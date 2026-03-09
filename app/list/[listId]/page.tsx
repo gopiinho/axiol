@@ -10,10 +10,11 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import type { StaticImageData } from "next/image";
 import { icons } from "@/lib/icons";
 import heartPixel from "@/public/icons/heart.png";
 
-const platformLogos: Record<string, any> = {
+const platformLogos: Record<string, StaticImageData> = {
   amazon: icons.amazonLogo,
   flipkart: icons.flipkartLogo,
   nykaa: icons.nykaaLogo,

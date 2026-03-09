@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
+import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,38 +15,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RefreshCw, ExternalLink, Eye, Check } from "lucide-react";
+import { ExternalLink, Eye } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function CreatePostPage() {
+  type Reel = {
+    id: string;
+    url: string;
+    caption: string;
+    thumbnailUrl: string;
+    timestamp: string;
+  };
+
   const router = useRouter();
-  const [selectedReel, setSelectedReel] = useState<any>(null);
-  const [selectedSection, setSelectedSection] = useState("");
+  const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
+  const [selectedSection, setSelectedSection] = useState<Id<"sections"> | "">(
+    ""
+  );
   const [keyword, setKeyword] = useState("link");
   const [maxItemsInDM, setMaxItemsInDM] = useState(10);
   const [includeWebsiteLink, setIncludeWebsiteLink] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [reels, setReels] = useState<any[]>([]);
-  const [previewMessage, setPreviewMessage] = useState<any>(null);
+  const [reels, setReels] = useState<Reel[]>([]);
 
   const sections = useQuery(api.sections.list);
-  const config = useQuery(api.instagram.getConfig);
   const fetchReels = useAction(api.instagram.fetchRecentReels);
   const createMapping = useMutation(api.instagram.createReelMapping);
   const generatePreview = useQuery(
     api.instagram.generateDMMessage,
     selectedSection
       ? {
-          sectionId: selectedSection as any,
+          sectionId: selectedSection,
           maxItems: maxItemsInDM,
           includeWebsiteLink,
         }
@@ -63,7 +64,7 @@ export default function CreatePostPage() {
     };
 
     loadReels();
-  }, []);
+  }, [fetchReels]);
 
   const handleSaveDraft = async () => {
     if (!selectedReel || !selectedSection) return;
@@ -75,14 +76,16 @@ export default function CreatePostPage() {
         reelUrl: selectedReel.url,
         thumbnailUrl: selectedReel.thumbnailUrl,
         caption: selectedReel.caption,
-        sectionId: selectedSection as any,
+        sectionId: selectedSection,
         keyword: keyword.toLowerCase(),
         maxItemsInDM,
         includeWebsiteLink,
       });
       router.push("/dashboard/drafts");
-    } catch (error: any) {
-      alert("Error: " + error.message);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save draft";
+      alert("Error: " + message);
     } finally {
       setLoading(false);
     }
@@ -168,7 +171,9 @@ export default function CreatePostPage() {
               <Label>Collection</Label>
               <Select
                 value={selectedSection}
-                onValueChange={setSelectedSection}
+                onValueChange={(value) =>
+                  setSelectedSection(value as Id<"sections">)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Choose collection..." />

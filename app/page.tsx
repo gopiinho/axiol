@@ -54,7 +54,7 @@ export default function Home() {
               className="w-5 h-5 sm:w-7.5 sm:h-7.5"
             />
             <h1 className="text-5xl text-primary sm:text-7xl font-secondary">
-              neme's world
+              neme&apos;s world
             </h1>
             <Image
               src={heartPixel.src}
