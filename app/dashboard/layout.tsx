@@ -8,6 +8,16 @@ import { api } from "@/convex/_generated/api";
 import { getAuthToken, clearAuth, isTokenExpired } from "@/lib/auth";
 import BottomNav from "@/components/BottomNav";
 import { LogOut } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +29,8 @@ export default function DashboardLayout({
   const logoutMutation = useMutation(api.auth.logout);
   const verifySession = useMutation(api.auth.verifySession);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const validateSession = async () => {
@@ -48,12 +60,16 @@ export default function DashboardLayout({
   }, [token, router, verifySession]);
 
   const handleLogout = async () => {
-    if (confirm("Are you sure you want to logout?")) {
+    try {
+      setIsLoggingOut(true);
       if (token) {
         await logoutMutation({ token });
       }
       clearAuth();
       router.push("/login");
+    } finally {
+      setIsLoggingOut(false);
+      setLogoutOpen(false);
     }
   };
 
@@ -75,7 +91,7 @@ export default function DashboardLayout({
             </Link>
 
             <button
-              onClick={handleLogout}
+              onClick={() => setLogoutOpen(true)}
               className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
@@ -89,7 +105,7 @@ export default function DashboardLayout({
         <div className="px-4 h-14 flex items-center justify-between">
           <h1 className="text-lg font-bold text-gray-900">Dashboard</h1>
           <button
-            onClick={handleLogout}
+            onClick={() => setLogoutOpen(true)}
             className="p-2 text-gray-600 hover:text-gray-900"
           >
             <LogOut className="h-5 w-5" />
@@ -104,6 +120,23 @@ export default function DashboardLayout({
       <div className="md:hidden">
         <BottomNav />
       </div>
+
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will need to sign in again to manage your dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut ? "Logging out..." : "Log out"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

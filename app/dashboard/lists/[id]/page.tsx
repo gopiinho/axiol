@@ -10,6 +10,16 @@ import Link from "next/link";
 import ItemCard from "@/components/ItemCard";
 import CreateItemModal from "@/components/CreateItemModal";
 import EditItemModal from "@/components/EditItemModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function SectionItemsPage({
   params,
@@ -33,10 +43,16 @@ export default function SectionItemsPage({
     itemTitle?: string;
     imageUrl?: string;
   } | null>(null);
+  const [deleteItemId, setDeleteItemId] = useState<Id<"items"> | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (id: Id<"items">) => {
-    if (confirm("Are you sure you want to delete this item?")) {
+    try {
+      setIsDeleting(true);
       await deleteItem({ id });
+    } finally {
+      setDeleteItemId(null);
+      setIsDeleting(false);
     }
   };
 
@@ -114,7 +130,7 @@ export default function SectionItemsPage({
                   imageUrl: item.imageUrl,
                 })
               }
-              onDelete={() => handleDelete(item._id)}
+              onDelete={() => setDeleteItemId(item._id)}
             />
           ))}
         </div>
@@ -133,6 +149,30 @@ export default function SectionItemsPage({
           onClose={() => setEditingItem(null)}
         />
       )}
+
+      <AlertDialog
+        open={deleteItemId !== null}
+        onOpenChange={(open) => !open && setDeleteItemId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action is permanent and removes the product from this list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={() => deleteItemId && handleDelete(deleteItemId)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete item"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

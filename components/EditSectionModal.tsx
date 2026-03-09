@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface EditSectionModalProps {
   section: {
@@ -35,12 +36,14 @@ export default function EditSectionModal({
   const [title, setTitle] = useState(section.title);
   const [description, setDescription] = useState(section.description || "");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const updateSection = useMutation(api.sections.update);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
 
     try {
       await updateSection({
@@ -51,7 +54,7 @@ export default function EditSectionModal({
       onClose();
     } catch (error) {
       console.error("Error updating section:", error);
-      alert("Failed to update section");
+      setErrorMessage("Failed to update section. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -66,6 +69,12 @@ export default function EditSectionModal({
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertTitle>Couldn&apos;t update list</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="edit-title">
                 Title <span className="text-red-500">*</span>

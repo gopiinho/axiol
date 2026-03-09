@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -40,12 +41,14 @@ export default function CreateItemModal({
   const [itemTitle, setItemTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const createItem = useMutation(api.items.create);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
 
     try {
       await createItem({
@@ -65,7 +68,7 @@ export default function CreateItemModal({
       onClose();
     } catch (error) {
       console.error("Error creating item:", error);
-      alert("Failed to create item");
+      setErrorMessage("Failed to add item. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -82,6 +85,12 @@ export default function CreateItemModal({
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertTitle>Couldn&apos;t add item</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="item-title">Product Name</Label>
               <Input

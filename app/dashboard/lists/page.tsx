@@ -18,6 +18,16 @@ import {
 } from "lucide-react";
 import CreateSectionModal from "@/components/CreateSectionModal";
 import EditSectionModal from "@/components/EditSectionModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function ListsPage() {
   const sections = useQuery(api.sections.list);
@@ -29,10 +39,18 @@ export default function ListsPage() {
     title: string;
     description?: string;
   } | null>(null);
+  const [deleteSectionId, setDeleteSectionId] = useState<Id<"sections"> | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (id: Id<"sections">) => {
-    if (confirm("Are you sure? This will delete the list and all its items.")) {
+    try {
+      setIsDeleting(true);
       await deleteSection({ id });
+    } finally {
+      setDeleteSectionId(null);
+      setIsDeleting(false);
     }
   };
 
@@ -155,7 +173,7 @@ export default function ListsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDelete(section._id)}
+                    onClick={() => setDeleteSectionId(section._id)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -179,6 +197,30 @@ export default function ListsPage() {
           onClose={() => setEditingSection(null)}
         />
       )}
+
+      <AlertDialog
+        open={deleteSectionId !== null}
+        onOpenChange={(open) => !open && setDeleteSectionId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this list?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the list and all items inside it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={() => deleteSectionId && handleDelete(deleteSectionId)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete list"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

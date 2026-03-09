@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface CreateSectionModalProps {
   open: boolean;
@@ -28,12 +29,14 @@ export default function CreateSectionModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const createSection = useMutation(api.sections.create);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
 
     try {
       await createSection({
@@ -45,7 +48,7 @@ export default function CreateSectionModal({
       onClose();
     } catch (error) {
       console.error("Error creating section:", error);
-      alert("Failed to create section");
+      setErrorMessage("Failed to create section. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -62,6 +65,12 @@ export default function CreateSectionModal({
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertTitle>Couldn&apos;t create list</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="title">
                 Title <span className="text-red-500">*</span>
