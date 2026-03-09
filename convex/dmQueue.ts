@@ -10,7 +10,7 @@ import {
   ActionCtx,
 } from "./_generated/server";
 import { internal, api } from "./_generated/api";
-import { Doc } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 
 const MAX_DMS_PER_HOUR = 195;
 const DM_SPACING_MS = 2000;
@@ -179,6 +179,15 @@ export const markJobSent = internalMutation({
       messageText: args.messageText,
     });
 
+    await ctx.db.insert("dmLogs", {
+      instagramUserId: job.instagramUserId,
+      username: job.username,
+      sectionId: job.sectionId,
+      messageText: args.messageText,
+      success: true,
+      timestamp: now,
+    });
+
     const state = await getRateLimitState(ctx);
     await ctx.db.patch(state._id, {
       dmsSentInLastHour: [...state.dmsSentInLastHour, now],
@@ -197,6 +206,16 @@ export const markJobFailed = internalMutation({
     if (!job) return;
 
     const newAttemptCount = job.attemptCount + 1;
+
+    await ctx.db.insert("dmLogs", {
+      instagramUserId: job.instagramUserId,
+      username: job.username,
+      sectionId: job.sectionId,
+      messageText: job.messageText ?? "",
+      success: false,
+      error: args.error,
+      timestamp: Date.now(),
+    });
 
     if (newAttemptCount >= MAX_RETRY_ATTEMPTS) {
       await ctx.db.patch(args.jobId, {
@@ -236,23 +255,11 @@ async function sendDM(
 
     const messageData = await ctx.runQuery(api.instagram.generateDMMessage, {
       sectionId: job.sectionId,
-      maxItems: 10,
-      includeWebsiteLink: true,
+      maxItems: job.maxItemsInDM,
+      includeWebsiteLink: job.includeWebsiteLink,
     });
 
-    const mapping = await ctx.runQuery(api.instagram.findMappingForReel, {
-      reelId: job.reelId,
-    });
-
-    const finalMessageData = mapping
-      ? await ctx.runQuery(api.instagram.generateDMMessage, {
-          sectionId: job.sectionId,
-          maxItems: 10,
-          includeWebsiteLink: true,
-        })
-      : messageData;
-
-    let messageText = finalMessageData.message;
+    let messageText = messageData.message;
 
     if (messageText.length > 1000) {
       messageText =
@@ -295,7 +302,7 @@ async function getRateLimitState(
 
   if (!("scheduler" in ctx)) {
     return {
-      _id: "virtual" as any,
+      _id: "virtual" as Id<"dmRateLimitState">,
       _creationTime: Date.now(),
       dmsSentInLastHour: [],
       lastDmSentAt: undefined,

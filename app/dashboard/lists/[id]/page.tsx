@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -15,13 +14,13 @@ import EditItemModal from "@/components/EditItemModal";
 export default function SectionItemsPage({
   params,
 }: {
-  params: Promise<{ sectionId: Id<"sections"> }>;
+  params: Promise<{ id: Id<"sections"> }>;
 }) {
-  const { sectionId } = use(params);
+  const { id } = use(params);
 
-  const section = useQuery(api.sections.getById, { id: sectionId });
+  const section = useQuery(api.sections.getById, { id: id });
   const items = useQuery(api.items.listBySection, {
-    sectionId: sectionId,
+    sectionId: id,
   });
   const deleteItem = useMutation(api.items.remove);
 
@@ -122,7 +121,7 @@ export default function SectionItemsPage({
       )}
 
       <CreateItemModal
-        sectionId={sectionId}
+        sectionId={id}
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />

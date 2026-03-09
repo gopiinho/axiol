@@ -51,10 +51,11 @@ export default function LoginPage() {
 
       setAuthToken(result.token, result.expiresAt);
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Login error:", err);
 
-      let errorMessage = err.message || "Login failed. Please try again.";
+      const errorMessage =
+        err instanceof Error ? err.message : "Login failed. Please try again.";
 
       if (errorMessage.includes("locked")) {
         setError(errorMessage);

@@ -5,6 +5,18 @@ import { api } from "@/convex/_generated/api";
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const VERIFY_TOKEN = process.env.INSTAGRAM_VERIFY_TOKEN!;
 
+type UnknownRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): UnknownRecord | null {
+  return value !== null && typeof value === "object"
+    ? (value as UnknownRecord)
+    : null;
+}
+
+function getString(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const mode = searchParams.get("hub.mode");
@@ -20,21 +32,30 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as unknown;
+    const payload = asRecord(body);
 
-    if (!body.entry) {
+    const entry = payload?.entry;
+    if (!Array.isArray(entry)) {
       return NextResponse.json({ status: "no_entry" });
     }
 
-    for (const entry of body.entry) {
-      if (!entry.changes) continue;
+    for (const rawEntry of entry) {
+      const entryObj = asRecord(rawEntry);
+      const changes = entryObj?.changes;
+      if (!Array.isArray(changes)) continue;
 
-      for (const change of entry.changes) {
-        if (change.field === "comments" && change.value) {
+      for (const rawChange of changes) {
+        const change = asRecord(rawChange);
+        if (!change) continue;
+
+        const field = getString(change.field);
+
+        if (field === "comments") {
           await handleCommentEvent(change.value);
         }
 
-        if (change.field === "messages" && change.value) {
+        if (field === "messages") {
           await handleDMEvent(change.value);
         }
       }
@@ -47,24 +68,41 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleCommentEvent(comment: any) {
+async function handleCommentEvent(rawComment: unknown) {
+  const comment = asRecord(rawComment);
+  if (!comment) return;
+
+  const commentId = getString(comment.id);
+  const commentTextRaw = getString(comment.text);
+  const media = asRecord(comment.media);
+  const from = asRecord(comment.from);
+  const mediaId = getString(media?.id);
+  const userId = getString(from?.id);
+  const username = getString(from?.username);
+
+  if (!commentId || !commentTextRaw || !mediaId || !userId || !username) {
+    return;
+  }
+
+  const commentText = commentTextRaw.toLowerCase().trim();
+
   try {
-    const commentId = comment.id;
-    const commentText = comment.text?.toLowerCase().trim();
-    const mediaId = comment.media?.id;
-    const userId = comment.from?.id;
-    const username = comment.from?.username;
-
-    if (!commentText || !mediaId || !userId || !username) {
-      return;
-    }
-
     const mapping = await convex.query(api.instagram.findMappingForComment, {
       reelId: mediaId,
       commentText,
     });
 
     if (!mapping) {
+      await convex.mutation(api.instagram.logComment, {
+        commentId,
+        reelId: mediaId,
+        instagramUserId: userId,
+        username,
+        commentText,
+        keyword: commentText,
+        dmSent: false,
+        dmError: "No active mapping for reel and keyword",
+      });
       return;
     }
 
@@ -83,28 +121,54 @@ async function handleCommentEvent(comment: any) {
       includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
     });
 
+    await convex.mutation(api.instagram.logComment, {
+      commentId,
+      reelId: mediaId,
+      instagramUserId: userId,
+      username,
+      commentText,
+      keyword: mapping.keyword,
+      sectionId: mapping.sectionId,
+      dmSent: Boolean(jobId),
+      dmError: jobId ? undefined : "Duplicate job skipped",
+    });
+
     if (jobId) {
       console.log("DM job created:", jobId);
     }
   } catch (error) {
     console.error("handleCommentEvent error:", error);
+
+    await convex.mutation(api.instagram.logComment, {
+      commentId,
+      reelId: mediaId,
+      instagramUserId: userId,
+      username,
+      commentText,
+      keyword: commentText,
+      dmSent: false,
+      dmError: String(error),
+    });
   }
 }
 
-async function handleDMEvent(message: any) {
+async function handleDMEvent(rawMessage: unknown) {
+  const message = asRecord(rawMessage);
+  if (!message) return;
+
+  const messageId = getString(message.mid);
+  const messageBody = asRecord(message.message);
+  const messageText = getString(messageBody?.text);
+  const from = asRecord(message.from);
+  const userId = getString(from?.id);
+  const username = getString(from?.username);
+
+  if (!messageText || !userId || !username || !messageId) {
+    return;
+  }
+
   try {
-    const messageId = message.mid;
-    const messageText = message.message?.text;
-    const userId = message.from?.id;
-    const username = message.from?.username;
-
-    if (!messageText || !userId || !username || !messageId) {
-      return;
-    }
-
-    const reelMatch = messageText.match(
-      /instagram\.com\/reel\/([A-Za-z0-9_-]+)/
-    );
+    const reelMatch = messageText.match(/instagram\.com\/reel\/([A-Za-z0-9_-]+)/);
     if (!reelMatch) {
       return;
     }

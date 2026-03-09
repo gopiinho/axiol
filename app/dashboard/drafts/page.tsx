@@ -7,16 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Send, Eye } from "lucide-react";
 import Link from "next/link";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function DraftsPage() {
   const drafts = useQuery(api.instagram.getDraftMappings);
   const publishMapping = useMutation(api.instagram.publishReelMapping);
   const deleteMapping = useMutation(api.instagram.deleteReelMapping);
 
-  const handlePublish = async (id: any) => {
+  const handlePublish = async (id: Id<"reelMappings">) => {
     if (confirm("Publish this post? Auto-DM will be activated.")) {
       await publishMapping({ id });
-      alert("✅ Published! Auto-DM is now active.");
+      alert("Published! Auto-DM is now active.");
     }
   };
 
@@ -29,7 +30,7 @@ export default function DraftsPage() {
             Review and publish your reel mappings
           </p>
         </div>
-        <Link href="/dashboard/instagram/create">
+        <Link href="/dashboard/create">
           <Button>Create New Post</Button>
         </Link>
       </div>

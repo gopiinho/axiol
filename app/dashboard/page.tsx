@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Plus,
-  Package,
   Instagram,
   MessageCircle,
   AlertCircle,
@@ -18,6 +17,7 @@ import {
   TrendingUp,
   Play,
   Pause,
+  List,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -62,12 +62,25 @@ export default function DashboardPage() {
             Manage your Instagram affiliate automation
           </p>
         </div>
-        <Link href="/dashboard/create">
-          <Button size="lg" className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Post
-          </Button>
-        </Link>
+        <div className="flex gap-3 flex-wrap max-sm:hidden">
+          <Link href="/dashboard/create">
+            <Button size="lg" className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Post
+            </Button>
+          </Link>
+          <Link href="/dashboard/lists">
+            <Button size="lg" className="gap-2" variant="outline">
+              <List className="h-4 w-4" />
+              Your Lists
+            </Button>
+          </Link>
+          <Link href="/dashboard/drafts">
+            <Button size="lg" className="gap-2" variant="outline">
+              Drafts
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div>
@@ -168,7 +181,7 @@ export default function DashboardPage() {
                 {queueStats?.failed || 0}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                DMs that couldn't be delivered
+                DMs that couldn&apos;t be delivered
               </p>
             </CardContent>
           </Card>
@@ -253,7 +266,7 @@ export default function DashboardPage() {
                       {mapping.sectionTitle}
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1 truncate">
-                      Keyword: "{mapping.keyword}"
+                      Keyword: &quot;{mapping.keyword}&quot;
                     </p>
                   </div>
                   <Badge className="bg-green-500 ml-2">Live</Badge>
