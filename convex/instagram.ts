@@ -1,13 +1,17 @@
 import { v } from "convex/values";
-import { mutation, query, action } from "./_generated/server";
+import { mutation, query, action, internalQuery } from "./_generated/server";
 import { api } from "./_generated/api";
+import { requireAdminSession } from "./security";
 
 export const saveConfig = mutation({
   args: {
+    token: v.string(),
     accessToken: v.string(),
     instagramAccountId: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const existing = await ctx.db.query("instagramConfig").first();
 
     const tokenExpiresAt = Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days
@@ -32,15 +36,29 @@ export const saveConfig = mutation({
 });
 
 export const getConfig = query({
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+    return await ctx.db.query("instagramConfig").first();
+  },
+});
+
+export const getConfigInternal = internalQuery({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db.query("instagramConfig").first();
   },
 });
 
 export const fetchRecentReels = action({
-  args: {},
+  args: {
+    token: v.string(),
+  },
   handler: async (
-    ctx
+    ctx,
+    args
   ): Promise<
     Array<{
       id: string;
@@ -50,6 +68,11 @@ export const fetchRecentReels = action({
       timestamp: string;
     }>
   > => {
+    const session = await ctx.runQuery(api.auth.checkSession, { token: args.token });
+    if (!session.valid) {
+      throw new Error("Unauthorized");
+    }
+
     type GraphMedia = {
       id: string;
       caption?: string;
@@ -71,7 +94,9 @@ export const fetchRecentReels = action({
       throw new Error(rateLimitCheck.reason || "Rate limit exceeded");
     }
 
-    const config = await ctx.runQuery(api.instagram.getConfig);
+    const config = await ctx.runQuery(api.instagram.getConfig, {
+      token: args.token,
+    });
 
     if (!config) {
       throw new Error(
@@ -175,6 +200,7 @@ export const incrementRateLimit = mutation({
 
 export const createReelMapping = mutation({
   args: {
+    token: v.string(),
     reelId: v.string(),
     reelUrl: v.string(),
     thumbnailUrl: v.optional(v.string()),
@@ -185,6 +211,8 @@ export const createReelMapping = mutation({
     includeWebsiteLink: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const existing = await ctx.db
       .query("reelMappings")
       .withIndex("by_reel", (q) => q.eq("reelId", args.reelId))
@@ -214,8 +242,12 @@ export const createReelMapping = mutation({
 });
 
 export const publishReelMapping = mutation({
-  args: { id: v.id("reelMappings") },
+  args: {
+    token: v.string(),
+    id: v.id("reelMappings"),
+  },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
     await ctx.db.patch(args.id, {
       active: true,
       publishedAt: Date.now(),
@@ -224,7 +256,12 @@ export const publishReelMapping = mutation({
 });
 
 export const getDraftMappings = query({
-  handler: async (ctx) => {
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const drafts = await ctx.db
       .query("reelMappings")
       .filter((q) => q.eq(q.field("active"), false))
@@ -252,7 +289,12 @@ export const getDraftMappings = query({
 });
 
 export const getPublishedMappings = query({
-  handler: async (ctx) => {
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const published = await ctx.db
       .query("reelMappings")
       .withIndex("by_active", (q) => q.eq("active", true))
@@ -274,7 +316,12 @@ export const getPublishedMappings = query({
 });
 
 export const listReelMappings = query({
-  handler: async (ctx) => {
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const mappings = await ctx.db.query("reelMappings").order("desc").collect();
 
     const enriched = await Promise.all(
@@ -341,15 +388,24 @@ export const generateDMMessage = query({
 });
 
 export const deleteReelMapping = mutation({
-  args: { id: v.id("reelMappings") },
+  args: {
+    token: v.string(),
+    id: v.id("reelMappings"),
+  },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
     await ctx.db.delete(args.id);
   },
 });
 
 export const toggleReelMapping = mutation({
-  args: { id: v.id("reelMappings") },
+  args: {
+    token: v.string(),
+    id: v.id("reelMappings"),
+  },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const mapping = await ctx.db.get(args.id);
     if (!mapping) throw new Error("Mapping not found");
 
@@ -365,15 +421,22 @@ export const findMappingForComment = query({
     commentText: v.string(),
   },
   handler: async (ctx, args) => {
-    const keyword = args.commentText.toLowerCase().trim();
+    const commentKeyword = args.commentText.toLowerCase().trim();
 
-    const mapping = await ctx.db
+    const mappings = await ctx.db
       .query("reelMappings")
       .withIndex("by_reel", (q) => q.eq("reelId", args.reelId))
-      .filter((q) =>
-        q.and(q.eq(q.field("active"), true), q.eq(q.field("keyword"), keyword))
-      )
-      .first();
+      .filter((q) => q.eq(q.field("active"), true))
+      .collect();
+
+    const mapping = mappings.find((candidate) => {
+      const keywords = candidate.keyword
+        .split(",")
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean);
+
+      return keywords.includes(commentKeyword);
+    });
 
     if (!mapping) return null;
 
@@ -457,7 +520,12 @@ export const logDM = mutation({
 });
 
 export const getStats = query({
-  handler: async (ctx) => {
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const comments = await ctx.db.query("commentLogs").collect();
     const dms = await ctx.db.query("dmLogs").collect();
     const mappings = await ctx.db.query("reelMappings").collect();
@@ -483,9 +551,12 @@ export const getStats = query({
 
 export const getRecentActivity = query({
   args: {
+    token: v.string(),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const limit = args.limit ?? 50;
 
     const comments = await ctx.db

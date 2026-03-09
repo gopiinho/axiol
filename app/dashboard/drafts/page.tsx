@@ -28,9 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getAuthToken } from "@/lib/auth";
 
 export default function DraftsPage() {
-  const drafts = useQuery(api.instagram.getDraftMappings);
+  const token = getAuthToken();
+  const drafts = useQuery(
+    api.instagram.getDraftMappings,
+    token ? { token } : "skip"
+  );
   const publishMapping = useMutation(api.instagram.publishReelMapping);
   const deleteMapping = useMutation(api.instagram.deleteReelMapping);
   const [publishTarget, setPublishTarget] = useState<Id<"reelMappings"> | null>(
@@ -46,7 +51,8 @@ export default function DraftsPage() {
   const handlePublish = async (id: Id<"reelMappings">) => {
     try {
       setIsPublishing(true);
-      await publishMapping({ id });
+      if (!token) throw new Error("Unauthorized");
+      await publishMapping({ token, id });
       setPublishedOpen(true);
     } finally {
       setPublishTarget(null);
@@ -57,7 +63,8 @@ export default function DraftsPage() {
   const handleDelete = async (id: Id<"reelMappings">) => {
     try {
       setIsDeleting(true);
-      await deleteMapping({ id });
+      if (!token) throw new Error("Unauthorized");
+      await deleteMapping({ token, id });
     } finally {
       setDeleteTarget(null);
       setIsDeleting(false);

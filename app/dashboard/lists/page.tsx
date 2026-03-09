@@ -2,22 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import {
+  Edit,
+  ExternalLink,
+  FolderPlus,
+  Package,
+  Plus,
+  ShoppingBag,
+  Trash2,
+} from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Plus,
-  Package,
-  Edit,
-  Trash2,
-  ExternalLink,
-  ShoppingBag,
-} from "lucide-react";
 import CreateSectionModal from "@/components/CreateSectionModal";
 import EditSectionModal from "@/components/EditSectionModal";
+import { getAuthToken } from "@/lib/auth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +49,9 @@ export default function ListsPage() {
   const handleDelete = async (id: Id<"sections">) => {
     try {
       setIsDeleting(true);
-      await deleteSection({ id });
+      const token = getAuthToken();
+      if (!token) throw new Error("Unauthorized");
+      await deleteSection({ token, id });
     } finally {
       setDeleteSectionId(null);
       setIsDeleting(false);
@@ -56,110 +60,84 @@ export default function ListsPage() {
 
   if (sections === undefined) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading lists...</div>
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <div className="app-panel px-6 py-5 text-sm text-muted-foreground">Loading lists...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Package className="h-8 w-8" />
-            Your Lists
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Manage your affiliate product collections
-          </p>
+    <div className="space-y-5">
+      <section className="app-panel px-5 py-6 md:px-6 md:py-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Lists
+            </p>
+            <h1 className="app-title mt-2 flex items-center gap-2">
+              <Package className="h-7 w-7 text-primary" />
+              Product collections
+            </h1>
+            <p className="app-subtitle mt-2 max-w-xl">
+              Organize affiliate items into reusable lists for your reel mappings.
+            </p>
+          </div>
+
+          <Button onClick={() => setShowCreateModal(true)} size="lg" className="gap-2 sm:self-start">
+            <Plus className="h-4 w-4" />
+            Create List
+          </Button>
         </div>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          size="lg"
-          className="gap-2 hidden sm:flex"
-        >
-          <Plus className="h-4 w-4" />
-          Create New List
-        </Button>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          size="lg"
-          className="gap-2 block sm:hidden"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+      </section>
 
       {sections.length === 0 ? (
         <Card className="border-dashed">
-          <CardContent className="py-16 text-center">
-            <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No lists yet</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Create your first product list to organize affiliate items. You
-              can then link these lists to Instagram reels.
+          <CardContent className="py-14 text-center">
+            <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground" />
+            <h3 className="mt-4 text-xl font-semibold">No lists yet</h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Create your first collection to start attaching products to Instagram reel replies.
             </p>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              size="lg"
-              className="gap-2"
-            >
+            <Button onClick={() => setShowCreateModal(true)} size="lg" className="mt-6 gap-2">
               <Plus className="h-4 w-4" />
-              Create Your First List
+              Create your first list
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {sections.map((section) => (
-            <Card
-              key={section._id}
-              className="hover:shadow-lg transition-all group"
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg font-semibold truncate">
-                      {section.title}
-                    </CardTitle>
+            <Card key={section._id} className="overflow-hidden">
+              <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle className="truncate text-lg">{section.title}</CardTitle>
                     {section.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {section.description}
-                      </p>
+                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{section.description}</p>
                     )}
                   </div>
-                  <Badge variant="outline" className="ml-2">
-                    <ShoppingBag className="h-3 w-3 mr-1" />
+                  <Badge variant="secondary" className="rounded-lg px-2.5 py-1">
+                    <ShoppingBag className="h-3 w-3" />
                     List
                   </Badge>
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>
-                    Created {new Date(section.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
+              <CardContent className="space-y-4 pt-5">
+                <p className="text-xs text-muted-foreground">
+                  Created {new Date(section.createdAt).toLocaleDateString()}
+                </p>
 
                 <div className="flex gap-2">
-                  <Link
-                    href={`/dashboard/lists/${section._id}`}
-                    className="flex-1"
-                  >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full gap-2"
-                    >
-                      <ExternalLink className="h-4 w-4" />
+                  <Button asChild variant="outline" className="flex-1 gap-1.5">
+                    <Link href={`/dashboard/lists/${section._id}`}>
+                      <ExternalLink className="h-3.5 w-3.5" />
                       Manage Items
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     onClick={() =>
                       setEditingSection({
                         id: section._id,
@@ -167,14 +145,16 @@ export default function ListsPage() {
                         description: section.description,
                       })
                     }
+                    aria-label="Edit list"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     onClick={() => setDeleteSectionId(section._id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    aria-label="Delete list"
+                    className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -182,7 +162,7 @@ export default function ListsPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </section>
       )}
 
       <CreateSectionModal
@@ -193,7 +173,7 @@ export default function ListsPage() {
       {editingSection && (
         <EditSectionModal
           section={editingSection}
-          open={!!editingSection}
+          open={Boolean(editingSection)}
           onClose={() => setEditingSection(null)}
         />
       )}
@@ -206,7 +186,7 @@ export default function ListsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this list?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove the list and all items inside it.
+              This permanently removes the list and all items inside it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,24 +1,30 @@
 import type { Metadata } from "next";
-import { Pacifico, DM_Sans, Jersey_10 } from "next/font/google";
+import { DM_Sans, Jersey_10, Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 
-const pacifico = Pacifico({
-  weight: "400",
+const manrope = Manrope({
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
-  variable: "--font-pacifico",
+  variable: "--font-manrope",
 });
 
-const dm = DM_Sans({
-  weight: ["400", "700"],
+const spaceGrotesk = Space_Grotesk({
+  weight: ["500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-dm",
+  variable: "--font-space-grotesk",
 });
 
-const jersy = Jersey_10({
+const dmSans = DM_Sans({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+});
+
+const jersey = Jersey_10({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-jersy",
+  variable: "--font-jersey",
 });
 
 export const metadata: Metadata = {
@@ -34,16 +40,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${dm.variable} ${pacifico.variable} ${jersy.variable} antialiased relative min-h-screen`}
+        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} ${jersey.variable} app-bg antialiased relative min-h-screen`}
       >
-        <div
-          className="fixed inset-0 -z-10 opacity-30 pointer-events-none"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, rgba(236,72,153,0.99) 1px, transparent 1px)",
-            backgroundSize: "14px 14px",
-          }}
-        />
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>

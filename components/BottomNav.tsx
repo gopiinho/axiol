@@ -2,14 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  PlusCircle,
-  FileText,
-  BarChart3,
-  Settings,
-  List,
-} from "lucide-react";
+import { Home, PlusCircle, FileText, Settings, List } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -49,9 +43,9 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-inset-bottom z-50">
-      <div className="max-w-7xl mx-auto px-2">
-        <div className="flex items-center justify-around h-16">
+    <nav className="fixed right-0 bottom-2 left-0 z-50 px-3 safe-area-inset-bottom">
+      <div className="mx-auto max-w-xl rounded-2xl border border-border/90 bg-card/95 p-1.5 shadow-lg backdrop-blur">
+        <div className="flex items-center justify-around gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -60,16 +54,15 @@ export default function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-                  active ? "text-pink-600" : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={cn(
+                  "flex min-h-14 flex-1 flex-col items-center justify-center rounded-xl px-1 transition",
+                  active
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                )}
               >
-                <Icon className={`h-6 w-6 ${active ? "stroke-[2.5]" : ""}`} />
-                <span
-                  className={`text-xs mt-1 ${
-                    active ? "font-semibold" : "font-medium"
-                  }`}
-                >
+                <Icon className={cn("h-[1.15rem] w-[1.15rem]", active && "stroke-[2.35]")} />
+                <span className={cn("mt-1 text-[11px]", active ? "font-semibold" : "font-medium")}>
                   {item.label}
                 </span>
               </Link>
