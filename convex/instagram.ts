@@ -50,6 +50,21 @@ export const fetchRecentReels = action({
       timestamp: string;
     }>
   > => {
+    type GraphMedia = {
+      id: string;
+      caption?: string;
+      media_type: string;
+      media_url?: string;
+      thumbnail_url?: string;
+      permalink: string;
+      timestamp: string;
+    };
+
+    type GraphMediaResponse = {
+      data?: GraphMedia[];
+      error?: { message?: string };
+    };
+
     const rateLimitCheck = await ctx.runQuery(api.instagram.checkRateLimit);
 
     if (!rateLimitCheck.allowed) {
@@ -77,7 +92,7 @@ export const fetchRecentReels = action({
     const response = await fetch(url);
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = (await response.json()) as GraphMediaResponse;
       throw new Error(
         `Instagram API error: ${
           errorData.error?.message || response.statusText
@@ -85,7 +100,7 @@ export const fetchRecentReels = action({
       );
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as GraphMediaResponse;
 
     if (data.error) {
       throw new Error(data.error.message);
@@ -96,11 +111,10 @@ export const fetchRecentReels = action({
     }
 
     const reels = data.data.filter(
-      (media: any) =>
-        media.media_type === "VIDEO" || media.media_type === "REELS"
+      (media) => media.media_type === "VIDEO" || media.media_type === "REELS"
     );
 
-    return reels.map((reel: any) => ({
+    return reels.map((reel) => ({
       id: reel.id,
       url: reel.permalink,
       caption: reel.caption ? reel.caption.substring(0, 100) : "No caption",
