@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { requireAdminSession } from "./security";
 
 export const listBySection = query({
   args: { sectionId: v.id("sections") },
@@ -14,6 +15,7 @@ export const listBySection = query({
 
 export const create = mutation({
   args: {
+    token: v.string(),
     sectionId: v.id("sections"),
     affiliateLink: v.string(),
     price: v.optional(v.string()),
@@ -22,8 +24,15 @@ export const create = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     return await ctx.db.insert("items", {
-      ...args,
+      sectionId: args.sectionId,
+      affiliateLink: args.affiliateLink,
+      price: args.price,
+      platform: args.platform,
+      itemTitle: args.itemTitle,
+      imageUrl: args.imageUrl,
       order: Date.now(),
       createdAt: Date.now(),
     });
@@ -32,6 +41,7 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
+    token: v.string(),
     id: v.id("items"),
     affiliateLink: v.string(),
     price: v.optional(v.string()),
@@ -40,14 +50,25 @@ export const update = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { id, ...updates } = args;
-    await ctx.db.patch(id, updates);
+    await requireAdminSession(ctx, args.token);
+
+    await ctx.db.patch(args.id, {
+      affiliateLink: args.affiliateLink,
+      price: args.price,
+      platform: args.platform,
+      itemTitle: args.itemTitle,
+      imageUrl: args.imageUrl,
+    });
   },
 });
 
 export const remove = mutation({
-  args: { id: v.id("items") },
+  args: {
+    token: v.string(),
+    id: v.id("items"),
+  },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
     await ctx.db.delete(args.id);
   },
 });

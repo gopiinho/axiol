@@ -1,16 +1,11 @@
 "use client";
 
-import { Id } from "@/convex/_generated/dataModel";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, ExternalLink } from "lucide-react";
 import Image from "next/image";
+import { ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { Id } from "@/convex/_generated/dataModel";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 
 interface ItemCardProps {
   item: {
@@ -25,12 +20,12 @@ interface ItemCardProps {
   onDelete: () => void;
 }
 
-const platformColors: Record<string, string> = {
-  amazon: "bg-orange-100 text-orange-700",
-  flipkart: "bg-blue-100 text-blue-700",
+const platformStyles: Record<string, string> = {
+  amazon: "bg-amber-100 text-amber-700",
+  flipkart: "bg-sky-100 text-sky-700",
   nykaa: "bg-pink-100 text-pink-700",
-  meesho: "bg-purple-100 text-purple-700",
-  other: "bg-gray-100 text-gray-700",
+  meesho: "bg-violet-100 text-violet-700",
+  other: "bg-slate-100 text-slate-700",
 };
 
 export default function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
@@ -38,59 +33,56 @@ export default function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
     item.platform.charAt(0).toUpperCase() + item.platform.slice(1);
 
   return (
-    <Card className="hover:shadow-lg overflow-hidden pt-0 transition-shadow flex flex-col h-full">
-      {item.imageUrl && (
-        <div className="relative w-full h-48 bg-gray-100">
+    <Card className="overflow-hidden pt-0">
+      {item.imageUrl ? (
+        <div className="relative h-44 w-full overflow-hidden border-b border-border/70 bg-secondary/30">
           <Image
             src={item.imageUrl}
             alt={item.itemTitle || "Product"}
             fill
-            className="object-cover"
+            className="object-cover transition duration-300 hover:scale-[1.03]"
           />
+        </div>
+      ) : (
+        <div className="flex h-44 items-center justify-center border-b border-border/70 bg-secondary/45 px-4 text-sm text-muted-foreground">
+          No image preview
         </div>
       )}
 
-      <CardHeader className="space-y-2 pb-3">
-        {item.itemTitle && (
-          <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">
-            {item.itemTitle}
-          </h3>
-        )}
+      <CardHeader className="pb-3">
+        <h3 className="line-clamp-2 min-h-11 text-base font-semibold">
+          {item.itemTitle || "Untitled product"}
+        </h3>
 
         <div className="flex items-center justify-between gap-2">
-          <Badge
-            className={platformColors[item.platform] || platformColors.other}
-          >
+          <Badge className={platformStyles[item.platform] || platformStyles.other}>
             {capitalizedPlatform}
           </Badge>
 
-          {item.price && (
-            <span className="text-sm font-semibold text-pink-600">
-              ₹{item.price}
-            </span>
-          )}
+          {item.price && <span className="text-sm font-semibold text-primary">₹{item.price}</span>}
         </div>
       </CardHeader>
 
-      <CardContent className="pb-3 grow">
+      <CardContent className="grow pb-3">
         <a
           href={item.affiliateLink}
           target="_blank"
           rel="nofollow noopener"
-          className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
-          View Product <ExternalLink className="h-3 w-3" />
+          View product
+          <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </CardContent>
 
-      <CardFooter className="flex gap-2 pt-3">
-        <Button onClick={onEdit} variant="outline" size="sm" className="flex-1">
-          <Pencil className="h-3 w-3 mr-1" />
+      <CardFooter className="gap-2 border-t border-border/70 pt-4">
+        <Button onClick={onEdit} variant="outline" size="sm" className="flex-1 gap-1.5">
+          <Pencil className="h-3.5 w-3.5" />
           Edit
         </Button>
 
-        <Button onClick={onDelete} variant="destructive" size="sm">
-          <Trash2 className="h-3 w-3" />
+        <Button onClick={onDelete} variant="destructive" size="sm" aria-label="Delete item">
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </CardFooter>
     </Card>

@@ -11,6 +11,7 @@ import {
 } from "./_generated/server";
 import { internal, api } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
+import { requireAdminSession } from "./security";
 
 const MAX_DMS_PER_HOUR = 195;
 const DM_SPACING_MS = 2000;
@@ -18,6 +19,7 @@ const MAX_RETRY_ATTEMPTS = 3;
 
 export const createDmJob = mutation({
   args: {
+    sourceSecret: v.string(),
     instagramUserId: v.string(),
     username: v.string(),
     sectionId: v.id("sections"),
@@ -28,6 +30,11 @@ export const createDmJob = mutation({
     includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
+    const expectedSecret = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
+    if (!expectedSecret || args.sourceSecret !== expectedSecret) {
+      throw new Error("Unauthorized");
+    }
+
     const existing = await ctx.db
       .query("dmJobs")
       .withIndex("by_user_reel", (q) =>
@@ -248,7 +255,7 @@ async function sendDM(
   job: Doc<"dmJobs">
 ): Promise<{ success: boolean; error?: string; messageText?: string }> {
   try {
-    const config = await ctx.runQuery(api.instagram.getConfig);
+    const config = await ctx.runQuery(internal.instagram.getConfigInternal);
     if (!config) {
       return { success: false, error: "Not configured" };
     }
@@ -333,16 +340,23 @@ async function ensureWorkerRunning(ctx: MutationCtx): Promise<void> {
 }
 
 export const kickoffWorker = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
     await ensureWorkerRunning(ctx);
     return { message: "Worker started" };
   },
 });
 
 export const getQueueStats = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
     const pending = await ctx.db
       .query("dmJobs")
       .withIndex("by_status", (q) => q.eq("status", "pending"))

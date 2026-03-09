@@ -42,7 +42,7 @@ export default function Home() {
   const isLoading = sections === undefined;
 
   return (
-    <main className="min-h-screen flex justify-center p-4">
+    <main className="home-font-primary min-h-screen flex justify-center p-4">
       <div className="w-full max-w-3xl">
         <div className="text-center max-sm:my-12 max-sm:mb-24 sm:my-16 space-y-4">
           <div className="inline-flex justify-center items-center gap-2 mb-2">
@@ -53,7 +53,7 @@ export default function Home() {
               height={32}
               className="w-5 h-5 sm:w-7.5 sm:h-7.5"
             />
-            <h1 className="text-5xl text-primary sm:text-7xl font-secondary">
+            <h1 className="font-secondary text-5xl text-primary sm:text-7xl">
               neme&apos;s world
             </h1>
             <Image
@@ -166,7 +166,7 @@ export default function Home() {
           <div className="relative backdrop-blur-sm bg-white/60 border-2 border-pink-100 p-4 lg:p-6">
             <div className="flex items-center justify-center font-secondary gap-2 mb-8">
               <p className="text-primary">⋆｡˚ ✧</p>
-              <h5 className="text-xl font-secondary">my collections</h5>
+              <h5 className="font-secondary text-xl">my collections</h5>
               <p className="text-primary">✧ ⋆｡˚</p>
             </div>
 

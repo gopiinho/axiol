@@ -14,6 +14,7 @@ import type * as dmQueue from "../dmQueue.js";
 import type * as instagram from "../instagram.js";
 import type * as items from "../items.js";
 import type * as sections from "../sections.js";
+import type * as security from "../security.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   instagram: typeof instagram;
   items: typeof items;
   sections: typeof sections;
+  security: typeof security;
 }>;
 
 /**
