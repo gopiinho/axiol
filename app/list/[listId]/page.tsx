@@ -119,6 +119,7 @@ export default async function ListPage({
 
                     {item.imageUrl && (
                       <div className="w-full h-72">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={item.imageUrl}
                           alt={item.itemTitle || "Product"}

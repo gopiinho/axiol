@@ -100,8 +100,9 @@ export default function CreatePostPage() {
 
   const generatePreview = useQuery(
     api.instagram.generateDMMessage,
-    canPreview
+    canPreview && Boolean(authToken)
       ? {
+          token: authToken!,
           sectionId: selectedSection as Id<"sections">,
           maxItems: maxItemsInDM,
           includeWebsiteLink,

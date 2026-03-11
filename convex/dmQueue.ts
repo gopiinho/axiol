@@ -9,7 +9,7 @@ import {
   QueryCtx,
   ActionCtx,
 } from "./_generated/server";
-import { internal, api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import { requireAdminSession } from "./security";
 
@@ -260,11 +260,14 @@ async function sendDM(
       return { success: false, error: "Not configured" };
     }
 
-    const messageData = await ctx.runQuery(api.instagram.generateDMMessage, {
+    const messageData = await ctx.runQuery(
+      internal.instagram.generateDMMessageForJob,
+      {
       sectionId: job.sectionId,
       maxItems: job.maxItemsInDM,
       includeWebsiteLink: job.includeWebsiteLink,
-    });
+      }
+    );
 
     let messageText = messageData.message;
 
