@@ -1,45 +1,15 @@
-"use client";
-
 import Image from "next/image";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import Link from "next/link";
 import { Heart } from "lucide-react";
-import heartPixel from "@/public/icons/heart.png";
+import { api } from "@/convex/_generated/api";
 import Cat from "@/components/Cat";
 import CollectionsCard from "@/components/CollectionCard";
-import Link from "next/link";
+import heartPixel from "@/public/icons/heart.png";
+import { getServerConvexClient } from "@/server/convex/client";
 
-function CollectionCardSkeleton() {
-  return (
-    <div className="group relative animate-pulse">
-      <div className="relative w-full bg-white p-6 border-2 border-pink-200">
-        <div className="absolute top-3 right-3">
-          <div className="w-8 h-8 bg-pink-200/50 rounded-full"></div>
-        </div>
-
-        <div className="flex flex-col gap-4 min-h-35">
-          <div className="flex-1 space-y-3">
-            <div className="h-7 bg-pink-200/50 rounded w-3/4"></div>
-
-            <div className="space-y-2">
-              <div className="h-4 bg-pink-200/30 rounded"></div>
-              <div className="h-4 bg-pink-200/30 rounded w-5/6"></div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-pink-100">
-            <div className="h-3 bg-pink-200/30 rounded w-24"></div>
-            <div className="w-4 h-4 bg-pink-200/30 rounded"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function Home() {
-  const sections = useQuery(api.sections.list);
-  const isLoading = sections === undefined;
+export default async function Home() {
+  const convex = getServerConvexClient();
+  const sections = await convex.query(api.sections.list);
 
   return (
     <main className="home-font-primary min-h-screen flex justify-center p-4">
@@ -170,13 +140,7 @@ export default function Home() {
               <p className="text-primary">✧ ⋆｡˚</p>
             </div>
 
-            {isLoading ? (
-              <div className="grid grid-cols-1 gap-6">
-                {[1, 2].map((i) => (
-                  <CollectionCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : sections.length === 0 ? (
+            {sections.length === 0 ? (
               <div className="text-center py-16">
                 <Heart className="w-16 h-16 mx-auto text-pink-300 mb-4" />
                 <p className="text-gray-500 text-lg">

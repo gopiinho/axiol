@@ -1,11 +1,11 @@
 import "server-only";
 
-import { ConvexHttpClient } from "convex/browser";
 import { cookies } from "next/headers";
 import { api } from "@/convex/_generated/api";
 import { AUTH_TOKEN_COOKIE } from "@/lib/auth-cookies";
+import { getServerConvexClient } from "@/server/convex/client";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const convex = getServerConvexClient();
 
 export async function getSessionTokenFromCookies(): Promise<string | null> {
   const cookieStore = await cookies();
