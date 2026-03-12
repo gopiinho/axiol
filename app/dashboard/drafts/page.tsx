@@ -25,22 +25,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { requireAdminSessionToken, getAdminSessionToken } from "@/features/auth/client/session";
+import {
+  requireAdminSessionToken,
+  getAdminSessionToken,
+} from "@/features/auth/client/session";
 import DraftMappingCard from "@/features/instagram-mappings/components/DraftMappingCard";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export default function DraftsPage() {
   const token = getAdminSessionToken();
-  const drafts = useQuery(
+  const rawDrafts = useQuery(
     api.instagram.getDraftMappings,
-    token ? { token } : "skip"
+    token ? { token } : "skip",
+  );
+  const drafts = useCachedQueryResult(
+    `dashboard:drafts:${token ?? "anon"}`,
+    rawDrafts,
   );
   const publishMapping = useMutation(api.instagram.publishReelMapping);
   const deleteMapping = useMutation(api.instagram.deleteReelMapping);
   const [publishTarget, setPublishTarget] = useState<Id<"reelMappings"> | null>(
-    null
+    null,
   );
   const [deleteTarget, setDeleteTarget] = useState<Id<"reelMappings"> | null>(
-    null
+    null,
   );
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -94,6 +102,12 @@ export default function DraftsPage() {
             />
           ))}
         </div>
+      ) : rawDrafts === undefined ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            Loading drafts...
+          </CardContent>
+        </Card>
       ) : (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
@@ -114,7 +128,9 @@ export default function DraftsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPublishing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPublishing}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => publishTarget && handlePublish(publishTarget)}
               disabled={isPublishing}

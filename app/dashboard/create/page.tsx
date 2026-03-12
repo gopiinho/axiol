@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useAction, useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Id } from "@/convex/_generated/dataModel";
@@ -48,7 +48,15 @@ export default function CreatePostPage() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [direction, setDirection] = useState(1);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [generatePreview, setGeneratePreview] = useState<{
+    message: string;
+    itemCount: number;
+    characterCount: number;
+  } | null>(null);
 
+  const convex = useConvex();
   const sections = useQuery(api.sections.list);
   const fetchReels = useAction(api.instagram.fetchRecentReels);
   const createMapping = useMutation(api.instagram.createReelMapping);
@@ -63,19 +71,57 @@ export default function CreatePostPage() {
     Number.isInteger(maxItemsInDM) && maxItemsInDM >= 1 && maxItemsInDM <= 20;
   const canPreview = Boolean(selectedSection) && maxItemsValid;
 
-  const generatePreview = useQuery(
-    api.instagram.generateDMMessage,
-    canPreview && Boolean(authToken)
-      ? {
-          token: authToken!,
+  useEffect(() => {
+    if (!canPreview || !authToken) {
+      setGeneratePreview(null);
+      setPreviewError(null);
+      setPreviewLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timeoutId = window.setTimeout(() => {
+      setPreviewLoading(true);
+      setPreviewError(null);
+
+      void convex
+        .query(api.instagram.generateDMMessage, {
+          token: authToken,
           sectionId: selectedSection as Id<"sections">,
           maxItems: maxItemsInDM,
           includeWebsiteLink,
-        }
-      : "skip",
-  );
+        })
+        .then((result) => {
+          if (cancelled) return;
+          setGeneratePreview(result);
+        })
+        .catch((error: unknown) => {
+          if (cancelled) return;
+          setGeneratePreview(null);
+          setPreviewError(
+            error instanceof Error
+              ? error.message
+              : "Failed to generate message preview.",
+          );
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setPreviewLoading(false);
+        });
+    }, 200);
 
-  const previewLoading = canPreview && generatePreview === undefined;
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [
+    convex,
+    canPreview,
+    authToken,
+    selectedSection,
+    maxItemsInDM,
+    includeWebsiteLink,
+  ]);
 
   const stepMeta = useMemo(
     () => [
@@ -329,7 +375,8 @@ export default function CreatePostPage() {
                   maxItemsValid={maxItemsValid}
                   canPreview={canPreview}
                   previewLoading={previewLoading}
-                  generatePreview={generatePreview}
+                  previewError={previewError}
+                  generatePreview={generatePreview ?? undefined}
                   onMaxItemsChange={setMaxItemsInDM}
                   onIncludeWebsiteLinkChange={setIncludeWebsiteLink}
                 />

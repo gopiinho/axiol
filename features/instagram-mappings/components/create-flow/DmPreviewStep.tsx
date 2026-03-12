@@ -19,6 +19,7 @@ interface DmPreviewStepProps {
   maxItemsValid: boolean;
   canPreview: boolean;
   previewLoading: boolean;
+  previewError: string | null;
   generatePreview?: DmPreviewData;
   onMaxItemsChange: (value: number) => void;
   onIncludeWebsiteLinkChange: (value: boolean) => void;
@@ -30,6 +31,7 @@ export default function DmPreviewStep({
   maxItemsValid,
   canPreview,
   previewLoading,
+  previewError,
   generatePreview,
   onMaxItemsChange,
   onIncludeWebsiteLinkChange,
@@ -93,6 +95,11 @@ export default function DmPreviewStep({
             <AlertDescription>
               Select a collection and valid DM item count to generate a preview.
             </AlertDescription>
+          </Alert>
+        ) : previewError ? (
+          <Alert variant="destructive">
+            <AlertTitle>Couldn&apos;t generate preview</AlertTitle>
+            <AlertDescription>{previewError}</AlertDescription>
           </Alert>
         ) : generatePreview && generatePreview.itemCount === 0 ? (
           <Alert>

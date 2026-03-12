@@ -364,15 +364,18 @@ export const getDraftMappings = query({
 export const getPublishedMappings = query({
   args: {
     token: v.string(),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
+
+    const limit = args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
 
     const published = await ctx.db
       .query("reelMappings")
       .withIndex("by_active", (q) => q.eq("active", true))
       .order("desc")
-      .collect();
+      .take(limit ?? 1000);
 
     const enriched = await Promise.all(
       published.map(async (mapping) => {

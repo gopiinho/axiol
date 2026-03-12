@@ -29,21 +29,33 @@ import {
   requireAdminSessionToken,
 } from "@/features/auth/client/session";
 import { KpiRow, StatTile } from "@/features/dm-queue/components/Stats";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export default function DashboardPage() {
   const token = getAdminSessionToken();
-  const sections = useQuery(api.sections.list);
-  const queueStats = useQuery(
+  const rawQueueStats = useQuery(
     api.dmQueue.getQueueStats,
     token ? { token } : "skip",
   );
-  const instagramStats = useQuery(
+  const rawInstagramStats = useQuery(
     api.instagram.getStats,
     token ? { token } : "skip",
   );
-  const publishedMappings = useQuery(
+  const rawPublishedMappings = useQuery(
     api.instagram.getPublishedMappings,
-    token ? { token } : "skip",
+    token ? { token, limit: 6 } : "skip",
+  );
+  const queueStats = useCachedQueryResult(
+    `dashboard:queue:${token ?? "anon"}`,
+    rawQueueStats,
+  );
+  const instagramStats = useCachedQueryResult(
+    `dashboard:instagram:${token ?? "anon"}`,
+    rawInstagramStats,
+  );
+  const publishedMappings = useCachedQueryResult(
+    `dashboard:mappings:${token ?? "anon"}`,
+    rawPublishedMappings,
   );
   const kickoffWorker = useMutation(api.dmQueue.kickoffWorker);
 
@@ -60,21 +72,6 @@ export default function DashboardPage() {
     }
   };
 
-  const isLoading =
-    sections === undefined ||
-    queueStats === undefined ||
-    instagramStats === undefined;
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
-          Loading dashboard metrics...
-        </div>
-      </div>
-    );
-  }
-
   const workerActive = Boolean(queueStats?.workerActive);
 
   return (
@@ -85,9 +82,12 @@ export default function DashboardPage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               Overview
             </p>
-            <h1 className="app-title mt-2">Instagram automation command center</h1>
+            <h1 className="app-title mt-2">
+              Instagram automation command center
+            </h1>
             <p className="app-subtitle mt-2 max-w-2xl">
-              Monitor queue health, track activity, and jump directly into content and list management.
+              Monitor queue health, track activity, and jump directly into
+              content and list management.
             </p>
           </div>
 
@@ -141,7 +141,9 @@ export default function DashboardPage() {
                 <Badge
                   className={cn(
                     "rounded-lg px-2 py-1 text-[11px]",
-                    workerActive ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                    workerActive
+                      ? "bg-emerald-500 text-white"
+                      : "bg-muted text-muted-foreground",
                   )}
                 >
                   {workerActive ? "Active" : "Idle"}
@@ -203,7 +205,9 @@ export default function DashboardPage() {
               <TrendingUp className="h-4 w-4 text-primary" />
               Activity (24h)
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Recent engagement and DM delivery indicators</p>
+            <p className="text-sm text-muted-foreground">
+              Recent engagement and DM delivery indicators
+            </p>
           </CardHeader>
           <CardContent className="grid gap-3 pt-5">
             <KpiRow
@@ -229,10 +233,19 @@ export default function DashboardPage() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h2 className="font-accent text-xl font-semibold tracking-tight">Active Reel Mappings</h2>
-            <p className="app-subtitle mt-1">Live posts currently responding to matching comments</p>
+            <h2 className="font-accent text-xl font-semibold tracking-tight">
+              Active Reel Mappings
+            </h2>
+            <p className="app-subtitle mt-1">
+              Live posts currently responding to matching comments
+            </p>
           </div>
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
             <Link href="/dashboard/drafts">
               View drafts
               <ArrowUpRight className="h-4 w-4" />
@@ -242,7 +255,7 @@ export default function DashboardPage() {
 
         {publishedMappings && publishedMappings.length > 0 ? (
           <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-            {publishedMappings.slice(0, 6).map((mapping) => (
+            {publishedMappings.map((mapping) => (
               <Card key={mapping._id} className="overflow-hidden">
                 {mapping.thumbnailUrl && (
                   <div className="aspect-video overflow-hidden border-b border-border/70 bg-secondary/40">
@@ -259,12 +272,16 @@ export default function DashboardPage() {
                 <CardContent className="space-y-3 pt-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">{mapping.sectionTitle}</p>
+                      <p className="truncate text-sm font-semibold">
+                        {mapping.sectionTitle}
+                      </p>
                       <p className="mt-1 truncate text-xs text-muted-foreground">
                         Keyword: &quot;{mapping.keyword}&quot;
                       </p>
                     </div>
-                    <Badge className="rounded-lg bg-emerald-500 text-white">Live</Badge>
+                    <Badge className="rounded-lg bg-emerald-500 text-white">
+                      Live
+                    </Badge>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
