@@ -43,7 +43,9 @@ export default function CreateFlowHeader({
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Create
           </p>
-          <h1 className="text-xl font-semibold tracking-tight">Create New Post</h1>
+          <h1 className="text-xl font-semibold tracking-tight">
+            Create New Post
+          </h1>
           <p className="mt-1 text-xs text-muted-foreground">
             Map a reel, set keyword rules, and preview your DM message.
           </p>
@@ -68,7 +70,7 @@ export default function CreateFlowHeader({
                 onGoToStep(3);
               }
             }}
-            className={`rounded-xl border px-2 py-2 text-left transition ${
+            className={`rounded-xl border px-4 py-2 text-left transition ${
               currentStep === step.id
                 ? "border-pink-400 bg-pink-50"
                 : "border-border bg-white"

@@ -125,8 +125,8 @@ export default function DashboardPage() {
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
         <Card className="overflow-hidden">
-          <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
-            <div className="flex items-start justify-between gap-4">
+          <CardHeader className="border-b border-border/70 bg-secondary/35">
+            <div className="flex items-start gap-4">
               <div>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Instagram className="h-4 w-4 text-primary" />
