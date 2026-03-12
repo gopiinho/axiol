@@ -108,11 +108,11 @@ export default function SectionItemsPage({
             </p>
             <h1 className="app-title mt-2 flex items-center gap-2">
               <ShoppingBasket className="h-7 w-7 text-primary" />
-              {section.title}
+              {section!.title}
             </h1>
-            {section.description && (
+            {section!.description && (
               <p className="app-subtitle mt-2 max-w-xl">
-                {section.description}
+                {section!.description}
               </p>
             )}
           </div>
