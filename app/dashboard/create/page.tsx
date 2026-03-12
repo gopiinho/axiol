@@ -33,11 +33,11 @@ export default function CreatePostPage() {
   const authToken = getAdminSessionToken();
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
   const [selectedSection, setSelectedSection] = useState<Id<"sections"> | "">(
-    ""
+    "",
   );
   const [keywordInput, setKeywordInput] = useState("link");
   const [keywordPresets, setKeywordPresets] = useState<string[]>(
-    DEFAULT_KEYWORD_PRESETS
+    DEFAULT_KEYWORD_PRESETS,
   );
   const [maxItemsInDM, setMaxItemsInDM] = useState(10);
   const [includeWebsiteLink, setIncludeWebsiteLink] = useState(true);
@@ -53,7 +53,10 @@ export default function CreatePostPage() {
   const fetchReels = useAction(api.instagram.fetchRecentReels);
   const createMapping = useMutation(api.instagram.createReelMapping);
 
-  const keywordList = useMemo(() => parseKeywords(keywordInput), [keywordInput]);
+  const keywordList = useMemo(
+    () => parseKeywords(keywordInput),
+    [keywordInput],
+  );
   const keywordNormalized = useMemo(() => keywordList.join(","), [keywordList]);
   const keywordValid = keywordList.length > 0;
   const maxItemsValid =
@@ -69,7 +72,7 @@ export default function CreatePostPage() {
           maxItems: maxItemsInDM,
           includeWebsiteLink,
         }
-      : "skip"
+      : "skip",
   );
 
   const previewLoading = canPreview && generatePreview === undefined;
@@ -80,7 +83,7 @@ export default function CreatePostPage() {
       { id: 2 as const, title: "Collection + Keyword" },
       { id: 3 as const, title: "DM + Preview" },
     ],
-    []
+    [],
   );
 
   const goToStep = (nextStep: 1 | 2 | 3) => {
@@ -92,7 +95,7 @@ export default function CreatePostPage() {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(
       KEYWORD_PRESET_STORAGE_KEY,
-      JSON.stringify(presets)
+      JSON.stringify(presets),
     );
   }, []);
 
@@ -107,8 +110,10 @@ export default function CreatePostPage() {
       if (Array.isArray(parsed) && parsed.length > 0) {
         setKeywordPresets(
           Array.from(
-            new Set(parsed.map((value) => value.trim().toLowerCase()).filter(Boolean))
-          )
+            new Set(
+              parsed.map((value) => value.trim().toLowerCase()).filter(Boolean),
+            ),
+          ),
         );
       }
     } catch {
@@ -121,15 +126,14 @@ export default function CreatePostPage() {
       if (keywordsToRemember.length === 0) return;
 
       setKeywordPresets((previous) => {
-        const next = Array.from(new Set([...keywordsToRemember, ...previous])).slice(
-          0,
-          16
-        );
+        const next = Array.from(
+          new Set([...keywordsToRemember, ...previous]),
+        ).slice(0, 16);
         persistPresets(next);
         return next;
       });
     },
-    [persistPresets]
+    [persistPresets],
   );
 
   const addPresetToInput = (preset: string) => {
@@ -138,7 +142,9 @@ export default function CreatePostPage() {
   };
 
   const removeKeywordFromInput = (keywordToRemove: string) => {
-    const nextKeywords = keywordList.filter((value) => value !== keywordToRemove);
+    const nextKeywords = keywordList.filter(
+      (value) => value !== keywordToRemove,
+    );
     setKeywordInput(nextKeywords.join(", "));
   };
 
@@ -164,7 +170,9 @@ export default function CreatePostPage() {
       setReels(fetchedReels);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to fetch reels. Please try again.";
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch reels. Please try again.";
       setReelsError(message);
     } finally {
       setReelsLoading(false);
@@ -201,9 +209,12 @@ export default function CreatePostPage() {
       rememberKeywords(keywordList);
       router.push("/dashboard/drafts");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to save draft";
+      const message =
+        error instanceof Error ? error.message : "Failed to save draft";
       setSaveError(
-        message === "Unauthorized" ? "Session expired. Please sign in again." : message
+        message === "Unauthorized"
+          ? "Session expired. Please sign in again."
+          : message,
       );
     } finally {
       setIsSavingDraft(false);
@@ -260,7 +271,7 @@ export default function CreatePostPage() {
           onGoToStep={goToStep}
         />
 
-        <div className="min-h-[540px] p-4 sm:p-6">
+        <div className="min-h-135 p-4 sm:p-6">
           <AnimatePresence mode="wait" initial={false}>
             {currentStep === 1 && (
               <motion.section
@@ -343,7 +354,9 @@ export default function CreatePostPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Couldn&apos;t save draft</DialogTitle>
-            <DialogDescription>{saveError ?? "Please try again."}</DialogDescription>
+            <DialogDescription>
+              {saveError ?? "Please try again."}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setSaveError(null)}>Close</Button>
