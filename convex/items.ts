@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdminSession } from "./security";
+import { validateItemInput } from "../lib/validators/items";
 
 export const listBySection = query({
   args: { sectionId: v.id("sections") },
@@ -25,14 +26,21 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
-
-    return await ctx.db.insert("items", {
-      sectionId: args.sectionId,
+    const validated = validateItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
       platform: args.platform,
       itemTitle: args.itemTitle,
       imageUrl: args.imageUrl,
+    });
+
+    return await ctx.db.insert("items", {
+      sectionId: args.sectionId,
+      affiliateLink: validated.affiliateLink,
+      price: validated.price,
+      platform: validated.platform,
+      itemTitle: validated.itemTitle,
+      imageUrl: validated.imageUrl,
       order: Date.now(),
       createdAt: Date.now(),
     });
@@ -51,13 +59,20 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
-
-    await ctx.db.patch(args.id, {
+    const validated = validateItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
       platform: args.platform,
       itemTitle: args.itemTitle,
       imageUrl: args.imageUrl,
+    });
+
+    await ctx.db.patch(args.id, {
+      affiliateLink: validated.affiliateLink,
+      price: validated.price,
+      platform: validated.platform,
+      itemTitle: validated.itemTitle,
+      imageUrl: validated.imageUrl,
     });
   },
 });

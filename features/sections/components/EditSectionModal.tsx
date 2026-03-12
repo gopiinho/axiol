@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { validateSectionInput } from "@/lib/validators/sections";
 
 interface EditSectionModalProps {
   section: {
@@ -48,17 +49,20 @@ export default function EditSectionModal({
 
     try {
       const token = requireAdminSessionToken();
+      const validated = validateSectionInput({ title, description });
 
       await updateSection({
         token,
         id: section.id,
-        title,
-        description: description || undefined,
+        title: validated.title,
+        description: validated.description,
       });
       onClose();
     } catch (error) {
       console.error("Error updating section:", error);
-      setErrorMessage("Failed to update list. Please try again.");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to update list. Please try again."
+      );
     } finally {
       setLoading(false);
     }

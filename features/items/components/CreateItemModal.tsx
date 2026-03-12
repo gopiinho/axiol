@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { validateItemInput } from "@/lib/validators/items";
 
 interface CreateItemModalProps {
   sectionId: Id<"sections">;
@@ -53,15 +54,22 @@ export default function CreateItemModal({
 
     try {
       const token = requireAdminSessionToken();
+      const validated = validateItemInput({
+        affiliateLink,
+        price,
+        platform,
+        itemTitle,
+        imageUrl,
+      });
 
       await createItem({
         token,
         sectionId,
-        affiliateLink,
-        price: price || undefined,
-        platform,
-        itemTitle: itemTitle || undefined,
-        imageUrl: imageUrl || undefined,
+        affiliateLink: validated.affiliateLink,
+        price: validated.price,
+        platform: validated.platform,
+        itemTitle: validated.itemTitle,
+        imageUrl: validated.imageUrl,
       });
 
       setAffiliateLink("");
@@ -72,7 +80,9 @@ export default function CreateItemModal({
       onClose();
     } catch (error) {
       console.error("Error creating item:", error);
-      setErrorMessage("Failed to add item. Please try again.");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to add item. Please try again."
+      );
     } finally {
       setLoading(false);
     }

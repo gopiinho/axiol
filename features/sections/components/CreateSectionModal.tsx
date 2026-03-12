@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { validateSectionInput } from "@/lib/validators/sections";
 
 interface CreateSectionModalProps {
   open: boolean;
@@ -41,18 +42,21 @@ export default function CreateSectionModal({
 
     try {
       const token = requireAdminSessionToken();
+      const validated = validateSectionInput({ title, description });
 
       await createSection({
         token,
-        title,
-        description: description || undefined,
+        title: validated.title,
+        description: validated.description,
       });
       setTitle("");
       setDescription("");
       onClose();
     } catch (error) {
       console.error("Error creating section:", error);
-      setErrorMessage("Failed to create list. Please try again.");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to create list. Please try again."
+      );
     } finally {
       setLoading(false);
     }

@@ -8,6 +8,7 @@ import {
 } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { requireAdminSession } from "./security";
+import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
 
 const WEBHOOK_SECRET = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
 
@@ -275,21 +276,30 @@ export const createReelMapping = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
+    const validated = validateReelMappingInput({
+      reelId: args.reelId,
+      reelUrl: args.reelUrl,
+      thumbnailUrl: args.thumbnailUrl,
+      caption: args.caption,
+      keyword: args.keyword,
+      maxItemsInDM: args.maxItemsInDM,
+      includeWebsiteLink: args.includeWebsiteLink,
+    });
 
     const existing = await ctx.db
       .query("reelMappings")
-      .withIndex("by_reel", (q) => q.eq("reelId", args.reelId))
+      .withIndex("by_reel", (q) => q.eq("reelId", validated.reelId))
       .first();
 
     const data = {
       sectionId: args.sectionId,
-      keyword: args.keyword.toLowerCase(),
+      keyword: validated.keyword,
       active: false, // Starts as draft
-      reelUrl: args.reelUrl,
-      thumbnailUrl: args.thumbnailUrl,
-      caption: args.caption,
-      maxItemsInDM: args.maxItemsInDM ?? 10,
-      includeWebsiteLink: args.includeWebsiteLink ?? true,
+      reelUrl: validated.reelUrl,
+      thumbnailUrl: validated.thumbnailUrl,
+      caption: validated.caption,
+      maxItemsInDM: validated.maxItemsInDM,
+      includeWebsiteLink: validated.includeWebsiteLink,
     };
 
     if (existing) {
@@ -298,7 +308,7 @@ export const createReelMapping = mutation({
     } else {
       return await ctx.db.insert("reelMappings", {
         ...data,
-        reelId: args.reelId,
+        reelId: validated.reelId,
       });
     }
   },
