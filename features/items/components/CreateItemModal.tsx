@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { getAuthToken } from "@/lib/auth";
+import { requireAdminSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -52,8 +52,7 @@ export default function CreateItemModal({
     setErrorMessage(null);
 
     try {
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireAdminSessionToken();
 
       await createItem({
         token,

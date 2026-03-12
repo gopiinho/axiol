@@ -17,9 +17,9 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import CreateSectionModal from "@/components/CreateSectionModal";
-import EditSectionModal from "@/components/EditSectionModal";
-import { getAuthToken } from "@/lib/auth";
+import CreateSectionModal from "@/features/sections/components/CreateSectionModal";
+import EditSectionModal from "@/features/sections/components/EditSectionModal";
+import { requireAdminSessionToken } from "@/features/auth/client/session";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,8 +49,7 @@ export default function ListsPage() {
   const handleDelete = async (id: Id<"sections">) => {
     try {
       setIsDeleting(true);
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireAdminSessionToken();
       await deleteSection({ token, id });
     } finally {
       setDeleteSectionId(null);

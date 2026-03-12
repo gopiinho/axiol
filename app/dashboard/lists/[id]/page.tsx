@@ -7,10 +7,10 @@ import { ArrowLeft, Plus, ShoppingBasket } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import ItemCard from "@/components/ItemCard";
-import CreateItemModal from "@/components/CreateItemModal";
-import EditItemModal from "@/components/EditItemModal";
-import { getAuthToken } from "@/lib/auth";
+import ItemCard from "@/features/items/components/ItemCard";
+import CreateItemModal from "@/features/items/components/CreateItemModal";
+import EditItemModal from "@/features/items/components/EditItemModal";
+import { requireAdminSessionToken } from "@/features/auth/client/session";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,8 +51,7 @@ export default function SectionItemsPage({
   const handleDelete = async (itemId: Id<"items">) => {
     try {
       setIsDeleting(true);
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireAdminSessionToken();
       await deleteItem({ token, id: itemId });
     } finally {
       setDeleteItemId(null);

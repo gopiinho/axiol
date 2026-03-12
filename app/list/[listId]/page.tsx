@@ -8,8 +8,8 @@ import { icons } from "@/lib/icons";
 import heartPixel from "@/public/icons/heart.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import ListViewTracker from "@/components/list/ListViewTracker";
-import AffiliateItemLink from "@/components/list/AffiliateItemLink";
+import ListViewTracker from "@/features/analytics/components/ListViewTracker";
+import AffiliateItemLink from "@/features/analytics/components/AffiliateItemLink";
 import { getServerConvexClient } from "@/server/convex/client";
 
 const platformLogos: Record<string, StaticImageData> = {

@@ -29,7 +29,12 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { getAuthToken } from "@/lib/auth";
+import { getAdminSessionToken } from "@/features/auth/client/session";
+import {
+  DEFAULT_KEYWORD_PRESETS,
+  KEYWORD_PRESET_STORAGE_KEY,
+  parseKeywords,
+} from "@/features/instagram-mappings/lib/keywords";
 import {
   ArrowLeft,
   ArrowRight,
@@ -49,23 +54,9 @@ type Reel = {
   timestamp: string;
 };
 
-const PRESET_STORAGE_KEY = "nemeowww.create.keyword-presets";
-const DEFAULT_KEYWORD_PRESETS = ["link", "dm", "details", "shop", "price"];
-
-function parseKeywords(rawValue: string) {
-  return Array.from(
-    new Set(
-      rawValue
-        .split(",")
-        .map((value) => value.trim().toLowerCase())
-        .filter(Boolean),
-    ),
-  );
-}
-
 export default function CreatePostPage() {
   const router = useRouter();
-  const authToken = getAuthToken();
+  const authToken = getAdminSessionToken();
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
   const [selectedSection, setSelectedSection] = useState<Id<"sections"> | "">(
     "",
@@ -128,13 +119,13 @@ export default function CreatePostPage() {
 
   const persistPresets = useCallback((presets: string[]) => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(presets));
+    window.localStorage.setItem(KEYWORD_PRESET_STORAGE_KEY, JSON.stringify(presets));
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const storedValue = window.localStorage.getItem(PRESET_STORAGE_KEY);
+    const storedValue = window.localStorage.getItem(KEYWORD_PRESET_STORAGE_KEY);
     if (!storedValue) return;
 
     try {

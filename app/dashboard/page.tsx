@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useMutation, useQuery } from "convex/react";
@@ -24,10 +24,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { getAuthToken } from "@/lib/auth";
+import {
+  getAdminSessionToken,
+  requireAdminSessionToken,
+} from "@/features/auth/client/session";
+import { KpiRow, StatTile } from "@/features/dm-queue/components/Stats";
 
 export default function DashboardPage() {
-  const token = getAuthToken();
+  const token = getAdminSessionToken();
   const sections = useQuery(api.sections.list);
   const queueStats = useQuery(
     api.dmQueue.getQueueStats,
@@ -46,13 +50,9 @@ export default function DashboardPage() {
   const [startingWorker, setStartingWorker] = useState(false);
 
   const handleStartWorker = async () => {
-    if (!token) {
-      return;
-    }
-
     setStartingWorker(true);
     try {
-      await kickoffWorker({ token });
+      await kickoffWorker({ token: requireAdminSessionToken() });
     } catch (error) {
       console.error("Failed to start worker:", error);
     } finally {
@@ -300,64 +300,6 @@ export default function DashboardPage() {
           </Card>
         )}
       </section>
-    </div>
-  );
-}
-
-type Tone = "ok" | "warn" | "danger" | "neutral";
-
-function StatTile({
-  title,
-  value,
-  description,
-  tone,
-  icon: Icon,
-}: {
-  title: string;
-  value: string;
-  description: string;
-  tone: Tone;
-  icon: ComponentType<{ className?: string }>;
-}) {
-  const toneStyles = {
-    ok: "bg-emerald-100 text-emerald-700",
-    warn: "bg-amber-100 text-amber-700",
-    danger: "bg-rose-100 text-rose-700",
-    neutral: "bg-slate-100 text-slate-700",
-  };
-
-  return (
-    <div className="app-panel-soft p-4">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <span className={cn("rounded-lg p-2", toneStyles[tone])}>
-          <Icon className="h-3.5 w-3.5" />
-        </span>
-      </div>
-      <p className="mt-3 text-2xl font-semibold tracking-tight">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-    </div>
-  );
-}
-
-function KpiRow({
-  label,
-  value,
-  helper,
-  highlight = false,
-}: {
-  label: string;
-  value: number | string;
-  helper: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div className="app-panel-soft flex items-center justify-between gap-3 px-4 py-3">
-      <div>
-        <p className="text-sm font-medium">{label}</p>
-        <p className="text-xs text-muted-foreground">{helper}</p>
-      </div>
-      <p className={cn("text-xl font-semibold", highlight && "text-emerald-600")}>{value}</p>
     </div>
   );
 }
