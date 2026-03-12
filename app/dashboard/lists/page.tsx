@@ -17,9 +17,10 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import CreateSectionModal from "@/components/CreateSectionModal";
-import EditSectionModal from "@/components/EditSectionModal";
-import { getAuthToken } from "@/lib/auth";
+import CreateSectionModal from "@/features/sections/components/CreateSectionModal";
+import EditSectionModal from "@/features/sections/components/EditSectionModal";
+import { requireAdminSessionToken } from "@/features/auth/client/session";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +33,9 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function ListsPage() {
-  const sections = useQuery(api.sections.list);
+  const rawSections = useQuery(api.sections.list);
+  const sections =
+    useCachedQueryResult("dashboard:lists:sections", rawSections) ?? [];
   const deleteSection = useMutation(api.sections.remove);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -42,15 +45,14 @@ export default function ListsPage() {
     description?: string;
   } | null>(null);
   const [deleteSectionId, setDeleteSectionId] = useState<Id<"sections"> | null>(
-    null
+    null,
   );
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (id: Id<"sections">) => {
     try {
       setIsDeleting(true);
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireAdminSessionToken();
       await deleteSection({ token, id });
     } finally {
       setDeleteSectionId(null);
@@ -58,10 +60,12 @@ export default function ListsPage() {
     }
   };
 
-  if (sections === undefined) {
+  if (rawSections === undefined && sections.length === 0) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="app-panel px-6 py-5 text-sm text-muted-foreground">Loading lists...</div>
+        <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
+          Loading lists...
+        </div>
       </div>
     );
   }
@@ -79,11 +83,16 @@ export default function ListsPage() {
               Product collections
             </h1>
             <p className="app-subtitle mt-2 max-w-xl">
-              Organize affiliate items into reusable lists for your reel mappings.
+              Organize affiliate items into reusable lists for your reel
+              mappings.
             </p>
           </div>
 
-          <Button onClick={() => setShowCreateModal(true)} size="lg" className="gap-2 sm:self-start">
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            size="lg"
+            className="gap-2 sm:self-start"
+          >
             <Plus className="h-4 w-4" />
             Create List
           </Button>
@@ -96,9 +105,14 @@ export default function ListsPage() {
             <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground" />
             <h3 className="mt-4 text-xl font-semibold">No lists yet</h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              Create your first collection to start attaching products to Instagram reel replies.
+              Create your first collection to start attaching products to
+              Instagram reel replies.
             </p>
-            <Button onClick={() => setShowCreateModal(true)} size="lg" className="mt-6 gap-2">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              size="lg"
+              className="mt-6 gap-2"
+            >
               <Plus className="h-4 w-4" />
               Create your first list
             </Button>
@@ -111,9 +125,13 @@ export default function ListsPage() {
               <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <CardTitle className="truncate text-lg">{section.title}</CardTitle>
+                    <CardTitle className="truncate text-lg">
+                      {section.title}
+                    </CardTitle>
                     {section.description && (
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{section.description}</p>
+                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                        {section.description}
+                      </p>
                     )}
                   </div>
                   <Badge variant="secondary" className="rounded-lg px-2.5 py-1">

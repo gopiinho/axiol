@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { getAuthToken } from "@/lib/auth";
+import { requireAdminSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { validateItemInput } from "@/lib/validators/items";
 
 interface EditItemModalProps {
   item: {
@@ -59,22 +60,30 @@ export default function EditItemModal({
     setErrorMessage(null);
 
     try {
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireAdminSessionToken();
+      const validated = validateItemInput({
+        affiliateLink,
+        price,
+        platform,
+        itemTitle,
+        imageUrl,
+      });
 
       await updateItem({
         token,
         id: item.id,
-        affiliateLink,
-        price: price || undefined,
-        platform,
-        itemTitle: itemTitle || undefined,
-        imageUrl: imageUrl || undefined,
+        affiliateLink: validated.affiliateLink,
+        price: validated.price,
+        platform: validated.platform,
+        itemTitle: validated.itemTitle,
+        imageUrl: validated.imageUrl,
       });
       onClose();
     } catch (error) {
       console.error("Error updating item:", error);
-      setErrorMessage("Failed to update item. Please try again.");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to update item. Please try again."
+      );
     } finally {
       setLoading(false);
     }

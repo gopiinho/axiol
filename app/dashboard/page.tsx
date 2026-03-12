@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useMutation, useQuery } from "convex/react";
@@ -24,56 +24,53 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { getAuthToken } from "@/lib/auth";
+import {
+  getAdminSessionToken,
+  requireAdminSessionToken,
+} from "@/features/auth/client/session";
+import { KpiRow, StatTile } from "@/features/dm-queue/components/Stats";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export default function DashboardPage() {
-  const token = getAuthToken();
-  const sections = useQuery(api.sections.list);
-  const queueStats = useQuery(
+  const token = getAdminSessionToken();
+  const rawQueueStats = useQuery(
     api.dmQueue.getQueueStats,
     token ? { token } : "skip",
   );
-  const instagramStats = useQuery(
+  const rawInstagramStats = useQuery(
     api.instagram.getStats,
     token ? { token } : "skip",
   );
-  const publishedMappings = useQuery(
+  const rawPublishedMappings = useQuery(
     api.instagram.getPublishedMappings,
-    token ? { token } : "skip",
+    token ? { token, limit: 6 } : "skip",
+  );
+  const queueStats = useCachedQueryResult(
+    `dashboard:queue:${token ?? "anon"}`,
+    rawQueueStats,
+  );
+  const instagramStats = useCachedQueryResult(
+    `dashboard:instagram:${token ?? "anon"}`,
+    rawInstagramStats,
+  );
+  const publishedMappings = useCachedQueryResult(
+    `dashboard:mappings:${token ?? "anon"}`,
+    rawPublishedMappings,
   );
   const kickoffWorker = useMutation(api.dmQueue.kickoffWorker);
 
   const [startingWorker, setStartingWorker] = useState(false);
 
   const handleStartWorker = async () => {
-    if (!token) {
-      return;
-    }
-
     setStartingWorker(true);
     try {
-      await kickoffWorker({ token });
+      await kickoffWorker({ token: requireAdminSessionToken() });
     } catch (error) {
       console.error("Failed to start worker:", error);
     } finally {
       setStartingWorker(false);
     }
   };
-
-  const isLoading =
-    sections === undefined ||
-    queueStats === undefined ||
-    instagramStats === undefined;
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
-          Loading dashboard metrics...
-        </div>
-      </div>
-    );
-  }
 
   const workerActive = Boolean(queueStats?.workerActive);
 
@@ -85,9 +82,12 @@ export default function DashboardPage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               Overview
             </p>
-            <h1 className="app-title mt-2">Instagram automation command center</h1>
+            <h1 className="app-title mt-2">
+              Instagram automation command center
+            </h1>
             <p className="app-subtitle mt-2 max-w-2xl">
-              Monitor queue health, track activity, and jump directly into content and list management.
+              Monitor queue health, track activity, and jump directly into
+              content and list management.
             </p>
           </div>
 
@@ -125,8 +125,8 @@ export default function DashboardPage() {
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
         <Card className="overflow-hidden">
-          <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
-            <div className="flex items-start justify-between gap-4">
+          <CardHeader className="border-b border-border/70 bg-secondary/35">
+            <div className="flex items-start gap-4">
               <div>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Instagram className="h-4 w-4 text-primary" />
@@ -141,7 +141,9 @@ export default function DashboardPage() {
                 <Badge
                   className={cn(
                     "rounded-lg px-2 py-1 text-[11px]",
-                    workerActive ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                    workerActive
+                      ? "bg-emerald-500 text-white"
+                      : "bg-muted text-muted-foreground",
                   )}
                 >
                   {workerActive ? "Active" : "Idle"}
@@ -203,7 +205,9 @@ export default function DashboardPage() {
               <TrendingUp className="h-4 w-4 text-primary" />
               Activity (24h)
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Recent engagement and DM delivery indicators</p>
+            <p className="text-sm text-muted-foreground">
+              Recent engagement and DM delivery indicators
+            </p>
           </CardHeader>
           <CardContent className="grid gap-3 pt-5">
             <KpiRow
@@ -229,10 +233,19 @@ export default function DashboardPage() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h2 className="font-accent text-xl font-semibold tracking-tight">Active Reel Mappings</h2>
-            <p className="app-subtitle mt-1">Live posts currently responding to matching comments</p>
+            <h2 className="font-accent text-xl font-semibold tracking-tight">
+              Active Reel Mappings
+            </h2>
+            <p className="app-subtitle mt-1">
+              Live posts currently responding to matching comments
+            </p>
           </div>
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
             <Link href="/dashboard/drafts">
               View drafts
               <ArrowUpRight className="h-4 w-4" />
@@ -242,7 +255,7 @@ export default function DashboardPage() {
 
         {publishedMappings && publishedMappings.length > 0 ? (
           <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-            {publishedMappings.slice(0, 6).map((mapping) => (
+            {publishedMappings.map((mapping) => (
               <Card key={mapping._id} className="overflow-hidden">
                 {mapping.thumbnailUrl && (
                   <div className="aspect-video overflow-hidden border-b border-border/70 bg-secondary/40">
@@ -259,12 +272,16 @@ export default function DashboardPage() {
                 <CardContent className="space-y-3 pt-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">{mapping.sectionTitle}</p>
+                      <p className="truncate text-sm font-semibold">
+                        {mapping.sectionTitle}
+                      </p>
                       <p className="mt-1 truncate text-xs text-muted-foreground">
                         Keyword: &quot;{mapping.keyword}&quot;
                       </p>
                     </div>
-                    <Badge className="rounded-lg bg-emerald-500 text-white">Live</Badge>
+                    <Badge className="rounded-lg bg-emerald-500 text-white">
+                      Live
+                    </Badge>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -300,64 +317,6 @@ export default function DashboardPage() {
           </Card>
         )}
       </section>
-    </div>
-  );
-}
-
-type Tone = "ok" | "warn" | "danger" | "neutral";
-
-function StatTile({
-  title,
-  value,
-  description,
-  tone,
-  icon: Icon,
-}: {
-  title: string;
-  value: string;
-  description: string;
-  tone: Tone;
-  icon: ComponentType<{ className?: string }>;
-}) {
-  const toneStyles = {
-    ok: "bg-emerald-100 text-emerald-700",
-    warn: "bg-amber-100 text-amber-700",
-    danger: "bg-rose-100 text-rose-700",
-    neutral: "bg-slate-100 text-slate-700",
-  };
-
-  return (
-    <div className="app-panel-soft p-4">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <span className={cn("rounded-lg p-2", toneStyles[tone])}>
-          <Icon className="h-3.5 w-3.5" />
-        </span>
-      </div>
-      <p className="mt-3 text-2xl font-semibold tracking-tight">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-    </div>
-  );
-}
-
-function KpiRow({
-  label,
-  value,
-  helper,
-  highlight = false,
-}: {
-  label: string;
-  value: number | string;
-  helper: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div className="app-panel-soft flex items-center justify-between gap-3 px-4 py-3">
-      <div>
-        <p className="text-sm font-medium">{label}</p>
-        <p className="text-xs text-muted-foreground">{helper}</p>
-      </div>
-      <p className={cn("text-xl font-semibold", highlight && "text-emerald-600")}>{value}</p>
     </div>
   );
 }

@@ -4,11 +4,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Send, Eye } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import Image from "next/image";
 import { Id } from "@/convex/_generated/dataModel";
 import {
   AlertDialog,
@@ -28,21 +25,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getAuthToken } from "@/lib/auth";
+import {
+  requireAdminSessionToken,
+  getAdminSessionToken,
+} from "@/features/auth/client/session";
+import DraftMappingCard from "@/features/instagram-mappings/components/DraftMappingCard";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export default function DraftsPage() {
-  const token = getAuthToken();
-  const drafts = useQuery(
+  const token = getAdminSessionToken();
+  const rawDrafts = useQuery(
     api.instagram.getDraftMappings,
-    token ? { token } : "skip"
+    token ? { token } : "skip",
+  );
+  const drafts = useCachedQueryResult(
+    `dashboard:drafts:${token ?? "anon"}`,
+    rawDrafts,
   );
   const publishMapping = useMutation(api.instagram.publishReelMapping);
   const deleteMapping = useMutation(api.instagram.deleteReelMapping);
   const [publishTarget, setPublishTarget] = useState<Id<"reelMappings"> | null>(
-    null
+    null,
   );
   const [deleteTarget, setDeleteTarget] = useState<Id<"reelMappings"> | null>(
-    null
+    null,
   );
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -51,8 +57,8 @@ export default function DraftsPage() {
   const handlePublish = async (id: Id<"reelMappings">) => {
     try {
       setIsPublishing(true);
-      if (!token) throw new Error("Unauthorized");
-      await publishMapping({ token, id });
+      const authToken = requireAdminSessionToken();
+      await publishMapping({ token: authToken, id });
       setPublishedOpen(true);
     } finally {
       setPublishTarget(null);
@@ -63,8 +69,8 @@ export default function DraftsPage() {
   const handleDelete = async (id: Id<"reelMappings">) => {
     try {
       setIsDeleting(true);
-      if (!token) throw new Error("Unauthorized");
-      await deleteMapping({ token, id });
+      const authToken = requireAdminSessionToken();
+      await deleteMapping({ token: authToken, id });
     } finally {
       setDeleteTarget(null);
       setIsDeleting(false);
@@ -88,57 +94,20 @@ export default function DraftsPage() {
       {drafts && drafts.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
           {drafts.map((draft) => (
-            <Card key={draft._id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex gap-4">
-                    {draft.thumbnailUrl && (
-                      <Image
-                        src={draft.thumbnailUrl}
-                        alt="Reel"
-                        width={96}
-                        height={96}
-                        className="w-24 h-24 object-cover rounded"
-                      />
-                    )}
-                    <div>
-                      <CardTitle className="text-lg">{draft.caption}</CardTitle>
-                      <div className="flex gap-2 mt-2">
-                        <Badge variant="secondary">{draft.keyword}</Badge>
-                        <Badge variant="outline">{draft.itemCount} items</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Collection: {draft.sectionTitle}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge>Draft</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setPublishTarget(draft._id)}
-                    className="gap-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    Publish
-                  </Button>
-                  <Button variant="outline" className="gap-2">
-                    <Eye className="h-4 w-4" />
-                    Preview DM
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setDeleteTarget(draft._id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <DraftMappingCard
+              key={draft._id}
+              draft={draft}
+              onPublish={setPublishTarget}
+              onDelete={setDeleteTarget}
+            />
           ))}
         </div>
+      ) : rawDrafts === undefined ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            Loading drafts...
+          </CardContent>
+        </Card>
       ) : (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
@@ -159,7 +128,9 @@ export default function DraftsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPublishing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPublishing}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => publishTarget && handlePublish(publishTarget)}
               disabled={isPublishing}

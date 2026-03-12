@@ -61,7 +61,7 @@ export default function LoginPage() {
         setError(errorMessage);
       } else if (errorMessage.includes("Invalid")) {
         setError(
-          "Invalid email or password. Please check your credentials and try again."
+          "Invalid email or password. Please check your credentials and try again.",
         );
       } else if (errorMessage.includes("attempt")) {
         setError(errorMessage);
@@ -87,7 +87,7 @@ export default function LoginPage() {
         <div className="grid lg:grid-cols-[1fr_460px]">
           <section className="hidden border-r border-border/70 bg-secondary/35 p-10 lg:block">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              Nemeowww
+              Welcome
             </p>
             <h1 className="mt-3 font-accent text-4xl font-semibold leading-tight">
               Affiliate automation,
@@ -95,17 +95,22 @@ export default function LoginPage() {
               under one dashboard.
             </h1>
             <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              Secure access for managing reel mappings, DM workflows, and product lists.
+              Secure access for managing reel mappings, DM workflows, and
+              product lists.
             </p>
 
             <div className="mt-8 space-y-3">
               <div className="app-panel-soft flex items-center gap-3 px-4 py-3">
                 <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                <p className="text-sm">Session verification on every dashboard load</p>
+                <p className="text-sm">
+                  Session verification on every dashboard load
+                </p>
               </div>
               <div className="app-panel-soft flex items-center gap-3 px-4 py-3">
                 <Lock className="h-4 w-4 text-primary" />
-                <p className="text-sm">Brute-force protection and lockout handling enabled</p>
+                <p className="text-sm">
+                  Brute-force protection and lockout handling enabled
+                </p>
               </div>
             </div>
           </section>
@@ -115,7 +120,9 @@ export default function LoginPage() {
               <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <Lock className="h-6 w-6" />
               </div>
-              <h2 className="font-accent text-3xl font-semibold tracking-tight">Sign in</h2>
+              <h2 className="font-accent text-3xl font-semibold tracking-tight">
+                Sign in
+              </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Access your dashboard workspace.
               </p>
@@ -164,10 +171,17 @@ export default function LoginPage() {
                     className="pl-10"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">Minimum 12 characters required.</p>
+                <p className="text-xs text-muted-foreground">
+                  Minimum 12 characters required.
+                </p>
               </div>
 
-              <Button type="submit" disabled={loading} size="lg" className="w-full">
+              <Button
+                type="submit"
+                disabled={loading}
+                size="lg"
+                className="w-full"
+              >
                 {loading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />

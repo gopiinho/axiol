@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdminSession } from "./security";
+import { validateSectionInput } from "../lib/validators/sections";
 
 export const list = query({
   handler: async (ctx) => {
@@ -23,10 +24,14 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
-
-    return await ctx.db.insert("sections", {
+    const validated = validateSectionInput({
       title: args.title,
       description: args.description,
+    });
+
+    return await ctx.db.insert("sections", {
+      title: validated.title,
+      description: validated.description,
       order: Date.now(),
       createdAt: Date.now(),
     });
@@ -42,10 +47,14 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
-
-    await ctx.db.patch(args.id, {
+    const validated = validateSectionInput({
       title: args.title,
       description: args.description,
+    });
+
+    await ctx.db.patch(args.id, {
+      title: validated.title,
+      description: validated.description,
     });
   },
 });

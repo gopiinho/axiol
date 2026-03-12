@@ -1,7 +1,67 @@
 import { v } from "convex/values";
-import { mutation, query, action, internalQuery } from "./_generated/server";
-import { api } from "./_generated/api";
+import {
+  mutation,
+  query,
+  action,
+  internalQuery,
+  internalMutation,
+} from "./_generated/server";
+import { api, internal } from "./_generated/api";
 import { requireAdminSession } from "./security";
+import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
+
+const WEBHOOK_SECRET = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
+
+function assertWebhookSourceSecret(sourceSecret: string) {
+  if (!WEBHOOK_SECRET || sourceSecret !== WEBHOOK_SECRET) {
+    throw new Error("Unauthorized");
+  }
+}
+
+function buildDMMessage({
+  sectionTitle,
+  items,
+  maxItems,
+  includeWebsiteLink,
+  siteUrl,
+  sectionId,
+}: {
+  sectionTitle: string;
+  items: Array<{ itemTitle?: string; price?: string; affiliateLink: string }>;
+  maxItems: number;
+  includeWebsiteLink: boolean;
+  siteUrl: string;
+  sectionId: string;
+}) {
+  const collectionUrl = `${siteUrl}/list/${sectionId}`;
+  let message = `Hi! Here are my top picks from "${sectionTitle}":\n\n`;
+
+  if (includeWebsiteLink) {
+    message += `🔗 View full collection: ${collectionUrl}\n\n`;
+  }
+
+  items.forEach((item, index) => {
+    message += `${index + 1}. ${item.itemTitle || "Product"}`;
+    if (item.price) {
+      message += ` - ₹${item.price}`;
+    }
+    message += `\n👉 ${item.affiliateLink}\n\n`;
+  });
+
+  if (items.length < maxItems) {
+    message += `(Showing all ${items.length} items)\n\n`;
+  } else {
+    message += `(Showing top ${maxItems} items - visit link for more)\n\n`;
+  }
+
+  message += `💕 Thank you for your support! xoxo`;
+
+  return {
+    message,
+    itemCount: items.length,
+    characterCount: message.length,
+  };
+}
 
 export const saveConfig = mutation({
   args: {
@@ -88,7 +148,9 @@ export const fetchRecentReels = action({
       error?: { message?: string };
     };
 
-    const rateLimitCheck = await ctx.runQuery(api.instagram.checkRateLimit);
+    const rateLimitCheck = await ctx.runQuery(
+      internal.instagram.checkRateLimitInternal
+    );
 
     if (!rateLimitCheck.allowed) {
       throw new Error(rateLimitCheck.reason || "Rate limit exceeded");
@@ -125,6 +187,8 @@ export const fetchRecentReels = action({
       );
     }
 
+    await ctx.runMutation(internal.instagram.incrementRateLimitInternal);
+
     const data = (await response.json()) as GraphMediaResponse;
 
     if (data.error) {
@@ -149,7 +213,7 @@ export const fetchRecentReels = action({
   },
 });
 
-export const checkRateLimit = query({
+export const checkRateLimitInternal = internalQuery({
   handler: async (ctx) => {
     const config = await ctx.db.query("instagramConfig").first();
     if (!config) return { allowed: false, reason: "Not configured" };
@@ -175,7 +239,7 @@ export const checkRateLimit = query({
   },
 });
 
-export const incrementRateLimit = mutation({
+export const incrementRateLimitInternal = internalMutation({
   handler: async (ctx) => {
     const config = await ctx.db.query("instagramConfig").first();
     if (!config) return;
@@ -212,21 +276,30 @@ export const createReelMapping = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
+    const validated = validateReelMappingInput({
+      reelId: args.reelId,
+      reelUrl: args.reelUrl,
+      thumbnailUrl: args.thumbnailUrl,
+      caption: args.caption,
+      keyword: args.keyword,
+      maxItemsInDM: args.maxItemsInDM,
+      includeWebsiteLink: args.includeWebsiteLink,
+    });
 
     const existing = await ctx.db
       .query("reelMappings")
-      .withIndex("by_reel", (q) => q.eq("reelId", args.reelId))
+      .withIndex("by_reel", (q) => q.eq("reelId", validated.reelId))
       .first();
 
     const data = {
       sectionId: args.sectionId,
-      keyword: args.keyword.toLowerCase(),
+      keyword: validated.keyword,
       active: false, // Starts as draft
-      reelUrl: args.reelUrl,
-      thumbnailUrl: args.thumbnailUrl,
-      caption: args.caption,
-      maxItemsInDM: args.maxItemsInDM ?? 10,
-      includeWebsiteLink: args.includeWebsiteLink ?? true,
+      reelUrl: validated.reelUrl,
+      thumbnailUrl: validated.thumbnailUrl,
+      caption: validated.caption,
+      maxItemsInDM: validated.maxItemsInDM,
+      includeWebsiteLink: validated.includeWebsiteLink,
     };
 
     if (existing) {
@@ -235,7 +308,7 @@ export const createReelMapping = mutation({
     } else {
       return await ctx.db.insert("reelMappings", {
         ...data,
-        reelId: args.reelId,
+        reelId: validated.reelId,
       });
     }
   },
@@ -291,15 +364,18 @@ export const getDraftMappings = query({
 export const getPublishedMappings = query({
   args: {
     token: v.string(),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.token);
+
+    const limit = args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
 
     const published = await ctx.db
       .query("reelMappings")
       .withIndex("by_active", (q) => q.eq("active", true))
       .order("desc")
-      .collect();
+      .take(limit ?? 1000);
 
     const enriched = await Promise.all(
       published.map(async (mapping) => {
@@ -340,11 +416,15 @@ export const listReelMappings = query({
 
 export const generateDMMessage = query({
   args: {
+    token: v.string(),
     sectionId: v.id("sections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.token);
+
+    const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
     const section = await ctx.db.get(args.sectionId);
     if (!section) throw new Error("Collection not found");
 
@@ -352,38 +432,46 @@ export const generateDMMessage = query({
       .query("items")
       .withIndex("by_section", (q) => q.eq("sectionId", args.sectionId))
       .order("desc")
-      .take(args.maxItems);
+      .take(normalizedMaxItems);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
-    const collectionUrl = `${siteUrl}/list/${args.sectionId}`;
-
-    let message = `Hi! Here are my top picks from "${section.title}":\n\n`;
-
-    if (args.includeWebsiteLink) {
-      message += `🔗 View full collection: ${collectionUrl}\n\n`;
-    }
-
-    items.forEach((item, index) => {
-      message += `${index + 1}. ${item.itemTitle || "Product"}`;
-      if (item.price) {
-        message += ` - ₹${item.price}`;
-      }
-      message += `\n👉 ${item.affiliateLink}\n\n`;
+    return buildDMMessage({
+      sectionTitle: section.title,
+      items,
+      maxItems: normalizedMaxItems,
+      includeWebsiteLink: args.includeWebsiteLink,
+      siteUrl,
+      sectionId: args.sectionId,
     });
+  },
+});
 
-    if (items.length < args.maxItems) {
-      message += `(Showing all ${items.length} items)\n\n`;
-    } else {
-      message += `(Showing top ${args.maxItems} items - visit link for more)\n\n`;
-    }
+export const generateDMMessageForJob = internalQuery({
+  args: {
+    sectionId: v.id("sections"),
+    maxItems: v.number(),
+    includeWebsiteLink: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
+    const section = await ctx.db.get(args.sectionId);
+    if (!section) throw new Error("Collection not found");
 
-    message += `💕 Thank you for your support! xoxo`;
+    const items = await ctx.db
+      .query("items")
+      .withIndex("by_section", (q) => q.eq("sectionId", args.sectionId))
+      .order("desc")
+      .take(normalizedMaxItems);
 
-    return {
-      message,
-      itemCount: items.length,
-      characterCount: message.length,
-    };
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+    return buildDMMessage({
+      sectionTitle: section.title,
+      items,
+      maxItems: normalizedMaxItems,
+      includeWebsiteLink: args.includeWebsiteLink,
+      siteUrl,
+      sectionId: args.sectionId,
+    });
   },
 });
 
@@ -417,10 +505,12 @@ export const toggleReelMapping = mutation({
 
 export const findMappingForComment = query({
   args: {
+    sourceSecret: v.string(),
     reelId: v.string(),
     commentText: v.string(),
   },
   handler: async (ctx, args) => {
+    assertWebhookSourceSecret(args.sourceSecret);
     const commentKeyword = args.commentText.toLowerCase().trim();
 
     const mappings = await ctx.db
@@ -453,9 +543,11 @@ export const findMappingForComment = query({
 
 export const findMappingForReel = query({
   args: {
+    sourceSecret: v.string(),
     reelId: v.string(),
   },
   handler: async (ctx, args) => {
+    assertWebhookSourceSecret(args.sourceSecret);
     const mapping = await ctx.db
       .query("reelMappings")
       .withIndex("by_reel", (q) => q.eq("reelId", args.reelId))
@@ -477,6 +569,7 @@ export const findMappingForReel = query({
 
 export const logComment = mutation({
   args: {
+    sourceSecret: v.string(),
     commentId: v.string(),
     reelId: v.string(),
     instagramUserId: v.string(),
@@ -488,6 +581,8 @@ export const logComment = mutation({
     dmError: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    assertWebhookSourceSecret(args.sourceSecret);
+
     const existing = await ctx.db
       .query("commentLogs")
       .withIndex("by_comment", (q) => q.eq("commentId", args.commentId))
@@ -496,7 +591,15 @@ export const logComment = mutation({
     if (existing) return existing._id;
 
     return await ctx.db.insert("commentLogs", {
-      ...args,
+      commentId: args.commentId,
+      reelId: args.reelId,
+      instagramUserId: args.instagramUserId,
+      username: args.username,
+      commentText: args.commentText,
+      keyword: args.keyword,
+      sectionId: args.sectionId,
+      dmSent: args.dmSent,
+      dmError: args.dmError,
       timestamp: Date.now(),
     });
   },
@@ -580,8 +683,12 @@ export const getRecentActivity = query({
 });
 
 export const getReelMappingById = query({
-  args: { id: v.id("reelMappings") },
+  args: {
+    sourceSecret: v.string(),
+    id: v.id("reelMappings"),
+  },
   handler: async (ctx, args) => {
+    assertWebhookSourceSecret(args.sourceSecret);
     return await ctx.db.get(args.id);
   },
 });
