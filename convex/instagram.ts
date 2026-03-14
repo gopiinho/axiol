@@ -7,7 +7,7 @@ import {
   internalMutation,
 } from "./_generated/server";
 import { api, internal } from "./_generated/api";
-import { requireAdminSession } from "./security";
+import { requireSession } from "./security";
 import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
 
 const WEBHOOK_SECRET = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
@@ -19,22 +19,22 @@ function assertWebhookSourceSecret(sourceSecret: string) {
 }
 
 function buildDMMessage({
-  sectionTitle,
+  collectionTitle,
   items,
   maxItems,
   includeWebsiteLink,
   siteUrl,
-  sectionId,
+  collectionId,
 }: {
-  sectionTitle: string;
+  collectionTitle: string;
   items: Array<{ itemTitle?: string; price?: string; affiliateLink: string }>;
   maxItems: number;
   includeWebsiteLink: boolean;
   siteUrl: string;
-  sectionId: string;
+  collectionId: string;
 }) {
-  const collectionUrl = `${siteUrl}/list/${sectionId}`;
-  let message = `Hi! Here are my top picks from "${sectionTitle}":\n\n`;
+  const collectionUrl = `${siteUrl}/list/${collectionId}`;
+  let message = `Hi! Here are my top picks from "${collectionTitle}":\n\n`;
 
   if (includeWebsiteLink) {
     message += `🔗 View full collection: ${collectionUrl}\n\n`;
@@ -70,14 +70,18 @@ export const saveConfig = mutation({
     instagramAccountId: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
-    const existing = await ctx.db.query("instagramConfig").first();
+    const existing = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
 
     const tokenExpiresAt = Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days
     const oneHourFromNow = Date.now() + 60 * 60 * 1000;
 
     const data = {
+      userId,
       accessToken: args.accessToken,
       instagramAccountId: args.instagramAccountId,
       lastTokenRefresh: Date.now(),
@@ -100,15 +104,36 @@ export const getConfig = query({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
-    return await ctx.db.query("instagramConfig").first();
+    const { userId } = await requireSession(ctx, args.token);
+    return await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
   },
 });
 
 export const getConfigInternal = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("instagramConfig").first();
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+  },
+});
+
+export const getUserByInstagramAccount = internalQuery({
+  args: { instagramAccountId: v.string() },
+  handler: async (ctx, args) => {
+    const config = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_instagram_account", (q) =>
+        q.eq("instagramAccountId", args.instagramAccountId),
+      )
+      .first();
+
+    if (!config) return null;
+    return { userId: config.userId, configId: config._id };
   },
 });
 
@@ -118,7 +143,7 @@ export const fetchRecentReels = action({
   },
   handler: async (
     ctx,
-    args
+    args,
   ): Promise<
     Array<{
       id: string;
@@ -128,7 +153,9 @@ export const fetchRecentReels = action({
       timestamp: string;
     }>
   > => {
-    const session = await ctx.runQuery(api.auth.checkSession, { token: args.token });
+    const session = await ctx.runQuery(api.auth.checkSession, {
+      token: args.token,
+    });
     if (!session.valid) {
       throw new Error("Unauthorized");
     }
@@ -148,21 +175,13 @@ export const fetchRecentReels = action({
       error?: { message?: string };
     };
 
-    const rateLimitCheck = await ctx.runQuery(
-      internal.instagram.checkRateLimitInternal
-    );
-
-    if (!rateLimitCheck.allowed) {
-      throw new Error(rateLimitCheck.reason || "Rate limit exceeded");
-    }
-
     const config = await ctx.runQuery(api.instagram.getConfig, {
       token: args.token,
     });
 
     if (!config) {
       throw new Error(
-        "Instagram not configured. Please add access token first."
+        "Instagram not configured. Please add access token first.",
       );
     }
 
@@ -183,11 +202,9 @@ export const fetchRecentReels = action({
       throw new Error(
         `Instagram API error: ${
           errorData.error?.message || response.statusText
-        }`
+        }`,
       );
     }
-
-    await ctx.runMutation(internal.instagram.incrementRateLimitInternal);
 
     const data = (await response.json()) as GraphMediaResponse;
 
@@ -200,7 +217,7 @@ export const fetchRecentReels = action({
     }
 
     const reels = data.data.filter(
-      (media) => media.media_type === "VIDEO" || media.media_type === "REELS"
+      (media) => media.media_type === "VIDEO" || media.media_type === "REELS",
     );
 
     return reels.map((reel) => ({
@@ -214,8 +231,12 @@ export const fetchRecentReels = action({
 });
 
 export const checkRateLimitInternal = internalQuery({
-  handler: async (ctx) => {
-    const config = await ctx.db.query("instagramConfig").first();
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const config = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
     if (!config) return { allowed: false, reason: "Not configured" };
 
     const now = Date.now();
@@ -240,8 +261,12 @@ export const checkRateLimitInternal = internalQuery({
 });
 
 export const incrementRateLimitInternal = internalMutation({
-  handler: async (ctx) => {
-    const config = await ctx.db.query("instagramConfig").first();
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const config = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
     if (!config) return;
 
     const now = Date.now();
@@ -269,13 +294,13 @@ export const createReelMapping = mutation({
     reelUrl: v.string(),
     thumbnailUrl: v.optional(v.string()),
     caption: v.optional(v.string()),
-    sectionId: v.id("sections"),
+    collectionId: v.id("collections"),
     keyword: v.string(),
     maxItemsInDM: v.optional(v.number()),
     includeWebsiteLink: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
     const validated = validateReelMappingInput({
       reelId: args.reelId,
       reelUrl: args.reelUrl,
@@ -286,15 +311,21 @@ export const createReelMapping = mutation({
       includeWebsiteLink: args.includeWebsiteLink,
     });
 
+    const collection = await ctx.db.get(args.collectionId);
+    if (!collection || collection.createdBy !== userId) {
+      throw new Error("Collection not found");
+    }
+
     const existing = await ctx.db
       .query("reelMappings")
       .withIndex("by_reel", (q) => q.eq("reelId", validated.reelId))
       .first();
 
     const data = {
-      sectionId: args.sectionId,
+      userId,
+      collectionId: args.collectionId,
       keyword: validated.keyword,
-      active: false, // Starts as draft
+      active: false,
       reelUrl: validated.reelUrl,
       thumbnailUrl: validated.thumbnailUrl,
       caption: validated.caption,
@@ -320,7 +351,11 @@ export const publishReelMapping = mutation({
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
+    const mapping = await ctx.db.get(args.id);
+    if (!mapping || mapping.userId !== userId) {
+      throw new Error("Mapping not found");
+    }
     await ctx.db.patch(args.id, {
       active: true,
       publishedAt: Date.now(),
@@ -333,28 +368,31 @@ export const getDraftMappings = query({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
     const drafts = await ctx.db
       .query("reelMappings")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("active"), false))
       .order("desc")
       .collect();
 
     const enriched = await Promise.all(
       drafts.map(async (draft) => {
-        const section = await ctx.db.get(draft.sectionId);
+        const collection = await ctx.db.get(draft.collectionId);
         const items = await ctx.db
           .query("items")
-          .withIndex("by_section", (q) => q.eq("sectionId", draft.sectionId))
+          .withIndex("by_collection", (q) =>
+            q.eq("collectionId", draft.collectionId),
+          )
           .collect();
 
         return {
           ...draft,
-          sectionTitle: section?.title || "Unknown Collection",
+          sectionTitle: collection?.title || "Unknown Collection",
           itemCount: items.length,
         };
-      })
+      }),
     );
 
     return enriched;
@@ -367,24 +405,26 @@ export const getPublishedMappings = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
-    const limit = args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
+    const limit =
+      args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
 
     const published = await ctx.db
       .query("reelMappings")
-      .withIndex("by_active", (q) => q.eq("active", true))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("active"), true))
       .order("desc")
       .take(limit ?? 1000);
 
     const enriched = await Promise.all(
       published.map(async (mapping) => {
-        const section = await ctx.db.get(mapping.sectionId);
+        const collection = await ctx.db.get(mapping.collectionId);
         return {
           ...mapping,
-          sectionTitle: section?.title || "Unknown Collection",
+          sectionTitle: collection?.title || "Unknown Collection",
         };
-      })
+      }),
     );
 
     return enriched;
@@ -396,18 +436,22 @@ export const listReelMappings = query({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
-    const mappings = await ctx.db.query("reelMappings").order("desc").collect();
+    const mappings = await ctx.db
+      .query("reelMappings")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
 
     const enriched = await Promise.all(
       mappings.map(async (mapping) => {
-        const section = await ctx.db.get(mapping.sectionId);
+        const collection = await ctx.db.get(mapping.collectionId);
         return {
           ...mapping,
-          sectionTitle: section?.title || "Unknown Collection",
+          sectionTitle: collection?.title || "Unknown Collection",
         };
-      })
+      }),
     );
 
     return enriched;
@@ -417,60 +461,62 @@ export const listReelMappings = query({
 export const generateDMMessage = query({
   args: {
     token: v.string(),
-    sectionId: v.id("sections"),
+    collectionId: v.id("collections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    await requireSession(ctx, args.token);
 
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
-    const section = await ctx.db.get(args.sectionId);
-    if (!section) throw new Error("Collection not found");
+    const collection = await ctx.db.get(args.collectionId);
+    if (!collection) throw new Error("Collection not found");
 
     const items = await ctx.db
       .query("items")
-      .withIndex("by_section", (q) => q.eq("sectionId", args.sectionId))
+      .withIndex("by_collection", (q) =>
+        q.eq("collectionId", args.collectionId),
+      )
       .order("desc")
       .take(normalizedMaxItems);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
     return buildDMMessage({
-      sectionTitle: section.title,
+      collectionTitle: collection.title,
       items,
       maxItems: normalizedMaxItems,
       includeWebsiteLink: args.includeWebsiteLink,
       siteUrl,
-      sectionId: args.sectionId,
+      collectionId: args.collectionId,
     });
   },
 });
 
 export const generateDMMessageForJob = internalQuery({
   args: {
-    sectionId: v.id("sections"),
+    collectionId: v.id("collections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
-    const section = await ctx.db.get(args.sectionId);
-    if (!section) throw new Error("Collection not found");
+    const collection = await ctx.db.get(args.collectionId);
+    if (!collection) throw new Error("Collection not found");
 
     const items = await ctx.db
       .query("items")
-      .withIndex("by_section", (q) => q.eq("sectionId", args.sectionId))
+      .withIndex("by_collection", (q) => q.eq("collectionId", args.collectionId))
       .order("desc")
       .take(normalizedMaxItems);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
     return buildDMMessage({
-      sectionTitle: section.title,
+      collectionTitle: collection.title,
       items,
       maxItems: normalizedMaxItems,
       includeWebsiteLink: args.includeWebsiteLink,
       siteUrl,
-      sectionId: args.sectionId,
+      collectionId: args.collectionId,
     });
   },
 });
@@ -481,7 +527,11 @@ export const deleteReelMapping = mutation({
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
+    const mapping = await ctx.db.get(args.id);
+    if (!mapping || mapping.userId !== userId) {
+      throw new Error("Mapping not found");
+    }
     await ctx.db.delete(args.id);
   },
 });
@@ -492,10 +542,12 @@ export const toggleReelMapping = mutation({
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
     const mapping = await ctx.db.get(args.id);
-    if (!mapping) throw new Error("Mapping not found");
+    if (!mapping || mapping.userId !== userId) {
+      throw new Error("Mapping not found");
+    }
 
     await ctx.db.patch(args.id, {
       active: !mapping.active,
@@ -530,13 +582,14 @@ export const findMappingForComment = query({
 
     if (!mapping) return null;
 
-    const section = await ctx.db.get(mapping.sectionId);
+    const collection = await ctx.db.get(mapping.collectionId);
 
     return {
       mappingId: mapping._id,
-      sectionId: mapping.sectionId,
-      sectionTitle: section?.title || "Collection",
+      collectionId: mapping.collectionId,
+      collectionTitle: collection?.title || "Collection",
       keyword: mapping.keyword,
+      userId: mapping.userId,
     };
   },
 });
@@ -556,13 +609,14 @@ export const findMappingForReel = query({
 
     if (!mapping) return null;
 
-    const section = await ctx.db.get(mapping.sectionId);
+    const collection = await ctx.db.get(mapping.collectionId);
 
     return {
       mappingId: mapping._id,
-      sectionId: mapping.sectionId,
-      sectionTitle: section?.title || "Collection",
+      collectionId: mapping.collectionId,
+      collectionTitle: collection?.title || "Collection",
       keyword: mapping.keyword,
+      userId: mapping.userId,
     };
   },
 });
@@ -576,7 +630,8 @@ export const logComment = mutation({
     username: v.string(),
     commentText: v.string(),
     keyword: v.string(),
-    sectionId: v.optional(v.id("sections")),
+    collectionId: v.optional(v.id("collections")),
+    userId: v.optional(v.id("users")),
     dmSent: v.boolean(),
     dmError: v.optional(v.string()),
   },
@@ -597,7 +652,8 @@ export const logComment = mutation({
       username: args.username,
       commentText: args.commentText,
       keyword: args.keyword,
-      sectionId: args.sectionId,
+      collectionId: args.collectionId,
+      userId: args.userId,
       dmSent: args.dmSent,
       dmError: args.dmError,
       timestamp: Date.now(),
@@ -609,7 +665,8 @@ export const logDM = mutation({
   args: {
     instagramUserId: v.string(),
     username: v.string(),
-    sectionId: v.id("sections"),
+    collectionId: v.id("collections"),
+    userId: v.optional(v.id("users")),
     messageText: v.string(),
     success: v.boolean(),
     error: v.optional(v.string()),
@@ -627,11 +684,20 @@ export const getStats = query({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
-    const comments = await ctx.db.query("commentLogs").collect();
-    const dms = await ctx.db.query("dmLogs").collect();
-    const mappings = await ctx.db.query("reelMappings").collect();
+    const comments = await ctx.db
+      .query("commentLogs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    const dms = await ctx.db
+      .query("dmLogs")
+      .withIndex("by_owner", (q) => q.eq("userId", userId))
+      .collect();
+    const mappings = await ctx.db
+      .query("reelMappings")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
 
     const last24h = Date.now() - 24 * 60 * 60 * 1000;
     const recentComments = comments.filter((c) => c.timestamp > last24h);
@@ -658,24 +724,25 @@ export const getRecentActivity = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
     const limit = args.limit ?? 50;
 
     const comments = await ctx.db
       .query("commentLogs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("desc")
       .take(limit);
 
     const enriched = await Promise.all(
       comments.map(async (comment) => {
-        if (!comment.sectionId) return comment;
-        const section = await ctx.db.get(comment.sectionId);
+        if (!comment.collectionId) return comment;
+        const collection = await ctx.db.get(comment.collectionId);
         return {
           ...comment,
-          sectionTitle: section?.title,
+          sectionTitle: collection?.title,
         };
-      })
+      }),
     );
 
     return enriched;

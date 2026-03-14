@@ -1,14 +1,14 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireAdminSession } from "./security";
+import { requireSession } from "./security";
 import { validateItemInput } from "../lib/validators/items";
 
-export const listBySection = query({
-  args: { sectionId: v.id("sections") },
+export const listByCollection = query({
+  args: { collectionId: v.id("collections") },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("items")
-      .withIndex("by_section", (q) => q.eq("sectionId", args.sectionId))
+      .withIndex("by_collection", (q) => q.eq("collectionId", args.collectionId))
       .order("desc")
       .collect();
   },
@@ -17,7 +17,7 @@ export const listBySection = query({
 export const create = mutation({
   args: {
     token: v.string(),
-    sectionId: v.id("sections"),
+    collectionId: v.id("collections"),
     affiliateLink: v.string(),
     price: v.optional(v.string()),
     platform: v.string(),
@@ -25,7 +25,7 @@ export const create = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
     const validated = validateItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
@@ -34,8 +34,13 @@ export const create = mutation({
       imageUrl: args.imageUrl,
     });
 
+    const collection = await ctx.db.get(args.collectionId);
+    if (!collection || collection.createdBy !== userId) {
+      throw new Error("Collection not found");
+    }
+
     return await ctx.db.insert("items", {
-      sectionId: args.sectionId,
+      collectionId: args.collectionId,
       affiliateLink: validated.affiliateLink,
       price: validated.price,
       platform: validated.platform,
@@ -58,7 +63,7 @@ export const update = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
     const validated = validateItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
@@ -66,6 +71,14 @@ export const update = mutation({
       itemTitle: args.itemTitle,
       imageUrl: args.imageUrl,
     });
+
+    const item = await ctx.db.get(args.id);
+    if (!item) throw new Error("Item not found");
+
+    const collection = await ctx.db.get(item.collectionId);
+    if (!collection || collection.createdBy !== userId) {
+      throw new Error("Unauthorized");
+    }
 
     await ctx.db.patch(args.id, {
       affiliateLink: validated.affiliateLink,
@@ -83,7 +96,16 @@ export const remove = mutation({
     id: v.id("items"),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
+
+    const item = await ctx.db.get(args.id);
+    if (!item) throw new Error("Item not found");
+
+    const collection = await ctx.db.get(item.collectionId);
+    if (!collection || collection.createdBy !== userId) {
+      throw new Error("Unauthorized");
+    }
+
     await ctx.db.delete(args.id);
   },
 });
