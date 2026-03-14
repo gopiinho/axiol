@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} ${jersey.variable} app-bg antialiased relative min-h-screen`}
+        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} ${jersey.variable} antialiased relative w-full min-h-screen`}
       >
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
