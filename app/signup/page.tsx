@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import {
@@ -93,13 +93,7 @@ export default function SignupPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(80rem 50rem at 10% 10%, oklch(0.95 0.09 240 / 0.6), transparent 50%), radial-gradient(80rem 40rem at 95% 95%, oklch(0.93 0.08 215 / 0.45), transparent 45%)",
-        }}
-      />
+      <div className="auth-bg pointer-events-none absolute inset-0" />
 
       <div className="app-panel relative z-10 w-full max-w-[520px] overflow-hidden rounded-3xl p-6 sm:p-10">
         <div className="mb-8 text-center">
@@ -115,7 +109,7 @@ export default function SignupPage() {
         </div>
 
         {error && (
-          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+          <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive">
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
               <p className="text-sm">{error}</p>
@@ -165,9 +159,9 @@ export default function SignupPage() {
               {debouncedUsername.length >= 3 && usernameCheck && (
                 <div className="absolute top-1/2 right-3 -translate-y-1/2">
                   {usernameCheck.available ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <CheckCircle2 className="h-4 w-4 text-status-success" />
                   ) : (
-                    <XCircle className="h-4 w-4 text-red-500" />
+                    <XCircle className="h-4 w-4 text-destructive" />
                   )}
                 </div>
               )}
@@ -175,7 +169,7 @@ export default function SignupPage() {
             {debouncedUsername.length >= 3 &&
               usernameCheck &&
               !usernameCheck.available && (
-                <p className="text-xs text-red-500">{usernameCheck.reason}</p>
+                <p className="text-xs text-destructive">{usernameCheck.reason}</p>
               )}
             <p className="text-xs text-muted-foreground">
               Your store will be at linkkit.com/{username || "yourname"}

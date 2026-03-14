@@ -142,7 +142,7 @@ export default function DashboardPage() {
                   className={cn(
                     "rounded-lg px-2 py-1 text-[11px]",
                     workerActive
-                      ? "bg-emerald-500 text-white"
+                      ? "badge-success"
                       : "bg-muted text-muted-foreground",
                   )}
                 >
@@ -279,9 +279,7 @@ export default function DashboardPage() {
                         Keyword: &quot;{mapping.keyword}&quot;
                       </p>
                     </div>
-                    <Badge className="rounded-lg bg-emerald-500 text-white">
-                      Live
-                    </Badge>
+                    <Badge className="badge-success rounded-lg">Live</Badge>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
