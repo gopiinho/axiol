@@ -24,20 +24,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function SectionItemsPage({
+export default function CollectionItemsPage({
   params,
 }: {
-  params: Promise<{ id: Id<"sections"> }>;
+  params: Promise<{ id: Id<"collections"> }>;
 }) {
   const { id } = use(params);
 
-  const rawSection = useQuery(api.sections.getById, { id });
-  const rawItems = useQuery(api.items.listBySection, {
-    sectionId: id,
+  const rawCollection = useQuery(api.collections.getById, { id });
+  const rawItems = useQuery(api.items.listByCollection, {
+    collectionId: id,
   });
-  const section = useCachedQueryResult(
-    `dashboard:list:${id}:section`,
-    rawSection,
+  const collection = useCachedQueryResult(
+    `dashboard:list:${id}:collection`,
+    rawCollection,
   );
   const items = useCachedQueryResult(`dashboard:list:${id}:items`, rawItems);
   const deleteItem = useMutation(api.items.remove);
@@ -66,7 +66,7 @@ export default function SectionItemsPage({
   };
 
   if (
-    (rawSection === undefined && section === undefined) ||
+    (rawCollection === undefined && collection === undefined) ||
     (rawItems === undefined && items === undefined)
   ) {
     return (
@@ -78,7 +78,7 @@ export default function SectionItemsPage({
     );
   }
 
-  if (section === null) {
+  if (collection === null) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -108,11 +108,11 @@ export default function SectionItemsPage({
             </p>
             <h1 className="app-title mt-2 flex items-center gap-2">
               <ShoppingBasket className="h-7 w-7 text-primary" />
-              {section!.title}
+              {collection!.title}
             </h1>
-            {section!.description && (
+            {collection!.description && (
               <p className="app-subtitle mt-2 max-w-xl">
-                {section!.description}
+                {collection!.description}
               </p>
             )}
           </div>
@@ -167,7 +167,7 @@ export default function SectionItemsPage({
       )}
 
       <CreateItemModal
-        sectionId={id}
+        collectionId={id}
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />

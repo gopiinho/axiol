@@ -27,13 +27,13 @@ import {
 import { validateItemInput } from "@/lib/validators/items";
 
 interface CreateItemModalProps {
-  sectionId: Id<"sections">;
+  collectionId: Id<"collections">;
   open: boolean;
   onClose: () => void;
 }
 
 export default function CreateItemModal({
-  sectionId,
+  collectionId,
   open,
   onClose,
 }: CreateItemModalProps) {
@@ -64,7 +64,7 @@ export default function CreateItemModal({
 
       await createItem({
         token,
-        sectionId,
+        collectionId,
         affiliateLink: validated.affiliateLink,
         price: validated.price,
         platform: validated.platform,

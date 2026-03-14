@@ -3,7 +3,7 @@ import Link from "next/link";
 import heartPixel from "@/public/icons/heart.png";
 
 interface CollectionsCardProps {
-  section: {
+  collection: {
     _id: string;
     title: string;
     description?: string | null;
@@ -12,12 +12,12 @@ interface CollectionsCardProps {
 }
 
 export default function CollectionsCard({
-  section,
+  collection,
   index,
 }: CollectionsCardProps) {
   return (
     <Link
-      href={`/list/${section._id}`}
+      href={`/list/${collection._id}`}
       className="group relative"
       style={{
         animationDelay: `${index * 100}ms`,
@@ -39,12 +39,12 @@ export default function CollectionsCard({
         <div className="flex flex-col gap-4 min-h-35">
           <div className="flex-1">
             <h2 className="text-xl font-bold text-gray-800 mb-2 leading-tight group-hover:text-pink-600 transition-colors">
-              {section.title}
+              {collection.title}
             </h2>
 
-            {section.description && (
+            {collection.description && (
               <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                {section.description}
+                {collection.description}
               </p>
             )}
           </div>

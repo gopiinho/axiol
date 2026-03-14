@@ -6,7 +6,7 @@ export const DEFAULT_KEYWORD_PRESETS = [
   "price",
 ];
 
-export const KEYWORD_PRESET_STORAGE_KEY = "nemeowww.create.keyword-presets";
+export const KEYWORD_PRESET_STORAGE_KEY = "linkkit.create.keyword-presets";
 
 export function parseKeywords(rawValue: string) {
   return Array.from(
@@ -14,7 +14,7 @@ export function parseKeywords(rawValue: string) {
       rawValue
         .split(",")
         .map((value) => value.trim().toLowerCase())
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
 }

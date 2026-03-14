@@ -15,19 +15,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface SectionOption {
-  _id: Id<"sections">;
+interface CollectionOption {
+  _id: Id<"collections">;
   title: string;
 }
 
 interface MappingRulesStepProps {
-  sections?: SectionOption[];
-  selectedSection: Id<"sections"> | "";
+  sections?: CollectionOption[];
+  selectedSection: Id<"collections"> | "";
   keywordInput: string;
   keywordPresets: string[];
   keywordList: string[];
   keywordValid: boolean;
-  onSelectSection: (sectionId: Id<"sections">) => void;
+  onSelectSection: (collectionId: Id<"collections">) => void;
   onKeywordInputChange: (value: string) => void;
   onTogglePreset: (preset: string) => void;
   onRemoveKeyword: (keyword: string) => void;
@@ -56,7 +56,7 @@ export default function MappingRulesStep({
 
       <div className="space-y-2">
         <Label>Collection</Label>
-        <Select value={selectedSection} onValueChange={(value) => onSelectSection(value as Id<"sections">)}>
+        <Select value={selectedSection} onValueChange={(value) => onSelectSection(value as Id<"collections">)}>
           <SelectTrigger>
             <SelectValue placeholder="Choose collection..." />
           </SelectTrigger>

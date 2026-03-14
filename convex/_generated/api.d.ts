@@ -10,11 +10,12 @@
 
 import type * as auth from "../auth.js";
 import type * as catCounter from "../catCounter.js";
+import type * as collections from "../collections.js";
 import type * as dmQueue from "../dmQueue.js";
 import type * as instagram from "../instagram.js";
 import type * as items from "../items.js";
-import type * as sections from "../sections.js";
 import type * as security from "../security.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -25,11 +26,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   catCounter: typeof catCounter;
+  collections: typeof collections;
   dmQueue: typeof dmQueue;
   instagram: typeof instagram;
   items: typeof items;
-  sections: typeof sections;
   security: typeof security;
+  users: typeof users;
 }>;
 
 /**

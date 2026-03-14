@@ -17,9 +17,12 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import CreateSectionModal from "@/features/sections/components/CreateSectionModal";
-import EditSectionModal from "@/features/sections/components/EditSectionModal";
-import { requireAdminSessionToken } from "@/features/auth/client/session";
+import CreateSectionModal from "@/features/collections/components/CreateSectionModal";
+import EditSectionModal from "@/features/collections/components/EditSectionModal";
+import {
+  getAdminSessionToken,
+  requireAdminSessionToken,
+} from "@/features/auth/client/session";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import {
   AlertDialog,
@@ -33,34 +36,38 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function ListsPage() {
-  const rawSections = useQuery(api.sections.list);
-  const sections =
-    useCachedQueryResult("dashboard:lists:sections", rawSections) ?? [];
-  const deleteSection = useMutation(api.sections.remove);
+  const token = getAdminSessionToken();
+  const rawCollections = useQuery(
+    api.collections.listByUser,
+    token ? { token } : "skip",
+  );
+  const collections =
+    useCachedQueryResult("dashboard:lists:collections", rawCollections) ?? [];
+  const deleteCollection = useMutation(api.collections.remove);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingSection, setEditingSection] = useState<{
-    id: Id<"sections">;
+  const [editingCollection, setEditingCollection] = useState<{
+    id: Id<"collections">;
     title: string;
     description?: string;
   } | null>(null);
-  const [deleteSectionId, setDeleteSectionId] = useState<Id<"sections"> | null>(
+  const [deleteCollectionId, setDeleteCollectionId] = useState<Id<"collections"> | null>(
     null,
   );
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = async (id: Id<"sections">) => {
+  const handleDelete = async (id: Id<"collections">) => {
     try {
       setIsDeleting(true);
-      const token = requireAdminSessionToken();
-      await deleteSection({ token, id });
+      const authToken = requireAdminSessionToken();
+      await deleteCollection({ token: authToken, id });
     } finally {
-      setDeleteSectionId(null);
+      setDeleteCollectionId(null);
       setIsDeleting(false);
     }
   };
 
-  if (rawSections === undefined && sections.length === 0) {
+  if (rawCollections === undefined && collections.length === 0) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
@@ -99,7 +106,7 @@ export default function ListsPage() {
         </div>
       </section>
 
-      {sections.length === 0 ? (
+      {collections.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-14 text-center">
             <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground" />
@@ -120,17 +127,17 @@ export default function ListsPage() {
         </Card>
       ) : (
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {sections.map((section) => (
-            <Card key={section._id} className="overflow-hidden">
+          {collections.map((collection) => (
+            <Card key={collection._id} className="overflow-hidden">
               <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <CardTitle className="truncate text-lg">
-                      {section.title}
+                      {collection.title}
                     </CardTitle>
-                    {section.description && (
+                    {collection.description && (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                        {section.description}
+                        {collection.description}
                       </p>
                     )}
                   </div>
@@ -143,12 +150,12 @@ export default function ListsPage() {
 
               <CardContent className="space-y-4 pt-5">
                 <p className="text-xs text-muted-foreground">
-                  Created {new Date(section.createdAt).toLocaleDateString()}
+                  Created {new Date(collection.createdAt).toLocaleDateString()}
                 </p>
 
                 <div className="flex gap-2">
                   <Button asChild variant="outline" className="flex-1 gap-1.5">
-                    <Link href={`/dashboard/lists/${section._id}`}>
+                    <Link href={`/dashboard/lists/${collection._id}`}>
                       <ExternalLink className="h-3.5 w-3.5" />
                       Manage Items
                     </Link>
@@ -157,10 +164,10 @@ export default function ListsPage() {
                     variant="outline"
                     size="icon"
                     onClick={() =>
-                      setEditingSection({
-                        id: section._id,
-                        title: section.title,
-                        description: section.description,
+                      setEditingCollection({
+                        id: collection._id,
+                        title: collection.title,
+                        description: collection.description,
                       })
                     }
                     aria-label="Edit list"
@@ -170,7 +177,7 @@ export default function ListsPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => setDeleteSectionId(section._id)}
+                    onClick={() => setDeleteCollectionId(collection._id)}
                     aria-label="Delete list"
                     className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                   >
@@ -188,17 +195,17 @@ export default function ListsPage() {
         onClose={() => setShowCreateModal(false)}
       />
 
-      {editingSection && (
+      {editingCollection && (
         <EditSectionModal
-          section={editingSection}
-          open={Boolean(editingSection)}
-          onClose={() => setEditingSection(null)}
+          section={editingCollection}
+          open={Boolean(editingCollection)}
+          onClose={() => setEditingCollection(null)}
         />
       )}
 
       <AlertDialog
-        open={deleteSectionId !== null}
-        onOpenChange={(open) => !open && setDeleteSectionId(null)}
+        open={deleteCollectionId !== null}
+        onOpenChange={(open) => !open && setDeleteCollectionId(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -211,7 +218,7 @@ export default function ListsPage() {
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-white hover:bg-destructive/90"
-              onClick={() => deleteSectionId && handleDelete(deleteSectionId)}
+              onClick={() => deleteCollectionId && handleDelete(deleteCollectionId)}
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting..." : "Delete list"}

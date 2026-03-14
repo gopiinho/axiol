@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { AlertCircle, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { api } from "@/convex/_generated/api";
 import { setAuthToken } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
@@ -192,6 +193,13 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
+
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="font-medium text-primary hover:underline">
+                Sign up
+              </Link>
+            </p>
           </section>
         </div>
       </div>
