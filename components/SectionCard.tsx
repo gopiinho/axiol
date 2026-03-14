@@ -17,7 +17,7 @@ import { Pencil, Trash2, Package } from "lucide-react";
 
 interface SectionCardProps {
   section: {
-    _id: Id<"sections">;
+    _id: Id<"collections">;
     title: string;
     description?: string;
     createdAt: number;
@@ -32,7 +32,7 @@ export default function SectionCard({
   onDelete,
 }: SectionCardProps) {
   const router = useRouter();
-  const items = useQuery(api.items.listBySection, { sectionId: section._id });
+  const items = useQuery(api.items.listByCollection, { collectionId: section._id });
 
   const itemCount = items?.length ?? 0;
 
@@ -52,7 +52,7 @@ export default function SectionCard({
           </Badge>
           <div className="w-full flex gap-2">
             <Button
-              onClick={() => router.push(`/dashboard/sections/${section._id}`)}
+              onClick={() => router.push(`/dashboard/lists/${section._id}`)}
               className="flex-1"
             >
               Manage Items

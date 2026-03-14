@@ -28,8 +28,8 @@ const jersey = Jersey_10({
 });
 
 export const metadata: Metadata = {
-  title: "Neme's World",
-  description: "I share everything here...",
+  title: "Linkkit - Your Creator Store",
+  description: "linkkit.store",
 };
 
 export default function RootLayout({

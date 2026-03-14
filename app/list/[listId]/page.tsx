@@ -30,17 +30,17 @@ const platformNames: Record<string, string> = {
 export default async function ListPage({
   params,
 }: {
-  params: Promise<{ listId: Id<"sections"> }>;
+  params: Promise<{ listId: Id<"collections"> }>;
 }) {
   const { listId } = await params;
   const convex = getServerConvexClient();
 
-  const [section, items] = await Promise.all([
-    convex.query(api.sections.getById, { id: listId }),
-    convex.query(api.items.listBySection, { sectionId: listId }),
+  const [collection, items] = await Promise.all([
+    convex.query(api.collections.getById, { id: listId }),
+    convex.query(api.items.listByCollection, { collectionId: listId }),
   ]);
 
-  if (!section) {
+  if (!collection) {
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
@@ -55,7 +55,7 @@ export default async function ListPage({
 
   return (
     <main className="min-h-screen flex justify-center p-4">
-      <ListViewTracker collectionId={listId} collectionTitle={section.title} />
+      <ListViewTracker collectionId={listId} collectionTitle={collection.title} />
 
       <div className="w-full max-w-4xl">
         <Link href="/" className="inline-block mb-8">
@@ -67,10 +67,10 @@ export default async function ListPage({
 
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-secondary text-primary mb-2">
-            {section.title}
+            {collection.title}
           </h1>
-          {section.description && (
-            <p className="mt-2 text-base">{section.description}</p>
+          {collection.description && (
+            <p className="mt-2 text-base">{collection.description}</p>
           )}
         </div>
 
@@ -92,7 +92,7 @@ export default async function ListPage({
                   platform={item.platform}
                   price={item.price}
                   collectionId={listId}
-                  collectionTitle={section.title}
+                  collectionTitle={collection.title}
                   className="group relative"
                   style={{
                     animationDelay: `${index * 50}ms`,

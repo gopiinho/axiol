@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import { requireAdminSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
@@ -20,27 +19,21 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { validateSectionInput } from "@/lib/validators/sections";
 
-interface EditSectionModalProps {
-  section: {
-    id: Id<"sections">;
-    title: string;
-    description?: string;
-  };
+interface CreateSectionModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-export default function EditSectionModal({
-  section,
+export default function CreateSectionModal({
   open,
   onClose,
-}: EditSectionModalProps) {
-  const [title, setTitle] = useState(section.title);
-  const [description, setDescription] = useState(section.description || "");
+}: CreateSectionModalProps) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const updateSection = useMutation(api.sections.update);
+  const createSection = useMutation(api.collections.create);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,17 +44,18 @@ export default function EditSectionModal({
       const token = requireAdminSessionToken();
       const validated = validateSectionInput({ title, description });
 
-      await updateSection({
+      await createSection({
         token,
-        id: section.id,
         title: validated.title,
         description: validated.description,
       });
+      setTitle("");
+      setDescription("");
       onClose();
     } catch (error) {
-      console.error("Error updating section:", error);
+      console.error("Error creating section:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to update list. Please try again."
+        error instanceof Error ? error.message : "Failed to create list. Please try again."
       );
     } finally {
       setLoading(false);
@@ -72,34 +66,37 @@ export default function EditSectionModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Edit list</DialogTitle>
-          <DialogDescription>Update the list details.</DialogDescription>
+          <DialogTitle>Create list</DialogTitle>
+          <DialogDescription>
+            Add a product collection to organize affiliate items.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
             <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t update list</AlertTitle>
+              <AlertTitle>Couldn&apos;t create list</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="edit-title">
+            <Label htmlFor="title">
               List name <span className="text-red-500">*</span>
             </Label>
             <Input
-              id="edit-title"
+              id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Top Jeans Under ₹2000"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-description">Description (optional)</Label>
+            <Label htmlFor="description">Description (optional)</Label>
             <Textarea
-              id="edit-description"
+              id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add context for this list..."
@@ -112,7 +109,7 @@ export default function EditSectionModal({
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !title.trim()}>
-              {loading ? "Saving..." : "Save changes"}
+              {loading ? "Creating..." : "Create list"}
             </Button>
           </DialogFooter>
         </form>

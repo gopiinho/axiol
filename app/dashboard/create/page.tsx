@@ -32,7 +32,7 @@ export default function CreatePostPage() {
   const router = useRouter();
   const authToken = getAdminSessionToken();
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
-  const [selectedSection, setSelectedSection] = useState<Id<"sections"> | "">(
+  const [selectedSection, setSelectedSection] = useState<Id<"collections"> | "">(
     "",
   );
   const [keywordInput, setKeywordInput] = useState("link");
@@ -57,7 +57,10 @@ export default function CreatePostPage() {
   } | null>(null);
 
   const convex = useConvex();
-  const sections = useQuery(api.sections.list);
+  const sections = useQuery(
+    api.collections.listByUser,
+    authToken ? { token: authToken } : "skip",
+  );
   const fetchReels = useAction(api.instagram.fetchRecentReels);
   const createMapping = useMutation(api.instagram.createReelMapping);
 
@@ -87,7 +90,7 @@ export default function CreatePostPage() {
       void convex
         .query(api.instagram.generateDMMessage, {
           token: authToken,
-          sectionId: selectedSection as Id<"sections">,
+          collectionId: selectedSection as Id<"collections">,
           maxItems: maxItemsInDM,
           includeWebsiteLink,
         })
@@ -246,7 +249,7 @@ export default function CreatePostPage() {
         reelUrl: selectedReel.url,
         thumbnailUrl: selectedReel.thumbnailUrl,
         caption: selectedReel.caption,
-        sectionId: selectedSection,
+        collectionId: selectedSection,
         keyword: keywordNormalized,
         maxItemsInDM,
         includeWebsiteLink,
@@ -306,7 +309,7 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md pb-44 sm:max-w-xl md:pb-28 lg:max-w-2xl">
+    <div className="mx-auto w-full pb-44 md:pb-28">
       <div className="overflow-hidden rounded-[2rem] border bg-white shadow-xl">
         <CreateFlowHeader
           currentStep={currentStep}
@@ -347,7 +350,7 @@ export default function CreatePostPage() {
                 transition={{ duration: 0.22, ease: "easeOut" }}
               >
                 <MappingRulesStep
-                  sections={sections}
+                  sections={sections ?? undefined}
                   selectedSection={selectedSection}
                   keywordInput={keywordInput}
                   keywordPresets={keywordPresets}
