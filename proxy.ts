@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AUTH_TOKEN_COOKIE } from "@/lib/auth-cookies";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const isDashboardPath = request.nextUrl.pathname.startsWith("/dashboard");
   if (!isDashboardPath) {
     return NextResponse.next();
