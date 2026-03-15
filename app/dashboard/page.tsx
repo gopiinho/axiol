@@ -76,19 +76,10 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-5 md:space-y-6">
-      <section className="app-panel overflow-hidden">
+      <div className="overflow-hidden">
         <div className="grid gap-5 px-5 py-6 md:grid-cols-[minmax(0,1fr)_auto] md:px-6 md:py-7">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Overview
-            </p>
-            <h1 className="app-title mt-2">
-              Instagram automation command center
-            </h1>
-            <p className="app-subtitle mt-2 max-w-2xl">
-              Monitor queue health, track activity, and jump directly into
-              content and list management.
-            </p>
+            <h2 className="text-3xl font-bold">My Store</h2>
           </div>
 
           <div className="hidden gap-2 sm:flex md:self-start">
@@ -121,7 +112,7 @@ export default function DashboardPage() {
             </Button>
           </div>
         </div>
-      </section>
+      </div>
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
         <Card className="overflow-hidden">
@@ -142,7 +133,7 @@ export default function DashboardPage() {
                   className={cn(
                     "rounded-lg px-2 py-1 text-[11px]",
                     workerActive
-                      ? "bg-emerald-500 text-white"
+                      ? "badge-success"
                       : "bg-muted text-muted-foreground",
                   )}
                 >
@@ -279,9 +270,7 @@ export default function DashboardPage() {
                         Keyword: &quot;{mapping.keyword}&quot;
                       </p>
                     </div>
-                    <Badge className="rounded-lg bg-emerald-500 text-white">
-                      Live
-                    </Badge>
+                    <Badge className="badge-success rounded-lg">Live</Badge>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">

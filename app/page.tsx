@@ -25,7 +25,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="relative backdrop-blur-sm bg-white/60 border-2 border-pink-100 p-6 lg:p-8">
+        <div className="relative backdrop-blur-sm bg-card/60 border-2 border-border p-6 lg:p-8">
           <div className="text-center space-y-4">
             <h2 className="font-secondary text-2xl text-primary">
               How it works
