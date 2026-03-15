@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
-import { AlertCircle, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { api } from "@/convex/_generated/api";
 import { setAuthToken } from "@/lib/auth";
@@ -15,6 +23,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -78,48 +87,27 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="auth-bg pointer-events-none absolute inset-0" />
 
-      <div className="app-panel relative z-10 w-full max-w-[980px] overflow-hidden rounded-3xl">
-        <div className="grid lg:grid-cols-[1fr_460px]">
-          <section className="hidden border-r border-border/70 bg-secondary/35 p-10 lg:block">
+      <div className="relative z-10 w-full max-w-130 overflow-hidden">
+        <div className="flex items-center justify-center">
+          {/* <section className="hidden border-r border-border/70 bg-secondary/35 p-10 lg:block">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              Welcome
+              Welcome to,
             </p>
-            <h1 className="mt-3 font-accent text-4xl font-semibold leading-tight">
-              Affiliate automation,
-              <br />
-              under one dashboard.
+            <h1 className="mt-3 font-accent text-7xl font-semibold leading-tight">
+              Linkkit
             </h1>
             <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              Secure access for managing reel mappings, DM workflows, and
-              product lists.
+              Turn your following into a sales machine.
             </p>
+          </section> */}
 
-            <div className="mt-8 space-y-3">
-              <div className="app-panel-soft flex items-center gap-3 px-4 py-3">
-                <ShieldCheck className="h-4 w-4 text-status-success-subtle-fg" />
-                <p className="text-sm">
-                  Session verification on every dashboard load
-                </p>
-              </div>
-              <div className="app-panel-soft flex items-center gap-3 px-4 py-3">
-                <Lock className="h-4 w-4 text-primary" />
-                <p className="text-sm">
-                  Brute-force protection and lockout handling enabled
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="p-6 sm:p-10">
-            <div className="mb-8 text-center lg:text-left">
-              <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Lock className="h-6 w-6" />
-              </div>
-              <h2 className="font-accent text-3xl font-semibold tracking-tight">
-                Sign in
+          <div className="p-6 sm:p-10 w-full">
+            <div className="mb-8 text-center">
+              <h2 className="font-accent text-3xl flex text-center items-center justify-center font-semibold tracking-tight">
+                Welcome back!
               </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Access your dashboard workspace.
+              <p className="text-xl text-muted-foreground">
+                Access your admin workspace.
               </p>
             </div>
 
@@ -134,7 +122,6 @@ export default function LoginPage() {
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -142,59 +129,70 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
+                    placeholder="Email or Username"
                     required
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 h-12"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="Password"
                     required
                     minLength={12}
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 pr-10 h-12"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute top-1/2 right-3.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Minimum 12 characters required.
-                </p>
               </div>
 
               <Button
                 type="submit"
                 disabled={loading}
                 size="lg"
-                className="w-full"
+                className="w-full mt-6 "
               >
                 {loading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    Signing in...
+                    Logging in...
                   </>
                 ) : (
-                  "Sign in"
+                  "Login"
                 )}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-medium text-primary hover:underline">
+              <Link
+                href="/signup"
+                className="font-medium text-primary hover:underline"
+              >
                 Sign up
               </Link>
             </p>
-          </section>
+          </div>
         </div>
       </div>
     </div>
