@@ -140,7 +140,7 @@
   }
 
   .app-shell {
-    @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
+    @apply w-full p-0;
   }
 
   .app-title {
@@ -174,8 +174,16 @@
   /* Auth page background — shared between /login and /signup */
   .auth-bg {
     background-image:
-      radial-gradient(80rem 50rem at 10% 10%, oklch(0.95 0.09 240 / 0.6), transparent 50%),
-      radial-gradient(80rem 40rem at 95% 95%, oklch(0.93 0.08 215 / 0.45), transparent 45%);
+      radial-gradient(
+        80rem 50rem at 10% 10%,
+        oklch(0.95 0.09 240 / 0.6),
+        transparent 50%
+      ),
+      radial-gradient(
+        80rem 40rem at 95% 95%,
+        oklch(0.93 0.08 215 / 0.45),
+        transparent 45%
+      );
   }
 
   /* Status badges — solid */
@@ -185,15 +193,42 @@
   }
 
   /* Status tone icons — subtle background + colored icon */
-  .tone-ok      { background: var(--status-success-subtle); color: var(--status-success-subtle-fg); }
-  .tone-warn    { background: var(--status-warn-subtle);    color: var(--status-warn-subtle-fg); }
-  .tone-danger  { background: var(--status-danger-subtle);  color: var(--status-danger-subtle-fg); }
-  .tone-neutral { background: var(--status-neutral-subtle); color: var(--status-neutral-subtle-fg); }
+  .tone-ok {
+    background: var(--status-success-subtle);
+    color: var(--status-success-subtle-fg);
+  }
+  .tone-warn {
+    background: var(--status-warn-subtle);
+    color: var(--status-warn-subtle-fg);
+  }
+  .tone-danger {
+    background: var(--status-danger-subtle);
+    color: var(--status-danger-subtle-fg);
+  }
+  .tone-neutral {
+    background: var(--status-neutral-subtle);
+    color: var(--status-neutral-subtle-fg);
+  }
 
   /* Platform badges */
-  .badge-platform-amazon  { background: var(--platform-amazon);  color: var(--platform-amazon-fg); }
-  .badge-platform-flipkart { background: var(--platform-flipkart); color: var(--platform-flipkart-fg); }
-  .badge-platform-nykaa   { background: var(--platform-nykaa);   color: var(--platform-nykaa-fg); }
-  .badge-platform-meesho  { background: var(--platform-meesho);  color: var(--platform-meesho-fg); }
-  .badge-platform-other   { background: var(--platform-other);   color: var(--platform-other-fg); }
+  .badge-platform-amazon {
+    background: var(--platform-amazon);
+    color: var(--platform-amazon-fg);
+  }
+  .badge-platform-flipkart {
+    background: var(--platform-flipkart);
+    color: var(--platform-flipkart-fg);
+  }
+  .badge-platform-nykaa {
+    background: var(--platform-nykaa);
+    color: var(--platform-nykaa-fg);
+  }
+  .badge-platform-meesho {
+    background: var(--platform-meesho);
+    color: var(--platform-meesho-fg);
+  }
+  .badge-platform-other {
+    background: var(--platform-other);
+    color: var(--platform-other-fg);
+  }
 }

@@ -25,7 +25,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -59,10 +58,10 @@ export default function DashboardShell({
   };
 
   return (
-    <div className="min-h-screen min-w-full pb-20 md:pb-8">
-      <div className="app-shell w-full pt-4 sm:pt-6 lg:pt-8">
-        <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)] w-full">
-          <aside className="h-full sticky top-6 hidden overflow-hidden lg:block">
+    <div className="min-h-screen  min-w-full">
+      <div className="app-shell  w-full">
+        <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
+          <aside className="sticky top-0 h-screen border-r border-border/70 hidden overflow-y-auto lg:block">
             <div className="border-b border-border/70 px-5 py-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                 Welcome
@@ -143,7 +142,7 @@ export default function DashboardShell({
               </div>
             </header>
 
-            <main>{children}</main>
+            <main className="p-2 sm:p-4">{children}</main>
           </section>
         </div>
       </div>
