@@ -2,10 +2,10 @@ const ALGORITHM = "AES-GCM";
 const IV_LENGTH = 12;
 
 function getKey(): Promise<CryptoKey> {
-  const hex = process.env.INSTAGRAM_TOKEN_ENCRYPTION_KEY;
+  const hex = process.env.INSTAGRAM_INTERNAL_SECRET;
   if (!hex || hex.length !== 64) {
     throw new Error(
-      "INSTAGRAM_TOKEN_ENCRYPTION_KEY must be a 64-character hex string",
+      "INSTAGRAM_INTERNAL_SECRET must be a 64-character hex string",
     );
   }
   const keyBytes = new Uint8Array(
