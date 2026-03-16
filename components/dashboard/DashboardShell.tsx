@@ -32,7 +32,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: Home },
   { href: "/dashboard/create", label: "Create", icon: PencilRuler },
   { href: "/dashboard/drafts", label: "Drafts", icon: FileText },
-  { href: "/dashboard/lists", label: "Lists", icon: List },
+  { href: "/dashboard/lists", label: "Collections", icon: List },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 

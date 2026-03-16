@@ -29,10 +29,6 @@ export default function ConnectInstagramCTA({
     <div
       className={`flex flex-col items-center justify-center gap-4 py-16 ${className ?? ""}`}
     >
-      <div className="rounded-full bg-gradient-to-br from-[#833AB4] via-[#E1306C] to-[#F77737] p-4">
-        <Instagram className="h-8 w-8 text-white" />
-      </div>
-
       <div className="space-y-1 text-center">
         <h3 className="text-lg font-semibold">
           {isExpired ? "Instagram Disconnected" : "Connect Instagram"}

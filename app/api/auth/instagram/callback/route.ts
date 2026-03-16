@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { AUTH_TOKEN_COOKIE } from "@/lib/auth-cookies";
+import { encryptToken } from "@/lib/instagram-crypto";
 
 const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
 
@@ -144,11 +145,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 4. Save to Convex
+    // 4. Encrypt token and save to Convex
+    const encryptedToken = await encryptToken(longLivedData.access_token);
     const convex = getConvexClient();
     await convex.mutation(api.instagram.saveConfig, {
       token: sessionToken,
-      accessToken: longLivedData.access_token,
+      accessToken: encryptedToken,
       instagramAccountId,
       instagramUsername,
     });

@@ -10,6 +10,7 @@ import {
 import { api, internal } from "./_generated/api";
 import { requireSession } from "./security";
 import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
+import { decryptToken, encryptToken } from "./lib/instagramCrypto";
 
 const WEBHOOK_SECRET = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
 
@@ -213,11 +214,12 @@ export const fetchRecentReels = action({
       throw new Error("INSTAGRAM_TOKEN_EXPIRED");
     }
 
+    const accessToken = await decryptToken(config.accessToken);
     const url =
       `https://graph.instagram.com/v24.0/${config.instagramAccountId}/media` +
       `?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp` +
       `&limit=20` +
-      `&access_token=${config.accessToken}`;
+      `&access_token=${accessToken}`;
 
     const response = await fetch(url);
 
@@ -798,10 +800,11 @@ export const refreshToken = internalAction({
       throw new Error("DMHELPER_APP_SECRET not configured");
     }
 
+    const accessToken = await decryptToken(config.accessToken);
     const url =
       `https://graph.instagram.com/refresh_access_token` +
       `?grant_type=ig_refresh_token` +
-      `&access_token=${config.accessToken}`;
+      `&access_token=${accessToken}`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -815,9 +818,10 @@ export const refreshToken = internalAction({
       expires_in: number;
     };
 
+    const encryptedNewToken = await encryptToken(data.access_token);
     await ctx.runMutation(internal.instagram.updateTokenInternal, {
       configId: args.configId,
-      accessToken: data.access_token,
+      accessToken: encryptedNewToken,
       tokenExpiresAt: Date.now() + data.expires_in * 1000,
     });
   },

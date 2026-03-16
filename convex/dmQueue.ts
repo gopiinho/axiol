@@ -12,6 +12,7 @@ import {
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import { requireSession } from "./security";
+import { decryptToken } from "./lib/instagramCrypto";
 
 const MAX_DMS_PER_HOUR = 195;
 const DM_SPACING_MS = 2000;
@@ -285,6 +286,7 @@ async function sendDM(
         messageText.substring(0, 950) + "\n\n... (visit link for full list)";
     }
 
+    const accessToken = await decryptToken(config.accessToken);
     const url = `https://graph.instagram.com/v24.0/me/messages`;
 
     const response = await fetch(url, {
@@ -293,7 +295,7 @@ async function sendDM(
       body: JSON.stringify({
         recipient: { id: job.instagramUserId },
         message: { text: messageText },
-        access_token: config.accessToken,
+        access_token: accessToken,
       }),
     });
 

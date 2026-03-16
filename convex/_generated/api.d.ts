@@ -15,6 +15,7 @@ import type * as crons from "../crons.js";
 import type * as dmQueue from "../dmQueue.js";
 import type * as instagram from "../instagram.js";
 import type * as items from "../items.js";
+import type * as lib_instagramCrypto from "../lib/instagramCrypto.js";
 import type * as security from "../security.js";
 import type * as users from "../users.js";
 
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   dmQueue: typeof dmQueue;
   instagram: typeof instagram;
   items: typeof items;
+  "lib/instagramCrypto": typeof lib_instagramCrypto;
   security: typeof security;
   users: typeof users;
 }>;
