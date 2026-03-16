@@ -5,7 +5,9 @@ import { AUTH_TOKEN_COOKIE } from "@/lib/auth-cookies";
 
 const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+function getConvexClient() {
+  return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+}
 
 function timingSafeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -130,6 +132,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Save to Convex
+    const convex = getConvexClient();
     await convex.mutation(api.instagram.saveConfig, {
       token: sessionToken,
       accessToken: longLivedData.access_token,
