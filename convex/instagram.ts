@@ -5,6 +5,7 @@ import {
   action,
   internalQuery,
   internalMutation,
+  internalAction,
 } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { requireSession } from "./security";
@@ -68,6 +69,7 @@ export const saveConfig = mutation({
     token: v.string(),
     accessToken: v.string(),
     instagramAccountId: v.string(),
+    instagramUsername: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx, args.token);
@@ -84,6 +86,7 @@ export const saveConfig = mutation({
       userId,
       accessToken: args.accessToken,
       instagramAccountId: args.instagramAccountId,
+      instagramUsername: args.instagramUsername,
       lastTokenRefresh: Date.now(),
       tokenExpiresAt,
       rateLimitCallCount: 0,
@@ -109,6 +112,27 @@ export const getConfig = query({
       .query("instagramConfig")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
+  },
+});
+
+export const getConfigPublic = query({
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx, args.token);
+    const config = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!config) return null;
+
+    return {
+      instagramAccountId: config.instagramAccountId,
+      instagramUsername: config.instagramUsername,
+      tokenExpiresAt: config.tokenExpiresAt,
+    };
   },
 });
 
@@ -186,7 +210,7 @@ export const fetchRecentReels = action({
     }
 
     if (config.tokenExpiresAt < Date.now()) {
-      throw new Error("Instagram access token expired. Please refresh it.");
+      throw new Error("INSTAGRAM_TOKEN_EXPIRED");
     }
 
     const url =
@@ -757,5 +781,83 @@ export const getReelMappingById = query({
   handler: async (ctx, args) => {
     assertWebhookSourceSecret(args.sourceSecret);
     return await ctx.db.get(args.id);
+  },
+});
+
+export const refreshToken = internalAction({
+  args: { configId: v.id("instagramConfig") },
+  handler: async (ctx, args) => {
+    const config = await ctx.runQuery(
+      internal.instagram.getConfigById,
+      { configId: args.configId },
+    );
+    if (!config) return;
+
+    const clientSecret = process.env.DMHELPER_APP_SECRET;
+    if (!clientSecret) {
+      throw new Error("DMHELPER_APP_SECRET not configured");
+    }
+
+    const url =
+      `https://graph.instagram.com/refresh_access_token` +
+      `?grant_type=ig_refresh_token` +
+      `&access_token=${config.accessToken}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Token refresh failed: ${error}`);
+    }
+
+    const data = (await response.json()) as {
+      access_token: string;
+      token_type: string;
+      expires_in: number;
+    };
+
+    await ctx.runMutation(internal.instagram.updateTokenInternal, {
+      configId: args.configId,
+      accessToken: data.access_token,
+      tokenExpiresAt: Date.now() + data.expires_in * 1000,
+    });
+  },
+});
+
+export const getConfigById = internalQuery({
+  args: { configId: v.id("instagramConfig") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.configId);
+  },
+});
+
+export const updateTokenInternal = internalMutation({
+  args: {
+    configId: v.id("instagramConfig"),
+    accessToken: v.string(),
+    tokenExpiresAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.configId, {
+      accessToken: args.accessToken,
+      tokenExpiresAt: args.tokenExpiresAt,
+      lastTokenRefresh: Date.now(),
+    });
+  },
+});
+
+export const refreshExpiring = internalMutation({
+  handler: async (ctx) => {
+    const sevenDaysFromNow = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+    const allConfigs = await ctx.db.query("instagramConfig").collect();
+    const expiring = allConfigs.filter(
+      (c) => c.tokenExpiresAt < sevenDaysFromNow && c.tokenExpiresAt > Date.now(),
+    );
+
+    for (const config of expiring) {
+      await ctx.scheduler.runAfter(0, internal.instagram.refreshToken, {
+        configId: config._id,
+      });
+    }
   },
 });

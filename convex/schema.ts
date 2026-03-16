@@ -70,6 +70,7 @@ export default defineSchema({
     userId: v.id("users"),
     accessToken: v.string(),
     instagramAccountId: v.string(),
+    instagramUsername: v.optional(v.string()),
     lastTokenRefresh: v.number(),
     tokenExpiresAt: v.number(),
     rateLimitCallCount: v.number(),
