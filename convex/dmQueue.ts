@@ -32,7 +32,7 @@ export const createDmJob = mutation({
     includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const expectedSecret = process.env.INSTAGRAM_INTERNAL_SECRETx;
+    const expectedSecret = process.env.INSTAGRAM_INTERNAL_SECRET;
     if (!expectedSecret || args.sourceSecret !== expectedSecret) {
       throw new Error("Unauthorized");
     }
