@@ -5,12 +5,15 @@ import { ExternalLink } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Reel } from "@/features/instagram-mappings/types";
+import type { InstagramStatus } from "@/features/instagram-mappings/hooks/useInstagramConnection";
+import ConnectInstagramCTA from "@/features/instagram-mappings/components/ConnectInstagramCTA";
 
 interface ReelSelectionStepProps {
   reels: Reel[];
   selectedReelId?: string;
   reelsLoading: boolean;
   reelsError: string | null;
+  instagramStatus: InstagramStatus;
   onRetry: () => void;
   onSelectReel: (reel: Reel) => void;
 }
@@ -20,9 +23,28 @@ export default function ReelSelectionStep({
   selectedReelId,
   reelsLoading,
   reelsError,
+  instagramStatus,
   onRetry,
   onSelectReel,
 }: ReelSelectionStepProps) {
+  if (
+    instagramStatus === "not_connected" ||
+    instagramStatus === "expired" ||
+    instagramStatus === "loading"
+  ) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold">Select a Reel</h2>
+          <p className="text-sm text-muted-foreground">
+            Connect your Instagram to get started.
+          </p>
+        </div>
+        <ConnectInstagramCTA status={instagramStatus} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -84,7 +106,9 @@ export default function ReelSelectionStep({
                 )}
               </div>
               <div className="space-y-2 p-2.5">
-                <p className="line-clamp-2 text-xs font-medium">{reel.caption}</p>
+                <p className="line-clamp-2 text-xs font-medium">
+                  {reel.caption}
+                </p>
                 <a
                   href={reel.url}
                   target="_blank"
