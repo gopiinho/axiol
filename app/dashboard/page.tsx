@@ -24,15 +24,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import {
-  getAdminSessionToken,
-  requireAdminSessionToken,
-} from "@/features/auth/client/session";
+import { requireSessionToken } from "@/features/auth/client/session";
+import { useUser } from "@/features/auth/client/UserContext";
 import { KpiRow, StatTile } from "@/features/dm-queue/components/Stats";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export default function DashboardPage() {
-  const token = getAdminSessionToken();
+  const { token } = useUser();
   const rawQueueStats = useQuery(
     api.dmQueue.getQueueStats,
     token ? { token } : "skip",
@@ -64,7 +62,7 @@ export default function DashboardPage() {
   const handleStartWorker = async () => {
     setStartingWorker(true);
     try {
-      await kickoffWorker({ token: requireAdminSessionToken() });
+      await kickoffWorker({ token: requireSessionToken() });
     } catch (error) {
       console.error("Failed to start worker:", error);
     } finally {

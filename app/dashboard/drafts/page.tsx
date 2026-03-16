@@ -25,15 +25,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  requireAdminSessionToken,
-  getAdminSessionToken,
-} from "@/features/auth/client/session";
+import { requireSessionToken } from "@/features/auth/client/session";
+import { useUser } from "@/features/auth/client/UserContext";
 import DraftMappingCard from "@/features/instagram-mappings/components/DraftMappingCard";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export default function DraftsPage() {
-  const token = getAdminSessionToken();
+  const { token } = useUser();
   const rawDrafts = useQuery(
     api.instagram.getDraftMappings,
     token ? { token } : "skip",
@@ -57,7 +55,7 @@ export default function DraftsPage() {
   const handlePublish = async (id: Id<"reelMappings">) => {
     try {
       setIsPublishing(true);
-      const authToken = requireAdminSessionToken();
+      const authToken = requireSessionToken();
       await publishMapping({ token: authToken, id });
       setPublishedOpen(true);
     } finally {
@@ -69,7 +67,7 @@ export default function DraftsPage() {
   const handleDelete = async (id: Id<"reelMappings">) => {
     try {
       setIsDeleting(true);
-      const authToken = requireAdminSessionToken();
+      const authToken = requireSessionToken();
       await deleteMapping({ token: authToken, id });
     } finally {
       setDeleteTarget(null);

@@ -15,7 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { getAdminSessionToken } from "@/features/auth/client/session";
+import { useUser } from "@/features/auth/client/UserContext";
+import { useInstagramConnection } from "@/features/instagram-mappings/hooks/useInstagramConnection";
 import {
   DEFAULT_KEYWORD_PRESETS,
   KEYWORD_PRESET_STORAGE_KEY,
@@ -30,11 +31,12 @@ import CreateFlowFooter from "@/features/instagram-mappings/components/create-fl
 
 export default function CreatePostPage() {
   const router = useRouter();
-  const authToken = getAdminSessionToken();
+  const { token: authToken } = useUser();
+  const ig = useInstagramConnection();
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
-  const [selectedSection, setSelectedSection] = useState<Id<"collections"> | "">(
-    "",
-  );
+  const [selectedSection, setSelectedSection] = useState<
+    Id<"collections"> | ""
+  >("");
   const [keywordInput, setKeywordInput] = useState("link");
   const [keywordPresets, setKeywordPresets] = useState<string[]>(
     DEFAULT_KEYWORD_PRESETS,
@@ -207,14 +209,15 @@ export default function CreatePostPage() {
   };
 
   const loadReels = useCallback(async () => {
+    if (!ig.isUsable || !authToken) {
+      setReelsLoading(false);
+      return;
+    }
+
     setReelsLoading(true);
     setReelsError(null);
 
     try {
-      if (!authToken) {
-        throw new Error("Unauthorized");
-      }
-
       const fetchedReels = await fetchReels({ token: authToken });
       setReels(fetchedReels);
     } catch (error) {
@@ -226,7 +229,7 @@ export default function CreatePostPage() {
     } finally {
       setReelsLoading(false);
     }
-  }, [fetchReels, authToken]);
+  }, [fetchReels, authToken, ig.isUsable]);
 
   useEffect(() => {
     void loadReels();
@@ -335,6 +338,7 @@ export default function CreatePostPage() {
                   selectedReelId={selectedReel?.id}
                   reelsLoading={reelsLoading}
                   reelsError={reelsError}
+                  instagramStatus={ig.status}
                   onRetry={() => void loadReels()}
                   onSelectReel={setSelectedReel}
                 />

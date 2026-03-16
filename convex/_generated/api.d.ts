@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as catCounter from "../catCounter.js";
 import type * as collections from "../collections.js";
+import type * as crons from "../crons.js";
 import type * as dmQueue from "../dmQueue.js";
 import type * as instagram from "../instagram.js";
 import type * as items from "../items.js";
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   catCounter: typeof catCounter;
   collections: typeof collections;
+  crons: typeof crons;
   dmQueue: typeof dmQueue;
   instagram: typeof instagram;
   items: typeof items;

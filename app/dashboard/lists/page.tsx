@@ -19,10 +19,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CreateSectionModal from "@/features/collections/components/CreateSectionModal";
 import EditSectionModal from "@/features/collections/components/EditSectionModal";
-import {
-  getAdminSessionToken,
-  requireAdminSessionToken,
-} from "@/features/auth/client/session";
+import { requireSessionToken } from "@/features/auth/client/session";
+import { useUser } from "@/features/auth/client/UserContext";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import {
   AlertDialog,
@@ -36,7 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function ListsPage() {
-  const token = getAdminSessionToken();
+  const { token } = useUser();
   const rawCollections = useQuery(
     api.collections.listByUser,
     token ? { token } : "skip",
@@ -51,15 +49,14 @@ export default function ListsPage() {
     title: string;
     description?: string;
   } | null>(null);
-  const [deleteCollectionId, setDeleteCollectionId] = useState<Id<"collections"> | null>(
-    null,
-  );
+  const [deleteCollectionId, setDeleteCollectionId] =
+    useState<Id<"collections"> | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (id: Id<"collections">) => {
     try {
       setIsDeleting(true);
-      const authToken = requireAdminSessionToken();
+      const authToken = requireSessionToken();
       await deleteCollection({ token: authToken, id });
     } finally {
       setDeleteCollectionId(null);
@@ -218,7 +215,9 @@ export default function ListsPage() {
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-white hover:bg-destructive/90"
-              onClick={() => deleteCollectionId && handleDelete(deleteCollectionId)}
+              onClick={() =>
+                deleteCollectionId && handleDelete(deleteCollectionId)
+              }
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting..." : "Delete list"}
