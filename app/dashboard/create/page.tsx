@@ -313,7 +313,7 @@ export default function CreatePostPage() {
 
   return (
     <div className="mx-auto w-full pb-44 md:pb-28">
-      <div className="overflow-hidden rounded-[2rem] border bg-white shadow-xl">
+      <div className="overflow-hidden">
         <CreateFlowHeader
           currentStep={currentStep}
           stepMeta={stepMeta}

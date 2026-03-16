@@ -76,19 +76,13 @@ export default function ListsPage() {
 
   return (
     <div className="space-y-5">
-      <section className="app-panel px-5 py-6 md:px-6 md:py-7">
+      <section className="px-5 sm:px-6 py-6 md:py-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Lists
-            </p>
-            <h1 className="app-title mt-2 flex items-center gap-2">
-              <Package className="h-7 w-7 text-primary" />
-              Product collections
-            </h1>
+            <h1 className="text-3xl font-bold">Collections</h1>
             <p className="app-subtitle mt-2 max-w-xl">
-              Organize affiliate items into reusable lists for your reel
-              mappings.
+              Organize affiliate items into reusable lists and promote them via
+              instagram reels.
             </p>
           </div>
 
@@ -98,7 +92,7 @@ export default function ListsPage() {
             className="gap-2 sm:self-start"
           >
             <Plus className="h-4 w-4" />
-            Create List
+            Create New
           </Button>
         </div>
       </section>

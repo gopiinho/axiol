@@ -223,7 +223,7 @@ export default function DashboardPage() {
         <div className="mb-3 flex items-center justify-between">
           <div>
             <h2 className="font-accent text-xl font-semibold tracking-tight">
-              Active Reel Mappings
+              Active Posts
             </h2>
             <p className="app-subtitle mt-1">
               Live posts currently responding to matching comments

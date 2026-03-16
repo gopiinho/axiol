@@ -50,7 +50,7 @@ export default function ReelSelectionStep({
       <div>
         <h2 className="text-lg font-semibold">Select a Reel</h2>
         <p className="text-sm text-muted-foreground">
-          Showing the latest {reels.length} reels (current fetch limit: 20).
+          Showing the latest {reels.length} reels.
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export default function ReelSelectionStep({
           </AlertDescription>
         </Alert>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {reels.map((reel) => (
             <button
               type="button"
@@ -90,7 +90,7 @@ export default function ReelSelectionStep({
                   : "border-border bg-card"
               }`}
             >
-              <div className="aspect-[4/5] overflow-hidden bg-muted">
+              <div className="aspect-4/5 overflow-hidden bg-muted">
                 {reel.thumbnailUrl ? (
                   <Image
                     src={reel.thumbnailUrl}

@@ -47,16 +47,15 @@ export default function MappingRulesStep({
 }: MappingRulesStepProps) {
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-lg font-semibold">Collection + Keywords</h2>
-        <p className="text-sm text-muted-foreground">
-          Choose where products come from and add comma-separated trigger keywords.
-        </p>
-      </div>
-
       <div className="space-y-2">
-        <Label>Collection</Label>
-        <Select value={selectedSection} onValueChange={(value) => onSelectSection(value as Id<"collections">)}>
+        <h2 className="text-lg font-semibold">Collection</h2>
+        <p className="text-xs text-muted-foreground">
+          Choose which collection you want to automate DMs for.
+        </p>
+        <Select
+          value={selectedSection}
+          onValueChange={(value) => onSelectSection(value as Id<"collections">)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Choose collection..." />
           </SelectTrigger>
@@ -71,19 +70,24 @@ export default function MappingRulesStep({
       </div>
 
       <div className="space-y-2">
-        <Label>Trigger Keywords</Label>
+        <h2 className="text-lg font-semibold">Trigger Keywords</h2>
         <Input
           value={keywordInput}
-          onChange={(event) => onKeywordInputChange(event.target.value.toLowerCase())}
+          onChange={(event) =>
+            onKeywordInputChange(event.target.value.toLowerCase())
+          }
           placeholder="link, dm, details"
         />
         <p className="text-xs text-muted-foreground">
-          Separate keywords with commas. Comments matching any keyword will trigger DMs.
+          Separate keywords with commas. Comments matching any keyword will
+          trigger DMs.
         </p>
       </div>
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">Saved presets</p>
+        <p className="text-xs font-medium text-muted-foreground">
+          Saved presets
+        </p>
         <div className="flex flex-wrap gap-2">
           {keywordPresets.map((preset) => {
             const isActive = keywordList.includes(preset);
@@ -110,7 +114,11 @@ export default function MappingRulesStep({
           </p>
           <div className="flex flex-wrap gap-2">
             {keywordList.map((value) => (
-              <Badge key={value} variant="secondary" className="rounded-full px-2 py-1">
+              <Badge
+                key={value}
+                variant="secondary"
+                className="rounded-full px-2 py-1"
+              >
                 <button
                   type="button"
                   className="inline-flex items-center gap-1"

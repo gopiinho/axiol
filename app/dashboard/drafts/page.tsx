@@ -29,6 +29,7 @@ import { requireSessionToken } from "@/features/auth/client/session";
 import { useUser } from "@/features/auth/client/UserContext";
 import DraftMappingCard from "@/features/instagram-mappings/components/DraftMappingCard";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
+import { Plus } from "lucide-react";
 
 export default function DraftsPage() {
   const { token } = useUser();
@@ -85,7 +86,10 @@ export default function DraftsPage() {
           </p>
         </div>
         <Link href="/dashboard/create">
-          <Button>Create New Post</Button>
+          <Button size="lg" className="gap-2 sm:self-start">
+            <Plus className="h-4 w-4" />
+            Create New
+          </Button>
         </Link>
       </div>
 

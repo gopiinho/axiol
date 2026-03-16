@@ -27,36 +27,33 @@ export default function CreateFlowHeader({
   onGoToStep,
 }: CreateFlowHeaderProps) {
   return (
-    <div className="border-b bg-gradient-to-br from-pink-50 via-white to-rose-50 p-5 sm:p-6">
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="mb-3 -ml-2 h-8 px-2"
-        onClick={onBack}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back
-      </Button>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            Create
-          </p>
-          <h1 className="text-xl font-semibold tracking-tight">
-            Create New Post
-          </h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Map a reel, set keyword rules, and preview your DM message.
-          </p>
-        </div>
-        <Badge variant="secondary" className="gap-1">
-          <Sparkles className="h-3.5 w-3.5" />
+    <div className="rounded-t-3xl bg-linear-to-br from-pink-50 via-white to-rose-50 p-5 sm:p-6">
+      <div className="w-full flex justify-between items-center">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mb-3 -ml-2 h-8 px-2"
+          onClick={onBack}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <Badge variant="secondary" className="gap-1 font-semibold">
+          {/* <Sparkles className="h-3.5 w-3.5" /> */}
           Step {currentStep} / 3
         </Badge>
       </div>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Create New Post</h1>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Map a reel, select a collection, and monetize to your followers.
+          </p>
+        </div>
+      </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-8 flex flex-col sm:grid sm:grid-cols-3 gap-2">
         {stepMeta.map((step) => (
           <button
             key={step.id}
