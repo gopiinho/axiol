@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     b.toString(16).padStart(2, "0"),
   ).join("");
 
-  const redirectUri = `${siteUrl}/api/auth/instagram/callback`;
+  const redirectUri = `${siteUrl.replace(/\/+$/, "")}/api/auth/instagram/callback`;
   const scope =
     "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments";
 

@@ -18,7 +18,10 @@ function timingSafeCompare(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
-function settingsRedirect(request: NextRequest, params: Record<string, string>) {
+function settingsRedirect(
+  request: NextRequest,
+  params: Record<string, string>,
+) {
   const url = new URL("/dashboard/settings", request.url);
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
@@ -41,7 +44,11 @@ export async function GET(request: NextRequest) {
   const stateParam = searchParams.get("state");
   const stateCookie = request.cookies.get(IG_OAUTH_STATE_COOKIE)?.value;
 
-  if (!stateParam || !stateCookie || !timingSafeCompare(stateParam, stateCookie)) {
+  if (
+    !stateParam ||
+    !stateCookie ||
+    !timingSafeCompare(stateParam, stateCookie)
+  ) {
     return settingsRedirect(request, { ig_error: "csrf" });
   }
 
@@ -51,15 +58,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const code = searchParams.get("code");
+  let code = searchParams.get("code");
   if (!code) {
     return settingsRedirect(request, { ig_error: "no_code" });
   }
 
+  code = code.replace(/#_$/, "");
+
   const clientId = process.env.DMHELPER_APP_ID!;
   const clientSecret = process.env.DMHELPER_APP_SECRET!;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!.replace(/\/+$/, "");
   const redirectUri = `${siteUrl}/api/auth/instagram/callback`;
+  console.log(
+    "Instagram OAuth redirect_uri used for token exchange:",
+    redirectUri,
+  );
 
   try {
     // 1. Exchange code for short-lived token
