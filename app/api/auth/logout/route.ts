@@ -3,7 +3,9 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { AUTH_EXPIRY_COOKIE, AUTH_TOKEN_COOKIE } from "@/lib/auth-cookies";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+function getConvexClient() {
+  return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+}
 
 async function invalidateSession(token: string | null) {
   if (!token) {
@@ -11,7 +13,7 @@ async function invalidateSession(token: string | null) {
   }
 
   try {
-    await convex.mutation(api.auth.logout, { token });
+    await getConvexClient().mutation(api.auth.logout, { token });
   } catch {
     // Ignore backend logout errors and still clear browser cookies.
   }

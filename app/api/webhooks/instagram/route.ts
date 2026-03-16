@@ -3,7 +3,6 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { api } from "@/convex/_generated/api";
 import { getServerConvexClient } from "@/server/convex/client";
 
-const convex = getServerConvexClient();
 const VERIFY_TOKEN = process.env.INSTAGRAM_VERIFY_TOKEN;
 const APP_SECRET = process.env.INSTAGRAM_APP_SECRET;
 const INTERNAL_WEBHOOK_SECRET = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
@@ -192,14 +191,14 @@ async function handleCommentEvent(rawComment: unknown, webhookSecret: string) {
   const commentText = commentTextRaw.toLowerCase().trim();
 
   try {
-    const mapping = await convex.query(api.instagram.findMappingForComment, {
+    const mapping = await getServerConvexClient().query(api.instagram.findMappingForComment, {
       sourceSecret: webhookSecret,
       reelId: mediaId,
       commentText,
     });
 
     if (!mapping) {
-      await convex.mutation(api.instagram.logComment, {
+      await getServerConvexClient().mutation(api.instagram.logComment, {
         sourceSecret: webhookSecret,
         commentId,
         reelId: mediaId,
@@ -213,12 +212,12 @@ async function handleCommentEvent(rawComment: unknown, webhookSecret: string) {
       return;
     }
 
-    const fullMapping = await convex.query(api.instagram.getReelMappingById, {
+    const fullMapping = await getServerConvexClient().query(api.instagram.getReelMappingById, {
       sourceSecret: webhookSecret,
       id: mapping.mappingId,
     });
 
-    const jobId = await convex.mutation(api.dmQueue.createDmJob, {
+    const jobId = await getServerConvexClient().mutation(api.dmQueue.createDmJob, {
       sourceSecret: webhookSecret,
       instagramUserId: userId,
       username,
@@ -231,7 +230,7 @@ async function handleCommentEvent(rawComment: unknown, webhookSecret: string) {
       includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
     });
 
-    await convex.mutation(api.instagram.logComment, {
+    await getServerConvexClient().mutation(api.instagram.logComment, {
       sourceSecret: webhookSecret,
       commentId,
       reelId: mediaId,
@@ -251,7 +250,7 @@ async function handleCommentEvent(rawComment: unknown, webhookSecret: string) {
   } catch (error) {
     console.error("handleCommentEvent error:", error);
 
-    await convex.mutation(api.instagram.logComment, {
+    await getServerConvexClient().mutation(api.instagram.logComment, {
       sourceSecret: webhookSecret,
       commentId,
       reelId: mediaId,
@@ -288,7 +287,7 @@ async function handleDMEvent(rawMessage: unknown, webhookSecret: string) {
 
     const reelId = reelMatch[1];
 
-    const mapping = await convex.query(api.instagram.findMappingForReel, {
+    const mapping = await getServerConvexClient().query(api.instagram.findMappingForReel, {
       sourceSecret: webhookSecret,
       reelId,
     });
@@ -297,12 +296,12 @@ async function handleDMEvent(rawMessage: unknown, webhookSecret: string) {
       return;
     }
 
-    const fullMapping = await convex.query(api.instagram.getReelMappingById, {
+    const fullMapping = await getServerConvexClient().query(api.instagram.getReelMappingById, {
       sourceSecret: webhookSecret,
       id: mapping.mappingId,
     });
 
-    const jobId = await convex.mutation(api.dmQueue.createDmJob, {
+    const jobId = await getServerConvexClient().mutation(api.dmQueue.createDmJob, {
       sourceSecret: webhookSecret,
       instagramUserId: userId,
       username,
