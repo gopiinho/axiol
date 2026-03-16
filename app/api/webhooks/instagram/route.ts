@@ -5,7 +5,7 @@ import { getServerConvexClient } from "@/server/convex/client";
 
 const VERIFY_TOKEN = process.env.INSTAGRAM_VERIFY_TOKEN;
 const APP_SECRET = process.env.INSTAGRAM_APP_SECRET;
-const INTERNAL_WEBHOOK_SECRET = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
+const INTERNAL_WEBHOOK_SECRET = process.env.INSTAGRAM_INTERNAL_SECRET;
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -22,7 +22,7 @@ function getString(value: unknown): string | null {
 function isValidSignature(
   rawBody: string,
   signatureHeader: string | null,
-  appSecret: string
+  appSecret: string,
 ): boolean {
   if (!signatureHeader || !signatureHeader.startsWith("sha256=")) {
     return false;
@@ -53,7 +53,7 @@ function jsonError(status: number, code: string, message: string) {
       ok: false,
       error: { code, message },
     },
-    { status }
+    { status },
   );
 }
 
@@ -63,7 +63,7 @@ function jsonOk(status: number, data: Record<string, unknown> = {}) {
       ok: true,
       ...data,
     },
-    { status }
+    { status },
   );
 }
 
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     return jsonError(
       503,
       "WEBHOOK_CONFIG_MISSING",
-      "Webhook verify token is not configured"
+      "Webhook verify token is not configured",
     );
   }
 
@@ -82,11 +82,18 @@ export async function GET(request: NextRequest) {
   const challenge = searchParams.get("hub.challenge");
 
   if (mode !== "subscribe" || !challenge) {
-    return jsonError(400, "INVALID_CHALLENGE_REQUEST", "Invalid webhook challenge");
+    return jsonError(
+      400,
+      "INVALID_CHALLENGE_REQUEST",
+      "Invalid webhook challenge",
+    );
   }
 
   if (token === VERIFY_TOKEN) {
-    return new NextResponse(challenge, { status: 200, headers: { "Content-Type": "text/plain" } });
+    return new NextResponse(challenge, {
+      status: 200,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 
   return jsonError(403, "FORBIDDEN", "Invalid verify token");
@@ -98,13 +105,17 @@ export async function POST(request: NextRequest) {
       return jsonError(
         503,
         "WEBHOOK_CONFIG_MISSING",
-        "Webhook security is not fully configured"
+        "Webhook security is not fully configured",
       );
     }
 
     const contentType = request.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
-      return jsonError(415, "INVALID_CONTENT_TYPE", "Expected application/json");
+      return jsonError(
+        415,
+        "INVALID_CONTENT_TYPE",
+        "Expected application/json",
+      );
     }
 
     const rawBody = await request.text();
@@ -127,7 +138,11 @@ export async function POST(request: NextRequest) {
 
     const payload = asRecord(body);
     if (!payload) {
-      return jsonError(400, "INVALID_PAYLOAD", "Webhook payload must be an object");
+      return jsonError(
+        400,
+        "INVALID_PAYLOAD",
+        "Webhook payload must be an object",
+      );
     }
 
     const objectType = getString(payload.object);
@@ -168,7 +183,11 @@ export async function POST(request: NextRequest) {
     return jsonOk(200, { status: "success", processedEvents });
   } catch (error) {
     console.error("Webhook error:", error);
-    return jsonError(500, "INTERNAL_ERROR", "Internal webhook processing error");
+    return jsonError(
+      500,
+      "INTERNAL_ERROR",
+      "Internal webhook processing error",
+    );
   }
 }
 
@@ -191,11 +210,14 @@ async function handleCommentEvent(rawComment: unknown, webhookSecret: string) {
   const commentText = commentTextRaw.toLowerCase().trim();
 
   try {
-    const mapping = await getServerConvexClient().query(api.instagram.findMappingForComment, {
-      sourceSecret: webhookSecret,
-      reelId: mediaId,
-      commentText,
-    });
+    const mapping = await getServerConvexClient().query(
+      api.instagram.findMappingForComment,
+      {
+        sourceSecret: webhookSecret,
+        reelId: mediaId,
+        commentText,
+      },
+    );
 
     if (!mapping) {
       await getServerConvexClient().mutation(api.instagram.logComment, {
@@ -212,23 +234,29 @@ async function handleCommentEvent(rawComment: unknown, webhookSecret: string) {
       return;
     }
 
-    const fullMapping = await getServerConvexClient().query(api.instagram.getReelMappingById, {
-      sourceSecret: webhookSecret,
-      id: mapping.mappingId,
-    });
+    const fullMapping = await getServerConvexClient().query(
+      api.instagram.getReelMappingById,
+      {
+        sourceSecret: webhookSecret,
+        id: mapping.mappingId,
+      },
+    );
 
-    const jobId = await getServerConvexClient().mutation(api.dmQueue.createDmJob, {
-      sourceSecret: webhookSecret,
-      instagramUserId: userId,
-      username,
-      userId: mapping.userId,
-      collectionId: mapping.collectionId,
-      reelId: mediaId,
-      triggerType: "comment",
-      triggerId: commentId,
-      maxItemsInDM: fullMapping?.maxItemsInDM ?? 10,
-      includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
-    });
+    const jobId = await getServerConvexClient().mutation(
+      api.dmQueue.createDmJob,
+      {
+        sourceSecret: webhookSecret,
+        instagramUserId: userId,
+        username,
+        userId: mapping.userId,
+        collectionId: mapping.collectionId,
+        reelId: mediaId,
+        triggerType: "comment",
+        triggerId: commentId,
+        maxItemsInDM: fullMapping?.maxItemsInDM ?? 10,
+        includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
+      },
+    );
 
     await getServerConvexClient().mutation(api.instagram.logComment, {
       sourceSecret: webhookSecret,
@@ -280,39 +308,50 @@ async function handleDMEvent(rawMessage: unknown, webhookSecret: string) {
   }
 
   try {
-    const reelMatch = messageText.match(/instagram\.com\/reel\/([A-Za-z0-9_-]+)/);
+    const reelMatch = messageText.match(
+      /instagram\.com\/reel\/([A-Za-z0-9_-]+)/,
+    );
     if (!reelMatch) {
       return;
     }
 
     const reelId = reelMatch[1];
 
-    const mapping = await getServerConvexClient().query(api.instagram.findMappingForReel, {
-      sourceSecret: webhookSecret,
-      reelId,
-    });
+    const mapping = await getServerConvexClient().query(
+      api.instagram.findMappingForReel,
+      {
+        sourceSecret: webhookSecret,
+        reelId,
+      },
+    );
 
     if (!mapping) {
       return;
     }
 
-    const fullMapping = await getServerConvexClient().query(api.instagram.getReelMappingById, {
-      sourceSecret: webhookSecret,
-      id: mapping.mappingId,
-    });
+    const fullMapping = await getServerConvexClient().query(
+      api.instagram.getReelMappingById,
+      {
+        sourceSecret: webhookSecret,
+        id: mapping.mappingId,
+      },
+    );
 
-    const jobId = await getServerConvexClient().mutation(api.dmQueue.createDmJob, {
-      sourceSecret: webhookSecret,
-      instagramUserId: userId,
-      username,
-      userId: mapping.userId,
-      collectionId: mapping.collectionId,
-      reelId,
-      triggerType: "dm",
-      triggerId: messageId,
-      maxItemsInDM: fullMapping?.maxItemsInDM ?? 10,
-      includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
-    });
+    const jobId = await getServerConvexClient().mutation(
+      api.dmQueue.createDmJob,
+      {
+        sourceSecret: webhookSecret,
+        instagramUserId: userId,
+        username,
+        userId: mapping.userId,
+        collectionId: mapping.collectionId,
+        reelId,
+        triggerType: "dm",
+        triggerId: messageId,
+        maxItemsInDM: fullMapping?.maxItemsInDM ?? 10,
+        includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
+      },
+    );
 
     if (jobId) {
       console.log("DM job created from inbox message:", jobId);

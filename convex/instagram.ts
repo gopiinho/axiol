@@ -12,7 +12,7 @@ import { requireSession } from "./security";
 import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
 
-const WEBHOOK_SECRET = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
+const WEBHOOK_SECRET = process.env.INSTAGRAM_INTERNAL_SECRET;
 
 function assertWebhookSourceSecret(sourceSecret: string) {
   if (!WEBHOOK_SECRET || sourceSecret !== WEBHOOK_SECRET) {
@@ -531,7 +531,9 @@ export const generateDMMessageForJob = internalQuery({
 
     const items = await ctx.db
       .query("items")
-      .withIndex("by_collection", (q) => q.eq("collectionId", args.collectionId))
+      .withIndex("by_collection", (q) =>
+        q.eq("collectionId", args.collectionId),
+      )
       .order("desc")
       .take(normalizedMaxItems);
 
@@ -789,10 +791,9 @@ export const getReelMappingById = query({
 export const refreshToken = internalAction({
   args: { configId: v.id("instagramConfig") },
   handler: async (ctx, args) => {
-    const config = await ctx.runQuery(
-      internal.instagram.getConfigById,
-      { configId: args.configId },
-    );
+    const config = await ctx.runQuery(internal.instagram.getConfigById, {
+      configId: args.configId,
+    });
     if (!config) return;
 
     const clientSecret = process.env.DMHELPER_APP_SECRET;
@@ -855,7 +856,8 @@ export const refreshExpiring = internalMutation({
 
     const allConfigs = await ctx.db.query("instagramConfig").collect();
     const expiring = allConfigs.filter(
-      (c) => c.tokenExpiresAt < sevenDaysFromNow && c.tokenExpiresAt > Date.now(),
+      (c) =>
+        c.tokenExpiresAt < sevenDaysFromNow && c.tokenExpiresAt > Date.now(),
     );
 
     for (const config of expiring) {
