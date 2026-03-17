@@ -12,6 +12,9 @@ type UserProfile = {
   name?: string;
   bio?: string;
   avatarUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  websiteUrl?: string;
   accountType: string;
   subscriptionStatus?: string;
   trialEndsAt?: number;
