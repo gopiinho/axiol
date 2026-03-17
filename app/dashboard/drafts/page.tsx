@@ -30,6 +30,12 @@ import { useUser } from "@/features/auth/client/UserContext";
 import DraftMappingCard from "@/features/instagram-mappings/components/DraftMappingCard";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import { Plus } from "lucide-react";
+import { SuccessCheckmark } from "@/components/motion/SuccessCheckmark";
+import { FadeIn } from "@/components/motion/FadeIn";
+import {
+  AnimatedList,
+  AnimatedListItem,
+} from "@/components/motion/AnimatedList";
 
 export default function DraftsPage() {
   const { token } = useUser();
@@ -78,6 +84,7 @@ export default function DraftsPage() {
 
   return (
     <div className="space-y-6">
+      <FadeIn>
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Draft Posts</h1>
@@ -92,18 +99,20 @@ export default function DraftsPage() {
           </Button>
         </Link>
       </div>
+      </FadeIn>
 
       {drafts && drafts.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4">
+        <AnimatedList className="grid grid-cols-1 gap-4">
           {drafts.map((draft) => (
+            <AnimatedListItem key={draft._id}>
             <DraftMappingCard
-              key={draft._id}
               draft={draft}
               onPublish={setPublishTarget}
               onDelete={setDeleteTarget}
             />
+            </AnimatedListItem>
           ))}
-        </div>
+        </AnimatedList>
       ) : rawDrafts === undefined ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
@@ -169,7 +178,8 @@ export default function DraftsPage() {
 
       <Dialog open={publishedOpen} onOpenChange={setPublishedOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="items-center text-center">
+            <SuccessCheckmark className="mb-2" />
             <DialogTitle>Draft published</DialogTitle>
             <DialogDescription>
               Auto-DM is now active for this reel mapping.

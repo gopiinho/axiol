@@ -32,6 +32,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { FadeIn } from "@/components/motion/FadeIn";
+import {
+  AnimatedList,
+  AnimatedListItem,
+} from "@/components/motion/AnimatedList";
 
 export default function ListsPage() {
   const { token } = useUser();
@@ -68,7 +73,7 @@ export default function ListsPage() {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
-          Loading lists...
+          Loading collections...
         </div>
       </div>
     );
@@ -76,13 +81,14 @@ export default function ListsPage() {
 
   return (
     <div className="space-y-5">
+      <FadeIn>
       <section className="px-5 sm:px-6 py-6 md:py-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">Collections</h1>
             <p className="app-subtitle mt-2 max-w-xl">
-              Organize affiliate items into reusable lists and promote them via
-              instagram reels.
+              Organize affiliate items into reusable collections and promote them
+              via Instagram reels.
             </p>
           </div>
 
@@ -96,12 +102,13 @@ export default function ListsPage() {
           </Button>
         </div>
       </section>
+      </FadeIn>
 
       {collections.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-14 text-center">
-            <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground" />
-            <h3 className="mt-4 text-xl font-semibold">No lists yet</h3>
+            <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground animate-float" />
+            <h3 className="mt-4 text-xl font-semibold">No collections yet</h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               Create your first collection to start attaching products to
               Instagram reel replies.
@@ -112,14 +119,15 @@ export default function ListsPage() {
               className="mt-6 gap-2"
             >
               <Plus className="h-4 w-4" />
-              Create your first list
+              Create your first collection
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <AnimatedList className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {collections.map((collection) => (
-            <Card key={collection._id} className="overflow-hidden">
+            <AnimatedListItem key={collection._id}>
+            <Card className="overflow-hidden">
               <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -134,7 +142,7 @@ export default function ListsPage() {
                   </div>
                   <Badge variant="secondary" className="rounded-lg px-2.5 py-1">
                     <ShoppingBag className="h-3 w-3" />
-                    List
+                    Collection
                   </Badge>
                 </div>
               </CardHeader>
@@ -161,7 +169,7 @@ export default function ListsPage() {
                         description: collection.description,
                       })
                     }
-                    aria-label="Edit list"
+                    aria-label="Edit collection"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -169,7 +177,7 @@ export default function ListsPage() {
                     variant="outline"
                     size="icon"
                     onClick={() => setDeleteCollectionId(collection._id)}
-                    aria-label="Delete list"
+                    aria-label="Delete collection"
                     className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -177,8 +185,9 @@ export default function ListsPage() {
                 </div>
               </CardContent>
             </Card>
+            </AnimatedListItem>
           ))}
-        </section>
+        </AnimatedList>
       )}
 
       <CreateSectionModal
@@ -200,9 +209,9 @@ export default function ListsPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this list?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this collection?</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently removes the list and all items inside it.
+              This permanently removes the collection and all items inside it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -214,7 +223,7 @@ export default function ListsPage() {
               }
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete list"}
+              {isDeleting ? "Deleting..." : "Delete collection"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

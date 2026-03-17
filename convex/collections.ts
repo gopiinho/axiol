@@ -35,6 +35,33 @@ export const listPublic = query({
   },
 });
 
+export const listByUserWithCover = query({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx, args.token);
+    const collections = await ctx.db
+      .query("collections")
+      .withIndex("by_user", (q) => q.eq("createdBy", userId))
+      .order("desc")
+      .collect();
+
+    return Promise.all(
+      collections.map(async (col) => {
+        const items = await ctx.db
+          .query("items")
+          .withIndex("by_collection", (q) => q.eq("collectionId", col._id))
+          .collect();
+        const firstItemWithImage = items.find((item) => item.imageUrl);
+        return {
+          ...col,
+          coverImageUrl: firstItemWithImage?.imageUrl ?? null,
+          itemCount: items.length,
+        };
+      }),
+    );
+  },
+});
+
 export const getById = query({
   args: { id: v.id("collections") },
   handler: async (ctx, args) => {

@@ -18,6 +18,9 @@ export const getByUsername = query({
       name: user.name,
       bio: user.bio,
       avatarUrl: user.avatarUrl,
+      instagramUrl: user.instagramUrl,
+      youtubeUrl: user.youtubeUrl,
+      websiteUrl: user.websiteUrl,
     };
   },
 });
@@ -33,6 +36,9 @@ export const getProfile = query({
       name: user.name,
       bio: user.bio,
       avatarUrl: user.avatarUrl,
+      instagramUrl: user.instagramUrl,
+      youtubeUrl: user.youtubeUrl,
+      websiteUrl: user.websiteUrl,
       accountType: user.accountType,
       subscriptionStatus: user.subscriptionStatus,
       trialEndsAt: user.trialEndsAt,
@@ -47,6 +53,9 @@ export const updateProfile = mutation({
     name: v.optional(v.string()),
     bio: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
+    instagramUrl: v.optional(v.string()),
+    youtubeUrl: v.optional(v.string()),
+    websiteUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx, args.token);
@@ -62,6 +71,15 @@ export const updateProfile = mutation({
     }
     if (args.avatarUrl !== undefined) {
       updates.avatarUrl = args.avatarUrl;
+    }
+    if (args.instagramUrl !== undefined) {
+      updates.instagramUrl = args.instagramUrl.trim();
+    }
+    if (args.youtubeUrl !== undefined) {
+      updates.youtubeUrl = args.youtubeUrl.trim();
+    }
+    if (args.websiteUrl !== undefined) {
+      updates.websiteUrl = args.websiteUrl.trim();
     }
 
     await ctx.db.patch(userId, updates);

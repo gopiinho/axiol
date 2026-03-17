@@ -54,7 +54,7 @@ export default async function UserStorePage({
           )}
         </div>
 
-        <div className="relative backdrop-blur-sm bg-white/60 border-2 border-pink-100 p-4 lg:p-6">
+        <div className="relative backdrop-blur-sm bg-white/60 rounded-2xl border-2 border-pink-100 p-4 lg:p-6">
           <div className="flex items-center justify-center font-secondary gap-2 mb-8">
             <p className="text-primary">&#x22c6;&#xff61;&#x02da; &#x2727;</p>
             <h5 className="font-secondary text-xl">my collections</h5>
@@ -63,7 +63,7 @@ export default async function UserStorePage({
 
           {collections.length === 0 ? (
             <div className="text-center py-16">
-              <Heart className="w-16 h-16 mx-auto text-pink-300 mb-4" />
+              <Heart className="w-16 h-16 mx-auto text-pink-300 mb-4 animate-float" />
               <p className="text-gray-500 text-lg">
                 building my collection... check back soon!
               </p>
@@ -81,7 +81,7 @@ export default async function UserStorePage({
           )}
 
           <div className="text-primary w-full">
-            <div className="text-center flex flex-col items-center justify-center mt-8 text-[0.6rem]">
+            <div className="text-center flex flex-col items-center justify-center mt-8 text-[0.65rem]">
               <p>
                 If you purchase from any of these links, I may receive a small
                 commission.

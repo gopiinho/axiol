@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "motion/react";
 import heartPixel from "@/public/icons/heart.png";
 
 interface CollectionsCardProps {
@@ -16,14 +19,20 @@ export default function CollectionsCard({
   index,
 }: CollectionsCardProps) {
   return (
-    <Link
-      href={`/list/${collection._id}`}
-      className="group relative"
-      style={{
-        animationDelay: `${index * 100}ms`,
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.08,
+        ease: [0.25, 1, 0.5, 1],
       }}
     >
-      <div className="relative w-full bg-white p-6 border-2 border-pink-200 transition-all duration-300 hover:shadow-2xl group-hover:border-pink-300">
+    <Link
+      href={`/list/${collection._id}`}
+      className="group relative block"
+    >
+      <div className="relative w-full bg-white rounded-2xl p-6 border-2 border-pink-200 transition-all duration-300 hover:shadow-2xl group-hover:border-pink-300">
         <div className="absolute top-3 right-3">
           <div className="w-8 h-8 bg-pink-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
             <Image
@@ -55,7 +64,6 @@ export default function CollectionsCard({
             </span>
 
             <div className="flex items-center gap-1 text-pink-500 group-hover:gap-2 transition-all">
-              <span className="text-sm font-semibold"></span>
               <svg
                 className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
                 fill="none"
@@ -74,5 +82,6 @@ export default function CollectionsCard({
         </div>
       </div>
     </Link>
+    </motion.div>
   );
 }
