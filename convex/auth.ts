@@ -5,6 +5,24 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 const SESSION_IDLE_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours
+const TRIAL_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days
+
+const RESERVED_USERNAMES = [
+  "login",
+  "signup",
+  "dashboard",
+  "api",
+  "privacy",
+  "terms",
+  "data-deletion",
+  "list",
+  "admin",
+  "settings",
+  "about",
+  "help",
+  "support",
+  "contact",
+];
 
 function generateSalt(): string {
   const array = new Uint8Array(16);
@@ -77,7 +95,7 @@ export const createAdmin = mutation({
     }
 
     const existing = await ctx.db
-      .query("adminUsers")
+      .query("users")
       .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
       .first();
 
@@ -87,14 +105,139 @@ export const createAdmin = mutation({
 
     const salt = generateSalt();
     const passwordHash = await hashPassword(args.password, salt);
+    const now = Date.now();
 
-    return await ctx.db.insert("adminUsers", {
+    return await ctx.db.insert("users", {
       email: args.email.toLowerCase(),
+      username: "admin",
+      name: "Admin",
+      bio: "",
+      accountType: "admin",
       passwordHash,
       salt,
       failedLoginAttempts: 0,
       accountLocked: false,
+      createdAt: now,
     });
+  },
+});
+
+export const signup = mutation({
+  args: {
+    email: v.string(),
+    username: v.string(),
+    name: v.string(),
+    password: v.string(),
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(args.email)) {
+      throw new Error("Invalid email format");
+    }
+
+    const username = args.username.toLowerCase().trim();
+    const usernameRegex = /^[a-z0-9_]{3,30}$/;
+    if (!usernameRegex.test(username)) {
+      throw new Error(
+        "Username must be 3-30 characters, lowercase letters, numbers, and underscores only"
+      );
+    }
+
+    if (RESERVED_USERNAMES.includes(username)) {
+      throw new Error("This username is not available");
+    }
+
+    if (args.name.trim().length < 1) {
+      throw new Error("Name is required");
+    }
+
+    if (args.password.length < 12) {
+      throw new Error("Password must be at least 12 characters");
+    }
+
+    const existingEmail = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
+      .first();
+
+    if (existingEmail) {
+      throw new Error("An account with this email already exists");
+    }
+
+    const existingUsername = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .first();
+
+    if (existingUsername) {
+      throw new Error("This username is already taken");
+    }
+
+    const salt = generateSalt();
+    const passwordHash = await hashPassword(args.password, salt);
+    const now = Date.now();
+
+    const userId = await ctx.db.insert("users", {
+      email: args.email.toLowerCase(),
+      username,
+      name: args.name.trim(),
+      bio: "",
+      accountType: "creator",
+      passwordHash,
+      salt,
+      failedLoginAttempts: 0,
+      accountLocked: false,
+      trialStartedAt: now,
+      trialEndsAt: now + TRIAL_DURATION,
+      subscriptionStatus: "trial",
+      createdAt: now,
+    });
+
+    const token = generateSecureToken();
+    const expiresAt = now + SESSION_DURATION;
+
+    await ctx.db.insert("sessions", {
+      userId,
+      token,
+      expiresAt,
+      ipAddress: args.ipAddress,
+      userAgent: args.userAgent,
+      createdAt: now,
+      lastUsedAt: now,
+    });
+
+    return { token, expiresAt };
+  },
+});
+
+export const checkUsernameAvailable = query({
+  args: {
+    username: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const username = args.username.toLowerCase().trim();
+
+    const usernameRegex = /^[a-z0-9_]{3,30}$/;
+    if (!usernameRegex.test(username)) {
+      return { available: false, reason: "Invalid username format" };
+    }
+
+    if (RESERVED_USERNAMES.includes(username)) {
+      return { available: false, reason: "This username is not available" };
+    }
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .first();
+
+    if (existing) {
+      return { available: false, reason: "This username is already taken" };
+    }
+
+    return { available: true };
   },
 });
 
@@ -112,7 +255,7 @@ export const login = mutation({
     }
 
     const user = await ctx.db
-      .query("adminUsers")
+      .query("users")
       .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
       .first();
 
@@ -193,7 +336,13 @@ export const login = mutation({
       lastUsedAt: now,
     });
 
-    return { token, expiresAt };
+    return {
+      token,
+      expiresAt,
+      username: user.username,
+      name: user.name,
+      accountType: user.accountType,
+    };
   },
 });
 

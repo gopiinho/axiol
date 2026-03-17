@@ -28,8 +28,8 @@ const jersey = Jersey_10({
 });
 
 export const metadata: Metadata = {
-  title: "Neme's World",
-  description: "I share everything here...",
+  title: "Linkkit - Your Creator Store",
+  description: "linkkit.store",
 };
 
 export default function RootLayout({
@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} ${jersey.variable} app-bg antialiased relative min-h-screen`}
+        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} ${jersey.variable} antialiased relative w-full min-h-screen`}
       >
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>

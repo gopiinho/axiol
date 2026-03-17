@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { getAuthToken } from "@/lib/auth";
+import { requireSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { validateSectionInput } from "@/lib/validators/sections";
 
 interface EditSectionModalProps {
   section: {
-    id: Id<"sections">;
+    id: Id<"collections">;
     title: string;
     description?: string;
   };
@@ -39,7 +40,7 @@ export default function EditSectionModal({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const updateSection = useMutation(api.sections.update);
+  const updateSection = useMutation(api.collections.update);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,19 +48,23 @@ export default function EditSectionModal({
     setErrorMessage(null);
 
     try {
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireSessionToken();
+      const validated = validateSectionInput({ title, description });
 
       await updateSection({
         token,
         id: section.id,
-        title,
-        description: description || undefined,
+        title: validated.title,
+        description: validated.description,
       });
       onClose();
     } catch (error) {
       console.error("Error updating section:", error);
-      setErrorMessage("Failed to update list. Please try again.");
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Couldn't save changes. Check your connection and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -67,23 +72,25 @@ export default function EditSectionModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
-          <DialogTitle>Edit list</DialogTitle>
-          <DialogDescription>Update the list details.</DialogDescription>
+          <DialogTitle>Edit collection</DialogTitle>
+          <DialogDescription>
+            Update the collection name or description.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
             <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t update list</AlertTitle>
+              <AlertTitle>Couldn&apos;t save changes</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="edit-title">
-              List name <span className="text-red-500">*</span>
+              Collection name <span className="text-red-500">*</span>
             </Label>
             <Input
               id="edit-title"
@@ -99,7 +106,7 @@ export default function EditSectionModal({
               id="edit-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add context for this list..."
+              placeholder="What's in this collection?"
               rows={3}
             />
           </div>

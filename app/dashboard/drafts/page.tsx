@@ -4,11 +4,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Send, Eye } from "lucide-react";
+
 import Link from "next/link";
-import Image from "next/image";
 import { Id } from "@/convex/_generated/dataModel";
 import {
   AlertDialog,
@@ -28,21 +25,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getAuthToken } from "@/lib/auth";
+import { requireSessionToken } from "@/features/auth/client/session";
+import { useUser } from "@/features/auth/client/UserContext";
+import DraftMappingCard from "@/features/instagram-mappings/components/DraftMappingCard";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
+import { Plus } from "lucide-react";
+import { SuccessCheckmark } from "@/components/motion/SuccessCheckmark";
+import { FadeIn } from "@/components/motion/FadeIn";
+import {
+  AnimatedList,
+  AnimatedListItem,
+} from "@/components/motion/AnimatedList";
 
 export default function DraftsPage() {
-  const token = getAuthToken();
-  const drafts = useQuery(
+  const { token } = useUser();
+  const rawDrafts = useQuery(
     api.instagram.getDraftMappings,
-    token ? { token } : "skip"
+    token ? { token } : "skip",
+  );
+  const drafts = useCachedQueryResult(
+    `dashboard:drafts:${token ?? "anon"}`,
+    rawDrafts,
   );
   const publishMapping = useMutation(api.instagram.publishReelMapping);
   const deleteMapping = useMutation(api.instagram.deleteReelMapping);
   const [publishTarget, setPublishTarget] = useState<Id<"reelMappings"> | null>(
-    null
+    null,
   );
   const [deleteTarget, setDeleteTarget] = useState<Id<"reelMappings"> | null>(
-    null
+    null,
   );
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -51,8 +62,8 @@ export default function DraftsPage() {
   const handlePublish = async (id: Id<"reelMappings">) => {
     try {
       setIsPublishing(true);
-      if (!token) throw new Error("Unauthorized");
-      await publishMapping({ token, id });
+      const authToken = requireSessionToken();
+      await publishMapping({ token: authToken, id });
       setPublishedOpen(true);
     } finally {
       setPublishTarget(null);
@@ -63,8 +74,8 @@ export default function DraftsPage() {
   const handleDelete = async (id: Id<"reelMappings">) => {
     try {
       setIsDeleting(true);
-      if (!token) throw new Error("Unauthorized");
-      await deleteMapping({ token, id });
+      const authToken = requireSessionToken();
+      await deleteMapping({ token: authToken, id });
     } finally {
       setDeleteTarget(null);
       setIsDeleting(false);
@@ -72,80 +83,49 @@ export default function DraftsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Draft Posts</h1>
-          <p className="text-muted-foreground">
-            Review and publish your reel mappings
-          </p>
-        </div>
-        <Link href="/dashboard/create">
-          <Button>Create New Post</Button>
-        </Link>
-      </div>
+    <div>
+      <FadeIn>
+        <section className="px-5 lg:px-6 py-6 lg:py-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="app-title">Draft Posts</h1>
+              <p className="app-subtitle mt-1">
+                Review and publish your auto-DM posts
+              </p>
+            </div>
+            <Link href="/dashboard/create">
+              <Button size="lg" className="gap-2 sm:self-start">
+                <Plus className="h-4 w-4" />
+                Create New
+              </Button>
+            </Link>
+          </div>
+        </section>
+      </FadeIn>
 
-      {drafts && drafts.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4">
-          {drafts.map((draft) => (
-            <Card key={draft._id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex gap-4">
-                    {draft.thumbnailUrl && (
-                      <Image
-                        src={draft.thumbnailUrl}
-                        alt="Reel"
-                        width={96}
-                        height={96}
-                        className="w-24 h-24 object-cover rounded"
-                      />
-                    )}
-                    <div>
-                      <CardTitle className="text-lg">{draft.caption}</CardTitle>
-                      <div className="flex gap-2 mt-2">
-                        <Badge variant="secondary">{draft.keyword}</Badge>
-                        <Badge variant="outline">{draft.itemCount} items</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Collection: {draft.sectionTitle}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge>Draft</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setPublishTarget(draft._id)}
-                    className="gap-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    Publish
-                  </Button>
-                  <Button variant="outline" className="gap-2">
-                    <Eye className="h-4 w-4" />
-                    Preview DM
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setDeleteTarget(draft._id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            No drafts yet. Create your first post!
-          </CardContent>
-        </Card>
-      )}
+      <div className="px-5 lg:px-6">
+        {drafts && drafts.length > 0 ? (
+          <AnimatedList className="grid grid-cols-1 gap-4">
+            {drafts.map((draft) => (
+              <AnimatedListItem key={draft._id}>
+                <DraftMappingCard
+                  draft={draft}
+                  onPublish={setPublishTarget}
+                  onDelete={setDeleteTarget}
+                />
+              </AnimatedListItem>
+            ))}
+          </AnimatedList>
+        ) : rawDrafts === undefined ? (
+          <div className="app-panel px-6 py-12 text-center text-muted-foreground">
+            Loading drafts...
+          </div>
+        ) : (
+          <div className="app-panel px-6 py-12 text-center text-muted-foreground">
+            No drafts yet — create a post to set up auto-DM for a reel.
+          </div>
+        )}
+      </div>
 
       <AlertDialog
         open={publishTarget !== null}
@@ -155,11 +135,13 @@ export default function DraftsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Publish this draft?</AlertDialogTitle>
             <AlertDialogDescription>
-              Auto-DM will become active for comments matching this keyword.
+              Followers who comment the trigger keyword will start receiving DMs automatically.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPublishing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPublishing}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => publishTarget && handlePublish(publishTarget)}
               disabled={isPublishing}
@@ -178,7 +160,7 @@ export default function DraftsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this draft?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the draft mapping and cannot be undone.
+              This removes the draft and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -196,10 +178,11 @@ export default function DraftsPage() {
 
       <Dialog open={publishedOpen} onOpenChange={setPublishedOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="items-center text-center">
+            <SuccessCheckmark className="mb-2" />
             <DialogTitle>Draft published</DialogTitle>
             <DialogDescription>
-              Auto-DM is now active for this reel mapping.
+              Auto-DM is now live — followers who comment the keyword will get a DM.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

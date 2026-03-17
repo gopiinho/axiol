@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { getAuthToken } from "@/lib/auth";
+import { requireSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -24,27 +24,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { validateItemInput } from "@/lib/validators/items";
 
-interface CreateItemModalProps {
-  sectionId: Id<"sections">;
+interface EditItemModalProps {
+  item: {
+    id: Id<"items">;
+    affiliateLink: string;
+    price?: string;
+    platform: string;
+    itemTitle?: string;
+    imageUrl?: string;
+  };
   open: boolean;
   onClose: () => void;
 }
 
-export default function CreateItemModal({
-  sectionId,
+export default function EditItemModal({
+  item,
   open,
   onClose,
-}: CreateItemModalProps) {
-  const [affiliateLink, setAffiliateLink] = useState("");
-  const [price, setPrice] = useState("");
-  const [platform, setPlatform] = useState("amazon");
-  const [itemTitle, setItemTitle] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+}: EditItemModalProps) {
+  const [affiliateLink, setAffiliateLink] = useState(item.affiliateLink);
+  const [price, setPrice] = useState(item.price || "");
+  const [platform, setPlatform] = useState(item.platform);
+  const [itemTitle, setItemTitle] = useState(item.itemTitle || "");
+  const [imageUrl, setImageUrl] = useState(item.imageUrl || "");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const createItem = useMutation(api.items.create);
+  const updateItem = useMutation(api.items.update);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,28 +60,30 @@ export default function CreateItemModal({
     setErrorMessage(null);
 
     try {
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
-
-      await createItem({
-        token,
-        sectionId,
+      const token = requireSessionToken();
+      const validated = validateItemInput({
         affiliateLink,
-        price: price || undefined,
+        price,
         platform,
-        itemTitle: itemTitle || undefined,
-        imageUrl: imageUrl || undefined,
+        itemTitle,
+        imageUrl,
       });
 
-      setAffiliateLink("");
-      setPrice("");
-      setPlatform("amazon");
-      setItemTitle("");
-      setImageUrl("");
+      await updateItem({
+        token,
+        id: item.id,
+        affiliateLink: validated.affiliateLink,
+        price: validated.price,
+        platform: validated.platform,
+        itemTitle: validated.itemTitle,
+        imageUrl: validated.imageUrl,
+      });
       onClose();
     } catch (error) {
-      console.error("Error creating item:", error);
-      setErrorMessage("Failed to add item. Please try again.");
+      console.error("Error updating item:", error);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Couldn't save changes. Check your connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -83,22 +93,22 @@ export default function CreateItemModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add item</DialogTitle>
-          <DialogDescription>Add an affiliate product to this list.</DialogDescription>
+          <DialogTitle>Edit item</DialogTitle>
+          <DialogDescription>Update the product details.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
             <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t add item</AlertTitle>
+              <AlertTitle>Couldn&apos;t update item</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="item-title">Product name</Label>
+            <Label htmlFor="edit-item-title">Product name</Label>
             <Input
-              id="item-title"
+              id="edit-item-title"
               value={itemTitle}
               onChange={(e) => setItemTitle(e.target.value)}
               placeholder="e.g., Levi's Women's Skinny Jeans"
@@ -106,11 +116,11 @@ export default function CreateItemModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="affiliate-link">
+            <Label htmlFor="edit-affiliate-link">
               Affiliate link <span className="text-red-500">*</span>
             </Label>
             <Input
-              id="affiliate-link"
+              id="edit-affiliate-link"
               type="url"
               value={affiliateLink}
               onChange={(e) => setAffiliateLink(e.target.value)}
@@ -121,11 +131,11 @@ export default function CreateItemModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="platform">
+              <Label htmlFor="edit-platform">
                 Platform <span className="text-red-500">*</span>
               </Label>
               <Select value={platform} onValueChange={setPlatform}>
-                <SelectTrigger id="platform">
+                <SelectTrigger id="edit-platform">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -139,9 +149,9 @@ export default function CreateItemModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="edit-price">Price</Label>
               <Input
-                id="price"
+                id="edit-price"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="₹1,999"
@@ -150,15 +160,14 @@ export default function CreateItemModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image-url">Image URL</Label>
+            <Label htmlFor="edit-image-url">Image URL</Label>
             <Input
-              id="image-url"
+              id="edit-image-url"
               type="url"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://example.com/image.jpg"
             />
-            <p className="text-xs text-muted-foreground">Optional: add a product image URL.</p>
           </div>
 
           <DialogFooter>
@@ -166,7 +175,7 @@ export default function CreateItemModal({
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !affiliateLink.trim()}>
-              {loading ? "Adding..." : "Add item"}
+              {loading ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>
         </form>

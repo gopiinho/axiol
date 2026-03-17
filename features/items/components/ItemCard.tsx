@@ -5,7 +5,12 @@ import { ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 
 interface ItemCardProps {
   item: {
@@ -20,12 +25,12 @@ interface ItemCardProps {
   onDelete: () => void;
 }
 
-const platformStyles: Record<string, string> = {
-  amazon: "bg-amber-100 text-amber-700",
-  flipkart: "bg-sky-100 text-sky-700",
-  nykaa: "bg-pink-100 text-pink-700",
-  meesho: "bg-violet-100 text-violet-700",
-  other: "bg-slate-100 text-slate-700",
+const platformClass: Record<string, string> = {
+  amazon: "badge-platform-amazon",
+  flipkart: "badge-platform-flipkart",
+  nykaa: "badge-platform-nykaa",
+  meesho: "badge-platform-meesho",
+  other: "badge-platform-other",
 };
 
 export default function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
@@ -55,7 +60,7 @@ export default function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
         </h3>
 
         <div className="flex items-center justify-between gap-2">
-          <Badge className={platformStyles[item.platform] || platformStyles.other}>
+          <Badge className={platformClass[item.platform] || platformClass.other}>
             {capitalizedPlatform}
           </Badge>
 

@@ -7,10 +7,11 @@ import { ArrowLeft, Plus, ShoppingBasket } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import ItemCard from "@/components/ItemCard";
-import CreateItemModal from "@/components/CreateItemModal";
-import EditItemModal from "@/components/EditItemModal";
-import { getAuthToken } from "@/lib/auth";
+import ItemCard from "@/features/items/components/ItemCard";
+import CreateItemModal from "@/features/items/components/CreateItemModal";
+import EditItemModal from "@/features/items/components/EditItemModal";
+import { requireSessionToken } from "@/features/auth/client/session";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,17 +24,22 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function SectionItemsPage({
+export default function CollectionItemsPage({
   params,
 }: {
-  params: Promise<{ id: Id<"sections"> }>;
+  params: Promise<{ id: Id<"collections"> }>;
 }) {
   const { id } = use(params);
 
-  const section = useQuery(api.sections.getById, { id });
-  const items = useQuery(api.items.listBySection, {
-    sectionId: id,
+  const rawCollection = useQuery(api.collections.getById, { id });
+  const rawItems = useQuery(api.items.listByCollection, {
+    collectionId: id,
   });
+  const collection = useCachedQueryResult(
+    `dashboard:list:${id}:collection`,
+    rawCollection,
+  );
+  const items = useCachedQueryResult(`dashboard:list:${id}:items`, rawItems);
   const deleteItem = useMutation(api.items.remove);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -51,8 +57,7 @@ export default function SectionItemsPage({
   const handleDelete = async (itemId: Id<"items">) => {
     try {
       setIsDeleting(true);
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireSessionToken();
       await deleteItem({ token, id: itemId });
     } finally {
       setDeleteItemId(null);
@@ -60,21 +65,26 @@ export default function SectionItemsPage({
     }
   };
 
-  if (section === undefined || items === undefined) {
+  if (
+    (rawCollection === undefined && collection === undefined) ||
+    (rawItems === undefined && items === undefined)
+  ) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="app-panel px-6 py-5 text-sm text-muted-foreground">Loading list details...</div>
+        <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
+          Loading collection...
+        </div>
       </div>
     );
   }
 
-  if (section === null) {
+  if (collection === null) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <h2 className="text-2xl font-semibold">List not found</h2>
+          <h2 className="text-2xl font-semibold">Collection not found</h2>
           <Button asChild className="mt-4">
-            <Link href="/dashboard/lists">Back to lists</Link>
+            <Link href="/dashboard/lists">Back to collections</Link>
           </Button>
         </CardContent>
       </Card>
@@ -87,40 +97,48 @@ export default function SectionItemsPage({
         <Button asChild variant="ghost" size="sm" className="mb-4 gap-1.5">
           <Link href="/dashboard/lists">
             <ArrowLeft className="h-4 w-4" />
-            Back to lists
+            Back to collections
           </Link>
         </Button>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              List Details
+              Collection
             </p>
             <h1 className="app-title mt-2 flex items-center gap-2">
               <ShoppingBasket className="h-7 w-7 text-primary" />
-              {section.title}
+              {collection!.title}
             </h1>
-            {section.description && (
-              <p className="app-subtitle mt-2 max-w-xl">{section.description}</p>
+            {collection!.description && (
+              <p className="app-subtitle mt-2 max-w-xl">
+                {collection!.description}
+              </p>
             )}
           </div>
 
-          <Button onClick={() => setShowCreateModal(true)} className="gap-2 sm:self-start">
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            className="gap-2 sm:self-start"
+          >
             <Plus className="h-4 w-4" />
             Add Item
           </Button>
         </div>
       </section>
 
-      {items.length === 0 ? (
+      {(items ?? []).length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
             <ShoppingBasket className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">No items yet</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Add your first affiliate product to this list.
+              Add your first product — these will be sent in auto-DMs to your followers.
             </p>
-            <Button onClick={() => setShowCreateModal(true)} className="mt-5 gap-2">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="mt-5 gap-2"
+            >
               <Plus className="h-4 w-4" />
               Add first item
             </Button>
@@ -128,7 +146,7 @@ export default function SectionItemsPage({
         </Card>
       ) : (
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((item) => (
+          {(items ?? []).map((item) => (
             <ItemCard
               key={item._id}
               item={item}
@@ -149,7 +167,7 @@ export default function SectionItemsPage({
       )}
 
       <CreateItemModal
-        sectionId={id}
+        collectionId={id}
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />
@@ -170,7 +188,7 @@ export default function SectionItemsPage({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this item?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action is permanent and removes the product from this list.
+              This permanently removes the product from this collection.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

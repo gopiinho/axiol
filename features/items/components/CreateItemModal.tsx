@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { getAuthToken } from "@/lib/auth";
+import { requireSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -24,34 +24,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { validateItemInput } from "@/lib/validators/items";
 
-interface EditItemModalProps {
-  item: {
-    id: Id<"items">;
-    affiliateLink: string;
-    price?: string;
-    platform: string;
-    itemTitle?: string;
-    imageUrl?: string;
-  };
+interface CreateItemModalProps {
+  collectionId: Id<"collections">;
   open: boolean;
   onClose: () => void;
 }
 
-export default function EditItemModal({
-  item,
+export default function CreateItemModal({
+  collectionId,
   open,
   onClose,
-}: EditItemModalProps) {
-  const [affiliateLink, setAffiliateLink] = useState(item.affiliateLink);
-  const [price, setPrice] = useState(item.price || "");
-  const [platform, setPlatform] = useState(item.platform);
-  const [itemTitle, setItemTitle] = useState(item.itemTitle || "");
-  const [imageUrl, setImageUrl] = useState(item.imageUrl || "");
+}: CreateItemModalProps) {
+  const [affiliateLink, setAffiliateLink] = useState("");
+  const [price, setPrice] = useState("");
+  const [platform, setPlatform] = useState("amazon");
+  const [itemTitle, setItemTitle] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const updateItem = useMutation(api.items.update);
+  const createItem = useMutation(api.items.create);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,22 +53,38 @@ export default function EditItemModal({
     setErrorMessage(null);
 
     try {
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
-
-      await updateItem({
-        token,
-        id: item.id,
+      const token = requireSessionToken();
+      const validated = validateItemInput({
         affiliateLink,
-        price: price || undefined,
+        price,
         platform,
-        itemTitle: itemTitle || undefined,
-        imageUrl: imageUrl || undefined,
+        itemTitle,
+        imageUrl,
       });
+
+      await createItem({
+        token,
+        collectionId,
+        affiliateLink: validated.affiliateLink,
+        price: validated.price,
+        platform: validated.platform,
+        itemTitle: validated.itemTitle,
+        imageUrl: validated.imageUrl,
+      });
+
+      setAffiliateLink("");
+      setPrice("");
+      setPlatform("amazon");
+      setItemTitle("");
+      setImageUrl("");
       onClose();
     } catch (error) {
-      console.error("Error updating item:", error);
-      setErrorMessage("Failed to update item. Please try again.");
+      console.error("Error creating item:", error);
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Couldn't add this product. Check your connection and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -82,24 +92,26 @@ export default function EditItemModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-155 max-h-[90svh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit item</DialogTitle>
-          <DialogDescription>Update item details for this list.</DialogDescription>
+          <DialogTitle>Add item</DialogTitle>
+          <DialogDescription>
+            Add a product with its affiliate link to this collection.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
             <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t update item</AlertTitle>
+              <AlertTitle>Couldn&apos;t add item</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="edit-item-title">Product name</Label>
+            <Label htmlFor="item-title">Product name</Label>
             <Input
-              id="edit-item-title"
+              id="item-title"
               value={itemTitle}
               onChange={(e) => setItemTitle(e.target.value)}
               placeholder="e.g., Levi's Women's Skinny Jeans"
@@ -107,26 +119,33 @@ export default function EditItemModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-affiliate-link">
-              Affiliate link <span className="text-red-500">*</span>
+            <Label htmlFor="affiliate-link">
+              Affiliate link{" "}
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>
             </Label>
             <Input
-              id="edit-affiliate-link"
+              id="affiliate-link"
               type="url"
               value={affiliateLink}
               onChange={(e) => setAffiliateLink(e.target.value)}
               placeholder="https://..."
               required
+              aria-required="true"
             />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-platform">
-                Platform <span className="text-red-500">*</span>
+              <Label htmlFor="platform">
+                Platform{" "}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </Label>
               <Select value={platform} onValueChange={setPlatform}>
-                <SelectTrigger id="edit-platform">
+                <SelectTrigger id="platform" aria-required="true">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,9 +159,9 @@ export default function EditItemModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-price">Price</Label>
+              <Label htmlFor="price">Price</Label>
               <Input
-                id="edit-price"
+                id="price"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="₹1,999"
@@ -151,14 +170,17 @@ export default function EditItemModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-image-url">Image URL</Label>
+            <Label htmlFor="image-url">Image URL</Label>
             <Input
-              id="edit-image-url"
+              id="image-url"
               type="url"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://example.com/image.jpg"
             />
+            <p className="text-xs text-muted-foreground">
+              Optional: add a product image URL.
+            </p>
           </div>
 
           <DialogFooter>
@@ -166,7 +188,7 @@ export default function EditItemModal({
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !affiliateLink.trim()}>
-              {loading ? "Saving..." : "Save changes"}
+              {loading ? "Adding..." : "Add item"}
             </Button>
           </DialogFooter>
         </form>

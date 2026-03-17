@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { getAuthToken } from "@/lib/auth";
+import { requireSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { validateSectionInput } from "@/lib/validators/sections";
 
 interface CreateSectionModalProps {
   open: boolean;
@@ -32,7 +33,7 @@ export default function CreateSectionModal({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const createSection = useMutation(api.sections.create);
+  const createSection = useMutation(api.collections.create);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,20 +41,24 @@ export default function CreateSectionModal({
     setErrorMessage(null);
 
     try {
-      const token = getAuthToken();
-      if (!token) throw new Error("Unauthorized");
+      const token = requireSessionToken();
+      const validated = validateSectionInput({ title, description });
 
       await createSection({
         token,
-        title,
-        description: description || undefined,
+        title: validated.title,
+        description: validated.description,
       });
       setTitle("");
       setDescription("");
       onClose();
     } catch (error) {
       console.error("Error creating section:", error);
-      setErrorMessage("Failed to create list. Please try again.");
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Couldn't create this collection. Check your connection and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -61,25 +66,25 @@ export default function CreateSectionModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
-          <DialogTitle>Create list</DialogTitle>
+          <DialogTitle>Create collection</DialogTitle>
           <DialogDescription>
-            Add a product collection to organize affiliate items.
+            Group your affiliate products so you can link them to reels.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
             <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t create list</AlertTitle>
+              <AlertTitle>Couldn&apos;t create collection</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="title">
-              List name <span className="text-red-500">*</span>
+              Collection name <span className="text-red-500">*</span>
             </Label>
             <Input
               id="title"
@@ -96,7 +101,7 @@ export default function CreateSectionModal({
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add context for this list..."
+              placeholder="What's in this collection?"
               rows={3}
             />
           </div>
@@ -106,7 +111,7 @@ export default function CreateSectionModal({
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !title.trim()}>
-              {loading ? "Creating..." : "Create list"}
+              {loading ? "Creating..." : "Create collection"}
             </Button>
           </DialogFooter>
         </form>

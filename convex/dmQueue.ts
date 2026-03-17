@@ -9,9 +9,10 @@ import {
   QueryCtx,
   ActionCtx,
 } from "./_generated/server";
-import { internal, api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
-import { requireAdminSession } from "./security";
+import { requireSession } from "./security";
+import { decryptToken } from "./lib/instagramCrypto";
 
 const MAX_DMS_PER_HOUR = 195;
 const DM_SPACING_MS = 2000;
@@ -22,7 +23,8 @@ export const createDmJob = mutation({
     sourceSecret: v.string(),
     instagramUserId: v.string(),
     username: v.string(),
-    sectionId: v.id("sections"),
+    userId: v.id("users"),
+    collectionId: v.id("collections"),
     reelId: v.string(),
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
     triggerId: v.string(),
@@ -30,7 +32,7 @@ export const createDmJob = mutation({
     includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const expectedSecret = process.env.INSTAGRAM_WEBHOOK_INTERNAL_SECRET;
+    const expectedSecret = process.env.INSTAGRAM_INTERNAL_SECRET;
     if (!expectedSecret || args.sourceSecret !== expectedSecret) {
       throw new Error("Unauthorized");
     }
@@ -38,14 +40,14 @@ export const createDmJob = mutation({
     const existing = await ctx.db
       .query("dmJobs")
       .withIndex("by_user_reel", (q) =>
-        q.eq("instagramUserId", args.instagramUserId).eq("reelId", args.reelId)
+        q.eq("instagramUserId", args.instagramUserId).eq("reelId", args.reelId),
       )
       .filter((q) =>
         q.or(
           q.eq(q.field("status"), "pending"),
           q.eq(q.field("status"), "processing"),
-          q.eq(q.field("status"), "sent")
-        )
+          q.eq(q.field("status"), "sent"),
+        ),
       )
       .first();
 
@@ -55,9 +57,10 @@ export const createDmJob = mutation({
     }
 
     const jobId = await ctx.db.insert("dmJobs", {
+      userId: args.userId,
       instagramUserId: args.instagramUserId,
       username: args.username,
-      sectionId: args.sectionId,
+      collectionId: args.collectionId,
       reelId: args.reelId,
       maxItemsInDM: args.maxItemsInDM,
       includeWebsiteLink: args.includeWebsiteLink,
@@ -79,21 +82,22 @@ export const processDmQueue = internalAction({
   handler: async (ctx) => {
     console.log("Worker running...");
 
-    const rateLimitOk = await ctx.runMutation(
-      internal.dmQueue.checkAndReserveSlot
-    );
-
-    if (!rateLimitOk) {
-      console.log("Rate limited - will retry in 10 seconds");
-      await ctx.scheduler.runAfter(10000, internal.dmQueue.processDmQueue);
-      return;
-    }
-
     const job = await ctx.runQuery(internal.dmQueue.getNextPendingJob);
 
     if (!job) {
       console.log("Queue empty - worker stopping");
       await ctx.runMutation(internal.dmQueue.markWorkerInactive);
+      return;
+    }
+
+    const rateLimitOk = await ctx.runMutation(
+      internal.dmQueue.checkAndReserveSlot,
+      { userId: job.userId },
+    );
+
+    if (!rateLimitOk) {
+      console.log("Rate limited - will retry in 10 seconds");
+      await ctx.scheduler.runAfter(10000, internal.dmQueue.processDmQueue);
       return;
     }
 
@@ -121,20 +125,20 @@ export const processDmQueue = internalAction({
 
     await ctx.scheduler.runAfter(
       DM_SPACING_MS,
-      internal.dmQueue.processDmQueue
+      internal.dmQueue.processDmQueue,
     );
   },
 });
 
 export const checkAndReserveSlot = internalMutation({
-  args: {},
-  handler: async (ctx) => {
-    const state = await getRateLimitState(ctx);
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const state = await getRateLimitState(ctx, args.userId);
     const now = Date.now();
     const oneHourAgo = now - 60 * 60 * 1000;
 
     const recentDMs = state.dmsSentInLastHour.filter(
-      (ts: number) => ts > oneHourAgo
+      (ts: number) => ts > oneHourAgo,
     );
 
     if (state.lastDmSentAt && now - state.lastDmSentAt < 1000) {
@@ -189,13 +193,14 @@ export const markJobSent = internalMutation({
     await ctx.db.insert("dmLogs", {
       instagramUserId: job.instagramUserId,
       username: job.username,
-      sectionId: job.sectionId,
+      collectionId: job.collectionId,
+      userId: job.userId,
       messageText: args.messageText,
       success: true,
       timestamp: now,
     });
 
-    const state = await getRateLimitState(ctx);
+    const state = await getRateLimitState(ctx, job.userId);
     await ctx.db.patch(state._id, {
       dmsSentInLastHour: [...state.dmsSentInLastHour, now],
       lastDmSentAt: now,
@@ -217,7 +222,8 @@ export const markJobFailed = internalMutation({
     await ctx.db.insert("dmLogs", {
       instagramUserId: job.instagramUserId,
       username: job.username,
-      sectionId: job.sectionId,
+      collectionId: job.collectionId,
+      userId: job.userId,
       messageText: job.messageText ?? "",
       success: false,
       error: args.error,
@@ -243,28 +249,35 @@ export const markJobFailed = internalMutation({
 export const markWorkerInactive = internalMutation({
   args: {},
   handler: async (ctx) => {
-    const state = await getRateLimitState(ctx);
-    await ctx.db.patch(state._id, {
-      workerActive: false,
-    });
+    const states = await ctx.db.query("dmRateLimitState").collect();
+    for (const state of states) {
+      if (state.workerActive) {
+        await ctx.db.patch(state._id, { workerActive: false });
+      }
+    }
   },
 });
 
 async function sendDM(
   ctx: ActionCtx,
-  job: Doc<"dmJobs">
+  job: Doc<"dmJobs">,
 ): Promise<{ success: boolean; error?: string; messageText?: string }> {
   try {
-    const config = await ctx.runQuery(internal.instagram.getConfigInternal);
+    const config = await ctx.runQuery(internal.instagram.getConfigInternal, {
+      userId: job.userId,
+    });
     if (!config) {
       return { success: false, error: "Not configured" };
     }
 
-    const messageData = await ctx.runQuery(api.instagram.generateDMMessage, {
-      sectionId: job.sectionId,
-      maxItems: job.maxItemsInDM,
-      includeWebsiteLink: job.includeWebsiteLink,
-    });
+    const messageData = await ctx.runQuery(
+      internal.instagram.generateDMMessageForJob,
+      {
+        collectionId: job.collectionId,
+        maxItems: job.maxItemsInDM,
+        includeWebsiteLink: job.includeWebsiteLink,
+      },
+    );
 
     let messageText = messageData.message;
 
@@ -273,6 +286,7 @@ async function sendDM(
         messageText.substring(0, 950) + "\n\n... (visit link for full list)";
     }
 
+    const accessToken = await decryptToken(config.accessToken);
     const url = `https://graph.instagram.com/v24.0/me/messages`;
 
     const response = await fetch(url, {
@@ -281,7 +295,7 @@ async function sendDM(
       body: JSON.stringify({
         recipient: { id: job.instagramUserId },
         message: { text: messageText },
-        access_token: config.accessToken,
+        access_token: accessToken,
       }),
     });
 
@@ -301,9 +315,13 @@ async function sendDM(
 }
 
 async function getRateLimitState(
-  ctx: MutationCtx | QueryCtx
+  ctx: MutationCtx | QueryCtx,
+  userId: Id<"users">,
 ): Promise<Doc<"dmRateLimitState">> {
-  const state = await ctx.db.query("dmRateLimitState").first();
+  const state = await ctx.db
+    .query("dmRateLimitState")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .first();
 
   if (state) return state;
 
@@ -311,6 +329,7 @@ async function getRateLimitState(
     return {
       _id: "virtual" as Id<"dmRateLimitState">,
       _creationTime: Date.now(),
+      userId,
       dmsSentInLastHour: [],
       lastDmSentAt: undefined,
       workerLastRun: undefined,
@@ -319,6 +338,7 @@ async function getRateLimitState(
   }
 
   const id = await ctx.db.insert("dmRateLimitState", {
+    userId,
     dmsSentInLastHour: [],
     workerActive: false,
   });
@@ -330,10 +350,15 @@ async function getRateLimitState(
 }
 
 async function ensureWorkerRunning(ctx: MutationCtx): Promise<void> {
-  const state = await getRateLimitState(ctx);
+  const states = await ctx.db.query("dmRateLimitState").collect();
+  const anyActive = states.some((s) => s.workerActive);
 
-  if (!state.workerActive) {
-    await ctx.db.patch(state._id, { workerActive: true });
+  if (!anyActive) {
+    // Create or find any rate limit state to mark as active
+    const firstState = states[0];
+    if (firstState) {
+      await ctx.db.patch(firstState._id, { workerActive: true });
+    }
     await ctx.scheduler.runAfter(0, internal.dmQueue.processDmQueue);
     console.log("Worker started");
   }
@@ -344,7 +369,7 @@ export const kickoffWorker = mutation({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    await requireSession(ctx, args.token);
     await ensureWorkerRunning(ctx);
     return { message: "Worker started" };
   },
@@ -355,33 +380,37 @@ export const getQueueStats = query({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.token);
+    const { userId } = await requireSession(ctx, args.token);
 
     const pending = await ctx.db
       .query("dmJobs")
-      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .withIndex("by_owner", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("status"), "pending"))
       .collect();
 
     const processing = await ctx.db
       .query("dmJobs")
-      .withIndex("by_status", (q) => q.eq("status", "processing"))
+      .withIndex("by_owner", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("status"), "processing"))
       .collect();
 
     const sent = await ctx.db
       .query("dmJobs")
-      .withIndex("by_status", (q) => q.eq("status", "sent"))
+      .withIndex("by_owner", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("status"), "sent"))
       .collect();
 
     const failed = await ctx.db
       .query("dmJobs")
-      .withIndex("by_status", (q) => q.eq("status", "failed"))
+      .withIndex("by_owner", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("status"), "failed"))
       .collect();
 
-    const state = await getRateLimitState(ctx);
+    const state = await getRateLimitState(ctx, userId);
     const now = Date.now();
     const oneHourAgo = now - 60 * 60 * 1000;
     const recentDMs = state.dmsSentInLastHour.filter(
-      (ts: number) => ts > oneHourAgo
+      (ts: number) => ts > oneHourAgo,
     );
 
     const estimatedMinutesToClear =

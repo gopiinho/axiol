@@ -6,12 +6,22 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-status-success: var(--status-success);
+  --color-status-success-fg: var(--status-success-fg);
+  --color-status-success-subtle: var(--status-success-subtle);
+  --color-status-success-subtle-fg: var(--status-success-subtle-fg);
+  --color-status-warn: var(--status-warn);
+  --color-status-warn-subtle-fg: var(--status-warn-subtle-fg);
   --font-sans: var(--font-manrope);
   --font-primary: var(--font-manrope);
   --font-secondary: var(--font-jersey);
   --font-accent: var(--font-space-grotesk);
   --font-home-primary: var(--font-dm-sans);
   --font-home-accent: var(--font-jersey);
+  --color-pink: var(--pink);
+  --color-pink-fg: var(--pink-fg);
+  --color-pink-subtle: var(--pink-subtle);
+  --color-pink-muted: var(--pink-muted);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -52,79 +62,70 @@
 
 :root {
   --radius: 0.95rem;
-  --background: oklch(0.98 0.01 240);
-  --foreground: oklch(0.22 0.03 255);
-  --card: oklch(0.995 0.006 245);
-  --card-foreground: oklch(0.22 0.03 255);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.03 255);
-  --primary: oklch(0.52 0.2 254);
+  --background: oklch(0.975 0.012 245);
+  --foreground: oklch(0.18 0.04 255);
+  --card: oklch(0.993 0.007 248);
+  --card-foreground: oklch(0.18 0.04 255);
+  --popover: oklch(0.995 0.005 248);
+  --popover-foreground: oklch(0.18 0.04 255);
+  --primary: oklch(0.5 0.22 254);
   --primary-foreground: oklch(0.985 0.01 252);
   --secondary: oklch(0.93 0.03 245);
-  --secondary-foreground: oklch(0.28 0.03 252);
+  --secondary-foreground: oklch(0.25 0.04 252);
   --muted: oklch(0.95 0.018 245);
-  --muted-foreground: oklch(0.52 0.03 252);
-  --accent: oklch(0.9 0.06 230);
-  --accent-foreground: oklch(0.24 0.03 252);
-  --destructive: oklch(0.61 0.23 28);
-  --border: oklch(0.9 0.02 250);
-  --input: oklch(0.9 0.02 250);
-  --ring: oklch(0.56 0.17 252);
+  --muted-foreground: oklch(0.44 0.04 252);
+  --accent: oklch(0.88 0.08 230);
+  --accent-foreground: oklch(0.22 0.04 252);
+  --destructive: oklch(0.59 0.24 28);
+  --border: oklch(0.89 0.025 250);
+  --input: oklch(0.89 0.025 250);
+  --ring: oklch(0.54 0.19 252);
   --chart-1: oklch(0.62 0.18 256);
   --chart-2: oklch(0.66 0.12 196);
   --chart-3: oklch(0.58 0.19 300);
   --chart-4: oklch(0.75 0.18 95);
   --chart-5: oklch(0.67 0.2 35);
-  --sidebar: oklch(0.995 0.006 245);
-  --sidebar-foreground: oklch(0.22 0.03 255);
-  --sidebar-primary: oklch(0.52 0.2 254);
+  --sidebar: oklch(0.993 0.007 248);
+  --sidebar-foreground: oklch(0.18 0.04 255);
+  --sidebar-primary: oklch(0.5 0.22 254);
   --sidebar-primary-foreground: oklch(0.985 0.01 252);
-  --sidebar-accent: oklch(0.93 0.03 245);
-  --sidebar-accent-foreground: oklch(0.28 0.03 252);
-  --sidebar-border: oklch(0.9 0.02 250);
-  --sidebar-ring: oklch(0.56 0.17 252);
-  --surface-0: oklch(0.99 0.008 248);
-  --surface-1: oklch(1 0 0);
-  --surface-2: oklch(0.965 0.02 246);
-  --surface-elevated: 0 12px 40px -24px oklch(0.3 0.05 250 / 0.4);
-}
-
-.dark {
-  --background: oklch(0.98 0.01 240);
-  --foreground: oklch(0.22 0.03 255);
-  --card: oklch(0.995 0.006 245);
-  --card-foreground: oklch(0.22 0.03 255);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.03 255);
-  --primary: oklch(0.52 0.2 254);
-  --primary-foreground: oklch(0.985 0.01 252);
-  --secondary: oklch(0.93 0.03 245);
-  --secondary-foreground: oklch(0.28 0.03 252);
-  --muted: oklch(0.95 0.018 245);
-  --muted-foreground: oklch(0.52 0.03 252);
-  --accent: oklch(0.9 0.06 230);
-  --accent-foreground: oklch(0.24 0.03 252);
-  --destructive: oklch(0.61 0.23 28);
-  --border: oklch(0.9 0.02 250);
-  --input: oklch(0.9 0.02 250);
-  --ring: oklch(0.56 0.17 252);
-  --chart-1: oklch(0.62 0.18 256);
-  --chart-2: oklch(0.66 0.12 196);
-  --chart-3: oklch(0.58 0.19 300);
-  --chart-4: oklch(0.75 0.18 95);
-  --chart-5: oklch(0.67 0.2 35);
-  --sidebar: oklch(0.995 0.006 245);
-  --sidebar-foreground: oklch(0.22 0.03 255);
-  --sidebar-primary: oklch(0.52 0.2 254);
-  --sidebar-primary-foreground: oklch(0.985 0.01 252);
-  --sidebar-accent: oklch(0.93 0.03 245);
-  --sidebar-accent-foreground: oklch(0.28 0.03 252);
-  --sidebar-border: oklch(0.9 0.02 250);
-  --sidebar-ring: oklch(0.56 0.17 252);
-  --surface-0: oklch(0.99 0.008 248);
-  --surface-1: oklch(1 0 0);
-  --surface-2: oklch(0.965 0.02 246);
-  --surface-elevated: 0 12px 40px -24px oklch(0.3 0.05 250 / 0.4);
+  --sidebar-accent: oklch(0.93 0.035 248);
+  --sidebar-accent-foreground: oklch(0.25 0.04 252);
+  --sidebar-border: oklch(0.89 0.025 250);
+  --sidebar-ring: oklch(0.54 0.19 252);
+  --surface-0: oklch(0.985 0.01 248);
+  --surface-1: oklch(0.998 0.003 248);
+  --surface-2: oklch(0.96 0.022 246);
+  --surface-elevated: 0 16px 48px -20px oklch(0.25 0.06 252 / 0.45);
+  /* Pink accent — formalized */
+  --pink: oklch(0.72 0.18 350);
+  --pink-fg: oklch(0.98 0.01 350);
+  --pink-subtle: oklch(0.94 0.06 350);
+  --pink-muted: oklch(0.88 0.08 350);
+  /* Status */
+  --status-success: oklch(0.53 0.17 155);
+  --status-success-fg: oklch(0.98 0.01 155);
+  --status-success-subtle: oklch(0.94 0.06 155);
+  --status-success-subtle-fg: oklch(0.38 0.12 155);
+  --status-warn: oklch(0.72 0.15 78);
+  --status-warn-fg: oklch(0.98 0.01 78);
+  --status-warn-subtle: oklch(0.95 0.07 78);
+  --status-warn-subtle-fg: oklch(0.42 0.1 72);
+  --status-danger-subtle: oklch(0.94 0.06 28);
+  --status-danger-subtle-fg: oklch(0.45 0.18 28);
+  --status-neutral-subtle: oklch(0.93 0.025 250);
+  --status-neutral-subtle-fg: oklch(0.42 0.04 252);
+  /* Platform badge palette */
+  --platform-amazon: oklch(0.95 0.07 78);
+  --platform-amazon-fg: oklch(0.4 0.1 72);
+  --platform-flipkart: oklch(0.93 0.05 240);
+  --platform-flipkart-fg: oklch(0.35 0.1 245);
+  --platform-nykaa: oklch(0.93 0.05 355);
+  --platform-nykaa-fg: oklch(0.4 0.12 350);
+  --platform-meesho: oklch(0.93 0.05 300);
+  --platform-meesho-fg: oklch(0.38 0.12 295);
+  --platform-other: oklch(0.93 0.025 250);
+  --platform-other-fg: oklch(0.42 0.04 252);
 }
 
 @layer base {
@@ -140,20 +141,25 @@
   .app-bg {
     background-image:
       radial-gradient(
-        circle at 20% 0%,
-        oklch(0.95 0.06 240 / 0.65) 0%,
-        transparent 42%
+        ellipse 120% 80% at 10% -10%,
+        oklch(0.92 0.09 250 / 0.6) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 80% 60% at 90% 100%,
+        oklch(0.93 0.06 340 / 0.25) 0%,
+        transparent 50%
       ),
       linear-gradient(180deg, var(--surface-0) 0%, var(--background) 100%);
   }
 
   .app-shell {
-    @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8;
+    @apply w-full p-0;
   }
 
   .app-title {
     font-family: var(--font-space-grotesk), sans-serif;
-    @apply text-2xl font-semibold tracking-tight sm:text-3xl;
+    @apply text-2xl font-bold tracking-tight sm:text-3xl;
   }
 
   .home-font-primary {
@@ -171,11 +177,132 @@
   .app-panel {
     background: var(--surface-1);
     box-shadow: var(--surface-elevated);
-    @apply rounded-2xl border border-border/80;
+    @apply rounded-2xl border border-border/70;
   }
 
   .app-panel-soft {
     background: var(--surface-2);
     @apply rounded-2xl border border-border/70;
+  }
+
+  /* Auth page background — shared between /login and /signup */
+  .auth-bg {
+    background-image:
+      radial-gradient(
+        80rem 50rem at 5% 5%,
+        oklch(0.92 0.12 250 / 0.55),
+        transparent 50%
+      ),
+      radial-gradient(
+        60rem 40rem at 95% 90%,
+        oklch(0.92 0.08 340 / 0.35),
+        transparent 45%
+      ),
+      radial-gradient(
+        40rem 30rem at 50% 50%,
+        oklch(0.95 0.04 250 / 0.2),
+        transparent 50%
+      );
+  }
+
+  /* Status badges — solid */
+  .badge-success {
+    background: var(--status-success);
+    color: var(--status-success-fg);
+  }
+
+  /* Status tone icons — subtle background + colored icon */
+  .tone-ok {
+    background: var(--status-success-subtle);
+    color: var(--status-success-subtle-fg);
+  }
+  .tone-warn {
+    background: var(--status-warn-subtle);
+    color: var(--status-warn-subtle-fg);
+  }
+  .tone-danger {
+    background: var(--status-danger-subtle);
+    color: var(--status-danger-subtle-fg);
+  }
+  .tone-neutral {
+    background: var(--status-neutral-subtle);
+    color: var(--status-neutral-subtle-fg);
+  }
+
+  /* Platform badges */
+  .badge-platform-amazon {
+    background: var(--platform-amazon);
+    color: var(--platform-amazon-fg);
+  }
+  .badge-platform-flipkart {
+    background: var(--platform-flipkart);
+    color: var(--platform-flipkart-fg);
+  }
+  .badge-platform-nykaa {
+    background: var(--platform-nykaa);
+    color: var(--platform-nykaa-fg);
+  }
+  .badge-platform-meesho {
+    background: var(--platform-meesho);
+    color: var(--platform-meesho-fg);
+  }
+  .badge-platform-other {
+    background: var(--platform-other);
+    color: var(--platform-other-fg);
+  }
+
+  /* Live pulse dot — used on "Active" badges */
+  .pulse-dot {
+    position: relative;
+  }
+  .pulse-dot::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+    70% { box-shadow: 0 0 0 6px currentColor; opacity: 0; }
+    100% { box-shadow: 0 0 0 0 currentColor; opacity: 0; }
+  }
+
+  /* Shake animation for form errors */
+  .animate-shake {
+    animation: shake 0.4s ease-out;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(2px); }
+  }
+
+  /* Gentle float for empty state icons */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* Bold heading — Jersey 10 for playful personality moments */
+  .heading-playful {
+    font-family: var(--font-jersey), sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  /* Decorative dot grid — subtle background texture */
+  .dot-grid {
+    background-image: radial-gradient(oklch(0.85 0.03 250 / 0.4) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 }
