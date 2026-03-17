@@ -84,12 +84,14 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <FadeIn>
-      <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your profile and store settings.
-        </p>
-      </div>
+        <section className="px-5 lg:px-6 py-6 lg:py-8">
+          <div>
+            <h1 className="text-3xl font-bold">Settings</h1>
+            <p className="app-subtitle">
+              Manage your profile and store settings.
+            </p>
+          </div>
+        </section>
       </FadeIn>
 
       {igToast && (

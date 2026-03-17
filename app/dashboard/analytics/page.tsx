@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
       <FadeIn>
         <div className="px-5 py-6 md:px-6 md:py-7">
           <h2 className="text-3xl font-bold">Analytics</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="app-subtitle">
             DM queue performance and engagement metrics
           </p>
         </div>

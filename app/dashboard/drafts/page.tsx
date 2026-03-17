@@ -85,31 +85,33 @@ export default function DraftsPage() {
   return (
     <div className="space-y-6">
       <FadeIn>
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Draft Posts</h1>
-          <p className="text-muted-foreground">
-            Review and publish your reel mappings
-          </p>
-        </div>
-        <Link href="/dashboard/create">
-          <Button size="lg" className="gap-2 sm:self-start">
-            <Plus className="h-4 w-4" />
-            Create New
-          </Button>
-        </Link>
-      </div>
+        <section className="px-5 lg:px-6 py-6 lg:py-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">Draft Posts</h1>
+              <p className="app-subtitle">
+                Review and publish your reel mappings
+              </p>
+            </div>
+            <Link href="/dashboard/create">
+              <Button size="lg" className="gap-2 sm:self-start">
+                <Plus className="h-4 w-4" />
+                Create New
+              </Button>
+            </Link>
+          </div>
+        </section>
       </FadeIn>
 
       {drafts && drafts.length > 0 ? (
         <AnimatedList className="grid grid-cols-1 gap-4">
           {drafts.map((draft) => (
             <AnimatedListItem key={draft._id}>
-            <DraftMappingCard
-              draft={draft}
-              onPublish={setPublishTarget}
-              onDelete={setDeleteTarget}
-            />
+              <DraftMappingCard
+                draft={draft}
+                onPublish={setPublishTarget}
+                onDelete={setDeleteTarget}
+              />
             </AnimatedListItem>
           ))}
         </AnimatedList>

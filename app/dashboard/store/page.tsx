@@ -107,7 +107,7 @@ export default function MyStorePage() {
       <div className="flex w-full min-h-screen">
         <div className="w-full lg:min-w-[60%] lg:border-r border-border/70">
           <FadeIn>
-            <div className="flex max-lg:flex-col lg:flex items-center justify-center lg:items-start gap-4 py-4 px-8">
+            <div className="flex max-lg:flex-col lg:flex items-center justify-center lg:items-start gap-4 px-5 lg:px-6 py-6 lg:py-8">
               <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-primary/20 bg-linear-to-br from-primary/20 to-pink-400/20 p-0.5">
                 <div className="h-full w-full overflow-hidden rounded-full">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

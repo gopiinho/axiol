@@ -82,26 +82,26 @@ export default function ListsPage() {
   return (
     <div className="space-y-5">
       <FadeIn>
-      <section className="px-5 sm:px-6 py-6 md:py-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Collections</h1>
-            <p className="app-subtitle mt-2 max-w-xl">
-              Organize affiliate items into reusable collections and promote them
-              via Instagram reels.
-            </p>
-          </div>
+        <section className="px-5 lg:px-6 py-6 lg:py-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Collections</h1>
+              <p className="app-subtitle">
+                Organize affiliate items into reusable collections and promote
+                them via Instagram reels.
+              </p>
+            </div>
 
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            size="lg"
-            className="gap-2 sm:self-start"
-          >
-            <Plus className="h-4 w-4" />
-            Create New
-          </Button>
-        </div>
-      </section>
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              size="lg"
+              className="gap-2 sm:self-start"
+            >
+              <Plus className="h-4 w-4" />
+              Create New
+            </Button>
+          </div>
+        </section>
       </FadeIn>
 
       {collections.length === 0 ? (
@@ -127,64 +127,72 @@ export default function ListsPage() {
         <AnimatedList className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {collections.map((collection) => (
             <AnimatedListItem key={collection._id}>
-            <Card className="overflow-hidden">
-              <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <CardTitle className="truncate text-lg">
-                      {collection.title}
-                    </CardTitle>
-                    {collection.description && (
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                        {collection.description}
-                      </p>
-                    )}
+              <Card className="overflow-hidden">
+                <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <CardTitle className="truncate text-lg">
+                        {collection.title}
+                      </CardTitle>
+                      {collection.description && (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {collection.description}
+                        </p>
+                      )}
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="rounded-lg px-2.5 py-1"
+                    >
+                      <ShoppingBag className="h-3 w-3" />
+                      Collection
+                    </Badge>
                   </div>
-                  <Badge variant="secondary" className="rounded-lg px-2.5 py-1">
-                    <ShoppingBag className="h-3 w-3" />
-                    Collection
-                  </Badge>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent className="space-y-4 pt-5">
-                <p className="text-xs text-muted-foreground">
-                  Created {new Date(collection.createdAt).toLocaleDateString()}
-                </p>
+                <CardContent className="space-y-4 pt-5">
+                  <p className="text-xs text-muted-foreground">
+                    Created{" "}
+                    {new Date(collection.createdAt).toLocaleDateString()}
+                  </p>
 
-                <div className="flex gap-2">
-                  <Button asChild variant="outline" className="flex-1 gap-1.5">
-                    <Link href={`/dashboard/lists/${collection._id}`}>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Manage Items
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() =>
-                      setEditingCollection({
-                        id: collection._id,
-                        title: collection.title,
-                        description: collection.description,
-                      })
-                    }
-                    aria-label="Edit collection"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setDeleteCollectionId(collection._id)}
-                    aria-label="Delete collection"
-                    className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="flex-1 gap-1.5"
+                    >
+                      <Link href={`/dashboard/lists/${collection._id}`}>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Manage Items
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() =>
+                        setEditingCollection({
+                          id: collection._id,
+                          title: collection.title,
+                          description: collection.description,
+                        })
+                      }
+                      aria-label="Edit collection"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setDeleteCollectionId(collection._id)}
+                      aria-label="Delete collection"
+                      className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </AnimatedListItem>
           ))}
         </AnimatedList>

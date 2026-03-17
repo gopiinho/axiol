@@ -6,9 +6,7 @@ export default function Home() {
     <main className="home-font-primary min-h-screen flex justify-center p-4">
       <div className="w-full max-w-3xl">
         <div className="text-center max-sm:my-12 max-sm:mb-24 sm:my-16 space-y-6">
-          <h1 className="font-secondary text-5xl text-primary sm:text-7xl">
-            linkkit
-          </h1>
+          <h1 className="text-5xl text-primary sm:text-7xl">linkkit</h1>
 
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
             Your affiliate store + Instagram DM automation, all in one place.
