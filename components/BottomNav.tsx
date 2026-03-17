@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, PlusCircle, FileText, Settings, List } from "lucide-react";
+import { Home, PlusCircle, BarChart3, Settings, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function BottomNav() {
@@ -21,9 +21,9 @@ export default function BottomNav() {
       label: "Home",
     },
     {
-      href: "/dashboard/drafts",
-      icon: FileText,
-      label: "Drafts",
+      href: "/dashboard/store",
+      icon: Store,
+      label: "My Store",
     },
     {
       href: "/dashboard/create",
@@ -31,9 +31,9 @@ export default function BottomNav() {
       label: "Create",
     },
     {
-      href: "/dashboard/lists",
-      icon: List,
-      label: "Lists",
+      href: "/dashboard/analytics",
+      icon: BarChart3,
+      label: "Analytics",
     },
     {
       href: "/dashboard/settings",

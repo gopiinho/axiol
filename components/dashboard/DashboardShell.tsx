@@ -4,12 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  BarChart3,
   Home,
   List,
   LogOut,
   PencilRuler,
   Settings,
   Sparkles,
+  Store,
   FileText,
 } from "lucide-react";
 import { clearAuth } from "@/lib/auth";
@@ -29,10 +31,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview", icon: Home },
+  { href: "/dashboard", label: "Home", icon: Home },
+  { href: "/dashboard/store", label: "My Store", icon: Store },
+  { href: "/dashboard/lists", label: "Collections", icon: List },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/create", label: "Create", icon: PencilRuler },
   { href: "/dashboard/drafts", label: "Drafts", icon: FileText },
-  { href: "/dashboard/lists", label: "Collections", icon: List },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -60,8 +64,8 @@ export default function DashboardShell({
 
   return (
     <UserProvider>
-      <div className="min-h-screen  min-w-full">
-        <div className="app-shell  w-full">
+      <div className="min-h-screen min-w-full">
+        <div className="app-shell w-full">
           <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
             <aside className="sticky top-0 h-screen border-r border-border/70 hidden overflow-y-auto lg:block">
               <div className="border-b border-border/70 px-5 py-5">
@@ -115,7 +119,7 @@ export default function DashboardShell({
             </aside>
 
             <section className="min-w-0">
-              <header className="app-panel mb-4 flex items-center justify-between px-4 py-3 sm:px-5 lg:hidden">
+              {/* <header className="app-panel mb-4 flex items-center justify-between px-4 py-3 sm:px-5 lg:hidden">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     Linkkit
@@ -144,9 +148,9 @@ export default function DashboardShell({
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </div>
-              </header>
+              </header> */}
 
-              <main className="p-2 sm:p-4">{children}</main>
+              <main>{children}</main>
             </section>
           </div>
         </div>
