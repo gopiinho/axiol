@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { motion } from "motion/react";
+import { Check } from "lucide-react";
 
 interface StepMeta {
   id: 1 | 2 | 3;
@@ -18,66 +18,136 @@ interface CreateFlowHeaderProps {
   onGoToStep: (step: 1 | 2 | 3) => void;
 }
 
+const easeOutQuart: [number, number, number, number] = [0.25, 1, 0.5, 1];
+
 export default function CreateFlowHeader({
   currentStep,
   stepMeta,
   canContinueFromStep1,
   canContinueFromStep2,
-  onBack,
   onGoToStep,
 }: CreateFlowHeaderProps) {
-  return (
-    <div className="rounded-t-3xl bg-linear-to-br from-pink-50 via-white to-rose-50 p-5 sm:p-6">
-      <div className="w-full flex justify-between items-center">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="mb-3 -ml-2 h-8 px-2"
-          onClick={onBack}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-        <Badge variant="secondary" className="gap-1 font-semibold">
-          {/* <Sparkles className="h-3.5 w-3.5" /> */}
-          Step {currentStep} / 3
-        </Badge>
-      </div>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create New Post</h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Map a reel, select a collection, and monetize to your followers.
-          </p>
-        </div>
-      </div>
+  const isClickable = (stepId: number) => {
+    if (stepId === 1) return true;
+    if (stepId === 2) return canContinueFromStep1;
+    if (stepId === 3) return canContinueFromStep2;
+    return false;
+  };
 
-      <div className="mt-8 flex flex-col sm:grid sm:grid-cols-3 gap-2">
-        {stepMeta.map((step) => (
-          <button
-            key={step.id}
-            type="button"
-            onClick={() => {
-              if (step.id === 1) {
-                onGoToStep(1);
-              } else if (step.id === 2 && canContinueFromStep1) {
-                onGoToStep(2);
-              } else if (step.id === 3 && canContinueFromStep2) {
-                onGoToStep(3);
-              }
-            }}
-            className={`rounded-xl border px-4 py-2 text-left transition ${
-              currentStep === step.id
-                ? "border-pink-400 bg-pink-50"
-                : "border-border bg-white"
-            }`}
-          >
-            <p className="text-[10px] text-muted-foreground">Step {step.id}</p>
-            <p className="truncate text-xs font-medium">{step.title}</p>
-          </button>
-        ))}
-      </div>
+  const isCompleted = (stepId: number) => currentStep > stepId;
+
+  return (
+    <div className="px-5 lg:px-6">
+      <FadeIn>
+        <section className="py-6 lg:py-8">
+          <h1 className="app-title">Create New Post</h1>
+          <p className="app-subtitle mt-1 max-w-md">
+            Set up keyword-triggered auto-DMs for your Instagram reel.
+          </p>
+        </section>
+      </FadeIn>
+
+      <FadeIn delay={0.08}>
+        <nav
+          aria-label="Create flow steps"
+          className="app-panel flex items-stretch gap-0 overflow-hidden p-1.5"
+        >
+          {stepMeta.map((step, i) => {
+            const active = currentStep === step.id;
+            const completed = isCompleted(step.id);
+            const clickable = isClickable(step.id);
+
+            return (
+              <button
+                key={step.id}
+                type="button"
+                disabled={!clickable}
+                onClick={() => clickable && onGoToStep(step.id)}
+                aria-current={active ? "step" : undefined}
+                className={`
+                  group relative flex flex-1 items-center justify-center gap-2.5
+                  rounded-xl px-3 py-3 text-sm font-semibold
+                  transition-colors duration-200
+                  ${
+                    active
+                      ? "text-primary"
+                      : completed
+                        ? "text-foreground/70"
+                        : "text-muted-foreground"
+                  }
+                  ${
+                    clickable && !active
+                      ? "hover:text-foreground cursor-pointer"
+                      : !clickable
+                        ? "cursor-not-allowed opacity-40"
+                        : ""
+                  }
+                `}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="active-step-pill"
+                    className="absolute inset-0 rounded-xl bg-primary/[0.08]"
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 32,
+                      mass: 0.8,
+                    }}
+                  />
+                )}
+
+                <motion.span
+                  className={`
+                    relative z-10 flex h-7 w-7 shrink-0 items-center justify-center
+                    rounded-full text-xs font-bold transition-colors duration-200
+                    ${
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : completed
+                          ? "bg-primary/15 text-primary"
+                          : "bg-muted text-muted-foreground"
+                    }
+                  `}
+                  animate={{
+                    scale: active ? 1 : 0.9,
+                  }}
+                  transition={{
+                    duration: 0.3,
+                    ease: easeOutQuart,
+                  }}
+                >
+                  {completed ? (
+                    <motion.span
+                      initial={{ scale: 0, rotate: -90 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{
+                        duration: 0.35,
+                        ease: easeOutQuart,
+                      }}
+                    >
+                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                    </motion.span>
+                  ) : (
+                    step.id
+                  )}
+                </motion.span>
+
+                <span className="relative z-10 hidden sm:inline">
+                  {step.title}
+                </span>
+
+                {i < stepMeta.length - 1 && (
+                  <span
+                    className="pointer-events-none absolute right-0 top-1/2 h-5 w-px -translate-y-1/2 bg-border"
+                    aria-hidden
+                  />
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </FadeIn>
     </div>
   );
 }
