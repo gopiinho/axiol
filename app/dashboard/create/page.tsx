@@ -323,7 +323,7 @@ export default function CreatePostPage() {
           onGoToStep={goToStep}
         />
 
-        <div className="min-h-135 mb-20 p-4 sm:p-6">
+        <div className="min-h-135 mb-20 px-5 py-4 lg:px-6">
           <AnimatePresence mode="wait" initial={false}>
             {currentStep === 1 && (
               <motion.section

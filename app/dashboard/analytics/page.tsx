@@ -59,18 +59,18 @@ export default function AnalyticsPage() {
   const workerActive = Boolean(queueStats?.workerActive);
 
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div>
       <FadeIn>
-        <div className="px-5 py-6 md:px-6 md:py-7">
-          <h2 className="text-3xl font-bold">Analytics</h2>
-          <p className="app-subtitle">
+        <section className="px-5 lg:px-6 py-6 lg:py-8">
+          <h1 className="app-title">Analytics</h1>
+          <p className="app-subtitle mt-1">
             DM queue performance and engagement metrics
           </p>
-        </div>
+        </section>
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
+        <section className="grid gap-4 px-5 lg:px-6 xl:grid-cols-[1.3fr_1fr]">
           <Card className="overflow-hidden">
             <CardHeader className="border-b border-border/70 bg-secondary/35">
               <div className="flex items-start gap-4">

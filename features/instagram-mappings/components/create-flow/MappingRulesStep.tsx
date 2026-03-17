@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -45,15 +46,20 @@ export default function MappingRulesStep({
   onRemoveKeyword,
 }: MappingRulesStepProps) {
   return (
-    <div className="space-y-5">
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Collection</h2>
-        <p className="text-xs text-muted-foreground">
-          Choose which collection you want to automate DMs for.
-        </p>
+    <div className="space-y-6">
+      {/* Collection */}
+      <div className="space-y-2.5">
+        <div>
+          <Label className="text-base font-semibold">Collection</Label>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Choose which collection you want to automate DMs for.
+          </p>
+        </div>
         <Select
           value={selectedSection}
-          onValueChange={(value) => onSelectSection(value as Id<"collections">)}
+          onValueChange={(value) =>
+            onSelectSection(value as Id<"collections">)
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Choose collection..." />
@@ -68,8 +74,15 @@ export default function MappingRulesStep({
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Trigger Keywords</h2>
+      {/* Keywords */}
+      <div className="space-y-2.5">
+        <div>
+          <Label className="text-base font-semibold">Trigger Keywords</Label>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Separate keywords with commas. Comments matching any keyword trigger
+            a DM.
+          </p>
+        </div>
         <Input
           value={keywordInput}
           onChange={(event) =>
@@ -77,38 +90,38 @@ export default function MappingRulesStep({
           }
           placeholder="link, dm, details"
         />
-        <p className="text-xs text-muted-foreground">
-          Separate keywords with commas. Comments matching any keyword will
-          trigger DMs.
-        </p>
       </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">
-          Saved presets
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {keywordPresets.map((preset) => {
-            const isActive = keywordList.includes(preset);
-            return (
-              <Button
-                key={preset}
-                type="button"
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTogglePreset(preset)}
-                className="h-7 rounded-full px-3 text-xs"
-              >
-                {preset}
-              </Button>
-            );
-          })}
+      {/* Presets */}
+      {keywordPresets.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">
+            Saved presets
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {keywordPresets.map((preset) => {
+              const isActive = keywordList.includes(preset);
+              return (
+                <Button
+                  key={preset}
+                  type="button"
+                  variant={isActive ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onTogglePreset(preset)}
+                  className="h-7 rounded-full px-3 text-xs"
+                >
+                  {preset}
+                </Button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
+      {/* Active keywords */}
       {keywordList.length > 0 && (
-        <div className="rounded-xl border bg-muted/20 p-3">
-          <p className="mb-2 text-xs font-medium text-muted-foreground">
+        <div className="app-panel-soft p-3.5">
+          <p className="mb-2.5 text-xs font-medium text-muted-foreground">
             Active keywords ({keywordList.length})
           </p>
           <div className="flex flex-wrap gap-2">
@@ -116,14 +129,14 @@ export default function MappingRulesStep({
               <Badge
                 key={value}
                 variant="secondary"
-                className="rounded-full px-2 py-1"
+                className="gap-1 rounded-full px-2.5 py-1"
               >
+                {value}
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1"
                   onClick={() => onRemoveKeyword(value)}
+                  className="ml-0.5 rounded-full p-0.5 transition hover:bg-foreground/10"
                 >
-                  <span>{value}</span>
                   <X className="h-3 w-3" />
                 </button>
               </Badge>

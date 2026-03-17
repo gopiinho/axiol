@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Film } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Reel } from "@/features/instagram-mappings/types";
@@ -35,7 +35,7 @@ export default function ReelSelectionStep({
     return (
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold">Select a Reel</h2>
+          <h2 className="text-base font-semibold">Select a Reel</h2>
           <p className="text-sm text-muted-foreground">
             Connect your Instagram to get started.
           </p>
@@ -48,17 +48,28 @@ export default function ReelSelectionStep({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold">Select a Reel</h2>
+        <h2 className="text-base font-semibold">Select a Reel</h2>
         <p className="text-sm text-muted-foreground">
-          Showing the latest {reels.length} reels.
+          {reelsLoading
+            ? "Loading your recent reels..."
+            : `Showing your latest ${reels.length} reels.`}
         </p>
       </div>
 
       {reelsLoading ? (
-        <div className="space-y-3">
-          <div className="h-28 animate-pulse rounded-2xl bg-muted" />
-          <div className="h-28 animate-pulse rounded-2xl bg-muted" />
-          <div className="h-28 animate-pulse rounded-2xl bg-muted" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="overflow-hidden rounded-2xl border border-border bg-card"
+            >
+              <div className="aspect-4/5 animate-pulse bg-muted" />
+              <div className="space-y-2 p-2.5">
+                <div className="h-3 w-4/5 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : reelsError ? (
         <Alert variant="destructive">
@@ -71,57 +82,80 @@ export default function ReelSelectionStep({
           </AlertDescription>
         </Alert>
       ) : reels.length === 0 ? (
-        <Alert>
-          <AlertTitle>No reels found</AlertTitle>
-          <AlertDescription>
+        <div className="app-panel flex flex-col items-center py-14 text-center">
+          <Film className="h-10 w-10 text-muted-foreground/30 animate-float" />
+          <p className="mt-4 text-sm font-medium">No reels found</p>
+          <p className="mt-1 max-w-xs text-xs text-muted-foreground">
             No recent reels are available for this account yet.
-          </AlertDescription>
-        </Alert>
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {reels.map((reel) => (
-            <button
-              type="button"
-              key={reel.id}
-              onClick={() => onSelectReel(reel)}
-              className={`group overflow-hidden rounded-2xl border text-left transition ${
-                selectedReelId === reel.id
-                  ? "border-pink-500 bg-pink-50"
-                  : "border-border bg-card"
-              }`}
-            >
-              <div className="aspect-4/5 overflow-hidden bg-muted">
-                {reel.thumbnailUrl ? (
-                  <Image
-                    src={reel.thumbnailUrl}
-                    alt="Reel"
-                    width={420}
-                    height={520}
-                    className="h-full w-full object-cover transition group-hover:scale-[1.02]"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                    No thumbnail
-                  </div>
-                )}
-              </div>
-              <div className="space-y-2 p-2.5">
-                <p className="line-clamp-2 text-xs font-medium">
-                  {reel.caption}
-                </p>
-                <a
-                  href={reel.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  Open reel
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-            </button>
-          ))}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {reels.map((reel) => {
+            const isSelected = selectedReelId === reel.id;
+            return (
+              <button
+                type="button"
+                key={reel.id}
+                onClick={() => onSelectReel(reel)}
+                className={`group overflow-hidden rounded-2xl border-2 text-left transition-all duration-200 ${
+                  isSelected
+                    ? "border-primary bg-primary/[0.04] shadow-sm"
+                    : "border-transparent bg-card hover:border-border hover:shadow-sm"
+                }`}
+              >
+                <div className="relative aspect-4/5 overflow-hidden bg-muted">
+                  {reel.thumbnailUrl ? (
+                    <Image
+                      src={reel.thumbnailUrl}
+                      alt="Reel"
+                      width={420}
+                      height={520}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                      No thumbnail
+                    </div>
+                  )}
+                  {isSelected && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          strokeWidth={3}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5 p-2.5">
+                  <p className="line-clamp-2 text-xs font-medium leading-snug">
+                    {reel.caption}
+                  </p>
+                  <a
+                    href={reel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    Open reel
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

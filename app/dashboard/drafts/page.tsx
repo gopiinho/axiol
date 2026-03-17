@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import Link from "next/link";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -83,13 +83,13 @@ export default function DraftsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       <FadeIn>
         <section className="px-5 lg:px-6 py-6 lg:py-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold">Draft Posts</h1>
-              <p className="app-subtitle">
+              <h1 className="app-title">Draft Posts</h1>
+              <p className="app-subtitle mt-1">
                 Review and publish your reel mappings
               </p>
             </div>
@@ -103,31 +103,29 @@ export default function DraftsPage() {
         </section>
       </FadeIn>
 
-      {drafts && drafts.length > 0 ? (
-        <AnimatedList className="grid grid-cols-1 gap-4">
-          {drafts.map((draft) => (
-            <AnimatedListItem key={draft._id}>
-              <DraftMappingCard
-                draft={draft}
-                onPublish={setPublishTarget}
-                onDelete={setDeleteTarget}
-              />
-            </AnimatedListItem>
-          ))}
-        </AnimatedList>
-      ) : rawDrafts === undefined ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
+      <div className="px-5 lg:px-6">
+        {drafts && drafts.length > 0 ? (
+          <AnimatedList className="grid grid-cols-1 gap-4">
+            {drafts.map((draft) => (
+              <AnimatedListItem key={draft._id}>
+                <DraftMappingCard
+                  draft={draft}
+                  onPublish={setPublishTarget}
+                  onDelete={setDeleteTarget}
+                />
+              </AnimatedListItem>
+            ))}
+          </AnimatedList>
+        ) : rawDrafts === undefined ? (
+          <div className="app-panel px-6 py-12 text-center text-muted-foreground">
             Loading drafts...
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
+          </div>
+        ) : (
+          <div className="app-panel px-6 py-12 text-center text-muted-foreground">
             No drafts yet. Create your first post!
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
+      </div>
 
       <AlertDialog
         open={publishTarget !== null}

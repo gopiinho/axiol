@@ -80,13 +80,13 @@ export default function ListsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div>
       <FadeIn>
         <section className="px-5 lg:px-6 py-6 lg:py-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Collections</h1>
-              <p className="app-subtitle">
+              <h1 className="app-title">Collections</h1>
+              <p className="app-subtitle mt-1">
                 Organize affiliate items into reusable collections and promote
                 them via Instagram reels.
               </p>
@@ -104,27 +104,28 @@ export default function ListsPage() {
         </section>
       </FadeIn>
 
-      {collections.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="py-14 text-center">
-            <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground animate-float" />
-            <h3 className="mt-4 text-xl font-semibold">No collections yet</h3>
-            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              Create your first collection to start attaching products to
-              Instagram reel replies.
-            </p>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              size="lg"
-              className="mt-6 gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Create your first collection
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <AnimatedList className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="px-5 lg:px-6">
+        {collections.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-14 text-center">
+              <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground animate-float" />
+              <h3 className="mt-4 text-xl font-semibold">No collections yet</h3>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Create your first collection to start attaching products to
+                Instagram reel replies.
+              </p>
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                size="lg"
+                className="mt-6 gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Create your first collection
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <AnimatedList className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {collections.map((collection) => (
             <AnimatedListItem key={collection._id}>
               <Card className="overflow-hidden">
@@ -196,7 +197,8 @@ export default function ListsPage() {
             </AnimatedListItem>
           ))}
         </AnimatedList>
-      )}
+        )}
+      </div>
 
       <CreateSectionModal
         open={showCreateModal}
