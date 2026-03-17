@@ -67,19 +67,30 @@ Instagram creators and influencers monetizing their audience through affiliate m
 
 ### Brand Personality
 
-**Playful, trendy, approachable.** The brand embraces personality without sacrificing professionalism. It should feel modern and cutting-edge, accessible to creators who may not be tech-savvy, and energetic enough to match the fast-paced world of social media.
+**Playful, energetic, approachable.** The brand leans into bold, high-energy social media vibes while remaining accessible to creators who may not be tech-savvy. It should feel modern, cutting-edge, and alive — matching the fast-paced world of Instagram and creator commerce.
+
+### References
+
+- **Linktree / Stan Store** — clean, creator-focused link-in-bio tools with modern UI patterns
+- **Gumroad / Lemon Squeezy** — bold, opinionated creator commerce design with strong personality
 
 ### Aesthetic Direction
 
 - **Light mode only** — optimized for the current OKLCH palette designed for light backgrounds
-- **Modern, approachable visual language** — leverage the pink accent color, Jersey font for headlines, and soft UI patterns (borders, shadows)
+- **Dual accent system** — blue (oklch 0.52 0.2 254) is the primary brand color; pink is a secondary accent for personality moments and highlights
+- **Typography hierarchy** — Manrope for body, Space Grotesk for app titles, DM Sans for landing pages, Jersey 10 for playful accent headings
+- **Motion with purpose** — motion/react library with ease-out-quart curves ([0.25, 1, 0.5, 1]), staggered lists, fade-in-up entrances. Animations should feel snappy and energetic.
 - **Mobile-first mindset** — creators often check comments on phone; ensure responsive, thumb-friendly interactions
 - **Consistency over novelty** — every page should follow established patterns; spacing, interactions, and states should be predictable
+
+### Accessibility
+
+Follow WCAG AA standard best practices. Ensure sufficient color contrast with the OKLCH palette, proper focus indicators (ring style already established), and semantic HTML.
 
 ### Design Principles
 
 1. **Speed & clarity first** — Every feature should prioritize quick understanding and minimal friction. Creators are busy.
-2. **Personality without overload** — Playful branding (fonts, accents, micro-interactions) should enhance, not distract from core tasks.
+2. **Energy without chaos** — Bold colors, confident typography, and lively micro-interactions should make the interface feel alive, not overwhelming.
 3. **Mobile as first-class citizen** — Touch targets, readable text, and intuitive navigation must work seamlessly on phone and tablet.
-4. **Consistent systems over one-offs** — Use design tokens for colors, spacing, and typography. Avoid hard-coded styles and inline customizations.
+4. **Consistent systems over one-offs** — Use design tokens (OKLCH colors, radius scale, spacing) and component patterns (CVA variants, data-slot attributes). Avoid hard-coded styles and inline customizations.
 5. **Trust through clarity** — Clear feedback on actions (loading states, confirmations, error messages) builds confidence in the automation workflow.
