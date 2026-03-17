@@ -67,7 +67,7 @@ export default function DashboardShell({
       <div className="min-h-screen min-w-full">
         <div className="app-shell w-full">
           <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
-            <aside className="sticky top-0 h-screen border-r border-border/70 hidden overflow-y-auto lg:block">
+            <aside className="sticky top-0 h-screen border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
               <div className="border-b border-border/70 px-5 py-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                   Welcome
@@ -79,7 +79,7 @@ export default function DashboardShell({
                 </div>
               </div>
 
-              <nav className="space-y-1.5 p-3">
+              <nav className="flex-1 space-y-1.5 p-3">
                 {NAV_ITEMS.map((item) => {
                   const active =
                     item.href === "/dashboard"

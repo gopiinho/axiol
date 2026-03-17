@@ -269,13 +269,13 @@ export default function MyStorePage() {
           </FadeIn>
         </div>
 
-        <div className="hidden w-full lg:block items-center justify-center h-full">
+        <div className="hidden lg:flex items-center justify-center sticky top-0 w-full h-screen">
           <FadeIn delay={0.15}>
-            <div className="sticky top-10 py-8 h-full">
-              <div className="relative mx-auto w-[320px] rounded-[3rem] border-[6px] border-gray-900 bg-gray-900 shadow-lg">
+            <div className="flex h-[min(85vh,700px)] w-[min(45vh,340px)] flex-col">
+              <div className="relative flex flex-1 flex-col rounded-[3rem] border-[6px] border-gray-900 bg-gray-900 shadow-lg">
                 <div className="absolute left-1/2 top-2 z-20 h-[22px] w-[90px] -translate-x-1/2 rounded-full bg-black" />
 
-                <div className="overflow-hidden rounded-[2.5rem] bg-white">
+                <div className="flex flex-1 flex-col overflow-hidden rounded-[2.5rem] bg-white">
                   <div className="flex items-center justify-between px-6 pt-3 pb-1 text-[9px] font-semibold text-gray-900">
                     <span>9:41</span>
                     <div className="flex items-center gap-1">
@@ -300,7 +300,7 @@ export default function MyStorePage() {
                     {publicUrl || `linkkit.com/${user?.username ?? ""}`}
                   </div>
 
-                  <div className="max-h-[60vh] overflow-y-auto">
+                  <div className="flex-1 overflow-y-auto">
                     <div className="home-font-primary px-3 pb-6">
                       <div className="my-8 space-y-3 text-center">
                         <div className="inline-flex items-center justify-center gap-1.5">
