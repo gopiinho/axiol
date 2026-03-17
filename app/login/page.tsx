@@ -18,6 +18,7 @@ import { setAuthToken } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { FadeIn } from "@/components/motion/FadeIn";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -87,7 +88,7 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="auth-bg pointer-events-none absolute inset-0" />
 
-      <div className="relative z-10 w-full max-w-130 overflow-hidden">
+      <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden" offset={24} duration={0.5}>
         <div className="flex items-center justify-center">
           {/* <section className="hidden border-r border-border/70 bg-secondary/35 p-10 lg:block">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -112,7 +113,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive">
+              <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
                   <p className="text-sm">{error}</p>
@@ -194,7 +195,7 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-      </div>
+      </FadeIn>
     </div>
   );
 }

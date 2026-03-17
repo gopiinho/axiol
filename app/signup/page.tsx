@@ -20,6 +20,7 @@ import { api } from "@/convex/_generated/api";
 import { setAuthToken } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { FadeIn } from "@/components/motion/FadeIn";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -94,7 +95,7 @@ export default function SignupPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="auth-bg pointer-events-none absolute inset-0" />
 
-      <div className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10">
+      <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10" offset={24} duration={0.5}>
         <div className="mb-8 text-center">
           <h2 className="font-accent text-3xl flex text-center items-center justify-center font-semibold tracking-tight">
             Hey @{username ? username : <p className="capitalize">username</p>}
@@ -105,7 +106,7 @@ export default function SignupPage() {
         </div>
 
         {error && (
-          <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive">
+          <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
               <p className="text-sm">{error}</p>
@@ -241,7 +242,7 @@ export default function SignupPage() {
             Login
           </Link>
         </p>
-      </div>
+      </FadeIn>
     </div>
   );
 }

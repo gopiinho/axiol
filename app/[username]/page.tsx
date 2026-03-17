@@ -63,7 +63,7 @@ export default async function UserStorePage({
 
           {collections.length === 0 ? (
             <div className="text-center py-16">
-              <Heart className="w-16 h-16 mx-auto text-pink-300 mb-4" />
+              <Heart className="w-16 h-16 mx-auto text-pink-300 mb-4 animate-float" />
               <p className="text-gray-500 text-lg">
                 building my collection... check back soon!
               </p>

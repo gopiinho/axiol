@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "motion/react";
 import heartPixel from "@/public/icons/heart.png";
 
 interface CollectionsCardProps {
@@ -16,12 +19,18 @@ export default function CollectionsCard({
   index,
 }: CollectionsCardProps) {
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.08,
+        ease: [0.25, 1, 0.5, 1],
+      }}
+    >
     <Link
       href={`/list/${collection._id}`}
-      className="group relative"
-      style={{
-        animationDelay: `${index * 100}ms`,
-      }}
+      className="group relative block"
     >
       <div className="relative w-full bg-white p-6 border-2 border-pink-200 transition-all duration-300 hover:shadow-2xl group-hover:border-pink-300">
         <div className="absolute top-3 right-3">
@@ -74,5 +83,6 @@ export default function CollectionsCard({
         </div>
       </div>
     </Link>
+    </motion.div>
   );
 }

@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useInstagramConnection } from "@/features/instagram-mappings/hooks/useInstagramConnection";
 import ConnectInstagramCTA from "@/features/instagram-mappings/components/ConnectInstagramCTA";
+import { FadeIn } from "@/components/motion/FadeIn";
 
 export default function SettingsPage() {
   const { user: profile, token } = useUser();
@@ -82,12 +83,14 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
+      <FadeIn>
       <div>
         <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground">
           Manage your profile and store settings.
         </p>
       </div>
+      </FadeIn>
 
       {igToast && (
         <div

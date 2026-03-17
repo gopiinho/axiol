@@ -32,6 +32,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { FadeIn } from "@/components/motion/FadeIn";
+import {
+  AnimatedList,
+  AnimatedListItem,
+} from "@/components/motion/AnimatedList";
 
 export default function ListsPage() {
   const { token } = useUser();
@@ -76,6 +81,7 @@ export default function ListsPage() {
 
   return (
     <div className="space-y-5">
+      <FadeIn>
       <section className="px-5 sm:px-6 py-6 md:py-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -96,11 +102,12 @@ export default function ListsPage() {
           </Button>
         </div>
       </section>
+      </FadeIn>
 
       {collections.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-14 text-center">
-            <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground" />
+            <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground animate-float" />
             <h3 className="mt-4 text-xl font-semibold">No lists yet</h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               Create your first collection to start attaching products to
@@ -117,9 +124,10 @@ export default function ListsPage() {
           </CardContent>
         </Card>
       ) : (
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <AnimatedList className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {collections.map((collection) => (
-            <Card key={collection._id} className="overflow-hidden">
+            <AnimatedListItem key={collection._id}>
+            <Card className="overflow-hidden">
               <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -177,8 +185,9 @@ export default function ListsPage() {
                 </div>
               </CardContent>
             </Card>
+            </AnimatedListItem>
           ))}
-        </section>
+        </AnimatedList>
       )}
 
       <CreateSectionModal

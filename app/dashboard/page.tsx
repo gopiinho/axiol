@@ -28,6 +28,11 @@ import { requireSessionToken } from "@/features/auth/client/session";
 import { useUser } from "@/features/auth/client/UserContext";
 import { KpiRow, StatTile } from "@/features/dm-queue/components/Stats";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
+import { FadeIn } from "@/components/motion/FadeIn";
+import {
+  AnimatedList,
+  AnimatedListItem,
+} from "@/components/motion/AnimatedList";
 
 export default function DashboardPage() {
   const { token } = useUser();
@@ -74,6 +79,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-5 md:space-y-6">
+      <FadeIn>
       <div className="overflow-hidden">
         <div className="grid gap-5 px-5 py-6 md:grid-cols-[minmax(0,1fr)_auto] md:px-6 md:py-7">
           <div>
@@ -111,7 +117,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      </FadeIn>
 
+      <FadeIn delay={0.08}>
       <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
         <Card className="overflow-hidden">
           <CardHeader className="border-b border-border/70 bg-secondary/35">
@@ -135,7 +143,7 @@ export default function DashboardPage() {
                       : "bg-muted text-muted-foreground",
                   )}
                 >
-                  {workerActive ? "Active" : "Idle"}
+                  {workerActive ? <><span className="pulse-dot mr-1">&nbsp;&nbsp;</span>Active</> : "Idle"}
                 </Badge>
                 {!workerActive && queueStats && queueStats.pending > 0 && (
                   <Button
@@ -218,7 +226,9 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </section>
+      </FadeIn>
 
+      <FadeIn delay={0.16}>
       <section>
         <div className="mb-3 flex items-center justify-between">
           <div>
@@ -243,9 +253,10 @@ export default function DashboardPage() {
         </div>
 
         {publishedMappings && publishedMappings.length > 0 ? (
-          <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+          <AnimatedList className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
             {publishedMappings.map((mapping) => (
-              <Card key={mapping._id} className="overflow-hidden">
+              <AnimatedListItem key={mapping._id}>
+              <Card className="overflow-hidden">
                 {mapping.thumbnailUrl && (
                   <div className="aspect-video overflow-hidden border-b border-border/70 bg-secondary/40">
                     <Image
@@ -285,12 +296,13 @@ export default function DashboardPage() {
                   </div>
                 </CardContent>
               </Card>
+              </AnimatedListItem>
             ))}
-          </div>
+          </AnimatedList>
         ) : (
           <Card>
             <CardContent className="py-12 text-center">
-              <Sparkles className="mx-auto h-10 w-10 text-muted-foreground" />
+              <Sparkles className="mx-auto h-10 w-10 text-muted-foreground animate-float" />
               <p className="mt-3 text-sm text-muted-foreground">
                 No active mappings yet. Publish a draft to start auto-replies.
               </p>
@@ -304,6 +316,7 @@ export default function DashboardPage() {
           </Card>
         )}
       </section>
+      </FadeIn>
     </div>
   );
 }
