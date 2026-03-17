@@ -55,7 +55,9 @@ export default function CreateSectionModal({
     } catch (error) {
       console.error("Error creating section:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to create list. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Couldn't create this collection. Check your connection and try again.",
       );
     } finally {
       setLoading(false);
@@ -64,25 +66,25 @@ export default function CreateSectionModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
-          <DialogTitle>Create list</DialogTitle>
+          <DialogTitle>Create collection</DialogTitle>
           <DialogDescription>
-            Add a product collection to organize affiliate items.
+            Group your affiliate products so you can link them to reels.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
             <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t create list</AlertTitle>
+              <AlertTitle>Couldn&apos;t create collection</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="title">
-              List name <span className="text-red-500">*</span>
+              Collection name <span className="text-red-500">*</span>
             </Label>
             <Input
               id="title"
@@ -99,7 +101,7 @@ export default function CreateSectionModal({
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add context for this list..."
+              placeholder="What's in this collection?"
               rows={3}
             />
           </div>
@@ -109,7 +111,7 @@ export default function CreateSectionModal({
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !title.trim()}>
-              {loading ? "Creating..." : "Create list"}
+              {loading ? "Creating..." : "Create collection"}
             </Button>
           </DialogFooter>
         </form>

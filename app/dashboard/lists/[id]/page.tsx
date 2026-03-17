@@ -72,7 +72,7 @@ export default function CollectionItemsPage({
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
-          Loading list details...
+          Loading collection...
         </div>
       </div>
     );
@@ -82,9 +82,9 @@ export default function CollectionItemsPage({
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <h2 className="text-2xl font-semibold">List not found</h2>
+          <h2 className="text-2xl font-semibold">Collection not found</h2>
           <Button asChild className="mt-4">
-            <Link href="/dashboard/lists">Back to lists</Link>
+            <Link href="/dashboard/lists">Back to collections</Link>
           </Button>
         </CardContent>
       </Card>
@@ -97,14 +97,14 @@ export default function CollectionItemsPage({
         <Button asChild variant="ghost" size="sm" className="mb-4 gap-1.5">
           <Link href="/dashboard/lists">
             <ArrowLeft className="h-4 w-4" />
-            Back to lists
+            Back to collections
           </Link>
         </Button>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              List Details
+              Collection
             </p>
             <h1 className="app-title mt-2 flex items-center gap-2">
               <ShoppingBasket className="h-7 w-7 text-primary" />
@@ -133,7 +133,7 @@ export default function CollectionItemsPage({
             <ShoppingBasket className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">No items yet</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Add your first affiliate product to this list.
+              Add your first product — these will be sent in auto-DMs to your followers.
             </p>
             <Button
               onClick={() => setShowCreateModal(true)}
@@ -188,7 +188,7 @@ export default function CollectionItemsPage({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this item?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action is permanent and removes the product from this list.
+              This permanently removes the product from this collection.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

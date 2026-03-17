@@ -64,7 +64,7 @@ export default function AnalyticsPage() {
         <section className="px-5 lg:px-6 py-6 lg:py-8">
           <h1 className="app-title">Analytics</h1>
           <p className="app-subtitle mt-1">
-            DM queue performance and engagement metrics
+            See how your auto-DMs are performing
           </p>
         </section>
       </FadeIn>
@@ -80,7 +80,7 @@ export default function AnalyticsPage() {
                     DM Queue
                   </CardTitle>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Worker state and queue processing throughput
+                    How your auto-DM queue is performing
                   </p>
                 </div>
 
@@ -148,7 +148,7 @@ export default function AnalyticsPage() {
                 value={String(queueStats?.failed || 0)}
                 icon={AlertCircle}
                 tone="danger"
-                description="Require retry or review"
+                description="May need your attention"
               />
             </CardContent>
           </Card>
@@ -160,7 +160,7 @@ export default function AnalyticsPage() {
                 Activity (24h)
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Recent engagement and DM delivery indicators
+                Comments and DMs in the last 24 hours
               </p>
             </CardHeader>
             <CardContent className="grid gap-3 pt-5">

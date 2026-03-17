@@ -36,11 +36,11 @@ export default function SettingsPage() {
       });
     } else if (searchParams.get("ig_error")) {
       const errorMap: Record<string, string> = {
-        csrf: "Security check failed. Please try again.",
-        token_exchange: "Failed to connect Instagram. Please try again.",
-        server: "Something went wrong. Please try again.",
-        config: "Instagram app is not configured.",
-        user_denied: "You denied the Instagram permission request.",
+        csrf: "Security verification failed. Close this page and try connecting again.",
+        token_exchange: "Couldn't connect to Instagram. Close this page and try again.",
+        server: "Something unexpected happened. Close this page and try again.",
+        config: "Instagram integration isn't set up yet. Contact support.",
+        user_denied: "You declined the Instagram permission request. Try again when you're ready.",
       };
       const error = searchParams.get("ig_error")!;
       setIgToast({
@@ -61,7 +61,7 @@ export default function SettingsPage() {
         <section className="px-5 py-6 lg:px-6 lg:py-8">
           <h1 className="app-title">Settings</h1>
           <p className="app-subtitle">
-            Manage your account and connected services.
+            Your account and connected services.
           </p>
         </section>
       </FadeIn>
@@ -145,7 +145,7 @@ export default function SettingsPage() {
                     Instagram
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Auto-DM automation & reel comments
+                    Automate DM replies to reel comments
                   </p>
                 </div>
               </div>

@@ -87,8 +87,8 @@ export default function ListsPage() {
             <div>
               <h1 className="app-title">Collections</h1>
               <p className="app-subtitle mt-1">
-                Organize affiliate items into reusable collections and promote
-                them via Instagram reels.
+                Group your products into collections, then link them to your
+                reels for auto-DM.
               </p>
             </div>
 
@@ -111,8 +111,8 @@ export default function ListsPage() {
               <FolderPlus className="mx-auto h-14 w-14 text-primary/40 animate-float" />
               <h3 className="mt-4 text-xl font-bold">No collections yet</h3>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Create your first collection to start attaching products to
-                Instagram reel replies.
+                Group your affiliate products into a collection, then link
+                it to a reel for automatic DM replies.
               </p>
               <Button
                 onClick={() => setShowCreateModal(true)}

@@ -235,7 +235,7 @@ export default function MyStorePage() {
               <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
                 <Sparkles className="mx-auto h-10 w-10 text-muted-foreground/30" />
                 <p className="mt-4 text-sm text-muted-foreground">
-                  No active posts yet. Publish a mapping to see it here.
+                  No active posts yet. Publish a draft to see it here.
                 </p>
                 <Button asChild variant="outline" size="sm" className="mt-5">
                   <Link href="/dashboard/create">Create a post</Link>

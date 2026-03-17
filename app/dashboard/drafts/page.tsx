@@ -90,7 +90,7 @@ export default function DraftsPage() {
             <div>
               <h1 className="app-title">Draft Posts</h1>
               <p className="app-subtitle mt-1">
-                Review and publish your reel mappings
+                Review and publish your auto-DM posts
               </p>
             </div>
             <Link href="/dashboard/create">
@@ -122,7 +122,7 @@ export default function DraftsPage() {
           </div>
         ) : (
           <div className="app-panel px-6 py-12 text-center text-muted-foreground">
-            No drafts yet. Create your first post!
+            No drafts yet — create a post to set up auto-DM for a reel.
           </div>
         )}
       </div>
@@ -135,7 +135,7 @@ export default function DraftsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Publish this draft?</AlertDialogTitle>
             <AlertDialogDescription>
-              Auto-DM will become active for comments matching this keyword.
+              Followers who comment the trigger keyword will start receiving DMs automatically.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -160,7 +160,7 @@ export default function DraftsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this draft?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the draft mapping and cannot be undone.
+              This removes the draft and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -182,7 +182,7 @@ export default function DraftsPage() {
             <SuccessCheckmark className="mb-2" />
             <DialogTitle>Draft published</DialogTitle>
             <DialogDescription>
-              Auto-DM is now active for this reel mapping.
+              Auto-DM is now live — followers who comment the keyword will get a DM.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

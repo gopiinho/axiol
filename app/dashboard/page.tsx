@@ -14,7 +14,7 @@ const QUICK_ACTIONS = [
     href: "/dashboard/create",
     icon: PlusCircle,
     title: "Create Post",
-    description: "Set up a new keyword-triggered auto-DM for your reel",
+    description: "Pick a reel and set up automatic DM replies for commenters",
     accent: "bg-primary/10 text-primary",
   },
   {

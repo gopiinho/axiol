@@ -130,9 +130,9 @@ export default function CreatePostPage() {
 
   const stepMeta = useMemo(
     () => [
-      { id: 1 as const, title: "Select Reel" },
-      { id: 2 as const, title: "Collection + Keyword" },
-      { id: 3 as const, title: "DM + Preview" },
+      { id: 1 as const, title: "Choose Reel" },
+      { id: 2 as const, title: "Rules" },
+      { id: 3 as const, title: "Preview" },
     ],
     [],
   );

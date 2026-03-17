@@ -40,16 +40,16 @@ export default function DmPreviewStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-semibold">DM Config + Preview</h2>
+        <h2 className="text-base font-semibold">Message Settings</h2>
         <p className="text-sm text-muted-foreground">
-          Finalize DM details and check exactly what users receive.
+          Customize what followers receive and preview the DM.
         </p>
       </div>
 
       {/* Config fields */}
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Max Items in DM</Label>
+          <Label className="text-sm font-medium">Products per DM</Label>
           <Input
             type="number"
             min={1}
@@ -58,7 +58,7 @@ export default function DmPreviewStep({
             onChange={(event) => onMaxItemsChange(Number(event.target.value))}
           />
           <p className="text-xs text-muted-foreground">
-            Choose 1 to 20 items for the DM.
+            How many products to include (1–20).
           </p>
         </div>
 
@@ -71,16 +71,16 @@ export default function DmPreviewStep({
             }
           />
           <Label htmlFor="include-link" className="cursor-pointer text-sm">
-            Include website collection link in the DM
+            Add a link to your full collection page
           </Label>
         </div>
       </div>
 
       {!maxItemsValid && (
         <Alert variant="destructive">
-          <AlertTitle>Invalid DM item count</AlertTitle>
+          <AlertTitle>Invalid product count</AlertTitle>
           <AlertDescription>
-            Max items must be a whole number between 1 and 20.
+            Enter a number between 1 and 20.
           </AlertDescription>
         </Alert>
       )}
@@ -102,9 +102,9 @@ export default function DmPreviewStep({
           </div>
         ) : !canPreview ? (
           <Alert>
-            <AlertTitle>Preview unavailable</AlertTitle>
+            <AlertTitle>Preview not ready</AlertTitle>
             <AlertDescription>
-              Select a collection and valid DM item count to generate a preview.
+              Choose a collection above to see what your followers will receive.
             </AlertDescription>
           </Alert>
         ) : previewError ? (
@@ -114,9 +114,9 @@ export default function DmPreviewStep({
           </Alert>
         ) : generatePreview && generatePreview.itemCount === 0 ? (
           <Alert>
-            <AlertTitle>No items in this collection</AlertTitle>
+            <AlertTitle>This collection is empty</AlertTitle>
             <AlertDescription>
-              Add items to this collection to generate a DM preview.
+              Add products to this collection first, then come back to preview the DM.
             </AlertDescription>
           </Alert>
         ) : generatePreview ? (
@@ -143,7 +143,7 @@ export default function DmPreviewStep({
               </Badge>
               {generatePreview.characterCount > 1000 && (
                 <span className="text-xs font-medium text-destructive">
-                  Message will be truncated
+                  Instagram may cut off this message
                 </span>
               )}
             </div>

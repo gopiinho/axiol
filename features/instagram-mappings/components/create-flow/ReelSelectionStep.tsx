@@ -86,7 +86,7 @@ export default function ReelSelectionStep({
           <Film className="h-10 w-10 text-muted-foreground/30 animate-float" />
           <p className="mt-4 text-sm font-medium">No reels found</p>
           <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-            No recent reels are available for this account yet.
+            Post a reel on Instagram first, then come back to set up auto-DMs.
           </p>
         </div>
       ) : (

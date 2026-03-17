@@ -42,7 +42,7 @@ export default function CreateFlowHeader({
         <section className="py-6 lg:py-8">
           <h1 className="app-title">Create New Post</h1>
           <p className="app-subtitle mt-1 max-w-md">
-            Set up keyword-triggered auto-DMs for your Instagram reel.
+            Pick a reel, choose a collection, and set the keyword that triggers auto-DMs.
           </p>
         </section>
       </FadeIn>

@@ -52,7 +52,7 @@ export default function MappingRulesStep({
         <div>
           <Label className="text-base font-semibold">Collection</Label>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Choose which collection you want to automate DMs for.
+            Which product collection should followers receive in the DM?
           </p>
         </div>
         <Select
@@ -79,8 +79,8 @@ export default function MappingRulesStep({
         <div>
           <Label className="text-base font-semibold">Trigger Keywords</Label>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Separate keywords with commas. Comments matching any keyword trigger
-            a DM.
+            When someone comments any of these words on your reel, they get a DM.
+            Separate with commas.
           </p>
         </div>
         <Input

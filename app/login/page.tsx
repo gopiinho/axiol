@@ -75,7 +75,7 @@ export default function LoginPage() {
       } else if (errorMessage.includes("attempt")) {
         setError(errorMessage);
       } else {
-        setError("An error occurred during login. Please try again.");
+        setError("Something unexpected happened. Check your connection and try again.");
       }
     } finally {
       setLoading(false);

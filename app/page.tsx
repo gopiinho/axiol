@@ -83,10 +83,10 @@ export default function Home() {
                 <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-accent text-accent-foreground">
                   <Zap className="h-5 w-5" strokeWidth={2.5} />
                 </div>
-                <h3 className="text-lg font-bold">Auto-DM magic</h3>
+                <h3 className="text-lg font-bold">Automatic replies</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   When followers comment your keyword on a reel, they
-                  automatically get a DM with your curated product links.
+                  instantly get a DM with your product links.
                 </p>
               </div>
             </div>
