@@ -46,7 +46,7 @@ export default async function CollectionPage({
   }
 
   return (
-    <main className="min-h-screen flex justify-center p-4">
+    <main className="home-font-primary min-h-screen flex justify-center p-4">
       <ListViewTracker
         collectionId={collectionId}
         collectionTitle={collection.title}
@@ -70,13 +70,13 @@ export default async function CollectionPage({
         </div>
 
         {items.length === 0 ? (
-          <div className="text-center py-16 bg-pink-50 backdrop-blur-sm border-2 border-pink-100 shadow-xl">
+          <div className="text-center py-16 bg-pink-50 backdrop-blur-sm rounded-2xl border-2 border-pink-100 shadow-xl">
             <p className="text-gray-600 text-sm">
               No items in this collection yet :(
             </p>
           </div>
         ) : (
-          <div className="p-6 bg-pink-50">
+          <div className="p-6 bg-pink-50 rounded-2xl">
             <div className="grid max-sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((item, index) => (
                 <AffiliateItemLink
@@ -93,7 +93,7 @@ export default async function CollectionPage({
                     animationDelay: `${index * 50}ms`,
                   }}
                 >
-                  <div className="relative overflow-hidden border-2 border-pink-200 transition-all duration-300 hover:shadow-2xl hover:border-pink-300">
+                  <div className="relative overflow-hidden rounded-2xl border-2 border-pink-200 transition-all duration-300 hover:shadow-2xl hover:border-pink-300">
                     <div className="absolute top-3 right-3 z-10">
                       {platformLogos[item.platform] ? (
                         <div className="bg-white rounded-lg shadow-lg p-2 border border-gray-200">
@@ -159,7 +159,7 @@ export default async function CollectionPage({
               ))}
             </div>
             <div className="text-primary w-full">
-              <div className="text-center flex flex-col items-center justify-center mt-8 text-[0.6rem]">
+              <div className="text-center flex flex-col items-center justify-center mt-8 text-[0.65rem]">
                 <p>
                   If you purchase from any of these links, I may receive a small
                   commission.

@@ -10,7 +10,6 @@ import {
   LogOut,
   PencilRuler,
   Settings,
-  Sparkles,
   Store,
   FileText,
 } from "lucide-react";
@@ -119,37 +118,6 @@ export default function DashboardShell({
             </aside>
 
             <section className="min-w-0">
-              {/* <header className="app-panel mb-4 flex items-center justify-between px-4 py-3 sm:px-5 lg:hidden">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                    Linkkit
-                  </p>
-                  <p className="font-accent text-lg font-semibold">Dashboard</p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    asChild
-                    size="sm"
-                    variant="ghost"
-                    className="h-9 rounded-lg px-3"
-                  >
-                    <Link href="/dashboard/create">
-                      <Sparkles className="h-4 w-4" />
-                      Create
-                    </Link>
-                  </Button>
-                  <Button
-                    onClick={() => setLogoutOpen(true)}
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label="Log out"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </div>
-              </header> */}
-
               <main>{children}</main>
             </section>
           </div>

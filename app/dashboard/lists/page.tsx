@@ -73,7 +73,7 @@ export default function ListsPage() {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <div className="app-panel px-6 py-5 text-sm text-muted-foreground">
-          Loading lists...
+          Loading collections...
         </div>
       </div>
     );
@@ -87,8 +87,8 @@ export default function ListsPage() {
           <div>
             <h1 className="text-3xl font-bold">Collections</h1>
             <p className="app-subtitle mt-2 max-w-xl">
-              Organize affiliate items into reusable lists and promote them via
-              instagram reels.
+              Organize affiliate items into reusable collections and promote them
+              via Instagram reels.
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export default function ListsPage() {
         <Card className="border-dashed">
           <CardContent className="py-14 text-center">
             <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground animate-float" />
-            <h3 className="mt-4 text-xl font-semibold">No lists yet</h3>
+            <h3 className="mt-4 text-xl font-semibold">No collections yet</h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               Create your first collection to start attaching products to
               Instagram reel replies.
@@ -119,7 +119,7 @@ export default function ListsPage() {
               className="mt-6 gap-2"
             >
               <Plus className="h-4 w-4" />
-              Create your first list
+              Create your first collection
             </Button>
           </CardContent>
         </Card>
@@ -142,7 +142,7 @@ export default function ListsPage() {
                   </div>
                   <Badge variant="secondary" className="rounded-lg px-2.5 py-1">
                     <ShoppingBag className="h-3 w-3" />
-                    List
+                    Collection
                   </Badge>
                 </div>
               </CardHeader>
@@ -169,7 +169,7 @@ export default function ListsPage() {
                         description: collection.description,
                       })
                     }
-                    aria-label="Edit list"
+                    aria-label="Edit collection"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -177,7 +177,7 @@ export default function ListsPage() {
                     variant="outline"
                     size="icon"
                     onClick={() => setDeleteCollectionId(collection._id)}
-                    aria-label="Delete list"
+                    aria-label="Delete collection"
                     className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -209,9 +209,9 @@ export default function ListsPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this list?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this collection?</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently removes the list and all items inside it.
+              This permanently removes the collection and all items inside it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -223,7 +223,7 @@ export default function ListsPage() {
               }
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete list"}
+              {isDeleting ? "Deleting..." : "Delete collection"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

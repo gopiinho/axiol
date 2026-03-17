@@ -10,13 +10,11 @@ import {
   Loader2,
   Lock,
   Mail,
-  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/convex/_generated/api";
 import { setAuthToken } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
 
@@ -88,113 +86,98 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="auth-bg pointer-events-none absolute inset-0" />
 
-      <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden" offset={24} duration={0.5}>
-        <div className="flex items-center justify-center">
-          {/* <section className="hidden border-r border-border/70 bg-secondary/35 p-10 lg:block">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              Welcome to,
-            </p>
-            <h1 className="mt-3 font-accent text-7xl font-semibold leading-tight">
-              Linkkit
-            </h1>
-            <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              Turn your following into a sales machine.
-            </p>
-          </section> */}
-
-          <div className="p-6 sm:p-10 w-full">
-            <div className="mb-8 text-center">
-              <h2 className="font-accent text-3xl flex text-center items-center justify-center font-semibold tracking-tight">
-                Welcome back!
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Access your admin workspace.
-              </p>
-            </div>
-
-            {error && (
-              <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-                  <p className="text-sm">{error}</p>
-                </div>
-              </div>
-            )}
-
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <div className="space-y-2">
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email or Username"
-                    required
-                    disabled={loading}
-                    className="pl-10 h-12"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    required
-                    minLength={12}
-                    disabled={loading}
-                    className="pl-10 pr-10 h-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute top-1/2 right-3.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={loading}
-                size="lg"
-                className="w-full mt-6 "
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Logging in...
-                  </>
-                ) : (
-                  "Login"
-                )}
-              </Button>
-            </form>
-
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/signup"
-                className="font-medium text-primary hover:underline"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
+      <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10" offset={24} duration={0.5}>
+        <div className="mb-8 text-center">
+          <h2 className="font-accent text-3xl font-semibold tracking-tight">
+            Welcome back!
+          </h2>
+          <p className="text-xl text-muted-foreground">
+            Access your admin workspace.
+          </p>
         </div>
+
+        {error && (
+          <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+              <p className="text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <div className="relative">
+              <Mail className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email or Username"
+                required
+                disabled={loading}
+                className="pl-10 h-12"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="relative">
+              <Lock className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                minLength={12}
+                disabled={loading}
+                className="pl-10 pr-10 h-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute top-1/2 right-3.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={loading}
+            size="lg"
+            className="w-full mt-6"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-primary hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
       </FadeIn>
     </div>
   );

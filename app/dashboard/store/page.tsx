@@ -6,14 +6,11 @@ import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import {
   ArrowUpRight,
-  Check,
-  Copy,
   ExternalLink,
   Globe,
   Heart,
   Instagram,
   Pencil,
-  Smartphone,
   Sparkles,
   Youtube,
 } from "lucide-react";
@@ -66,7 +63,6 @@ export default function MyStorePage() {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const openEditModal = () => {
     setName(user?.name ?? "");
@@ -99,13 +95,6 @@ export default function MyStorePage() {
   const publicUrl = user?.username
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/${user.username}`
     : "";
-
-  const handleCopyUrl = async () => {
-    if (!publicUrl) return;
-    await navigator.clipboard.writeText(publicUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const socialLinks = [
     { url: user?.instagramUrl, icon: Instagram, label: "Instagram" },
@@ -189,19 +178,6 @@ export default function MyStorePage() {
                           View Store
                         </Link>
                       </Button>
-                      {/* <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleCopyUrl}
-                        className="gap-1.5"
-                      >
-                        {copied ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                        {copied ? "Copied!" : "Copy URL"}
-                      </Button> */}
                     </>
                   )}
                 </div>
