@@ -130,9 +130,9 @@ export default function CreatePostPage() {
 
   const stepMeta = useMemo(
     () => [
-      { id: 1 as const, title: "Select Reel" },
-      { id: 2 as const, title: "Collection + Keyword" },
-      { id: 3 as const, title: "DM + Preview" },
+      { id: 1 as const, title: "Choose Reel" },
+      { id: 2 as const, title: "Rules" },
+      { id: 3 as const, title: "Preview" },
     ],
     [],
   );
@@ -312,7 +312,7 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="mx-auto w-full pb-44 md:pb-28">
+    <div className="mx-auto w-full">
       <div className="overflow-hidden">
         <CreateFlowHeader
           currentStep={currentStep}
@@ -323,15 +323,15 @@ export default function CreatePostPage() {
           onGoToStep={goToStep}
         />
 
-        <div className="min-h-135 p-4 sm:p-6">
+        <div className="min-h-135 mb-20 px-5 py-4 lg:px-6">
           <AnimatePresence mode="wait" initial={false}>
             {currentStep === 1 && (
               <motion.section
                 key="step-1"
-                initial={{ opacity: 0, x: direction > 0 ? 36 : -36 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: direction > 0 ? -36 : 36 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
+                initial={{ opacity: 0, x: direction > 0 ? 24 : -24, filter: "blur(4px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, x: direction > 0 ? -24 : 24, filter: "blur(4px)" }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
               >
                 <ReelSelectionStep
                   reels={reels}
@@ -348,10 +348,10 @@ export default function CreatePostPage() {
             {currentStep === 2 && (
               <motion.section
                 key="step-2"
-                initial={{ opacity: 0, x: direction > 0 ? 36 : -36 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: direction > 0 ? -36 : 36 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
+                initial={{ opacity: 0, x: direction > 0 ? 24 : -24, filter: "blur(4px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, x: direction > 0 ? -24 : 24, filter: "blur(4px)" }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
               >
                 <MappingRulesStep
                   sections={sections ?? undefined}
@@ -371,10 +371,10 @@ export default function CreatePostPage() {
             {currentStep === 3 && (
               <motion.section
                 key="step-3"
-                initial={{ opacity: 0, x: direction > 0 ? 36 : -36 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: direction > 0 ? -36 : 36 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
+                initial={{ opacity: 0, x: direction > 0 ? 24 : -24, filter: "blur(4px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, x: direction > 0 ? -24 : 24, filter: "blur(4px)" }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
               >
                 <DmPreviewStep
                   maxItemsInDM={maxItemsInDM}

@@ -82,7 +82,7 @@ export default function EditItemModal({
     } catch (error) {
       console.error("Error updating item:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to update item. Please try again."
+        error instanceof Error ? error.message : "Couldn't save changes. Check your connection and try again."
       );
     } finally {
       setLoading(false);
@@ -94,7 +94,7 @@ export default function EditItemModal({
       <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit item</DialogTitle>
-          <DialogDescription>Update item details for this list.</DialogDescription>
+          <DialogDescription>Update the product details.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

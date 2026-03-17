@@ -61,7 +61,9 @@ export default function EditSectionModal({
     } catch (error) {
       console.error("Error updating section:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to update list. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Couldn't save changes. Check your connection and try again.",
       );
     } finally {
       setLoading(false);
@@ -70,23 +72,25 @@ export default function EditSectionModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
-          <DialogTitle>Edit list</DialogTitle>
-          <DialogDescription>Update the list details.</DialogDescription>
+          <DialogTitle>Edit collection</DialogTitle>
+          <DialogDescription>
+            Update the collection name or description.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
             <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t update list</AlertTitle>
+              <AlertTitle>Couldn&apos;t save changes</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="edit-title">
-              List name <span className="text-red-500">*</span>
+              Collection name <span className="text-red-500">*</span>
             </Label>
             <Input
               id="edit-title"
@@ -102,7 +106,7 @@ export default function EditSectionModal({
               id="edit-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add context for this list..."
+              placeholder="What's in this collection?"
               rows={3}
             />
           </div>

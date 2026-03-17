@@ -68,17 +68,15 @@ export default function DashboardShell({
           <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
             <aside className="sticky top-0 h-screen border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
               <div className="border-b border-border/70 px-5 py-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                  Welcome
+                <h1 className="heading-playful text-3xl text-primary">
+                  linkkit
+                </h1>
+                <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  Dashboard
                 </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <h1 className="font-accent text-xl font-semibold">
-                    Dashboard
-                  </h1>
-                </div>
               </div>
 
-              <nav className="flex-1 space-y-1.5 p-3">
+              <nav className="flex-1 space-y-1 p-3">
                 {NAV_ITEMS.map((item) => {
                   const active =
                     item.href === "/dashboard"
@@ -92,13 +90,13 @@ export default function DashboardShell({
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-medium transition",
+                        "flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
                         active
-                          ? "border-primary/30 bg-primary/10 text-primary"
-                          : "border-transparent text-muted-foreground hover:border-border hover:bg-card hover:text-foreground",
+                          ? "border-primary/25 bg-primary/10 text-primary shadow-[0_2px_8px_-4px_oklch(0.5_0.22_254/0.25)]"
+                          : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-card hover:text-foreground",
                       )}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className={cn("h-4 w-4", active && "stroke-[2.5]")} />
                       {item.label}
                     </Link>
                   );

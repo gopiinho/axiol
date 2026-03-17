@@ -96,11 +96,11 @@ export default function SignupPage() {
       <div className="auth-bg pointer-events-none absolute inset-0" />
 
       <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10" offset={24} duration={0.5}>
-        <div className="mb-8 text-center">
-          <h2 className="font-accent text-3xl flex text-center items-center justify-center font-semibold tracking-tight">
+        <div className="mb-10 text-center">
+          <h2 className="font-accent text-3xl flex text-center items-center justify-center font-bold tracking-tight sm:text-4xl">
             Hey @{username ? username : <p className="capitalize">username</p>}
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="mt-2 text-lg text-muted-foreground sm:text-xl">
             Let&apos;s monetize your following!
           </p>
         </div>

@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 interface DmPreviewData {
   message: string;
@@ -37,63 +38,73 @@ export default function DmPreviewStep({
   onIncludeWebsiteLinkChange,
 }: DmPreviewStepProps) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold">DM Config + Preview</h2>
+        <h2 className="text-base font-semibold">Message Settings</h2>
         <p className="text-sm text-muted-foreground">
-          Finalize DM details and check exactly what users receive.
+          Customize what followers receive and preview the DM.
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label>Max Items in DM</Label>
-        <Input
-          type="number"
-          min={1}
-          max={20}
-          value={maxItemsInDM}
-          onChange={(event) => onMaxItemsChange(Number(event.target.value))}
-        />
-        <p className="text-xs text-muted-foreground">Choose 1 to 20 items for the DM.</p>
-      </div>
+      {/* Config fields */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Products per DM</Label>
+          <Input
+            type="number"
+            min={1}
+            max={20}
+            value={maxItemsInDM}
+            onChange={(event) => onMaxItemsChange(Number(event.target.value))}
+          />
+          <p className="text-xs text-muted-foreground">
+            How many products to include (1–20).
+          </p>
+        </div>
 
-      <div className="flex items-center space-x-2 rounded-xl border p-3">
-        <Checkbox
-          id="include-link"
-          checked={includeWebsiteLink}
-          onCheckedChange={(checked) => onIncludeWebsiteLinkChange(checked as boolean)}
-        />
-        <Label htmlFor="include-link" className="cursor-pointer text-sm">
-          Include website collection link in the DM
-        </Label>
+        <div className="flex items-center gap-2.5 rounded-xl border border-border/70 px-3.5 py-3">
+          <Checkbox
+            id="include-link"
+            checked={includeWebsiteLink}
+            onCheckedChange={(checked) =>
+              onIncludeWebsiteLinkChange(checked as boolean)
+            }
+          />
+          <Label htmlFor="include-link" className="cursor-pointer text-sm">
+            Add a link to your full collection page
+          </Label>
+        </div>
       </div>
 
       {!maxItemsValid && (
         <Alert variant="destructive">
-          <AlertTitle>Invalid DM item count</AlertTitle>
+          <AlertTitle>Invalid product count</AlertTitle>
           <AlertDescription>
-            Max items must be a whole number between 1 and 20.
+            Enter a number between 1 and 20.
           </AlertDescription>
         </Alert>
       )}
 
-      <div className="rounded-2xl border bg-muted/20 p-3">
-        <div className="mb-2 flex items-center gap-2">
-          <Eye className="h-4 w-4" />
-          <Label>Message Preview</Label>
+      {/* Preview */}
+      <div className="app-panel-soft p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <Eye className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-sm font-medium">Message Preview</Label>
         </div>
 
         {previewLoading ? (
-          <div className="space-y-2 rounded-xl border bg-background p-3">
-            <div className="h-4 w-full animate-pulse rounded bg-muted" />
-            <div className="h-4 w-4/5 animate-pulse rounded bg-muted" />
-            <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+          <div className="space-y-2 rounded-xl border border-border/70 bg-background p-4">
+            <div className="h-3.5 w-full animate-pulse rounded bg-muted" />
+            <div className="h-3.5 w-4/5 animate-pulse rounded bg-muted" />
+            <div className="h-3.5 w-3/5 animate-pulse rounded bg-muted" />
+            <div className="mt-3 h-3.5 w-full animate-pulse rounded bg-muted" />
+            <div className="h-3.5 w-2/3 animate-pulse rounded bg-muted" />
           </div>
         ) : !canPreview ? (
           <Alert>
-            <AlertTitle>Preview unavailable</AlertTitle>
+            <AlertTitle>Preview not ready</AlertTitle>
             <AlertDescription>
-              Select a collection and valid DM item count to generate a preview.
+              Choose a collection above to see what your followers will receive.
             </AlertDescription>
           </Alert>
         ) : previewError ? (
@@ -103,29 +114,40 @@ export default function DmPreviewStep({
           </Alert>
         ) : generatePreview && generatePreview.itemCount === 0 ? (
           <Alert>
-            <AlertTitle>No items in this collection</AlertTitle>
+            <AlertTitle>This collection is empty</AlertTitle>
             <AlertDescription>
-              Add items to this collection to generate a DM preview.
+              Add products to this collection first, then come back to preview the DM.
             </AlertDescription>
           </Alert>
         ) : generatePreview ? (
-          <>
+          <div className="space-y-3">
             <Textarea
               value={generatePreview.message}
               readOnly
               rows={12}
-              className="bg-background font-mono text-xs"
+              className="border-border/70 bg-background font-mono text-xs leading-relaxed"
             />
-            <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span>Items: {generatePreview.itemCount}</span>
-              <span>Characters: {generatePreview.characterCount}/1000</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="text-xs">
+                {generatePreview.itemCount} items
+              </Badge>
+              <Badge
+                variant="secondary"
+                className={`text-xs ${
+                  generatePreview.characterCount > 1000
+                    ? "tone-danger"
+                    : ""
+                }`}
+              >
+                {generatePreview.characterCount}/1000 chars
+              </Badge>
               {generatePreview.characterCount > 1000 && (
-                <span className="font-medium text-destructive">
-                  Too long: message will be truncated
+                <span className="text-xs font-medium text-destructive">
+                  Instagram may cut off this message
                 </span>
               )}
             </div>
-          </>
+          </div>
         ) : null}
       </div>
     </div>

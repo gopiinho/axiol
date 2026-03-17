@@ -59,18 +59,18 @@ export default function AnalyticsPage() {
   const workerActive = Boolean(queueStats?.workerActive);
 
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div>
       <FadeIn>
-        <div className="px-5 py-6 md:px-6 md:py-7">
-          <h2 className="text-3xl font-bold">Analytics</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            DM queue performance and engagement metrics
+        <section className="px-5 lg:px-6 py-6 lg:py-8">
+          <h1 className="app-title">Analytics</h1>
+          <p className="app-subtitle mt-1">
+            See how your auto-DMs are performing
           </p>
-        </div>
+        </section>
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
+        <section className="grid gap-4 px-5 lg:px-6 xl:grid-cols-[1.3fr_1fr]">
           <Card className="overflow-hidden">
             <CardHeader className="border-b border-border/70 bg-secondary/35">
               <div className="flex items-start gap-4">
@@ -80,7 +80,7 @@ export default function AnalyticsPage() {
                     DM Queue
                   </CardTitle>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Worker state and queue processing throughput
+                    How your auto-DM queue is performing
                   </p>
                 </div>
 
@@ -148,7 +148,7 @@ export default function AnalyticsPage() {
                 value={String(queueStats?.failed || 0)}
                 icon={AlertCircle}
                 tone="danger"
-                description="Require retry or review"
+                description="May need your attention"
               />
             </CardContent>
           </Card>
@@ -160,7 +160,7 @@ export default function AnalyticsPage() {
                 Activity (24h)
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Recent engagement and DM delivery indicators
+                Comments and DMs in the last 24 hours
               </p>
             </CardHeader>
             <CardContent className="grid gap-3 pt-5">

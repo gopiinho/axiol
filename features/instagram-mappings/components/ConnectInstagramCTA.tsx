@@ -35,8 +35,8 @@ export default function ConnectInstagramCTA({
         </h3>
         <p className="max-w-sm text-sm text-muted-foreground">
           {isExpired
-            ? "Your Instagram connection has expired. Reconnect to continue using DM automations."
-            : "Connect your Instagram account to fetch your reels and enable DM automations."}
+            ? "Your Instagram session expired. Reconnect to keep auto-DMs running."
+            : "Link your Instagram to pull in your reels and start sending auto-DMs."}
         </p>
       </div>
 

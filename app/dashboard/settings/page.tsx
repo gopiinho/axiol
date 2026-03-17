@@ -1,36 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
-import { useUser } from "@/features/auth/client/UserContext";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  ExternalLink,
-  Save,
   Instagram,
   CheckCircle2,
   AlertTriangle,
+  RefreshCw,
+  Shield,
+  Clock,
+  X,
 } from "lucide-react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/features/auth/client/UserContext";
 import { useInstagramConnection } from "@/features/instagram-mappings/hooks/useInstagramConnection";
 import ConnectInstagramCTA from "@/features/instagram-mappings/components/ConnectInstagramCTA";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { AnimatePresence, motion } from "motion/react";
 
 export default function SettingsPage() {
-  const { user: profile, token } = useUser();
+  const { user: profile } = useUser();
   const searchParams = useSearchParams();
   const ig = useInstagramConnection();
-  const updateProfile = useMutation(api.users.updateProfile);
-  const [saving, setSaving] = useState(false);
-  const [name, setName] = useState<string | null>(null);
-  const [bio, setBio] = useState<string | null>(null);
   const [igToast, setIgToast] = useState<{
     type: "success" | "error";
     message: string;
@@ -44,11 +36,11 @@ export default function SettingsPage() {
       });
     } else if (searchParams.get("ig_error")) {
       const errorMap: Record<string, string> = {
-        csrf: "Security check failed. Please try again.",
-        token_exchange: "Failed to connect Instagram. Please try again.",
-        server: "Something went wrong. Please try again.",
-        config: "Instagram app is not configured.",
-        user_denied: "You denied the Instagram permission request.",
+        csrf: "Security verification failed. Close this page and try connecting again.",
+        token_exchange: "Couldn't connect to Instagram. Close this page and try again.",
+        server: "Something unexpected happened. Close this page and try again.",
+        config: "Instagram integration isn't set up yet. Contact support.",
+        user_denied: "You declined the Instagram permission request. Try again when you're ready.",
       };
       const error = searchParams.get("ig_error")!;
       setIgToast({
@@ -58,214 +50,204 @@ export default function SettingsPage() {
     }
   }, [searchParams]);
 
-  const displayName = name ?? profile?.name ?? "";
-  const displayBio = bio ?? profile?.bio ?? "";
-
-  const handleSave = async () => {
-    if (!token) return;
-    setSaving(true);
-    try {
-      await updateProfile({
-        token,
-        name: displayName,
-        bio: displayBio,
-      });
-      setName(null);
-      setBio(null);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const hasChanges =
-    (name !== null && name !== profile?.name) ||
-    (bio !== null && bio !== profile?.bio);
+  const subscriptionLabel =
+    profile?.subscriptionStatus === "trial" && profile?.trialEndsAt
+      ? `Trial — ends ${new Date(profile.trialEndsAt).toLocaleDateString()}`
+      : (profile?.subscriptionStatus ?? "N/A");
 
   return (
-    <div className="space-y-6">
+    <div className="w-full">
       <FadeIn>
-      <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your profile and store settings.
-        </p>
-      </div>
+        <section className="px-5 py-6 lg:px-6 lg:py-8">
+          <h1 className="app-title">Settings</h1>
+          <p className="app-subtitle">
+            Your account and connected services.
+          </p>
+        </section>
       </FadeIn>
 
-      {igToast && (
-        <div
-          className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm ${
-            igToast.type === "success"
-              ? "border-green-200 bg-green-50 text-green-800"
-              : "border-red-200 bg-red-50 text-red-800"
-          }`}
-        >
-          {igToast.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-          ) : (
-            <AlertTriangle className="h-4 w-4 shrink-0" />
-          )}
-          {igToast.message}
-          <button
-            onClick={() => setIgToast(null)}
-            className="ml-auto text-current opacity-60 hover:opacity-100"
+      <AnimatePresence>
+        {igToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+            className="mx-5 mb-4 lg:mx-6"
           >
-            &times;
-          </button>
-        </div>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Name</Label>
-            <Input
-              value={displayName}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Bio</Label>
-            <Textarea
-              value={displayBio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell people about yourself..."
-              rows={3}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Button
-              onClick={handleSave}
-              disabled={saving || !hasChanges}
-              className="gap-2"
+            <div
+              className={`flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium ${
+                igToast.type === "success" ? "tone-ok" : "tone-danger"
+              }`}
             >
-              <Save className="h-4 w-4" />
-              {saving ? "Saving..." : "Save changes"}
-            </Button>
+              {igToast.type === "success" ? (
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+              ) : (
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+              )}
+              <span className="flex-1">{igToast.message}</span>
+              <button
+                onClick={() => setIgToast(null)}
+                className="shrink-0 rounded-md p-0.5 opacity-60 transition hover:opacity-100"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            {profile?.username && (
-              <Button asChild variant="outline" className="gap-2">
-                <Link href={`/${profile.username}`} target="_blank">
-                  <ExternalLink className="h-4 w-4" />
-                  View your store
-                </Link>
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <FadeIn delay={0.06}>
+        <section className="px-5 lg:px-6">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Account
+          </h2>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Account</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Username</p>
-              <p className="text-sm text-muted-foreground">
-                @{profile?.username}
-              </p>
+          <div className="mt-4 divide-y divide-border/70">
+            <SettingsRow
+              label="Username"
+              value={`@${profile?.username ?? ""}`}
+            />
+            <SettingsRow label="Email" value={profile?.email ?? ""} />
+            <div className="flex items-center justify-between py-3.5">
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Subscription
+                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {subscriptionLabel}
+                </p>
+              </div>
+              <Badge variant="secondary" className="capitalize">
+                {profile?.subscriptionStatus ?? "N/A"}
+              </Badge>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Email</p>
-              <p className="text-sm text-muted-foreground">{profile?.email}</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Subscription</p>
-              <p className="text-sm text-muted-foreground">
-                {profile?.subscriptionStatus === "trial" && profile?.trialEndsAt
-                  ? `Trial (ends ${new Date(profile.trialEndsAt).toLocaleDateString()})`
-                  : (profile?.subscriptionStatus ?? "N/A")}
-              </p>
-            </div>
-            <Badge variant="secondary">
-              {profile?.subscriptionStatus ?? "N/A"}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
+        </section>
+      </FadeIn>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Instagram className="h-5 w-5" />
-            Instagram
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {(ig.status === "not_connected" ||
-            ig.status === "expired" ||
-            ig.status === "loading") && (
-            <ConnectInstagramCTA status={ig.status} className="py-8" />
-          )}
+      <div className="my-6 border-t border-border/50 mx-5 lg:mx-6" />
 
-          {ig.status === "connected" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">
-                    {ig.instagramUsername
-                      ? `@${ig.instagramUsername}`
-                      : `Account ${ig.instagramAccountId}`}
+      <FadeIn delay={0.12}>
+        <section className="px-5 lg:px-6 pb-12">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Socials
+          </h2>
+
+          <div className="mt-4">
+            <div className="app-panel p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#833AB4] via-[#E1306C] to-[#F77737]">
+                  <Instagram className="h-5 w-5 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Instagram
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Token expires{" "}
-                    {ig.tokenExpiresAt
-                      ? new Date(ig.tokenExpiresAt).toLocaleDateString()
-                      : "N/A"}
+                  <p className="text-xs text-muted-foreground">
+                    Automate DM replies to reel comments
                   </p>
                 </div>
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                  Connected
-                </Badge>
               </div>
-              <Button variant="outline" asChild size="sm">
-                {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full redirect */}
-                <a href="/api/auth/instagram">Reconnect</a>
-              </Button>
-            </div>
-          )}
 
-          {ig.status === "expiring_soon" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">
-                    {ig.instagramUsername
-                      ? `@${ig.instagramUsername}`
-                      : `Account ${ig.instagramAccountId}`}
-                  </p>
-                  <p className="text-sm text-amber-600">
-                    Token expiring soon (
-                    {ig.tokenExpiresAt
-                      ? new Date(ig.tokenExpiresAt).toLocaleDateString()
-                      : "N/A"}
-                    )
-                  </p>
-                </div>
-                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                  Expiring Soon
-                </Badge>
+              <div className="mt-4 border-t border-border/50 pt-4">
+                {(ig.status === "not_connected" ||
+                  ig.status === "expired" ||
+                  ig.status === "loading") && (
+                  <ConnectInstagramCTA status={ig.status} className="py-4" />
+                )}
+
+                {ig.status === "connected" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">
+                          {ig.instagramUsername
+                            ? `@${ig.instagramUsername}`
+                            : `Account ${ig.instagramAccountId}`}
+                        </p>
+                      </div>
+                      <Badge className="tone-ok shrink-0 border-0">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Connected
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5 shrink-0" />
+                      <span>
+                        Token expires{" "}
+                        {ig.tokenExpiresAt
+                          ? new Date(ig.tokenExpiresAt).toLocaleDateString()
+                          : "N/A"}
+                      </span>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="gap-1.5"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full redirect */}
+                      <a href="/api/auth/instagram">
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Reconnect
+                      </a>
+                    </Button>
+                  </div>
+                )}
+
+                {ig.status === "expiring_soon" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">
+                          {ig.instagramUsername
+                            ? `@${ig.instagramUsername}`
+                            : `Account ${ig.instagramAccountId}`}
+                        </p>
+                      </div>
+                      <Badge className="tone-warn shrink-0 border-0">
+                        <AlertTriangle className="h-3 w-3" />
+                        Expiring Soon
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium tone-warn">
+                      <Shield className="h-3.5 w-3.5 shrink-0" />
+                      <span>
+                        Token expires{" "}
+                        {ig.tokenExpiresAt
+                          ? new Date(ig.tokenExpiresAt).toLocaleDateString()
+                          : "soon"}{" "}
+                        — reconnect to avoid interruptions
+                      </span>
+                    </div>
+
+                    <Button size="sm" asChild className="gap-1.5">
+                      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full redirect */}
+                      <a href="/api/auth/instagram">
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Reconnect Now
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </div>
-              <Button asChild size="sm">
-                {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full redirect */}
-                <a href="/api/auth/instagram">Reconnect</a>
-              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        </section>
+      </FadeIn>
+    </div>
+  );
+}
+
+function SettingsRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-3.5">
+      <p className="text-sm font-medium text-foreground">{label}</p>
+      <p className="text-sm text-muted-foreground">{value}</p>
     </div>
   );
 }

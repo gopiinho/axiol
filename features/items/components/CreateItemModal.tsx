@@ -81,7 +81,9 @@ export default function CreateItemModal({
     } catch (error) {
       console.error("Error creating item:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to add item. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Couldn't add this product. Check your connection and try again.",
       );
     } finally {
       setLoading(false);
@@ -90,10 +92,12 @@ export default function CreateItemModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[620px] max-h-[90svh] overflow-y-auto">
+      <DialogContent className="sm:max-w-155 max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add item</DialogTitle>
-          <DialogDescription>Add an affiliate product to this list.</DialogDescription>
+          <DialogDescription>
+            Add a product with its affiliate link to this collection.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -116,7 +120,10 @@ export default function CreateItemModal({
 
           <div className="space-y-2">
             <Label htmlFor="affiliate-link">
-              Affiliate link <span className="text-destructive" aria-hidden="true">*</span>
+              Affiliate link{" "}
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>
             </Label>
             <Input
               id="affiliate-link"
@@ -132,7 +139,10 @@ export default function CreateItemModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="platform">
-                Platform <span className="text-destructive" aria-hidden="true">*</span>
+                Platform{" "}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </Label>
               <Select value={platform} onValueChange={setPlatform}>
                 <SelectTrigger id="platform" aria-required="true">
@@ -168,7 +178,9 @@ export default function CreateItemModal({
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://example.com/image.jpg"
             />
-            <p className="text-xs text-muted-foreground">Optional: add a product image URL.</p>
+            <p className="text-xs text-muted-foreground">
+              Optional: add a product image URL.
+            </p>
           </div>
 
           <DialogFooter>
