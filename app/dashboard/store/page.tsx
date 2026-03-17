@@ -108,7 +108,7 @@ export default function MyStorePage() {
         <div className="w-full lg:min-w-[60%] lg:border-r border-border/70">
           <FadeIn>
             <div className="flex max-lg:flex-col lg:flex items-center justify-center lg:items-start gap-4 px-5 lg:px-6 py-6 lg:py-8">
-              <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-primary/20 bg-linear-to-br from-primary/20 to-pink-400/20 p-0.5">
+              <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-primary/25 bg-linear-to-br from-primary/15 to-pink/15 p-0.5 shadow-[0_4px_16px_-6px_oklch(0.5_0.22_254/0.2)]">
                 <div className="h-full w-full overflow-hidden rounded-full">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -121,7 +121,7 @@ export default function MyStorePage() {
 
               <div className="grid lg:flex justify-center lg:justify-between items-center lg:items-start w-full">
                 <div className="flex flex-col items-center justify-center lg:items-start">
-                  <h1 className="font-accent text-xl font-bold">
+                  <h1 className="font-accent text-xl font-extrabold tracking-tight">
                     {user?.name ?? ""}
                   </h1>
 

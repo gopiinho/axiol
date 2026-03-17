@@ -108,8 +108,8 @@ export default function ListsPage() {
         {collections.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-14 text-center">
-              <FolderPlus className="mx-auto h-14 w-14 text-muted-foreground animate-float" />
-              <h3 className="mt-4 text-xl font-semibold">No collections yet</h3>
+              <FolderPlus className="mx-auto h-14 w-14 text-primary/40 animate-float" />
+              <h3 className="mt-4 text-xl font-bold">No collections yet</h3>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                 Create your first collection to start attaching products to
                 Instagram reel replies.
@@ -129,7 +129,7 @@ export default function ListsPage() {
           {collections.map((collection) => (
             <AnimatedListItem key={collection._id}>
               <Card className="overflow-hidden">
-                <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
+                <CardHeader className="border-b border-border/60 bg-secondary/40 pb-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <CardTitle className="truncate text-lg">

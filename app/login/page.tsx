@@ -87,12 +87,12 @@ export default function LoginPage() {
       <div className="auth-bg pointer-events-none absolute inset-0" />
 
       <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10" offset={24} duration={0.5}>
-        <div className="mb-8 text-center">
-          <h2 className="font-accent text-3xl font-semibold tracking-tight">
+        <div className="mb-10 text-center">
+          <h2 className="font-accent text-3xl font-bold tracking-tight sm:text-4xl">
             Welcome back!
           </h2>
-          <p className="text-xl text-muted-foreground">
-            Access your admin workspace.
+          <p className="mt-2 text-lg text-muted-foreground sm:text-xl">
+            Access your creator workspace.
           </p>
         </div>
 

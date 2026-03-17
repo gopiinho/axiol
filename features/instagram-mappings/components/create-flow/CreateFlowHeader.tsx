@@ -100,10 +100,10 @@ export default function CreateFlowHeader({
                 <motion.span
                   className={`
                     relative z-10 flex h-7 w-7 shrink-0 items-center justify-center
-                    rounded-full text-xs font-bold transition-colors duration-200
+                    rounded-full text-xs font-extrabold transition-colors duration-200
                     ${
                       active
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground shadow-[0_2px_8px_-2px_oklch(0.5_0.22_254/0.4)]"
                         : completed
                           ? "bg-primary/15 text-primary"
                           : "bg-muted text-muted-foreground"
