@@ -3,8 +3,6 @@ import { api } from "@/convex/_generated/api";
 import { encryptToken } from "@/lib/instagram-crypto";
 import { fetchAuthMutation, isAuthenticated } from "@/lib/auth-server";
 
-export const dynamic = "force-dynamic";
-
 const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
 
 function timingSafeCompare(a: string, b: string): boolean {
