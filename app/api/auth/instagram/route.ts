@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth-server";
 
+export const dynamic = "force-dynamic";
+
 const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
 
 export async function GET(request: NextRequest) {
