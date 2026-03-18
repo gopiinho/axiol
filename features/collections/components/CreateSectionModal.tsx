@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { requireSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -41,11 +40,9 @@ export default function CreateSectionModal({
     setErrorMessage(null);
 
     try {
-      const token = requireSessionToken();
       const validated = validateSectionInput({ title, description });
 
       await createSection({
-        token,
         title: validated.title,
         description: validated.description,
       });
