@@ -26,10 +26,7 @@ export default function AnalyticsPage() {
   useUser();
   const rawQueueStats = useQuery(api.dmQueue.getQueueStats);
   const rawInstagramStats = useQuery(api.instagram.getStats);
-  const queueStats = useCachedQueryResult(
-    "analytics:queue",
-    rawQueueStats,
-  );
+  const queueStats = useCachedQueryResult("analytics:queue", rawQueueStats);
   const instagramStats = useCachedQueryResult(
     "analytics:instagram",
     rawInstagramStats,
@@ -63,10 +60,10 @@ export default function AnalyticsPage() {
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <section className="grid gap-4 px-5 lg:px-6 xl:grid-cols-[1.3fr_1fr]">
+        <section className="grid gap-4 pb-24 px-5 lg:px-6 xl:grid-cols-[1.3fr_1fr]">
           <Card className="overflow-hidden">
-            <CardHeader className="border-b border-border/70 bg-secondary/35">
-              <div className="flex items-start gap-4">
+            <CardHeader className="border-b border-border/70">
+              <div className="flex items-start justify-between gap-4">
                 <div>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Instagram className="h-4 w-4 text-primary" />
@@ -77,7 +74,7 @@ export default function AnalyticsPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-end justify-end gap-2">
                   <Badge
                     className={cn(
                       "rounded-lg px-2 py-1 text-[11px]",
@@ -147,7 +144,7 @@ export default function AnalyticsPage() {
           </Card>
 
           <Card>
-            <CardHeader className="border-b border-border/70 bg-secondary/35 pb-4">
+            <CardHeader className="border-b border-border/70 pb-4">
               <CardTitle className="flex items-center gap-2 text-base">
                 <TrendingUp className="h-4 w-4 text-primary" />
                 Activity (24h)
