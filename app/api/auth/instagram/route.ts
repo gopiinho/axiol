@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_TOKEN_COOKIE } from "@/lib/auth-cookies";
+import { isAuthenticated } from "@/lib/auth-server";
 
 const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
 
 export async function GET(request: NextRequest) {
-  const token = request.cookies.get(AUTH_TOKEN_COOKIE)?.value;
-  if (!token) {
+  const authed = await isAuthenticated();
+  if (!authed) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

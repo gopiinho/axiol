@@ -25,7 +25,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { requireSessionToken } from "@/features/auth/client/session";
 import { useUser } from "@/features/auth/client/UserContext";
 import DraftMappingCard from "@/features/instagram-mappings/components/DraftMappingCard";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
@@ -38,13 +37,10 @@ import {
 } from "@/components/motion/AnimatedList";
 
 export default function DraftsPage() {
-  const { token } = useUser();
-  const rawDrafts = useQuery(
-    api.instagram.getDraftMappings,
-    token ? { token } : "skip",
-  );
+  useUser();
+  const rawDrafts = useQuery(api.instagram.getDraftMappings);
   const drafts = useCachedQueryResult(
-    `dashboard:drafts:${token ?? "anon"}`,
+    "dashboard:drafts",
     rawDrafts,
   );
   const publishMapping = useMutation(api.instagram.publishReelMapping);
@@ -62,8 +58,7 @@ export default function DraftsPage() {
   const handlePublish = async (id: Id<"reelMappings">) => {
     try {
       setIsPublishing(true);
-      const authToken = requireSessionToken();
-      await publishMapping({ token: authToken, id });
+      await publishMapping({ id });
       setPublishedOpen(true);
     } finally {
       setPublishTarget(null);
@@ -74,8 +69,7 @@ export default function DraftsPage() {
   const handleDelete = async (id: Id<"reelMappings">) => {
     try {
       setIsDeleting(true);
-      const authToken = requireSessionToken();
-      await deleteMapping({ token: authToken, id });
+      await deleteMapping({ id });
     } finally {
       setDeleteTarget(null);
       setIsDeleting(false);

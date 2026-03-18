@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { requireSessionToken } from "@/features/auth/client/session";
 import {
   Dialog,
   DialogContent,
@@ -60,7 +59,6 @@ export default function EditItemModal({
     setErrorMessage(null);
 
     try {
-      const token = requireSessionToken();
       const validated = validateItemInput({
         affiliateLink,
         price,
@@ -70,7 +68,6 @@ export default function EditItemModal({
       });
 
       await updateItem({
-        token,
         id: item.id,
         affiliateLink: validated.affiliateLink,
         price: validated.price,

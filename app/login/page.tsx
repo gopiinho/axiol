@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
 import {
   AlertCircle,
   Eye,
@@ -12,8 +11,7 @@ import {
   Mail,
 } from "lucide-react";
 import Link from "next/link";
-import { api } from "@/convex/_generated/api";
-import { setAuthToken } from "@/lib/auth";
+import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -26,7 +24,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const loginMutation = useMutation(api.auth.login);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,23 +39,15 @@ export default function LoginPage() {
         throw new Error("Password must be at least 12 characters");
       }
 
-      let ipAddress: string | undefined;
-      try {
-        const ipResponse = await fetch("https://api.ipify.org?format=json");
-        const ipData = await ipResponse.json();
-        ipAddress = ipData.ip;
-      } catch {
-        ipAddress = undefined;
-      }
-
-      const result = await loginMutation({
+      const result = await authClient.signIn.email({
         email,
         password,
-        ipAddress,
-        userAgent: navigator.userAgent,
       });
 
-      setAuthToken(result.token, result.expiresAt);
+      if (result.error) {
+        throw new Error(result.error.message ?? "Login failed");
+      }
+
       router.push("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
@@ -68,7 +57,7 @@ export default function LoginPage() {
 
       if (errorMessage.includes("locked")) {
         setError(errorMessage);
-      } else if (errorMessage.includes("Invalid")) {
+      } else if (errorMessage.includes("Invalid") || errorMessage.includes("invalid")) {
         setError(
           "Invalid email or password. Please check your credentials and try again.",
         );

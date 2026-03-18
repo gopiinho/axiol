@@ -4,9 +4,9 @@ import { requireSession } from "./security";
 import { validateSectionInput } from "../lib/validators/sections";
 
 export const listByUser = query({
-  args: { token: v.string() },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
     return await ctx.db
       .query("collections")
       .withIndex("by_user", (q) => q.eq("createdBy", userId))
@@ -36,9 +36,9 @@ export const listPublic = query({
 });
 
 export const listByUserWithCover = query({
-  args: { token: v.string() },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
     const collections = await ctx.db
       .query("collections")
       .withIndex("by_user", (q) => q.eq("createdBy", userId))
@@ -71,12 +71,11 @@ export const getById = query({
 
 export const create = mutation({
   args: {
-    token: v.string(),
     title: v.string(),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
     const validated = validateSectionInput({
       title: args.title,
       description: args.description,
@@ -94,13 +93,12 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    token: v.string(),
     id: v.id("collections"),
     title: v.string(),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
     const validated = validateSectionInput({
       title: args.title,
       description: args.description,
@@ -120,11 +118,10 @@ export const update = mutation({
 
 export const remove = mutation({
   args: {
-    token: v.string(),
     id: v.id("collections"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
 
     const collection = await ctx.db.get(args.id);
     if (!collection || collection.createdBy !== userId) {

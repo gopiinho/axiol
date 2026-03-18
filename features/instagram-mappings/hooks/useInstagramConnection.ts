@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useUser } from "@/features/auth/client/UserContext";
 
 export type InstagramStatus =
   | "loading"
@@ -36,11 +35,7 @@ function computeStatus(
 }
 
 export function useInstagramConnection(): InstagramConnection {
-  const { token } = useUser();
-  const config = useQuery(
-    api.instagram.getConfigPublic,
-    token ? { token } : "skip",
-  );
+  const config = useQuery(api.instagram.getConfigPublic);
 
   const [status, setStatus] = useState<InstagramStatus>(() =>
     computeStatus(config),
