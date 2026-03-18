@@ -27,7 +27,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUser } from "@/features/auth/client/UserContext";
-import { requireSessionToken } from "@/features/auth/client/session";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import { FadeIn } from "@/components/motion/FadeIn";
 import {
@@ -37,21 +36,15 @@ import {
 import heartPixel from "@/public/icons/heart.png";
 
 export default function MyStorePage() {
-  const { user, token } = useUser();
-  const rawMappings = useQuery(
-    api.instagram.getPublishedMappings,
-    token ? { token, limit: 24 } : "skip",
-  );
+  const { user } = useUser();
+  const rawMappings = useQuery(api.instagram.getPublishedMappings, { limit: 24 });
   const publishedMappings = useCachedQueryResult(
-    `store:mappings:${token ?? "anon"}`,
+    "store:mappings",
     rawMappings,
   );
-  const rawCollections = useQuery(
-    api.collections.listByUser,
-    token ? { token } : "skip",
-  );
+  const rawCollections = useQuery(api.collections.listByUser);
   const collections = useCachedQueryResult(
-    `store:collections:${token ?? "anon"}`,
+    "store:collections",
     rawCollections,
   );
   const updateProfile = useMutation(api.users.updateProfile);
@@ -77,7 +70,6 @@ export default function MyStorePage() {
     setSaving(true);
     try {
       await updateProfile({
-        token: requireSessionToken(),
         name,
         bio,
         instagramUrl,

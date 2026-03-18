@@ -17,28 +17,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { requireSessionToken } from "@/features/auth/client/session";
 import { useUser } from "@/features/auth/client/UserContext";
 import { KpiRow, StatTile } from "@/features/dm-queue/components/Stats";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import { FadeIn } from "@/components/motion/FadeIn";
 
 export default function AnalyticsPage() {
-  const { token } = useUser();
-  const rawQueueStats = useQuery(
-    api.dmQueue.getQueueStats,
-    token ? { token } : "skip",
-  );
-  const rawInstagramStats = useQuery(
-    api.instagram.getStats,
-    token ? { token } : "skip",
-  );
+  useUser();
+  const rawQueueStats = useQuery(api.dmQueue.getQueueStats);
+  const rawInstagramStats = useQuery(api.instagram.getStats);
   const queueStats = useCachedQueryResult(
-    `analytics:queue:${token ?? "anon"}`,
+    "analytics:queue",
     rawQueueStats,
   );
   const instagramStats = useCachedQueryResult(
-    `analytics:instagram:${token ?? "anon"}`,
+    "analytics:instagram",
     rawInstagramStats,
   );
   const kickoffWorker = useMutation(api.dmQueue.kickoffWorker);
@@ -48,7 +41,7 @@ export default function AnalyticsPage() {
   const handleStartWorker = async () => {
     setStartingWorker(true);
     try {
-      await kickoffWorker({ token: requireSessionToken() });
+      await kickoffWorker({});
     } catch (error) {
       console.error("Failed to start worker:", error);
     } finally {

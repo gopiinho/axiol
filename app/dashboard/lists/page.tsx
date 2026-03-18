@@ -19,7 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CreateSectionModal from "@/features/collections/components/CreateSectionModal";
 import EditSectionModal from "@/features/collections/components/EditSectionModal";
-import { requireSessionToken } from "@/features/auth/client/session";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import {
@@ -39,11 +38,8 @@ import {
 } from "@/components/motion/AnimatedList";
 
 export default function ListsPage() {
-  const { token } = useUser();
-  const rawCollections = useQuery(
-    api.collections.listByUser,
-    token ? { token } : "skip",
-  );
+  useUser();
+  const rawCollections = useQuery(api.collections.listByUser);
   const collections =
     useCachedQueryResult("dashboard:lists:collections", rawCollections) ?? [];
   const deleteCollection = useMutation(api.collections.remove);
@@ -61,8 +57,7 @@ export default function ListsPage() {
   const handleDelete = async (id: Id<"collections">) => {
     try {
       setIsDeleting(true);
-      const authToken = requireSessionToken();
-      await deleteCollection({ token: authToken, id });
+      await deleteCollection({ id });
     } finally {
       setDeleteCollectionId(null);
       setIsDeleting(false);

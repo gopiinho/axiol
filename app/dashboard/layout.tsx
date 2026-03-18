@@ -1,23 +1,15 @@
 import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
-import {
-  getSessionTokenFromCookies,
-  verifySession,
-} from "@/server/auth/session";
+import { isAuthenticated } from "@/lib/auth-server";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const token = await getSessionTokenFromCookies();
-  if (!token) {
+  const authed = await isAuthenticated();
+  if (!authed) {
     redirect("/login");
-  }
-
-  const validSession = await verifySession(token);
-  if (!validSession) {
-    redirect("/api/auth/logout?next=/login");
   }
 
   return <DashboardShell>{children}</DashboardShell>;
