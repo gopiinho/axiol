@@ -8,6 +8,7 @@ const accountTypes = v.union(
 
 export default defineSchema({
   users: defineTable({
+    betterAuthId: v.string(),
     email: v.string(),
     username: v.string(),
     name: v.string(),
@@ -17,12 +18,6 @@ export default defineSchema({
     youtubeUrl: v.optional(v.string()),
     websiteUrl: v.optional(v.string()),
     accountType: accountTypes,
-    passwordHash: v.string(),
-    salt: v.string(),
-    failedLoginAttempts: v.number(),
-    lastFailedLogin: v.optional(v.number()),
-    accountLocked: v.boolean(),
-    accountLockedUntil: v.optional(v.number()),
     trialStartedAt: v.optional(v.number()),
     trialEndsAt: v.optional(v.number()),
     subscriptionStatus: v.optional(
@@ -36,19 +31,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_email", ["email"])
-    .index("by_username", ["username"]),
-
-  sessions: defineTable({
-    userId: v.id("users"),
-    token: v.string(),
-    expiresAt: v.number(),
-    ipAddress: v.optional(v.string()),
-    userAgent: v.optional(v.string()),
-    createdAt: v.number(),
-    lastUsedAt: v.number(),
-  })
-    .index("by_token", ["token"])
-    .index("by_user", ["userId"]),
+    .index("by_username", ["username"])
+    .index("by_betterAuthId", ["betterAuthId"]),
 
   collections: defineTable({
     title: v.string(),
