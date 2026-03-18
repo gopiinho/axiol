@@ -365,22 +365,18 @@ async function ensureWorkerRunning(ctx: MutationCtx): Promise<void> {
 }
 
 export const kickoffWorker = mutation({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    await requireSession(ctx);
     await ensureWorkerRunning(ctx);
     return { message: "Worker started" };
   },
 });
 
 export const getQueueStats = query({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
 
     const pending = await ctx.db
       .query("dmJobs")

@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
-import { AUTH_TOKEN_COOKIE } from "@/lib/auth-cookies";
 import { encryptToken } from "@/lib/instagram-crypto";
+import { fetchAuthMutation, isAuthenticated } from "@/lib/auth-server";
 
 const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
-
-function getConvexClient() {
-  return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-}
 
 function timingSafeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -53,9 +48,9 @@ export async function GET(request: NextRequest) {
     return settingsRedirect(request, { ig_error: "csrf" });
   }
 
-  // Session validation
-  const sessionToken = request.cookies.get(AUTH_TOKEN_COOKIE)?.value;
-  if (!sessionToken) {
+  // Session validation via Better Auth
+  const authed = await isAuthenticated();
+  if (!authed) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -145,11 +140,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 4. Encrypt token and save to Convex
+    // 4. Encrypt token and save to Convex (auth is automatic via fetchAuthMutation)
     const encryptedToken = await encryptToken(longLivedData.access_token);
-    const convex = getConvexClient();
-    await convex.mutation(api.instagram.saveConfig, {
-      token: sessionToken,
+    await fetchAuthMutation(api.instagram.saveConfig, {
       accessToken: encryptedToken,
       instagramAccountId,
       instagramUsername,

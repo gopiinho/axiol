@@ -13,7 +13,7 @@ import {
   Store,
   FileText,
 } from "lucide-react";
-import { clearAuth } from "@/lib/auth";
+import { authClient } from "@/lib/auth-client";
 import { UserProvider } from "@/features/auth/client/UserContext";
 import BottomNav from "@/components/BottomNav";
 import {
@@ -52,8 +52,7 @@ export default function DashboardShell({
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      await fetch("/api/auth/logout", { method: "POST" });
-      clearAuth();
+      await authClient.signOut();
       router.replace("/login");
     } finally {
       setIsLoggingOut(false);
@@ -71,9 +70,6 @@ export default function DashboardShell({
                 <h1 className="heading-playful text-3xl text-primary">
                   linkkit
                 </h1>
-                <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                  Dashboard
-                </p>
               </div>
 
               <nav className="flex-1 space-y-1 p-3">
@@ -96,7 +92,9 @@ export default function DashboardShell({
                           : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-card hover:text-foreground",
                       )}
                     >
-                      <Icon className={cn("h-4 w-4", active && "stroke-[2.5]")} />
+                      <Icon
+                        className={cn("h-4 w-4", active && "stroke-[2.5]")}
+                      />
                       {item.label}
                     </Link>
                   );

@@ -7,7 +7,7 @@ import {
   internalMutation,
   internalAction,
 } from "./_generated/server";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { requireSession } from "./security";
 import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
@@ -67,13 +67,12 @@ function buildDMMessage({
 
 export const saveConfig = mutation({
   args: {
-    token: v.string(),
     accessToken: v.string(),
     instagramAccountId: v.string(),
     instagramUsername: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
 
     const existing = await ctx.db
       .query("instagramConfig")
@@ -104,11 +103,9 @@ export const saveConfig = mutation({
 });
 
 export const getConfig = query({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
     return await ctx.db
       .query("instagramConfig")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -117,11 +114,9 @@ export const getConfig = query({
 });
 
 export const getConfigPublic = query({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
     const config = await ctx.db
       .query("instagramConfig")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -162,13 +157,30 @@ export const getUserByInstagramAccount = internalQuery({
   },
 });
 
-export const fetchRecentReels = action({
-  args: {
-    token: v.string(),
+// Internal query to get user's config by betterAuthId (for actions)
+export const getConfigByBetterAuthId = internalQuery({
+  args: { betterAuthId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_betterAuthId", (q) => q.eq("betterAuthId", args.betterAuthId))
+      .first();
+
+    if (!user) return null;
+
+    const config = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+
+    return config;
   },
+});
+
+export const fetchRecentReels = action({
+  args: {},
   handler: async (
     ctx,
-    args,
   ): Promise<
     Array<{
       id: string;
@@ -178,10 +190,8 @@ export const fetchRecentReels = action({
       timestamp: string;
     }>
   > => {
-    const session = await ctx.runQuery(api.auth.checkSession, {
-      token: args.token,
-    });
-    if (!session.valid) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Unauthorized");
     }
 
@@ -200,8 +210,8 @@ export const fetchRecentReels = action({
       error?: { message?: string };
     };
 
-    const config = await ctx.runQuery(api.instagram.getConfig, {
-      token: args.token,
+    const config = await ctx.runQuery(internal.instagram.getConfigByBetterAuthId, {
+      betterAuthId: identity.subject,
     });
 
     if (!config) {
@@ -315,7 +325,6 @@ export const incrementRateLimitInternal = internalMutation({
 
 export const createReelMapping = mutation({
   args: {
-    token: v.string(),
     reelId: v.string(),
     reelUrl: v.string(),
     thumbnailUrl: v.optional(v.string()),
@@ -326,7 +335,7 @@ export const createReelMapping = mutation({
     includeWebsiteLink: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
     const validated = validateReelMappingInput({
       reelId: args.reelId,
       reelUrl: args.reelUrl,
@@ -373,11 +382,10 @@ export const createReelMapping = mutation({
 
 export const publishReelMapping = mutation({
   args: {
-    token: v.string(),
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
     const mapping = await ctx.db.get(args.id);
     if (!mapping || mapping.userId !== userId) {
       throw new Error("Mapping not found");
@@ -390,11 +398,9 @@ export const publishReelMapping = mutation({
 });
 
 export const getDraftMappings = query({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
 
     const drafts = await ctx.db
       .query("reelMappings")
@@ -427,11 +433,10 @@ export const getDraftMappings = query({
 
 export const getPublishedMappings = query({
   args: {
-    token: v.string(),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
 
     const limit =
       args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
@@ -458,11 +463,9 @@ export const getPublishedMappings = query({
 });
 
 export const listReelMappings = query({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
 
     const mappings = await ctx.db
       .query("reelMappings")
@@ -486,13 +489,12 @@ export const listReelMappings = query({
 
 export const generateDMMessage = query({
   args: {
-    token: v.string(),
     collectionId: v.id("collections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
-    await requireSession(ctx, args.token);
+    await requireSession(ctx);
 
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
     const collection = await ctx.db.get(args.collectionId);
@@ -551,11 +553,10 @@ export const generateDMMessageForJob = internalQuery({
 
 export const deleteReelMapping = mutation({
   args: {
-    token: v.string(),
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
     const mapping = await ctx.db.get(args.id);
     if (!mapping || mapping.userId !== userId) {
       throw new Error("Mapping not found");
@@ -566,11 +567,10 @@ export const deleteReelMapping = mutation({
 
 export const toggleReelMapping = mutation({
   args: {
-    token: v.string(),
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
 
     const mapping = await ctx.db.get(args.id);
     if (!mapping || mapping.userId !== userId) {
@@ -708,11 +708,9 @@ export const logDM = mutation({
 });
 
 export const getStats = query({
-  args: {
-    token: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
 
     const comments = await ctx.db
       .query("commentLogs")
@@ -748,11 +746,10 @@ export const getStats = query({
 
 export const getRecentActivity = query({
   args: {
-    token: v.string(),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
 
     const limit = args.limit ?? 50;
 

@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import ItemCard from "@/features/items/components/ItemCard";
 import CreateItemModal from "@/features/items/components/CreateItemModal";
 import EditItemModal from "@/features/items/components/EditItemModal";
-import { requireSessionToken } from "@/features/auth/client/session";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import {
   AlertDialog,
@@ -57,8 +56,7 @@ export default function CollectionItemsPage({
   const handleDelete = async (itemId: Id<"items">) => {
     try {
       setIsDeleting(true);
-      const token = requireSessionToken();
-      await deleteItem({ token, id: itemId });
+      await deleteItem({ id: itemId });
     } finally {
       setDeleteItemId(null);
       setIsDeleting(false);

@@ -16,7 +16,6 @@ export const listByCollection = query({
 
 export const create = mutation({
   args: {
-    token: v.string(),
     collectionId: v.id("collections"),
     affiliateLink: v.string(),
     price: v.optional(v.string()),
@@ -25,7 +24,7 @@ export const create = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
     const validated = validateItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
@@ -54,7 +53,6 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    token: v.string(),
     id: v.id("items"),
     affiliateLink: v.string(),
     price: v.optional(v.string()),
@@ -63,7 +61,7 @@ export const update = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
     const validated = validateItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
@@ -92,11 +90,10 @@ export const update = mutation({
 
 export const remove = mutation({
   args: {
-    token: v.string(),
     id: v.id("items"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx, args.token);
+    const { userId } = await requireSession(ctx);
 
     const item = await ctx.db.get(args.id);
     if (!item) throw new Error("Item not found");

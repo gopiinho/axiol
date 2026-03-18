@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import {
   AlertCircle,
   AtSign,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/convex/_generated/api";
-import { setAuthToken } from "@/lib/auth";
+import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -33,14 +33,33 @@ export default function SignupPage() {
   const [debouncedUsername, setDebouncedUsername] = useState("");
 
   const router = useRouter();
-  const signupMutation = useMutation(api.auth.signup);
+  const { isAuthenticated: convexAuthed } = useConvexAuth();
+  const createProfile = useMutation(api.users.createProfile);
+  const pendingUsername = useRef<string | null>(null);
 
   const usernameCheck = useQuery(
-    api.auth.checkUsernameAvailable,
+    api.users.checkUsernameAvailable,
     !loading && debouncedUsername.length >= 3
       ? { username: debouncedUsername }
       : "skip",
   );
+
+  useEffect(() => {
+    if (!convexAuthed || !pendingUsername.current) return;
+    const usernameToCreate = pendingUsername.current;
+    pendingUsername.current = null;
+
+    createProfile({ username: usernameToCreate })
+      .then(() => {
+        router.push("/dashboard");
+      })
+      .catch((err: unknown) => {
+        const msg =
+          err instanceof Error ? err.message : "Failed to create profile";
+        setError(msg);
+        setLoading(false);
+      });
+  }, [convexAuthed, createProfile, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -63,26 +82,17 @@ export default function SignupPage() {
         throw new Error("Password must be at least 12 characters");
       }
 
-      let ipAddress: string | undefined;
-      try {
-        const ipResponse = await fetch("https://api.ipify.org?format=json");
-        const ipData = await ipResponse.json();
-        ipAddress = ipData.ip;
-      } catch {
-        ipAddress = undefined;
-      }
-
-      const result = await signupMutation({
+      const result = await authClient.signUp.email({
         email,
-        username: username.toLowerCase().trim(),
-        name: name.trim(),
         password,
-        ipAddress,
-        userAgent: navigator.userAgent,
+        name: name.trim(),
       });
 
-      setAuthToken(result.token, result.expiresAt);
-      router.push("/dashboard");
+      if (result.error) {
+        throw new Error(result.error.message ?? "Signup failed");
+      }
+
+      pendingUsername.current = username.toLowerCase().trim();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Signup failed. Please try again.";
@@ -95,7 +105,11 @@ export default function SignupPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="auth-bg pointer-events-none absolute inset-0" />
 
-      <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10" offset={24} duration={0.5}>
+      <FadeIn
+        className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10"
+        offset={24}
+        duration={0.5}
+      >
         <div className="mb-10 text-center">
           <h2 className="font-accent text-3xl flex text-center items-center justify-center font-bold tracking-tight sm:text-4xl">
             Hey @{username ? username : <p className="capitalize">username</p>}

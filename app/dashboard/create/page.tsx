@@ -31,7 +31,7 @@ import CreateFlowFooter from "@/features/instagram-mappings/components/create-fl
 
 export default function CreatePostPage() {
   const router = useRouter();
-  const { token: authToken } = useUser();
+  useUser();
   const ig = useInstagramConnection();
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
   const [selectedSection, setSelectedSection] = useState<
@@ -59,10 +59,7 @@ export default function CreatePostPage() {
   } | null>(null);
 
   const convex = useConvex();
-  const sections = useQuery(
-    api.collections.listByUser,
-    authToken ? { token: authToken } : "skip",
-  );
+  const sections = useQuery(api.collections.listByUser);
   const fetchReels = useAction(api.instagram.fetchRecentReels);
   const createMapping = useMutation(api.instagram.createReelMapping);
 
@@ -77,7 +74,7 @@ export default function CreatePostPage() {
   const canPreview = Boolean(selectedSection) && maxItemsValid;
 
   useEffect(() => {
-    if (!canPreview || !authToken) {
+    if (!canPreview) {
       setGeneratePreview(null);
       setPreviewError(null);
       setPreviewLoading(false);
@@ -91,7 +88,6 @@ export default function CreatePostPage() {
 
       void convex
         .query(api.instagram.generateDMMessage, {
-          token: authToken,
           collectionId: selectedSection as Id<"collections">,
           maxItems: maxItemsInDM,
           includeWebsiteLink,
@@ -122,7 +118,6 @@ export default function CreatePostPage() {
   }, [
     convex,
     canPreview,
-    authToken,
     selectedSection,
     maxItemsInDM,
     includeWebsiteLink,
@@ -209,7 +204,7 @@ export default function CreatePostPage() {
   };
 
   const loadReels = useCallback(async () => {
-    if (!ig.isUsable || !authToken) {
+    if (!ig.isUsable) {
       setReelsLoading(false);
       return;
     }
@@ -218,7 +213,7 @@ export default function CreatePostPage() {
     setReelsError(null);
 
     try {
-      const fetchedReels = await fetchReels({ token: authToken });
+      const fetchedReels = await fetchReels({});
       setReels(fetchedReels);
     } catch (error) {
       const message =
@@ -229,7 +224,7 @@ export default function CreatePostPage() {
     } finally {
       setReelsLoading(false);
     }
-  }, [fetchReels, authToken, ig.isUsable]);
+  }, [fetchReels, ig.isUsable]);
 
   useEffect(() => {
     void loadReels();
@@ -242,12 +237,7 @@ export default function CreatePostPage() {
 
     setIsSavingDraft(true);
     try {
-      if (!authToken) {
-        throw new Error("Unauthorized");
-      }
-
       await createMapping({
-        token: authToken,
         reelId: selectedReel.id,
         reelUrl: selectedReel.url,
         thumbnailUrl: selectedReel.thumbnailUrl,
