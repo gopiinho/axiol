@@ -10,9 +10,12 @@ export async function getSessionTokenFromCookies(): Promise<string | null> {
   return cookieStore.get(AUTH_TOKEN_COOKIE)?.value ?? null;
 }
 
-export async function verifyAdminSession(token: string): Promise<boolean> {
+export async function verifySession(token: string): Promise<boolean> {
   try {
-    const result = await getServerConvexClient().mutation(api.auth.verifySession, { token });
+    const result = await getServerConvexClient().mutation(
+      api.auth.verifySession,
+      { token },
+    );
     return Boolean(result.valid);
   } catch {
     return false;

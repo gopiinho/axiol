@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import {
   getSessionTokenFromCookies,
-  verifyAdminSession,
+  verifySession,
 } from "@/server/auth/session";
 
 export default async function DashboardLayout({
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const validSession = await verifyAdminSession(token);
+  const validSession = await verifySession(token);
   if (!validSession) {
     redirect("/api/auth/logout?next=/login");
   }
