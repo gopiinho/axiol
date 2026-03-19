@@ -53,10 +53,11 @@ export default function DashboardShell({
     try {
       setIsLoggingOut(true);
       await authClient.signOut();
-      router.replace("/login");
+    } catch {
     } finally {
       setIsLoggingOut(false);
       setLogoutOpen(false);
+      router.replace("/login");
     }
   };
 
