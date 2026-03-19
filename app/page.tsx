@@ -92,6 +92,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        <footer className="mt-12 pb-4 text-center text-xs text-muted-foreground">
+          <Link href="/privacy" className="hover:underline">
+            Privacy Policy
+          </Link>
+          <span className="mx-2">·</span>
+          <Link href="/terms" className="hover:underline">
+            Terms of Service
+          </Link>
+        </footer>
       </div>
     </main>
   );
