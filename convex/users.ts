@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, MutationCtx } from "./_generated/server";
 import { requireSession } from "./security";
+import { Id } from "./_generated/dataModel";
 
 const TRIAL_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days
 
@@ -191,3 +192,79 @@ export const checkUsernameAvailable = query({
     return { available: true };
   },
 });
+
+export const deleteAccount = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
+
+    await deleteAllUserData(ctx, userId);
+
+    await ctx.db.delete(userId);
+  },
+});
+
+async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
+  const igConfigs = await ctx.db
+    .query("instagramConfig")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const config of igConfigs) {
+    await ctx.db.delete(config._id);
+  }
+
+  const collections = await ctx.db
+    .query("collections")
+    .withIndex("by_user", (q) => q.eq("createdBy", userId))
+    .collect();
+  for (const collection of collections) {
+    const items = await ctx.db
+      .query("items")
+      .withIndex("by_collection", (q) => q.eq("collectionId", collection._id))
+      .collect();
+    for (const item of items) {
+      await ctx.db.delete(item._id);
+    }
+    await ctx.db.delete(collection._id);
+  }
+
+  const mappings = await ctx.db
+    .query("reelMappings")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const mapping of mappings) {
+    await ctx.db.delete(mapping._id);
+  }
+
+  const jobs = await ctx.db
+    .query("dmJobs")
+    .withIndex("by_owner", (q) => q.eq("userId", userId))
+    .collect();
+  for (const job of jobs) {
+    await ctx.db.delete(job._id);
+  }
+
+  const rateStates = await ctx.db
+    .query("dmRateLimitState")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const state of rateStates) {
+    await ctx.db.delete(state._id);
+  }
+
+  const commentLogs = await ctx.db
+    .query("commentLogs")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const log of commentLogs) {
+    await ctx.db.delete(log._id);
+  }
+
+  const dmLogs = await ctx.db
+    .query("dmLogs")
+    .withIndex("by_owner", (q) => q.eq("userId", userId))
+    .collect();
+  for (const log of dmLogs) {
+    await ctx.db.delete(log._id);
+  }
+}
