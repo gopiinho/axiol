@@ -308,7 +308,7 @@ function DeleteAccountDialog({
 
     try {
       await deleteAccount();
-      await authClient.signOut();
+      await authClient.deleteUser();
       router.replace("/login");
     } catch (err) {
       const msg =
