@@ -22,6 +22,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { FadeIn } from "@/components/motion/FadeIn";
+import {
+  AnimatedList,
+  AnimatedListItem,
+} from "@/components/motion/AnimatedList";
 
 export default function CollectionItemsPage({
   params,
@@ -90,79 +95,82 @@ export default function CollectionItemsPage({
   }
 
   return (
-    <div className="space-y-5">
-      <section className="app-panel px-5 py-6 md:px-6 md:py-7">
-        <Button asChild variant="ghost" size="sm" className="mb-4 gap-1.5">
-          <Link href="/dashboard/lists">
-            <ArrowLeft className="h-4 w-4" />
-            Back to collections
-          </Link>
-        </Button>
-
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Collection
-            </p>
-            <h1 className="app-title mt-2 flex items-center gap-2">
-              <ShoppingBasket className="h-7 w-7 text-primary" />
-              {collection!.title}
-            </h1>
-            {collection!.description && (
-              <p className="app-subtitle mt-2 max-w-xl">
-                {collection!.description}
-              </p>
-            )}
-          </div>
-
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            className="gap-2 sm:self-start"
-          >
-            <Plus className="h-4 w-4" />
-            Add Item
+    <div>
+      <FadeIn>
+        <section className="px-5 lg:px-6 py-6 lg:py-8">
+          <Button asChild variant="ghost" size="sm" className="mb-4 gap-1.5">
+            <Link href="/dashboard/lists">
+              <ArrowLeft className="h-4 w-4" />
+              Back to collections
+            </Link>
           </Button>
-        </div>
-      </section>
 
-      {(items ?? []).length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="py-12 text-center">
-            <ShoppingBasket className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-semibold">No items yet</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Add your first product — these will be sent in auto-DMs to your followers.
-            </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="app-title mt-2 flex items-center gap-2">
+                <ShoppingBasket className="h-7 w-7 text-primary" />
+                {collection!.title}
+              </h1>
+              {collection!.description && (
+                <p className="app-subtitle mt-2 max-w-xl">
+                  {collection!.description}
+                </p>
+              )}
+            </div>
+
             <Button
               onClick={() => setShowCreateModal(true)}
-              className="mt-5 gap-2"
+              className="gap-2 sm:self-start"
             >
               <Plus className="h-4 w-4" />
-              Add first item
+              Add Item
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {(items ?? []).map((item) => (
-            <ItemCard
-              key={item._id}
-              item={item}
-              onEdit={() =>
-                setEditingItem({
-                  id: item._id,
-                  affiliateLink: item.affiliateLink,
-                  price: item.price,
-                  platform: item.platform,
-                  itemTitle: item.itemTitle,
-                  imageUrl: item.imageUrl,
-                })
-              }
-              onDelete={() => setDeleteItemId(item._id)}
-            />
-          ))}
+          </div>
         </section>
-      )}
+      </FadeIn>
+
+      <div className="px-5 lg:px-6 pb-10">
+        {(items ?? []).length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-12 text-center">
+              <ShoppingBasket className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-4 text-lg font-semibold">No items yet</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Add your first product — these will be sent in auto-DMs to your
+                followers.
+              </p>
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                className="mt-5 gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add first item
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <AnimatedList className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {(items ?? []).map((item) => (
+              <AnimatedListItem key={item._id}>
+                <ItemCard
+                  item={item}
+                  onEdit={() =>
+                    setEditingItem({
+                      id: item._id,
+                      affiliateLink: item.affiliateLink,
+                      price: item.price,
+                      platform: item.platform,
+                      itemTitle: item.itemTitle,
+                      imageUrl: item.imageUrl,
+                    })
+                  }
+                  onDelete={() => setDeleteItemId(item._id)}
+                />
+              </AnimatedListItem>
+            ))}
+          </AnimatedList>
+        )}
+      </div>
 
       <CreateItemModal
         collectionId={id}

@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import {
   Instagram,
   CheckCircle2,
@@ -9,7 +7,6 @@ import {
   RefreshCw,
   Shield,
   Clock,
-  X,
 } from "lucide-react";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useInstagramConnection } from "@/features/instagram-mappings/hooks/useInstagramConnection";
@@ -17,38 +14,10 @@ import ConnectInstagramCTA from "@/features/instagram-mappings/components/Connec
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
-import { AnimatePresence, motion } from "motion/react";
 
 export default function SettingsPage() {
   const { user: profile } = useUser();
-  const searchParams = useSearchParams();
   const ig = useInstagramConnection();
-  const [igToast, setIgToast] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
-
-  useEffect(() => {
-    if (searchParams.get("ig_connected") === "true") {
-      setIgToast({
-        type: "success",
-        message: "Instagram connected successfully!",
-      });
-    } else if (searchParams.get("ig_error")) {
-      const errorMap: Record<string, string> = {
-        csrf: "Security verification failed. Close this page and try connecting again.",
-        token_exchange: "Couldn't connect to Instagram. Close this page and try again.",
-        server: "Something unexpected happened. Close this page and try again.",
-        config: "Instagram integration isn't set up yet. Contact support.",
-        user_denied: "You declined the Instagram permission request. Try again when you're ready.",
-      };
-      const error = searchParams.get("ig_error")!;
-      setIgToast({
-        type: "error",
-        message: errorMap[error] ?? "Failed to connect Instagram.",
-      });
-    }
-  }, [searchParams]);
 
   const subscriptionLabel =
     profile?.subscriptionStatus === "trial" && profile?.trialEndsAt
@@ -56,46 +25,13 @@ export default function SettingsPage() {
       : (profile?.subscriptionStatus ?? "N/A");
 
   return (
-    <div className="w-full">
+    <div>
       <FadeIn>
         <section className="px-5 py-6 lg:px-6 lg:py-8">
           <h1 className="app-title">Settings</h1>
-          <p className="app-subtitle">
-            Your account and connected services.
-          </p>
+          <p className="app-subtitle">Your account and connected services.</p>
         </section>
       </FadeIn>
-
-      <AnimatePresence>
-        {igToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-            className="mx-5 mb-4 lg:mx-6"
-          >
-            <div
-              className={`flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium ${
-                igToast.type === "success" ? "tone-ok" : "tone-danger"
-              }`}
-            >
-              {igToast.type === "success" ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-              ) : (
-                <AlertTriangle className="h-4 w-4 shrink-0" />
-              )}
-              <span className="flex-1">{igToast.message}</span>
-              <button
-                onClick={() => setIgToast(null)}
-                className="shrink-0 rounded-md p-0.5 opacity-60 transition hover:opacity-100"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <FadeIn delay={0.06}>
         <section className="px-5 lg:px-6">
@@ -129,7 +65,7 @@ export default function SettingsPage() {
       <div className="my-6 border-t border-border/50 mx-5 lg:mx-6" />
 
       <FadeIn delay={0.12}>
-        <section className="px-5 lg:px-6 pb-12">
+        <section className="px-5 lg:px-6 pb-10">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Socials
           </h2>

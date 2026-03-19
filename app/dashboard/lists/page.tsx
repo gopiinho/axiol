@@ -99,7 +99,7 @@ export default function ListsPage() {
         </section>
       </FadeIn>
 
-      <div className="px-5 lg:px-6">
+      <div className="px-5 lg:px-6 pb-10">
         {collections.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-14 text-center">
@@ -124,7 +124,7 @@ export default function ListsPage() {
             {collections.map((collection) => (
               <AnimatedListItem key={collection._id}>
                 <Card className="overflow-hidden">
-                  <CardHeader className="border-b border-border/60 bg-secondary/40 pb-4">
+                  <CardHeader className="border-b border-border/60">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <CardTitle className="truncate text-lg">
