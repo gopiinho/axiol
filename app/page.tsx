@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Zap, Instagram, ShoppingBag } from "lucide-react";
+import HomeNav from "@/components/HomeNav";
 
 export default function Home() {
   return (
@@ -20,30 +21,28 @@ export default function Home() {
             "radial-gradient(circle, oklch(0.9 0.12 250 / 0.25) 0%, transparent 60%)",
         }}
       />
-
-      <div className="relative w-full max-w-3xl">
-        <div className="text-center max-sm:my-14 max-sm:mb-28 sm:my-20 space-y-8">
+      <HomeNav />
+      <div className="relative w-full max-w-3xl my-12">
+        <div className="text-start flex flex-col justify-start items-start max-sm:my-14 max-sm:mb-28 sm:my-20 space-y-8">
           <div className="space-y-4">
-            <p className="heading-playful text-lg text-pink tracking-wider">
-              your creator toolkit
-            </p>
-            <h1 className="text-6xl font-extrabold tracking-tight text-primary sm:text-8xl leading-[0.95]">
-              linkkit
+            <h1 className="text-5xl font-extrabold tracking-tight text-primary sm:text-8xl leading-[0.95]">
+              Your All-in-One Creator Store
             </h1>
           </div>
 
-          <p className="text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed sm:text-xl">
-            Your affiliate store + Instagram DM automation, all in one place.
-            Curate collections, auto-reply to reel comments with product links.
+          <p className="text-sm text-muted-foreground max-sm:max-w-60 max-w-lg leading-relaxed sm:text-lg">
+            Stan is the easiest way to make money online. All of your courses,
+            digital products, and bookings are now hosted within your
+            link-in-bio.
           </p>
 
-          <div className="flex items-center justify-center gap-3 sm:gap-4">
-            <Button asChild size="lg" className="px-8 text-base h-12">
-              <Link href="/signup">Get Started Free</Link>
+          <div className="flex max-sm:w-full items-center justify-center gap-3 sm:gap-4">
+            <Button asChild className="py-7 px-12 text-xl sm:text-2xl">
+              <Link href="/signup">Continue</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="h-12">
+            {/* <Button asChild size="lg" variant="outline" className="h-12">
               <Link href="/login">Sign In</Link>
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -85,8 +84,8 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-bold">Automatic replies</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  When followers comment your keyword on a reel, they
-                  instantly get a DM with your product links.
+                  When followers comment your keyword on a reel, they instantly
+                  get a DM with your product links.
                 </p>
               </div>
             </div>
