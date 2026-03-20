@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Instagram,
   CheckCircle2,
@@ -13,11 +12,8 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useInstagramConnection } from "@/features/instagram-mappings/hooks/useInstagramConnection";
-import { authClient } from "@/lib/auth-client";
 import ConnectInstagramCTA from "@/features/instagram-mappings/components/ConnectInstagramCTA";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -266,10 +262,10 @@ function AdvancedTab({ username }: { username?: string }) {
             variant="outline"
             size="sm"
             className="shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => setDeleteOpen(true)}
+            disabled
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Delete Account
+            Coming soon
           </Button>
         </div>
       </div>
@@ -292,8 +288,6 @@ function DeleteAccountDialog({
   onOpenChange: (open: boolean) => void;
   username?: string;
 }) {
-  const router = useRouter();
-  const deleteAccount = useMutation(api.users.deleteAccount);
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState("");
@@ -307,9 +301,12 @@ function DeleteAccountDialog({
     setIsDeleting(true);
 
     try {
-      await deleteAccount();
-      await authClient.deleteUser();
-      router.replace("/login");
+      const res = await fetch("/api/account/delete", { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to delete account");
+      }
+      window.location.href = "/login";
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Failed to delete account";
