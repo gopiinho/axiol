@@ -32,15 +32,69 @@ export const getByUsername = query({
 
     if (!user) return null;
 
+    const profileImageUrl = user.profileImageId
+      ? await ctx.storage.getUrl(user.profileImageId)
+      : null;
+    const coverImageUrl = user.coverImageId
+      ? await ctx.storage.getUrl(user.coverImageId)
+      : null;
+
     return {
       _id: user._id,
       username: user.username,
       name: user.name,
       bio: user.bio,
       avatarUrl: user.avatarUrl,
+      profileImageUrl,
+      coverImageUrl,
+      theme: user.theme,
+      accentColor: user.accentColor,
+      storeName: user.storeName,
       instagramUrl: user.instagramUrl,
       youtubeUrl: user.youtubeUrl,
       websiteUrl: user.websiteUrl,
+    };
+  },
+});
+
+export const getPublicStore = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .first();
+
+    if (!user) return null;
+
+    const profileImageUrl = user.profileImageId
+      ? await ctx.storage.getUrl(user.profileImageId)
+      : null;
+    const coverImageUrl = user.coverImageId
+      ? await ctx.storage.getUrl(user.coverImageId)
+      : null;
+
+    const collections = await ctx.db
+      .query("collections")
+      .withIndex("by_user", (q) => q.eq("createdBy", user._id))
+      .order("desc")
+      .collect();
+
+    return {
+      user: {
+        name: user.name,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        profileImageUrl,
+        coverImageUrl,
+        theme: user.theme,
+        accentColor: user.accentColor,
+        storeName: user.storeName,
+        instagramUrl: user.instagramUrl,
+        youtubeUrl: user.youtubeUrl,
+        websiteUrl: user.websiteUrl,
+      },
+      collections,
     };
   },
 });
@@ -49,6 +103,14 @@ export const getProfile = query({
   args: {},
   handler: async (ctx) => {
     const { user } = await requireSession(ctx);
+
+    const profileImageUrl = user.profileImageId
+      ? await ctx.storage.getUrl(user.profileImageId)
+      : null;
+    const coverImageUrl = user.coverImageId
+      ? await ctx.storage.getUrl(user.coverImageId)
+      : null;
+
     return {
       _id: user._id,
       email: user.email,
@@ -56,6 +118,11 @@ export const getProfile = query({
       name: user.name,
       bio: user.bio,
       avatarUrl: user.avatarUrl,
+      profileImageUrl,
+      coverImageUrl,
+      theme: user.theme,
+      accentColor: user.accentColor,
+      storeName: user.storeName,
       instagramUrl: user.instagramUrl,
       youtubeUrl: user.youtubeUrl,
       websiteUrl: user.websiteUrl,
@@ -75,11 +142,14 @@ export const updateProfile = mutation({
     instagramUrl: v.optional(v.string()),
     youtubeUrl: v.optional(v.string()),
     websiteUrl: v.optional(v.string()),
+    theme: v.optional(v.string()),
+    accentColor: v.optional(v.string()),
+    storeName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
 
-    const updates: Record<string, string> = {};
+    const updates: Record<string, string | undefined> = {};
     if (args.name !== undefined) {
       const name = args.name.trim();
       if (name.length < 1) throw new Error("Name is required");
@@ -99,6 +169,15 @@ export const updateProfile = mutation({
     }
     if (args.websiteUrl !== undefined) {
       updates.websiteUrl = args.websiteUrl.trim();
+    }
+    if (args.theme !== undefined) {
+      updates.theme = args.theme;
+    }
+    if (args.accentColor !== undefined) {
+      updates.accentColor = args.accentColor;
+    }
+    if (args.storeName !== undefined) {
+      updates.storeName = args.storeName.trim();
     }
 
     await ctx.db.patch(userId, updates);
@@ -205,6 +284,14 @@ export const deleteAccount = mutation({
 });
 
 async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
+  const user = await ctx.db.get(userId);
+  if (user?.profileImageId) {
+    await ctx.storage.delete(user.profileImageId);
+  }
+  if (user?.coverImageId) {
+    await ctx.storage.delete(user.coverImageId);
+  }
+
   const igConfigs = await ctx.db
     .query("instagramConfig")
     .withIndex("by_user", (q) => q.eq("userId", userId))
