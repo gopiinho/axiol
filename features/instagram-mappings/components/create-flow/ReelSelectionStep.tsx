@@ -100,7 +100,7 @@ export default function ReelSelectionStep({
                 onClick={() => onSelectReel(reel)}
                 className={`group overflow-hidden rounded-2xl border-2 text-left transition-all duration-200 ${
                   isSelected
-                    ? "border-primary bg-primary/[0.04] shadow-sm"
+                    ? "border-primary bg-primary/4 shadow-md"
                     : "border-transparent bg-card hover:border-border hover:shadow-sm"
                 }`}
               >
