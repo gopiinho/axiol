@@ -93,12 +93,18 @@ export default function MyStorePage() {
     setSelectedAccent(currentAccent);
   }
 
+  const extractUsername = (value: string) =>
+    value
+      .replace(/^https?:\/\//, "")
+      .replace(/^(www\.)?(instagram\.com|youtube\.com)\/?@?/, "")
+      .replace(/\/$/, "");
+
   const openEditModal = () => {
     setStoreName(user?.storeName ?? "");
     setName(user?.name ?? "");
     setBio(user?.bio ?? "");
-    setInstagramUrl(user?.instagramUrl ?? "");
-    setYoutubeUrl(user?.youtubeUrl ?? "");
+    setInstagramUrl(extractUsername(user?.instagramUrl ?? ""));
+    setYoutubeUrl(extractUsername(user?.youtubeUrl ?? ""));
     setWebsiteUrl(user?.websiteUrl ?? "");
     setEditOpen(true);
   };
@@ -155,8 +161,20 @@ export default function MyStorePage() {
     : "";
 
   const socialLinks = [
-    { url: user?.instagramUrl, icon: Instagram, label: "Instagram" },
-    { url: user?.youtubeUrl, icon: Youtube, label: "YouTube" },
+    {
+      url: user?.instagramUrl
+        ? `https://instagram.com/${user.instagramUrl}`
+        : undefined,
+      icon: Instagram,
+      label: "Instagram",
+    },
+    {
+      url: user?.youtubeUrl
+        ? `https://youtube.com/@${user.youtubeUrl}`
+        : undefined,
+      icon: Youtube,
+      label: "YouTube",
+    },
     { url: user?.websiteUrl, icon: Globe, label: "Website" },
   ].filter((link) => link.url);
 
@@ -550,31 +568,76 @@ export default function MyStorePage() {
                 <p className="text-xs font-medium text-muted-foreground">
                   Social links
                 </p>
-                <div className="grid sm:grid-cols-3 gap-3">
-                  <div className="flex items-center gap-2">
-                    <Instagram className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <Input
-                      value={instagramUrl}
-                      onChange={(e) => setInstagramUrl(e.target.value)}
-                      placeholder="instagram.com/..."
-                      className="h-9 text-sm"
-                    />
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="edit-instagram"
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    >
+                      <Instagram className="h-3.5 w-3.5" />
+                      Instagram username
+                    </Label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/60">
+                        @
+                      </span>
+                      <Input
+                        id="edit-instagram"
+                        value={instagramUrl}
+                        onChange={(e) =>
+                          setInstagramUrl(
+                            extractUsername(
+                              e.target.value.replace(/^@/, "").trim(),
+                            ),
+                          )
+                        }
+                        placeholder="username"
+                        className="h-9 pl-7 text-sm"
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Youtube className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <Input
-                      value={youtubeUrl}
-                      onChange={(e) => setYoutubeUrl(e.target.value)}
-                      placeholder="youtube.com/..."
-                      className="h-9 text-sm"
-                    />
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="edit-youtube"
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    >
+                      <Youtube className="h-3.5 w-3.5" />
+                      YouTube username
+                    </Label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/60">
+                        @
+                      </span>
+                      <Input
+                        id="edit-youtube"
+                        value={youtubeUrl}
+                        onChange={(e) =>
+                          setYoutubeUrl(
+                            extractUsername(
+                              e.target.value.replace(/^@/, "").trim(),
+                            ),
+                          )
+                        }
+                        placeholder="channel"
+                        className="h-9 pl-7 text-sm"
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 shrink-0 text-muted-foreground" />
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label
+                      htmlFor="edit-website"
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    >
+                      <Globe className="h-3.5 w-3.5" />
+                      Website URL
+                    </Label>
                     <Input
+                      id="edit-website"
                       value={websiteUrl}
                       onChange={(e) => setWebsiteUrl(e.target.value)}
-                      placeholder="yoursite.com"
+                      placeholder="https://yoursite.com"
                       className="h-9 text-sm"
                     />
                   </div>

@@ -27,8 +27,20 @@ export default async function UserStorePage({
   const profileSrc = user.profileImageUrl ?? user.avatarUrl ?? null;
 
   const socialLinks = [
-    { url: user.instagramUrl, icon: Instagram, label: "Instagram" },
-    { url: user.youtubeUrl, icon: Youtube, label: "YouTube" },
+    {
+      url: user.instagramUrl
+        ? `https://instagram.com/${user.instagramUrl}`
+        : undefined,
+      icon: Instagram,
+      label: "Instagram",
+    },
+    {
+      url: user.youtubeUrl
+        ? `https://youtube.com/@${user.youtubeUrl}`
+        : undefined,
+      icon: Youtube,
+      label: "YouTube",
+    },
     { url: user.websiteUrl, icon: Globe, label: "Website" },
   ].filter((link) => link.url);
 
