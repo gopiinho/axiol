@@ -9,7 +9,6 @@ import {
   Check,
   ExternalLink,
   Globe,
-  ImageIcon,
   Instagram,
   Pencil,
   Sparkles,
@@ -17,16 +16,7 @@ import {
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -34,8 +24,8 @@ import {
   AnimatedList,
   AnimatedListItem,
 } from "@/components/motion/AnimatedList";
-import { ImageUpload } from "@/components/ImageUpload";
 import { StorePreview } from "@/components/StorePreview";
+import { EditProfile } from "@/components/EditProfile";
 import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
 
 const ACCENT_PRESETS = [
@@ -58,10 +48,6 @@ export default function MyStorePage() {
   const rawCollections = useQuery(api.collections.listByUser);
   const collections = useCachedQueryResult("store:collections", rawCollections);
   const updateProfile = useMutation(api.users.updateProfile);
-  const saveProfileImage = useMutation(api.storage.saveProfileImage);
-  const saveCoverImage = useMutation(api.storage.saveCoverImage);
-  const removeProfileImage = useMutation(api.storage.removeProfileImage);
-  const removeCoverImage = useMutation(api.storage.removeCoverImage);
 
   const [editOpen, setEditOpen] = useState(false);
   const [storeName, setStoreName] = useState("");
@@ -93,18 +79,12 @@ export default function MyStorePage() {
     setSelectedAccent(currentAccent);
   }
 
-  const extractUsername = (value: string) =>
-    value
-      .replace(/^https?:\/\//, "")
-      .replace(/^(www\.)?(instagram\.com|youtube\.com)\/?@?/, "")
-      .replace(/\/$/, "");
-
   const openEditModal = () => {
     setStoreName(user?.storeName ?? "");
     setName(user?.name ?? "");
     setBio(user?.bio ?? "");
-    setInstagramUrl(extractUsername(user?.instagramUrl ?? ""));
-    setYoutubeUrl(extractUsername(user?.youtubeUrl ?? ""));
+    setInstagramUrl(user?.instagramUrl ?? "");
+    setYoutubeUrl(user?.youtubeUrl ?? "");
     setWebsiteUrl(user?.websiteUrl ?? "");
     setEditOpen(true);
   };
@@ -160,6 +140,9 @@ export default function MyStorePage() {
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/${user.username}`
     : "";
 
+  const formatDisplayUrl = (url: string) =>
+    url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+
   const socialLinks = [
     {
       url: user?.instagramUrl
@@ -177,6 +160,40 @@ export default function MyStorePage() {
     },
     { url: user?.websiteUrl, icon: Globe, label: "Website" },
   ].filter((link) => link.url);
+
+  const storeSocialLinks = [
+    user?.instagramUrl
+      ? {
+          url: `https://instagram.com/${user.instagramUrl}`,
+          icon: "instagram" as const,
+          label: "Instagram",
+          display: `@${user.instagramUrl.replace(/^@/, "")}`,
+        }
+      : null,
+    user?.youtubeUrl
+      ? {
+          url: `https://youtube.com/@${user.youtubeUrl}`,
+          icon: "youtube" as const,
+          label: "YouTube",
+          display: `@${user.youtubeUrl.replace(/^@/, "")}`,
+        }
+      : null,
+    user?.websiteUrl
+      ? {
+          url: user.websiteUrl.startsWith("http")
+            ? user.websiteUrl
+            : `https://${user.websiteUrl}`,
+          icon: "globe" as const,
+          label: "Website",
+          display: formatDisplayUrl(user.websiteUrl),
+        }
+      : null,
+  ].filter(Boolean) as {
+    url: string;
+    icon: "instagram" | "youtube" | "globe";
+    label: string;
+    display: string;
+  }[];
 
   const displayName = user?.storeName || user?.name || "";
 
@@ -325,62 +342,65 @@ export default function MyStorePage() {
         </div>
 
         <div className="hidden lg:flex flex-col items-center sticky top-0 w-full h-screen overflow-y-auto">
-          <FadeIn delay={0.15}>
-            <div className="flex flex-col h-full items-center justify-between gap-5 py-6 px-4 w-full max-w-md">
-              <div className="flex w-full justify-between gap-3">
-                <div>
-                  <p className="text-xs mb-1 font-semibold text-muted-foreground">
-                    Theme
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {themeKeys.map((key) => {
-                      const theme = themes[key];
-                      const isSelected = selectedTheme === key;
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => handleThemeChange(key)}
-                          className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-1.5 transition ${
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border/50 hover:border-border"
-                          }`}
-                        >
-                          <div
-                            className="h-6 w-full rounded-md border"
-                            style={{
-                              backgroundColor: theme.vars["--store-bg"],
-                              borderColor: theme.vars["--store-border"],
-                            }}
+          <FadeIn delay={0.15} className="w-full h-full">
+            <div className="flex flex-col h-full items-center justify-between gap-4 py-6 px-6 w-full">
+              <div className="w-full space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <p className="text-xs mb-2 font-semibold text-muted-foreground">
+                      Theme
+                    </p>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {themeKeys.map((key) => {
+                        const theme = themes[key];
+                        const isSelected = selectedTheme === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => handleThemeChange(key)}
+                            className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-1.5 transition ${
+                              isSelected
+                                ? "border-primary bg-primary/5"
+                                : "border-border/50 hover:border-border"
+                            }`}
                           >
                             <div
-                              className="mx-auto mt-1 h-2.5 w-[60%] rounded-sm"
+                              className="h-6 w-full rounded-md border"
                               style={{
-                                backgroundColor: theme.vars["--store-card-bg"],
+                                backgroundColor: theme.vars["--store-bg"],
+                                borderColor: theme.vars["--store-border"],
                               }}
-                            />
-                          </div>
-                          <span className="text-[9px] font-medium">
-                            {theme.label}
-                          </span>
-                          {isSelected && (
-                            <div className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                              <Check className="h-2 w-2" />
+                            >
+                              <div
+                                className="mx-auto mt-1 h-2.5 w-[60%] rounded-sm"
+                                style={{
+                                  backgroundColor:
+                                    theme.vars["--store-card-bg"],
+                                }}
+                              />
                             </div>
-                          )}
-                        </button>
-                      );
-                    })}
+                            <span className="text-[9px] font-medium">
+                              {theme.label}
+                            </span>
+                            {isSelected && (
+                              <div className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                <Check className="h-2 w-2" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid flex-col justify-between h-full">
-                  <div className="flex flex-col">
-                    <p className="text-xs mb-1 font-semibold text-muted-foreground">
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <p className="text-xs mb-2 font-semibold text-muted-foreground">
                       Accent color
                     </p>
-                    <div className="grid grid-cols-4 gap-1.5">
+                    <div className="flex gap-2">
                       {ACCENT_PRESETS.map((preset) => {
                         const isSelected = selectedAccent === preset.value;
                         return (
@@ -388,9 +408,11 @@ export default function MyStorePage() {
                             key={preset.label}
                             type="button"
                             onClick={() =>
-                              handleAccentChange(isSelected ? "" : preset.value)
+                              handleAccentChange(
+                                isSelected ? "" : preset.value,
+                              )
                             }
-                            className={`relative mx-auto h-7 w-7 rounded-full border-2 transition ${
+                            className={`relative h-7 w-7 shrink-0 rounded-full border-2 transition ${
                               isSelected
                                 ? "border-foreground scale-110"
                                 : "border-transparent hover:scale-105"
@@ -407,17 +429,16 @@ export default function MyStorePage() {
                       })}
                     </div>
                   </div>
-                  <>
-                    {themeDirty && (
-                      <Button
-                        onClick={handleThemeSave}
-                        disabled={themeSaving}
-                        className="w-full rounded-full"
-                      >
-                        {themeSaving ? "Saving..." : "Save theme"}
-                      </Button>
-                    )}
-                  </>
+                  {themeDirty && (
+                    <Button
+                      size="sm"
+                      onClick={handleThemeSave}
+                      disabled={themeSaving}
+                      className="shrink-0 rounded-full"
+                    >
+                      {themeSaving ? "Saving..." : "Save theme"}
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -430,305 +451,37 @@ export default function MyStorePage() {
                 username={user?.username ?? ""}
                 theme={selectedTheme}
                 accentColor={selectedAccent}
-                collections={collections}
+                collections={collections ?? []}
+                socialLinks={storeSocialLinks}
               />
             </div>
           </FadeIn>
         </div>
       </div>
 
-      {/* Edit dialog — images + profile info (theme only on mobile) */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent
-          showCloseButton={false}
-          className="max-w-2xl gap-0 overflow-hidden p-0"
-        >
-          <DialogHeader className="flex-row items-center justify-between border-b border-border/70 px-5 py-3.5">
-            <DialogTitle className="text-lg font-semibold">
-              Edit store
-            </DialogTitle>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={saving}
-              className="rounded-full px-5"
-            >
-              {saving ? "Saving..." : "Save"}
-            </Button>
-          </DialogHeader>
-
-          <div className="max-h-[70vh] overflow-y-auto lg:max-h-none lg:overflow-visible">
-            {/* Cover + Profile image row */}
-            <div className="flex flex-col sm:flex-row gap-5 border-b border-border/50 px-5 py-5">
-              <div className="flex-1 space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  Cover photo
-                </Label>
-                <ImageUpload
-                  currentImageUrl={user?.coverImageUrl}
-                  onUploaded={(storageId) =>
-                    saveCoverImage({ storageId: storageId as never })
-                  }
-                  onRemove={() => removeCoverImage()}
-                  maxSizeBytes={4 * 1024 * 1024}
-                  maxSizeLabel="4 MB"
-                  aspectRatio="3/1"
-                  placeholder={
-                    <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                      <ImageIcon className="h-5 w-5" />
-                      <span className="text-xs">Add cover photo</span>
-                      <span className="text-[10px] text-muted-foreground/60">
-                        1200x400 recommended
-                      </span>
-                    </div>
-                  }
-                />
-              </div>
-
-              <div className="flex sm:flex-col items-center gap-3 sm:gap-2 sm:w-24">
-                <Label className="text-xs text-muted-foreground sm:text-center">
-                  Profile
-                </Label>
-                <ImageUpload
-                  currentImageUrl={user?.profileImageUrl}
-                  onUploaded={(storageId) =>
-                    saveProfileImage({ storageId: storageId as never })
-                  }
-                  onRemove={() => removeProfileImage()}
-                  maxSizeBytes={2 * 1024 * 1024}
-                  maxSizeLabel="2 MB"
-                  className="h-16 w-16 shrink-0"
-                  placeholder={
-                    <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-pink-400/20">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`}
-                        alt="Avatar"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Profile fields — horizontal on desktop */}
-            <div className="grid sm:grid-cols-2 gap-5 px-5 py-5">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="edit-store-name"
-                  className="text-xs text-muted-foreground"
-                >
-                  Store name
-                </Label>
-                <Input
-                  id="edit-store-name"
-                  value={storeName}
-                  onChange={(e) => setStoreName(e.target.value)}
-                  placeholder={user?.name ?? "Your store name"}
-                />
-                <p className="text-[10px] text-muted-foreground/70">
-                  Public page display name
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="edit-name"
-                  className="text-xs text-muted-foreground"
-                >
-                  Name
-                </Label>
-                <Input
-                  id="edit-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your display name"
-                />
-              </div>
-
-              <div className="space-y-2 sm:col-span-2">
-                <Label
-                  htmlFor="edit-bio"
-                  className="text-xs text-muted-foreground"
-                >
-                  Bio
-                </Label>
-                <Textarea
-                  id="edit-bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell people about yourself"
-                  rows={2}
-                  className="resize-none"
-                />
-              </div>
-
-              <div className="space-y-3 rounded-xl border border-border/70 p-4 sm:col-span-2">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Social links
-                </p>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="edit-instagram"
-                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                    >
-                      <Instagram className="h-3.5 w-3.5" />
-                      Instagram username
-                    </Label>
-                    <div className="relative">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/60">
-                        @
-                      </span>
-                      <Input
-                        id="edit-instagram"
-                        value={instagramUrl}
-                        onChange={(e) =>
-                          setInstagramUrl(
-                            extractUsername(
-                              e.target.value.replace(/^@/, "").trim(),
-                            ),
-                          )
-                        }
-                        placeholder="username"
-                        className="h-9 pl-7 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="edit-youtube"
-                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                    >
-                      <Youtube className="h-3.5 w-3.5" />
-                      YouTube username
-                    </Label>
-                    <div className="relative">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/60">
-                        @
-                      </span>
-                      <Input
-                        id="edit-youtube"
-                        value={youtubeUrl}
-                        onChange={(e) =>
-                          setYoutubeUrl(
-                            extractUsername(
-                              e.target.value.replace(/^@/, "").trim(),
-                            ),
-                          )
-                        }
-                        placeholder="channel"
-                        className="h-9 pl-7 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label
-                      htmlFor="edit-website"
-                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                    >
-                      <Globe className="h-3.5 w-3.5" />
-                      Website URL
-                    </Label>
-                    <Input
-                      id="edit-website"
-                      value={websiteUrl}
-                      onChange={(e) => setWebsiteUrl(e.target.value)}
-                      placeholder="https://yoursite.com"
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Theme/accent — mobile only (desktop has it in the sidebar) */}
-              <div className="flex gap-3 sm:col-span-2 lg:hidden">
-                <div className="flex-1 space-y-3 rounded-xl border border-border/70 p-3">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Theme
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {themeKeys.map((key) => {
-                      const theme = themes[key];
-                      const isSelected = selectedTheme === key;
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => handleThemeChange(key)}
-                          className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-1.5 transition ${
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border/50 hover:border-border"
-                          }`}
-                        >
-                          <div
-                            className="h-6 w-full rounded-md border"
-                            style={{
-                              backgroundColor: theme.vars["--store-bg"],
-                              borderColor: theme.vars["--store-border"],
-                            }}
-                          >
-                            <div
-                              className="mx-auto mt-1 h-2.5 w-[60%] rounded-sm"
-                              style={{
-                                backgroundColor: theme.vars["--store-card-bg"],
-                              }}
-                            />
-                          </div>
-                          <span className="text-[9px] font-medium">
-                            {theme.label}
-                          </span>
-                          {isSelected && (
-                            <div className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                              <Check className="h-2 w-2" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="flex-1 space-y-3 rounded-xl border border-border/70 p-3">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Accent color
-                  </p>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {ACCENT_PRESETS.map((preset) => {
-                      const isSelected = selectedAccent === preset.value;
-                      return (
-                        <button
-                          key={preset.label}
-                          type="button"
-                          onClick={() =>
-                            handleAccentChange(isSelected ? "" : preset.value)
-                          }
-                          className={`relative mx-auto h-7 w-7 rounded-full border-2 transition ${
-                            isSelected
-                              ? "border-foreground scale-110"
-                              : "border-transparent hover:scale-105"
-                          }`}
-                          style={{ backgroundColor: preset.value }}
-                          aria-label={preset.label}
-                          title={preset.label}
-                        >
-                          {isSelected && (
-                            <Check className="absolute inset-0 m-auto h-3 w-3 text-white drop-shadow-sm" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EditProfile
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        user={user}
+        storeName={storeName}
+        setStoreName={setStoreName}
+        name={name}
+        setName={setName}
+        bio={bio}
+        setBio={setBio}
+        instagramUrl={instagramUrl}
+        setInstagramUrl={setInstagramUrl}
+        youtubeUrl={youtubeUrl}
+        setYoutubeUrl={setYoutubeUrl}
+        websiteUrl={websiteUrl}
+        setWebsiteUrl={setWebsiteUrl}
+        saving={saving}
+        onSave={handleSave}
+        selectedTheme={selectedTheme}
+        selectedAccent={selectedAccent}
+        onThemeChange={handleThemeChange}
+        onAccentChange={handleAccentChange}
+      />
     </>
   );
 }
