@@ -58,7 +58,6 @@ export default function MyStorePage() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Theme state — lives in store page so both desktop editor + mobile dialog can use it
   const [selectedTheme, setSelectedTheme] = useState<ThemeKey>(
     (user?.theme as ThemeKey) ?? "default",
   );
@@ -68,7 +67,6 @@ export default function MyStorePage() {
 
   const profileImageUrl = user?.profileImageUrl ?? user?.avatarUrl ?? null;
 
-  // Sync theme state when user data loads/changes
   const currentTheme = (user?.theme as ThemeKey) ?? "default";
   const currentAccent = user?.accentColor ?? "";
   if (
@@ -359,7 +357,7 @@ export default function MyStorePage() {
                             key={key}
                             type="button"
                             onClick={() => handleThemeChange(key)}
-                            className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-1.5 transition ${
+                            className={`relative flex flex-col cursor-pointer items-center gap-1 rounded-lg border p-1.5 transition ${
                               isSelected
                                 ? "border-primary bg-primary/5"
                                 : "border-border/50 hover:border-border"
@@ -408,11 +406,9 @@ export default function MyStorePage() {
                             key={preset.label}
                             type="button"
                             onClick={() =>
-                              handleAccentChange(
-                                isSelected ? "" : preset.value,
-                              )
+                              handleAccentChange(isSelected ? "" : preset.value)
                             }
-                            className={`relative h-7 w-7 shrink-0 rounded-full border-2 transition ${
+                            className={`relative h-7 w-7 shrink-0 rounded-sm border-2 cursor-pointer transition ${
                               isSelected
                                 ? "border-foreground scale-110"
                                 : "border-transparent hover:scale-105"

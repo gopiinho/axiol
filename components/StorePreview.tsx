@@ -1,9 +1,15 @@
 "use client";
 
 import { buildThemeStyle, getTheme } from "@/lib/themes";
-import { StoreContent, type StoreContentProps } from "@/components/StoreContent";
+import {
+  StoreContent,
+  type StoreContentProps,
+} from "@/components/StoreContent";
 
-type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "showDots" | "interactive"> & {
+type StorePreviewProps = Omit<
+  StoreContentProps,
+  "themeStyle" | "showDots" | "interactive"
+> & {
   publicUrl: string;
   username: string;
   theme?: string;
@@ -39,7 +45,7 @@ export function StorePreview({
           }}
         >
           <div
-            className="flex items-center justify-between px-6 pt-3 pb-1 text-[9px] font-semibold"
+            className="flex items-center justify-between px-6 pt-3 pb-2 text-[9px] font-semibold"
             style={{ color: "var(--store-text, #111)" }}
           >
             <span>9:41</span>
@@ -71,14 +77,8 @@ export function StorePreview({
             {publicUrl || `linkkit.com/${username}`}
           </div>
 
-          <div className="flex-1 overflow-y-auto">
-            <div
-              style={{
-                width: CONTENT_WIDTH,
-                transformOrigin: "top left",
-                transform: `scale(${ZOOM_FACTOR})`,
-              }}
-            >
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <div style={{ width: CONTENT_WIDTH, zoom: ZOOM_FACTOR }}>
               <StoreContent
                 {...contentProps}
                 themeStyle={themeStyle}
@@ -89,8 +89,8 @@ export function StorePreview({
           </div>
         </div>
 
-        <div className="flex justify-center py-1.5">
-          <div className="h-1 w-24 rounded-full bg-gray-600" />
+        <div className="flex relative justify-center py-1.5">
+          <div className="h-1 w-24 absolute bottom-4 rounded-full bg-gray-600" />
         </div>
       </div>
     </div>
