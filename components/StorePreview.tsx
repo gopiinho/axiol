@@ -1,37 +1,31 @@
 "use client";
 
-import { Heart } from "lucide-react";
-import { buildThemeStyle } from "@/lib/themes";
+import { buildThemeStyle, getTheme } from "@/lib/themes";
+import { StoreContent, type StoreContentProps } from "@/components/StoreContent";
 
-type Collection = {
-  _id: string;
-  title: string;
-  description?: string;
-};
-
-type StorePreviewProps = {
-  displayName: string;
-  bio?: string;
-  profileImageUrl?: string | null;
-  coverImageUrl?: string | null;
+type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "showDots" | "interactive"> & {
   publicUrl: string;
   username: string;
   theme?: string;
   accentColor?: string;
-  collections?: Collection[] | null;
 };
 
+const PHONE_WIDTH = 340;
+const BORDER_WIDTH = 6;
+const INNER_WIDTH = PHONE_WIDTH - BORDER_WIDTH * 2;
+const CONTENT_WIDTH = 375;
+const ZOOM_FACTOR = INNER_WIDTH / CONTENT_WIDTH;
+
 export function StorePreview({
-  displayName,
-  bio,
-  profileImageUrl,
-  coverImageUrl,
   publicUrl,
   username,
   theme,
   accentColor,
-  collections,
+  ...contentProps
 }: StorePreviewProps) {
+  const themeStyle = buildThemeStyle(theme, accentColor);
+  const showDots = getTheme(theme).vars["--store-show-dots"] === "1";
+
   return (
     <div className="flex h-[min(85vh,700px)] w-[min(45vh,340px)] flex-col">
       <div className="relative flex flex-1 flex-col rounded-[3rem] border-[6px] border-gray-900 bg-gray-900 shadow-lg">
@@ -40,8 +34,8 @@ export function StorePreview({
         <div
           className="flex flex-1 flex-col overflow-hidden rounded-[2.5rem]"
           style={{
-            ...buildThemeStyle(theme, accentColor),
             backgroundColor: "var(--store-bg, white)",
+            ...buildThemeStyle(theme, accentColor),
           }}
         >
           <div
@@ -78,155 +72,19 @@ export function StorePreview({
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="home-font-primary px-3 pb-6">
-              {coverImageUrl && (
-                <div className="mx-[-0.75rem] mb-2 h-16 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={coverImageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              )}
-
-              <div className="my-6 space-y-2 text-center">
-                {profileImageUrl && (
-                  <div
-                    className="mx-auto mb-2 h-12 w-12 overflow-hidden rounded-full border-2"
-                    style={{
-                      borderColor: "var(--store-accent, oklch(0.65 0.2 340))",
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={profileImageUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                )}
-                <div className="inline-flex items-center justify-center gap-1.5">
-                  <h1
-                    className="font-secondary text-2xl"
-                    style={{
-                      color: "var(--store-accent, oklch(0.52 0.2 254))",
-                    }}
-                  >
-                    {displayName}
-                  </h1>
-                </div>
-
-                {bio && (
-                  <p
-                    className="mx-auto max-w-50 text-xs"
-                    style={{ color: "var(--store-text-muted, #6b7280)" }}
-                  >
-                    {bio}
-                  </p>
-                )}
-              </div>
-
-              <div
-                className="p-3 backdrop-blur-sm"
-                style={{
-                  backgroundColor: "var(--store-card-bg, oklch(1 0 0 / 0.6))",
-                  border:
-                    "2px solid var(--store-border, oklch(0.85 0.06 340 / 0.6))",
-                  borderRadius: "var(--store-radius, 0)",
-                }}
-              >
-                <div className="mb-4 flex items-center justify-center gap-1.5 font-secondary">
-                  <h5
-                    className="font-secondary text-sm"
-                    style={{ color: "var(--store-text, #111)" }}
-                  >
-                    my collections
-                  </h5>
-                </div>
-
-                {!collections || collections.length === 0 ? (
-                  <div className="py-8 text-center">
-                    <Heart
-                      className="mx-auto mb-2 h-8 w-8"
-                      style={{
-                        color: "var(--store-accent, oklch(0.85 0.06 340))",
-                      }}
-                    />
-                    <p
-                      className="text-xs"
-                      style={{ color: "var(--store-text-muted, #6b7280)" }}
-                    >
-                      building my collection...
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-3">
-                    {collections.map((collection) => (
-                      <div
-                        key={collection._id}
-                        className="relative w-full p-3"
-                        style={{
-                          backgroundColor: "var(--store-surface, white)",
-                          border:
-                            "2px solid var(--store-border, oklch(0.85 0.06 340 / 0.6))",
-                        }}
-                      >
-                        <h2
-                          className="mb-1 pr-6 text-xs font-bold leading-tight"
-                          style={{ color: "var(--store-text, #111)" }}
-                        >
-                          {collection.title}
-                        </h2>
-
-                        {collection.description && (
-                          <p
-                            className="line-clamp-2 text-[10px]"
-                            style={{
-                              color: "var(--store-text-muted, #6b7280)",
-                            }}
-                          >
-                            {collection.description}
-                          </p>
-                        )}
-
-                        <div
-                          className="mt-2 flex items-center justify-between pt-1.5"
-                          style={{
-                            borderTop:
-                              "1px solid var(--store-border, oklch(0.85 0.06 340 / 0.6))",
-                          }}
-                        >
-                          <span
-                            className="text-[9px] font-medium"
-                            style={{
-                              color: "var(--store-text-muted, #6b7280)",
-                            }}
-                          >
-                            see collection
-                          </span>
-                          <svg
-                            className="h-3 w-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            style={{
-                              color: "var(--store-accent, oklch(0.65 0.2 340))",
-                            }}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div
+              style={{
+                width: CONTENT_WIDTH,
+                transformOrigin: "top left",
+                transform: `scale(${ZOOM_FACTOR})`,
+              }}
+            >
+              <StoreContent
+                {...contentProps}
+                themeStyle={themeStyle}
+                showDots={showDots}
+                interactive={false}
+              />
             </div>
           </div>
         </div>
