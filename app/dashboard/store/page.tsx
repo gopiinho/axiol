@@ -251,7 +251,7 @@ export default function MyStorePage() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-start h-full max-lg:mt-8 gap-2">
+                <div className="flex items-start justify-center h-full max-lg:mt-8 gap-2">
                   <Button
                     variant="outline"
                     size="sm"

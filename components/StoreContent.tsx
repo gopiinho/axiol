@@ -49,7 +49,7 @@ export function StoreContent({
 }: StoreContentProps) {
   return (
     <div
-      className={`home-font-primary relative overflow-hidden ${className ?? ""}`}
+      className={`home-font-primary relative flex flex-col overflow-hidden ${className ?? ""}`}
       style={{
         ...themeStyle,
         backgroundColor: "var(--store-bg)",
@@ -68,7 +68,13 @@ export function StoreContent({
         }}
       />
 
-      <div className="relative w-full">
+      <div
+        className="relative w-full flex-1"
+        style={{
+          backgroundColor:
+            "color-mix(in oklch, var(--store-accent) 6%, var(--store-bg))",
+        }}
+      >
         {coverImageUrl ? (
           <div className="w-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -88,7 +94,7 @@ export function StoreContent({
           />
         )}
 
-        <div className="px-5 -mt-14">
+        <div className="relative z-10 px-5 -mt-14">
           <div
             className="h-24 w-24 overflow-hidden rounded-full border-4"
             style={{
@@ -105,10 +111,9 @@ export function StoreContent({
               />
             ) : (
               <div
-                className="flex h-full w-full items-center justify-center"
+                className="flex h-full z-10 w-full items-center justify-center"
                 style={{
-                  backgroundColor:
-                    "var(--store-accent, oklch(0.52 0.2 254))",
+                  backgroundColor: "var(--store-accent, oklch(0.52 0.2 254))",
                 }}
               >
                 <span className="text-3xl font-bold text-white">
@@ -120,7 +125,7 @@ export function StoreContent({
 
           <div className="mt-4 space-y-1">
             <h1
-              className="font-accent text-2xl font-bold leading-tight"
+              className="font-accent text-xl font-bold leading-tight"
               style={{ color: "var(--store-accent)" }}
             >
               {displayName}

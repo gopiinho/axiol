@@ -74,7 +74,10 @@ export default async function UserStorePage({
   }[];
 
   return (
-    <main className="flex min-h-screen justify-center">
+    <main
+      className="flex min-h-screen justify-center"
+      style={{ backgroundColor: theme.vars["--store-bg"] }}
+    >
       <div className="w-full max-w-xl">
         <StoreContent
           className="min-h-screen"
