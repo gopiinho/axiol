@@ -2,6 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Zap, Instagram, ShoppingBag } from "lucide-react";
 import HomeNav from "@/components/HomeNav";
+import { SocialProofBar } from "@/components/landing/SocialProofBar";
+import { AutoDmShowcase } from "@/components/landing/AutoDmShowcase";
+import { StorefrontShowcase } from "@/components/landing/StorefrontShowcase";
+import { FeatureGrid } from "@/components/landing/FeatureGrid";
+import { FinalCta } from "@/components/landing/FinalCta";
 
 export default function Home() {
   return (
@@ -23,6 +28,7 @@ export default function Home() {
       />
       <HomeNav />
 
+      {/* Hero — unchanged */}
       <section className="relative min-h-[calc(100svh-80px)] flex items-end px-6 sm:px-16 lg:px-28 xl:px-32 pb-16 sm:pb-20 lg:pb-28 pt-28 sm:pt-40">
         <div className="w-full max-w-7xl mx-auto">
           <div className="max-w-2xl lg:max-w-3xl space-y-6 sm:space-y-8">
@@ -44,6 +50,13 @@ export default function Home() {
         </div>
       </section>
 
+      <StorefrontShowcase />
+
+      <SocialProofBar />
+
+      <AutoDmShowcase />
+
+      {/* How it works */}
       <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24 lg:py-32">
         <div className="w-full max-w-7xl mx-auto">
           <div className="rounded-3xl border-2 border-border/80 bg-card/80 p-6 sm:p-8 lg:p-12 backdrop-blur-sm">
@@ -59,8 +72,13 @@ export default function Home() {
 
               <div className="grid gap-8 sm:gap-10 md:grid-cols-3 text-left">
                 <div className="space-y-3">
-                  <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-primary/10 text-primary">
-                    <ShoppingBag className="h-5 w-5" strokeWidth={2.5} />
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-white text-xs font-bold">
+                      1
+                    </span>
+                    <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-primary/10 text-primary">
+                      <ShoppingBag className="h-5 w-5" strokeWidth={2.5} />
+                    </div>
                   </div>
                   <h3 className="text-lg font-bold">Create your store</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -69,8 +87,13 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="space-y-3">
-                  <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-pink-subtle text-pink">
-                    <Instagram className="h-5 w-5" strokeWidth={2.5} />
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-white text-xs font-bold">
+                      2
+                    </span>
+                    <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-pink-subtle text-pink">
+                      <Instagram className="h-5 w-5" strokeWidth={2.5} />
+                    </div>
                   </div>
                   <h3 className="text-lg font-bold">Connect Instagram</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -79,8 +102,13 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="space-y-3">
-                  <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-accent text-accent-foreground">
-                    <Zap className="h-5 w-5" strokeWidth={2.5} />
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-white text-xs font-bold">
+                      3
+                    </span>
+                    <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-accent text-accent-foreground">
+                      <Zap className="h-5 w-5" strokeWidth={2.5} />
+                    </div>
                   </div>
                   <h3 className="text-lg font-bold">Automatic replies</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -94,14 +122,63 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="relative px-6 sm:px-12 lg:px-20 xl:px-28 pb-8 text-center text-xs text-muted-foreground">
-        <Link href="/privacy" className="hover:underline">
-          Privacy Policy
-        </Link>
-        <span className="mx-2">·</span>
-        <Link href="/terms" className="hover:underline">
-          Terms of Service
-        </Link>
+      <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-12 sm:py-16">
+        <div className="w-full max-w-3xl mx-auto text-center space-y-6">
+          <h2 className="heading-playful text-3xl sm:text-4xl text-primary">
+            All your favorite platforms, one link
+          </h2>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {[
+              {
+                name: "Amazon",
+                bg: "bg-[#FF9900]/15",
+                color: "text-[#FF9900]",
+              },
+              {
+                name: "Flipkart",
+                bg: "bg-[#2874F0]/15",
+                color: "text-[#2874F0]",
+              },
+              { name: "Nykaa", bg: "bg-[#FC2779]/15", color: "text-[#FC2779]" },
+              {
+                name: "Meesho",
+                bg: "bg-[#570A57]/15",
+                color: "text-[#570A57]",
+              },
+              { name: "+Custom", bg: "bg-primary/10", color: "text-primary" },
+            ].map((p) => (
+              <span
+                key={p.name}
+                className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${p.bg} ${p.color}`}
+              >
+                {p.name}
+              </span>
+            ))}
+          </div>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Add affiliate links from any platform. Your followers get one clean
+            page with everything.
+          </p>
+        </div>
+      </section>
+
+      <FeatureGrid />
+
+      <FinalCta />
+
+      <footer className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-8 sm:py-10">
+        <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <span className="text-lg font-black text-primary">Linkkit</span>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:underline">
+              Privacy Policy
+            </Link>
+            <span>·</span>
+            <Link href="/terms" className="hover:underline">
+              Terms of Service
+            </Link>
+          </div>
+        </div>
       </footer>
     </main>
   );
