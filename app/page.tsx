@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Zap, Instagram, ShoppingBag } from "lucide-react";
+import { WaitlistForm } from "@/components/WaitlistForm";
 import HomeNav from "@/components/HomeNav";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { AutoDmShowcase } from "@/components/landing/AutoDmShowcase";
@@ -10,7 +10,7 @@ import { FinalCta } from "@/components/landing/FinalCta";
 
 export default function Home() {
   return (
-    <main className="home-font-primary bg-pink-100 min-h-screen relative overflow-hidden">
+    <main className="home-font-primary bg-pink-100 h-screen relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 dot-grid opacity-40" />
       <div
         className="pointer-events-none absolute -top-40 -right-40 h-125 w-125 rounded-full"
@@ -41,11 +41,7 @@ export default function Home() {
               products, and bookings — hosted within your link-in-bio.
             </p>
 
-            <div className="flex items-center gap-3 sm:gap-4 pt-2">
-              <Button asChild className="py-7 px-12 text-xl sm:text-2xl">
-                <Link href="/signup">Continue</Link>
-              </Button>
-            </div>
+            <WaitlistForm />
           </div>
         </div>
       </section>
