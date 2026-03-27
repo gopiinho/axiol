@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <section className="grid gap-4 pb-24 px-5 lg:px-6 xl:grid-cols-[1.3fr_1fr]">
+        <section className="grid gap-4 pb-10 px-5 lg:px-6 xl:grid-cols-[1.3fr_1fr]">
           <Card className="overflow-hidden">
             <CardHeader className="border-b border-border/70">
               <div className="flex items-start justify-between gap-4">

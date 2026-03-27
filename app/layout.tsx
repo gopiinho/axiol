@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Jersey_10, Manrope, Space_Grotesk } from "next/font/google";
+import { DM_Sans, Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 
@@ -21,12 +21,6 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
-const jersey = Jersey_10({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-jersey",
-});
-
 export const metadata: Metadata = {
   title: "Linkkit - Your Creator Store",
   description: "linkkit.store",
@@ -40,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} ${jersey.variable} antialiased relative w-full min-h-screen`}
+        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} antialiased relative w-full min-h-screen`}
       >
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>

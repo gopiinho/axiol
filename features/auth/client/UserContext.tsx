@@ -11,6 +11,11 @@ type UserProfile = {
   name?: string;
   bio?: string;
   avatarUrl?: string;
+  profileImageUrl?: string | null;
+  coverImageUrl?: string | null;
+  theme?: string;
+  accentColor?: string;
+  storeName?: string;
   instagramUrl?: string;
   youtubeUrl?: string;
   websiteUrl?: string;
