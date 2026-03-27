@@ -159,4 +159,8 @@ export default defineSchema({
   catCounter: defineTable({
     count: v.number(),
   }),
+
+  waitlist: defineTable({
+    email: v.string(),
+  }).index("by_email", ["email"]),
 });
