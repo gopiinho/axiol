@@ -54,10 +54,10 @@ function CommentBubble({
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay, ease: [0.25, 1, 0.5, 1] }}
     >
-      <div className="h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-pink to-primary" />
+      <div className="h-7 w-7 shrink-0 rounded-full bg-linear-to-br from-pink to-primary" />
       <div className="min-w-0">
-        <span className="text-xs font-bold text-gray-800">{user}</span>
-        <p className="text-xs text-gray-600 mt-0.5">
+        <span className="text-xs font-bold text-foreground">{user}</span>
+        <p className="text-xs text-muted-foreground mt-0.5">
           {parts.map((part, i) =>
             part.toLowerCase() === keyword.toLowerCase() ? (
               <span
@@ -89,20 +89,18 @@ function DmPreview() {
         Auto-DM sent instantly
       </p>
       <div className="space-y-1.5">
-        <p className="text-[11px] text-gray-600">
+        <p className="text-[11px] text-muted-foreground">
           Hi! Here are my top picks from &quot;Summer Skincare&quot;:
         </p>
         <div className="space-y-1">
-          {["Vitamin C Serum — ₹499", "SPF 50 Sunscreen — ₹349"].map(
-            (item) => (
-              <div
-                key={item}
-                className="text-[10px] text-primary/80 flex items-center gap-1"
-              >
-                <span>🔗</span> {item}
-              </div>
-            ),
-          )}
+          {["Vitamin C Serum — ₹499", "SPF 50 Sunscreen — ₹349"].map((item) => (
+            <div
+              key={item}
+              className="text-[10px] text-primary/80 flex items-center gap-1"
+            >
+              <span>🔗</span> {item}
+            </div>
+          ))}
         </div>
       </div>
     </motion.div>
@@ -120,8 +118,8 @@ export function AutoDmShowcase() {
                 Turn Comments into Sales
               </h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto">
-                When followers comment a keyword on your reel, they instantly get
-                a DM with your product links. Zero manual work.
+                When followers comment a keyword on your reel, they instantly
+                get a DM with your product links. Zero manual work.
               </p>
             </div>
           </ScrollFadeIn>
@@ -130,7 +128,7 @@ export function AutoDmShowcase() {
             {/* Left — Comment → DM simulation */}
             <div className="space-y-4 max-w-sm mx-auto lg:mx-0 w-full">
               {/* Instagram-style comment section */}
-              <div className="rounded-2xl border border-border bg-white/80 overflow-hidden">
+              <div className="rounded-2xl border border-border bg-card/90 overflow-hidden">
                 <div className="px-3 py-2 border-b border-border/60 flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-pink" />
                   <span className="text-[11px] font-semibold text-gray-500">

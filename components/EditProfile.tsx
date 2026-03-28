@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Globe,
-  ImageIcon,
-  Instagram,
-  Youtube,
-  Check,
-} from "lucide-react";
+import { Globe, ImageIcon, Instagram, Youtube, Check } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -166,7 +160,7 @@ export function EditProfile({
                 maxSizeLabel="2 MB"
                 className="h-16 w-16 shrink-0"
                 placeholder={
-                  <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-pink-400/20">
+                  <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary/20 to-pink-400/20">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`}

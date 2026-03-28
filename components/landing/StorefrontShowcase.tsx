@@ -76,7 +76,8 @@ export function StorefrontShowcase() {
                     <button
                       key={key}
                       onClick={() => setActiveTheme(key)}
-                      className={`h-8 w-8 rounded-full border-2 transition-all duration-200 ${
+                      aria-label={t.label}
+                      className={`h-11 w-11 rounded-full border-2 transition-all duration-200 ${
                         isActive
                           ? "scale-110 border-primary shadow-md"
                           : "border-border/60 hover:scale-105"
@@ -84,7 +85,6 @@ export function StorefrontShowcase() {
                       style={{
                         backgroundColor: t.vars["--store-accent"],
                       }}
-                      title={t.label}
                     />
                   );
                 })}

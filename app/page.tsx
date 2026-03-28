@@ -10,7 +10,7 @@ import { FinalCta } from "@/components/landing/FinalCta";
 
 export default function Home() {
   return (
-    <main className="home-font-primary bg-pink-100 h-screen relative overflow-hidden">
+    <main className="home-font-primary bg-pink-100 relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 dot-grid opacity-40" />
       <div
         className="pointer-events-none absolute -top-40 -right-40 h-125 w-125 rounded-full"
@@ -28,7 +28,6 @@ export default function Home() {
       />
       <HomeNav />
 
-      {/* Hero — unchanged */}
       <section className="relative min-h-[calc(100svh-80px)] flex items-end px-6 sm:px-16 lg:px-28 xl:px-32 pb-16 sm:pb-20 lg:pb-28 pt-28 sm:pt-40">
         <div className="w-full max-w-7xl mx-auto">
           <div className="max-w-2xl lg:max-w-3xl space-y-6 sm:space-y-8">
@@ -37,7 +36,7 @@ export default function Home() {
             </h1>
 
             <p className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-md sm:max-w-lg leading-relaxed">
-              The easiest way to make money online. All of your courses, digital
+              The easiest way to make money online. All of your digital
               products, and bookings — hosted within your link-in-bio.
             </p>
 
@@ -68,45 +67,30 @@ export default function Home() {
 
               <div className="grid gap-8 sm:gap-10 md:grid-cols-3 text-left">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-white text-xs font-bold">
-                      1
-                    </span>
-                    <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-primary/10 text-primary">
-                      <ShoppingBag className="h-5 w-5" strokeWidth={2.5} />
-                    </div>
+                  <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-primary/10 text-primary">
+                    <ShoppingBag className="h-5 w-5" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-lg font-bold">Create your store</h3>
+                  <h3 className="text-lg font-bold">1. Create your store</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Sign up and get your own page at linkkit.com/yourname. Add
                     product collections with affiliate links.
                   </p>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-white text-xs font-bold">
-                      2
-                    </span>
-                    <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-pink-subtle text-pink">
-                      <Instagram className="h-5 w-5" strokeWidth={2.5} />
-                    </div>
+                  <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-pink-subtle text-pink">
+                    <Instagram className="h-5 w-5" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-lg font-bold">Connect Instagram</h3>
+                  <h3 className="text-lg font-bold">2. Connect Instagram</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Link your Instagram account and map reels to your
                     collections with trigger keywords.
                   </p>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-white text-xs font-bold">
-                      3
-                    </span>
-                    <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-accent text-accent-foreground">
-                      <Zap className="h-5 w-5" strokeWidth={2.5} />
-                    </div>
+                  <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-accent text-accent-foreground">
+                    <Zap className="h-5 w-5" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-lg font-bold">Automatic replies</h3>
+                  <h3 className="text-lg font-bold">3. Automatic replies</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     When followers comment your keyword on a reel, they
                     instantly get a DM with your product links.
@@ -125,27 +109,15 @@ export default function Home() {
           </h2>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {[
-              {
-                name: "Amazon",
-                bg: "bg-[#FF9900]/15",
-                color: "text-[#FF9900]",
-              },
-              {
-                name: "Flipkart",
-                bg: "bg-[#2874F0]/15",
-                color: "text-[#2874F0]",
-              },
-              { name: "Nykaa", bg: "bg-[#FC2779]/15", color: "text-[#FC2779]" },
-              {
-                name: "Meesho",
-                bg: "bg-[#570A57]/15",
-                color: "text-[#570A57]",
-              },
-              { name: "+Custom", bg: "bg-primary/10", color: "text-primary" },
+              { name: "Amazon", cls: "badge-platform-amazon" },
+              { name: "Flipkart", cls: "badge-platform-flipkart" },
+              { name: "Nykaa", cls: "badge-platform-nykaa" },
+              { name: "Meesho", cls: "badge-platform-meesho" },
+              { name: "+Custom", cls: "badge-platform-other" },
             ].map((p) => (
               <span
                 key={p.name}
-                className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${p.bg} ${p.color}`}
+                className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${p.cls}`}
               >
                 {p.name}
               </span>
