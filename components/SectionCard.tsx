@@ -32,12 +32,14 @@ export default function SectionCard({
   onDelete,
 }: SectionCardProps) {
   const router = useRouter();
-  const items = useQuery(api.items.listByCollection, { collectionId: section._id });
+  const items = useQuery(api.items.listByCollection, {
+    collectionId: section._id,
+  });
 
   const itemCount = items?.length ?? 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow justify-between">
+    <Card className="hover:shadow-(--shadow-card-hover) transition-shadow justify-between">
       <CardHeader>
         <CardTitle className="text-xl">{section.title}</CardTitle>
         {section.description && (
