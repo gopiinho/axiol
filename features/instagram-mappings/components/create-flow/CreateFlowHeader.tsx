@@ -3,6 +3,7 @@
 import { FadeIn } from "@/components/motion/FadeIn";
 import { motion } from "motion/react";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StepMeta {
   id: 1 | 2 | 3;
@@ -36,116 +37,105 @@ export default function CreateFlowHeader({
 
   const isCompleted = (stepId: number) => currentStep > stepId;
 
+  const progressScale = currentStep === 1 ? 0 : currentStep === 2 ? 0.5 : 1;
+
   return (
     <div className="px-5 lg:px-6">
       <FadeIn>
         <section className="py-6 lg:py-8">
           <h1 className="app-title">Create New Post</h1>
           <p className="app-subtitle mt-1 max-w-md">
-            Pick a reel, choose a collection, and set the keyword that triggers auto-DMs.
+            Pick a reel, choose a collection, and set the keyword that triggers
+            auto-DMs.
           </p>
         </section>
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <nav
-          aria-label="Create flow steps"
-          className="app-panel flex items-stretch gap-0 overflow-hidden p-1.5"
-        >
-          {stepMeta.map((step, i) => {
-            const active = currentStep === step.id;
-            const completed = isCompleted(step.id);
-            const clickable = isClickable(step.id);
+        <nav aria-label="Create flow steps" className="pb-6 lg:pb-8">
+          <div className="relative flex justify-between">
+            <div
+              className="absolute h-px bg-border"
+              style={{
+                left: "calc(100% / 6)",
+                right: "calc(100% / 6)",
+                top: "1.25rem",
+              }}
+            />
 
-            return (
-              <button
-                key={step.id}
-                type="button"
-                disabled={!clickable}
-                onClick={() => clickable && onGoToStep(step.id)}
-                aria-current={active ? "step" : undefined}
-                className={`
-                  group relative flex flex-1 items-center justify-center gap-2.5
-                  rounded-xl px-3 py-3 text-sm font-semibold
-                  transition-colors duration-200
-                  ${
-                    active
-                      ? "text-primary"
-                      : completed
-                        ? "text-foreground/70"
-                        : "text-muted-foreground"
-                  }
-                  ${
+            <motion.div
+              className="absolute h-px bg-primary origin-left"
+              style={{
+                left: "calc(100% / 6)",
+                width: "calc(100% * 2 / 3)",
+                top: "1.25rem",
+              }}
+              animate={{ scaleX: progressScale }}
+              transition={{ duration: 0.5, ease: easeOutQuart }}
+            />
+
+            {stepMeta.map((step) => {
+              const active = currentStep === step.id;
+              const completed = isCompleted(step.id);
+              const clickable = isClickable(step.id);
+
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  disabled={!clickable}
+                  onClick={() => clickable && onGoToStep(step.id)}
+                  aria-current={active ? "step" : undefined}
+                  className={cn(
+                    "relative z-10 flex flex-1 flex-col items-center gap-2.5",
                     clickable && !active
-                      ? "hover:text-foreground cursor-pointer"
+                      ? "cursor-pointer"
                       : !clickable
-                        ? "cursor-not-allowed opacity-40"
-                        : ""
-                  }
-                `}
-              >
-                {active && (
-                  <motion.div
-                    layoutId="active-step-pill"
-                    className="absolute inset-0 rounded-xl bg-primary/[0.08]"
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 32,
-                      mass: 0.8,
-                    }}
-                  />
-                )}
-
-                <motion.span
-                  className={`
-                    relative z-10 flex h-7 w-7 shrink-0 items-center justify-center
-                    rounded-full text-xs font-extrabold transition-colors duration-200
-                    ${
-                      active
-                        ? "bg-primary text-primary-foreground shadow-[0_2px_8px_-2px_oklch(0.5_0.22_254/0.4)]"
-                        : completed
-                          ? "bg-primary/15 text-primary"
-                          : "bg-muted text-muted-foreground"
-                    }
-                  `}
-                  animate={{
-                    scale: active ? 1 : 0.9,
-                  }}
-                  transition={{
-                    duration: 0.3,
-                    ease: easeOutQuart,
-                  }}
-                >
-                  {completed ? (
-                    <motion.span
-                      initial={{ scale: 0, rotate: -90 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{
-                        duration: 0.35,
-                        ease: easeOutQuart,
-                      }}
-                    >
-                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                    </motion.span>
-                  ) : (
-                    step.id
+                        ? "cursor-not-allowed"
+                        : "",
                   )}
-                </motion.span>
+                >
+                  <motion.div
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors duration-300",
+                      active
+                        ? "border-primary bg-primary text-primary-foreground shadow-[0_4px_14px_-3px_oklch(0.5_0.22_254/0.45)]"
+                        : completed
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground",
+                    )}
+                    animate={{ scale: active ? 1.08 : 1 }}
+                    transition={{ duration: 0.3, ease: easeOutQuart }}
+                  >
+                    {completed ? (
+                      <motion.span
+                        initial={{ scale: 0, rotate: -90 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ duration: 0.35, ease: easeOutQuart }}
+                      >
+                        <Check className="h-4 w-4" strokeWidth={3} />
+                      </motion.span>
+                    ) : (
+                      <span>{step.id}</span>
+                    )}
+                  </motion.div>
 
-                <span className="relative z-10 hidden sm:inline">
-                  {step.title}
-                </span>
-
-                {i < stepMeta.length - 1 && (
                   <span
-                    className="pointer-events-none absolute right-0 top-1/2 h-5 w-px -translate-y-1/2 bg-border"
-                    aria-hidden
-                  />
-                )}
-              </button>
-            );
-          })}
+                    className={cn(
+                      "text-xs font-semibold transition-colors duration-200 hidden sm:block",
+                      active
+                        ? "text-foreground"
+                        : completed
+                          ? "text-muted-foreground"
+                          : "text-muted-foreground/40",
+                    )}
+                  >
+                    {step.title}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </nav>
       </FadeIn>
     </div>

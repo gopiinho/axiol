@@ -14,10 +14,10 @@
   --color-status-warn-subtle-fg: var(--status-warn-subtle-fg);
   --font-sans: var(--font-manrope);
   --font-primary: var(--font-manrope);
-  --font-secondary: var(--font-jersey);
+  --font-secondary: var(--font-space-grotesk);
   --font-accent: var(--font-space-grotesk);
   --font-home-primary: var(--font-dm-sans);
-  --font-home-accent: var(--font-jersey);
+  --font-home-accent: var(--font-space-grotesk);
   --color-pink: var(--pink);
   --color-pink-fg: var(--pink-fg);
   --color-pink-subtle: var(--pink-subtle);
@@ -97,6 +97,9 @@
   --surface-1: oklch(0.998 0.003 248);
   --surface-2: oklch(0.96 0.022 246);
   --surface-elevated: 0 16px 48px -20px oklch(0.25 0.06 252 / 0.45);
+  --shadow-card: 0 8px 32px -16px oklch(0.25 0.06 252 / 0.35);
+  --shadow-card-hover: 0 12px 36px -12px oklch(0.25 0.06 252 / 0.32);
+  --shadow-overlay: 0 20px 60px -16px oklch(0.25 0.06 252 / 0.5);
   /* Pink accent — formalized */
   --pink: oklch(0.72 0.18 350);
   --pink-fg: oklch(0.98 0.01 350);
@@ -167,7 +170,7 @@
   }
 
   .home-font-accent {
-    font-family: var(--font-jersey), sans-serif;
+    font-family: var(--font-space-grotesk), sans-serif;
   }
 
   .app-subtitle {
@@ -268,9 +271,18 @@
     animation: pulse-ring 2s ease-out infinite;
   }
   @keyframes pulse-ring {
-    0% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
-    70% { box-shadow: 0 0 0 6px currentColor; opacity: 0; }
-    100% { box-shadow: 0 0 0 0 currentColor; opacity: 0; }
+    0% {
+      box-shadow: 0 0 0 0 currentColor;
+      opacity: 1;
+    }
+    70% {
+      box-shadow: 0 0 0 6px currentColor;
+      opacity: 0;
+    }
+    100% {
+      box-shadow: 0 0 0 0 currentColor;
+      opacity: 0;
+    }
   }
 
   /* Shake animation for form errors */
@@ -278,11 +290,22 @@
     animation: shake 0.4s ease-out;
   }
   @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(5px); }
-    60% { transform: translateX(-3px); }
-    80% { transform: translateX(2px); }
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-6px);
+    }
+    40% {
+      transform: translateX(5px);
+    }
+    60% {
+      transform: translateX(-3px);
+    }
+    80% {
+      transform: translateX(2px);
+    }
   }
 
   /* Gentle float for empty state icons */
@@ -290,19 +313,28 @@
     animation: float 3s ease-in-out infinite;
   }
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
   }
 
-  /* Bold heading — Jersey 10 for playful personality moments */
+  /* Bold heading — Space Grotesk for personality moments */
   .heading-playful {
-    font-family: var(--font-jersey), sans-serif;
-    letter-spacing: 0.02em;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   /* Decorative dot grid — subtle background texture */
   .dot-grid {
-    background-image: radial-gradient(oklch(0.85 0.03 250 / 0.4) 1px, transparent 1px);
+    background-image: radial-gradient(
+      oklch(0.85 0.03 250 / 0.4) 1px,
+      transparent 1px
+    );
     background-size: 20px 20px;
   }
 }

@@ -25,13 +25,11 @@ export const listPublic = query({
 
     if (!user) return null;
 
-    const collections = await ctx.db
+    return await ctx.db
       .query("collections")
       .withIndex("by_user", (q) => q.eq("createdBy", user._id))
       .order("desc")
       .collect();
-
-    return { user: { name: user.name, bio: user.bio, avatarUrl: user.avatarUrl }, collections };
   },
 });
 

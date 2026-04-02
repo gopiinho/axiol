@@ -32,10 +32,10 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/store", label: "My Store", icon: Store },
-  { href: "/dashboard/lists", label: "Collections", icon: List },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/create", label: "Create", icon: PencilRuler },
   { href: "/dashboard/drafts", label: "Drafts", icon: FileText },
+  { href: "/dashboard/lists", label: "Collections", icon: List },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -53,10 +53,11 @@ export default function DashboardShell({
     try {
       setIsLoggingOut(true);
       await authClient.signOut();
-      router.replace("/login");
+    } catch {
     } finally {
       setIsLoggingOut(false);
       setLogoutOpen(false);
+      router.replace("/login");
     }
   };
 

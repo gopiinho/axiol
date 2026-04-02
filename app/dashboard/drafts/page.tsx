@@ -97,7 +97,7 @@ export default function DraftsPage() {
         </section>
       </FadeIn>
 
-      <div className="px-5 lg:px-6">
+      <div className="px-5 lg:px-6 pb-10">
         {drafts && drafts.length > 0 ? (
           <AnimatedList className="grid grid-cols-1 gap-4">
             {drafts.map((draft) => (
