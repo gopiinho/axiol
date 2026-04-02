@@ -301,7 +301,7 @@ export default function MyStorePage() {
                             className="object-cover transition duration-300 group-hover:scale-[1.03]"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-pink-400/20">
+                          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-primary/20 to-pink-400/20">
                             <Sparkles className="h-6 w-6 text-muted-foreground/50" />
                           </div>
                         )}
@@ -329,7 +329,7 @@ export default function MyStorePage() {
               <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
                 <Sparkles className="mx-auto h-10 w-10 text-muted-foreground/30" />
                 <p className="mt-4 text-sm text-muted-foreground">
-                  No active posts yet. Let's publish one to get started.
+                  No active posts yet. Let&apos;s publish one to get started.
                 </p>
                 <Button asChild variant="outline" size="sm" className="mt-5">
                   <Link href="/dashboard/create">Create a post</Link>
