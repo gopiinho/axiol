@@ -111,7 +111,7 @@ export default function ReelSelectionStep({
                       alt="Reel"
                       width={420}
                       height={520}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                      className="h-full w-full object-cover transition duration-300"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-xs text-muted-foreground">

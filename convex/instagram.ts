@@ -102,6 +102,22 @@ export const saveConfig = mutation({
   },
 });
 
+export const setWebhookSubscribed = mutation({
+  args: {
+    instagramAccountId: v.string(),
+    subscribed: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const existing = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!existing) return;
+    await ctx.db.patch(existing._id, { webhookSubscribed: args.subscribed });
+  },
+});
+
 export const getConfig = query({
   args: {},
   handler: async (ctx) => {
