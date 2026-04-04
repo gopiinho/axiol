@@ -148,6 +148,38 @@ export async function GET(request: NextRequest) {
       instagramUsername,
     });
 
+    // 5. Register webhook subscription for this account
+    let webhookSubscribed = false;
+    try {
+      const subscribeUrl = new URL(
+        `https://graph.instagram.com/v25.0/${instagramAccountId}/subscribed_apps`,
+      );
+      subscribeUrl.searchParams.set("subscribed_fields", "comments,messages");
+      subscribeUrl.searchParams.set("access_token", longLivedData.access_token);
+
+      const subscribeRes = await fetch(subscribeUrl.toString(), {
+        method: "POST",
+      });
+
+      if (subscribeRes.ok) {
+        const subscribeData = (await subscribeRes.json()) as {
+          success?: boolean;
+        };
+        webhookSubscribed = subscribeData.success === true;
+        console.log("Instagram webhook subscription result:", subscribeData);
+      } else {
+        const error = await subscribeRes.text();
+        console.error("Instagram webhook subscription failed:", error);
+      }
+    } catch (err) {
+      console.error("Instagram webhook subscription error:", err);
+    }
+
+    await fetchAuthMutation(api.instagram.setWebhookSubscribed, {
+      instagramAccountId,
+      subscribed: webhookSubscribed,
+    });
+
     return settingsRedirect(request, { ig_connected: "true" });
   } catch (error) {
     console.error("Instagram OAuth callback error:", error);

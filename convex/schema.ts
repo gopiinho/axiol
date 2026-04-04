@@ -68,6 +68,7 @@ export default defineSchema({
     rateLimitCallCount: v.number(),
     rateLimitResetTime: v.number(),
     lastApiCallTime: v.number(),
+    webhookSubscribed: v.optional(v.boolean()),
   })
     .index("by_user", ["userId"])
     .index("by_instagram_account", ["instagramAccountId"]),
