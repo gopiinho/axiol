@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms of Service — Linkkit",
+  title: "Terms of Service — Axiol",
 };
 
 function Section({
@@ -46,7 +46,7 @@ export default function TermsPage() {
             href="/"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            &larr; Back to Linkkit
+            &larr; Back to Axiol
           </Link>
           <h1 className="font-accent mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Terms of Service
@@ -59,9 +59,9 @@ export default function TermsPage() {
         <div className="space-y-10">
           <Section title="1. Acceptance of Terms">
             <P>
-              By accessing or using Linkkit (&ldquo;the Service&rdquo;), you
-              agree to be bound by these Terms of Service. If you do not agree,
-              do not use the Service.
+              By accessing or using Axiol (&ldquo;the Service&rdquo;), you agree
+              to be bound by these Terms of Service. If you do not agree, do not
+              use the Service.
             </P>
           </Section>
 
@@ -73,14 +73,14 @@ export default function TermsPage() {
               You must notify us immediately of any unauthorized use.
             </P>
             <P>
-              You must be at least 13 years old to use Linkkit. By registering,
+              You must be at least 13 years old to use Axiol. By registering,
               you represent that you meet this age requirement.
             </P>
           </Section>
 
           <Section title="3. Permitted Use">
             <P>
-              Linkkit provides tools for creators to build public profile pages
+              Axiol provides tools for creators to build public profile pages
               with product collections and automate Instagram DM responses. You
               agree to use the Service only for its intended purpose and in
               compliance with all applicable laws.
@@ -125,8 +125,8 @@ export default function TermsPage() {
 
           <Section title="4. Instagram Integration">
             <P>
-              By connecting your Instagram account to Linkkit, you authorize us
-              to access your Instagram data as described in our{" "}
+              By connecting your Instagram account to Axiol, you authorize us to
+              access your Instagram data as described in our{" "}
               <Link
                 href="/privacy"
                 className="font-medium text-primary underline decoration-primary/30 underline-offset-2 hover:decoration-primary"
@@ -140,14 +140,14 @@ export default function TermsPage() {
             <P>
               You acknowledge that Instagram may change, restrict, or revoke API
               access at any time, which may affect the availability of
-              automation features. Linkkit is not responsible for changes to
+              automation features. Axiol is not responsible for changes to
               Instagram&apos;s policies or API.
             </P>
           </Section>
 
           <Section title="5. Intellectual Property">
             <P>
-              The Linkkit platform, including its design, code, and branding, is
+              The Axiol platform, including its design, code, and branding, is
               owned by us. You retain ownership of the content you create and
               upload (collections, product links, profile information). By using
               the Service, you grant us a limited license to display your public
@@ -193,7 +193,7 @@ export default function TermsPage() {
             <P>
               We may update these Terms from time to time. If we make material
               changes, we will notify you by email or by posting a notice on the
-              platform. Your continued use of Linkkit after changes are posted
+              platform. Your continued use of Axiol after changes are posted
               constitutes acceptance of the updated Terms.
             </P>
           </Section>

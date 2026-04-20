@@ -133,7 +133,7 @@ export default function SignupPage() {
             <div className="relative flex items-center justify-center">
               <AtSign className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <span className="pointer-events-none font-semibold text-base absolute top-1/2 left-10 -translate-y-1/2 select-none whitespace-nowrap text-foreground">
-                linkkit.store/
+                axiol.store/
               </span>
               <Input
                 id="username"

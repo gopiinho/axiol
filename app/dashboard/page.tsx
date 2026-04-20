@@ -39,7 +39,7 @@ export default function DashboardPage() {
       <FadeIn>
         <div className="space-y-1">
           <h1 className="heading-playful text-4xl text-primary sm:text-5xl">
-            linkkit
+            axiol
           </h1>
           <p className="text-muted-foreground">
             What would you like to do today?

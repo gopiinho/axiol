@@ -68,9 +68,7 @@ export default function DashboardShell({
           <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
             <aside className="sticky top-0 h-screen border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
               <div className="border-b border-border/70 px-5 py-5">
-                <h1 className="heading-playful text-3xl text-primary">
-                  linkkit
-                </h1>
+                <h1 className="heading-playful text-3xl text-primary">axiol</h1>
               </div>
 
               <nav className="flex-1 space-y-1 p-3">

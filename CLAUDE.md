@@ -18,7 +18,7 @@ npx convex dev   # Run Convex backend locally (separate terminal)
 
 ## Architecture
 
-**Linkkit** is a creator commerce / link-in-bio platform. Creators sign up, build a public storefront at `linkkit.store/<username>` showcasing collections of products, affiliate links, and bookings, and optionally layer on Instagram DM automation that auto-replies to reel comments with product links. The codebase lives under the `nemeowww` org and is deployed at nemeowww.com.
+**Axiol** is a creator commerce / link-in-bio platform. Creators sign up, build a public storefront at `axiol.store/<username>` showcasing collections of products, affiliate links, and bookings, and optionally layer on Instagram DM automation that auto-replies to reel comments with product links. The codebase lives under the `nemeowww` org and is deployed at nemeowww.com.
 
 ### Tech Stack
 

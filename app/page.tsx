@@ -72,7 +72,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-lg font-bold">1. Create your store</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Sign up and get your own page at linkkit.com/yourname. Add
+                    Sign up and get your own page at axiol.com/yourname. Add
                     product collections with affiliate links.
                   </p>
                 </div>
@@ -136,7 +136,7 @@ export default function Home() {
 
       <footer className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-8 sm:py-10">
         <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <span className="text-lg font-black text-primary">Linkkit</span>
+          <span className="text-lg font-black text-primary">Axiol</span>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:underline">
               Privacy Policy
