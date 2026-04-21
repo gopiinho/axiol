@@ -291,15 +291,32 @@ async function sendDM(
     }
 
     const accessToken = await decryptToken(config.accessToken);
-    const url = `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`;
+    const appSecret = process.env.DMHELPER_APP_SECRET;
 
-    const response = await fetch(url, {
+    // Calculate appsecret_proof for production security
+    let appSecretProof: string | undefined;
+    if (appSecret) {
+      const { createHmac } = await import("node:crypto");
+      appSecretProof = createHmac("sha256", appSecret)
+        .update(accessToken)
+        .digest("hex");
+    }
+
+    const url = new URL(
+      `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`,
+    );
+    if (appSecretProof) {
+      url.searchParams.set("appsecret_proof", appSecretProof);
+    }
+
+    const response = await fetch(url.toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
+        messaging_type: "RESPONSE", // Identifies this as a reply to a comment
         recipient:
           job.triggerType === "comment"
             ? { comment_id: job.triggerId }
