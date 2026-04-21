@@ -293,7 +293,10 @@ async function sendDM(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        recipient: { id: job.instagramUserId },
+        recipient:
+          job.triggerType === "comment"
+            ? { comment_id: job.triggerId }
+            : { id: job.instagramUserId },
         message: { text: messageText },
         access_token: accessToken,
       }),
