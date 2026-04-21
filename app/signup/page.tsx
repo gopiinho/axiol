@@ -103,7 +103,7 @@ export default function SignupPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <div className="auth-bg pointer-events-none absolute inset-0" />
+      <div className="pointer-events-none absolute inset-0" />
 
       <FadeIn
         className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10"
@@ -250,10 +250,7 @@ export default function SignupPage() {
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-primary hover:underline"
-          >
+          <Link href="/login" className="font-medium hover:underline">
             Login
           </Link>
         </p>
