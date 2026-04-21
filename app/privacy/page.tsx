@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy — Linkkit",
+  title: "Privacy Policy — Axiol",
 };
 
 function Section({
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
             href="/"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            &larr; Back to Linkkit
+            &larr; Back to Axiol
           </Link>
           <h1 className="font-accent mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Privacy Policy
@@ -74,8 +74,8 @@ export default function PrivacyPage() {
         <div className="space-y-10">
           <Section title="1. Introduction">
             <P>
-              Linkkit (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
-              operates the Linkkit platform, a creator toolkit for affiliate
+              Axiol (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
+              operates the Axiol platform, a creator toolkit for affiliate
               marketing and Instagram DM automation. This Privacy Policy
               explains how we collect, use, share, and protect your personal
               information when you use our website and services.
@@ -228,7 +228,7 @@ export default function PrivacyPage() {
             <SubSection title="User Control">
               <P>
                 You can disable any reel mapping at any time, disconnect your
-                Instagram account, or delete your Linkkit account entirely.
+                Instagram account, or delete your Axiol account entirely.
                 Disabling a mapping immediately stops automated DMs for that
                 reel.
               </P>
@@ -352,10 +352,10 @@ export default function PrivacyPage() {
 
           <Section title="9. Children's Privacy">
             <P>
-              Linkkit is not intended for use by anyone under the age of 13. We
-              do not knowingly collect personal data from children under 13. If
-              we learn that we have collected data from a child under 13, we
-              will delete that data promptly.
+              Axiol is not intended for use by anyone under the age of 13. We do
+              not knowingly collect personal data from children under 13. If we
+              learn that we have collected data from a child under 13, we will
+              delete that data promptly.
             </P>
           </Section>
 
@@ -363,7 +363,7 @@ export default function PrivacyPage() {
             <P>
               We may update this Privacy Policy from time to time. If we make
               material changes, we will notify you by email or by posting a
-              notice on the platform. Your continued use of Linkkit after any
+              notice on the platform. Your continued use of Axiol after any
               changes constitutes acceptance of the updated policy.
             </P>
           </Section>

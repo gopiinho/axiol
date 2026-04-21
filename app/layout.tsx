@@ -22,8 +22,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Linkkit - Your Creator Store",
-  description: "linkkit.store",
+  title: "Axiol - Your Creator Store",
+  description: "axiol.store",
 };
 
 export default function RootLayout({

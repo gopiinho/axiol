@@ -10,29 +10,15 @@ import { FinalCta } from "@/components/landing/FinalCta";
 
 export default function Home() {
   return (
-    <main className="home-font-primary bg-pink-100 relative overflow-hidden">
+    <main className="home-font-primary bg-background relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 dot-grid opacity-40" />
-      <div
-        className="pointer-events-none absolute -top-40 -right-40 h-125 w-125 rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle, oklch(0.92 0.1 340 / 0.3) 0%, transparent 60%)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute -bottom-32 -left-32 h-100 w-100 rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle, oklch(0.9 0.12 250 / 0.25) 0%, transparent 60%)",
-        }}
-      />
       <HomeNav />
 
-      <section className="relative min-h-[calc(100svh-80px)] flex items-end px-6 sm:px-16 lg:px-28 xl:px-32 pb-16 sm:pb-20 lg:pb-28 pt-28 sm:pt-40">
+      <section className="relative min-h-screen flex items-end px-6 sm:px-16 lg:px-28 xl:px-32 pb-16 sm:pb-20 lg:pb-28 pt-28 sm:pt-40">
         <div className="w-full max-w-7xl mx-auto">
           <div className="max-w-2xl lg:max-w-3xl space-y-6 sm:space-y-8">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-primary leading-[0.95]">
-              Your All-in-One Creator Store
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-primary leading-[0.95] text-outline-black">
+              Turn your content into <span className="marker-stroke">income.</span>
             </h1>
 
             <p className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-md sm:max-w-lg leading-relaxed">
@@ -45,14 +31,14 @@ export default function Home() {
         </div>
       </section>
 
-      <StorefrontShowcase />
+      {/* <StorefrontShowcase />
 
       <SocialProofBar />
 
-      <AutoDmShowcase />
+      <AutoDmShowcase /> */}
 
       {/* How it works */}
-      <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24 lg:py-32">
+      {/* <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24 lg:py-32">
         <div className="w-full max-w-7xl mx-auto">
           <div className="rounded-3xl border-2 border-border/80 bg-card/80 p-6 sm:p-8 lg:p-12 backdrop-blur-sm">
             <div className="text-center space-y-8 sm:space-y-10">
@@ -72,7 +58,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-lg font-bold">1. Create your store</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Sign up and get your own page at linkkit.com/yourname. Add
+                    Sign up and get your own page at axiol.com/yourname. Add
                     product collections with affiliate links.
                   </p>
                 </div>
@@ -100,9 +86,9 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-12 sm:py-16">
+      {/* <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-12 sm:py-16">
         <div className="w-full max-w-3xl mx-auto text-center space-y-6">
           <h2 className="heading-playful text-3xl sm:text-4xl text-primary">
             All your favorite platforms, one link
@@ -132,11 +118,11 @@ export default function Home() {
 
       <FeatureGrid />
 
-      <FinalCta />
+      <FinalCta /> */}
 
-      <footer className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-8 sm:py-10">
+      {/* <footer className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-8 sm:py-10">
         <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <span className="text-lg font-black text-primary">Linkkit</span>
+          <span className="text-lg font-black text-primary">Axiol</span>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:underline">
               Privacy Policy
@@ -147,7 +133,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </main>
   );
 }

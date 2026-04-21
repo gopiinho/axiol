@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Loader2,
-  Lock,
-  Mail,
-} from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
@@ -57,14 +50,19 @@ export default function LoginPage() {
 
       if (errorMessage.includes("locked")) {
         setError(errorMessage);
-      } else if (errorMessage.includes("Invalid") || errorMessage.includes("invalid")) {
+      } else if (
+        errorMessage.includes("Invalid") ||
+        errorMessage.includes("invalid")
+      ) {
         setError(
           "Invalid email or password. Please check your credentials and try again.",
         );
       } else if (errorMessage.includes("attempt")) {
         setError(errorMessage);
       } else {
-        setError("Something unexpected happened. Check your connection and try again.");
+        setError(
+          "Something unexpected happened. Check your connection and try again.",
+        );
       }
     } finally {
       setLoading(false);
@@ -72,10 +70,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <div className="auth-bg pointer-events-none absolute inset-0" />
+    <div className="relative flex bg-primary/6 min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+      <div className="pointer-events-none absolute inset-0" />
 
-      <FadeIn className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10" offset={24} duration={0.5}>
+      <FadeIn
+        className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10"
+        offset={24}
+        duration={0.5}
+      >
         <div className="mb-10 text-center">
           <h2 className="font-accent text-3xl font-bold tracking-tight sm:text-4xl">
             Welcome back!
@@ -86,7 +88,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
+          <div className="mb-5 border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
               <p className="text-sm">{error}</p>
@@ -160,10 +162,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-primary hover:underline"
-          >
+          <Link href="/signup" className="font-medium hover:underline">
             Sign up
           </Link>
         </p>

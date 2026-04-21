@@ -74,7 +74,7 @@ export function StorePreview({
               color: "var(--store-text-muted, #6b7280)",
             }}
           >
-            {publicUrl || `linkkit.com/${username}`}
+            {publicUrl || `axiol.com/${username}`}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
