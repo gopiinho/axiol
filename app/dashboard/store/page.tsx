@@ -247,8 +247,8 @@ export default function MyStorePage() {
         <div className="w-full lg:min-w-[60%] lg:border-r border-border/70">
           <FadeIn>
             <div className="flex max-lg:flex-col lg:flex items-center justify-center lg:items-start gap-4 px-5 lg:px-6 py-6 lg:py-8">
-              <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-primary/25 bg-linear-to-br from-primary/15 to-pink/15 p-0.5 shadow-[0_4px_16px_-6px_oklch(0.5_0.22_254/0.2)]">
-                <div className="h-full w-full overflow-hidden rounded-full">
+              <div className="h-24 w-24 overflow-hidden border-2 border-border/25 bg-linear-to-br from-primary/15 to-pink/15 p-0.5">
+                <div className="h-full w-full overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={
@@ -298,18 +298,9 @@ export default function MyStorePage() {
                   )}
                 </div>
                 <div className="flex items-start justify-center h-full max-lg:mt-8 gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={openEditModal}
-                    className="gap-1.5"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    Edit Store
-                  </Button>
                   {publicUrl && (
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       className="gap-1.5"
                       asChild
@@ -320,6 +311,15 @@ export default function MyStorePage() {
                       </Link>
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={openEditModal}
+                    className="gap-1.5"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Edit Store
+                  </Button>
                 </div>
               </div>
             </div>
@@ -440,12 +440,12 @@ export default function MyStorePage() {
               </>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
-                <Sparkles className="mx-auto h-10 w-10 text-muted-foreground/30" />
+                <Sparkles className="mx-auto h-10 w-10 text-primary" />
                 <p className="mt-4 text-sm text-muted-foreground">
-                  No active posts yet. Let&apos;s publish one to get started.
+                  No active product yet. Let&apos;s publish one to get started.
                 </p>
-                <Button asChild variant="outline" size="sm" className="mt-5">
-                  <Link href="/dashboard/create">Create a post</Link>
+                <Button className="mt-5">
+                  <Link href="/dashboard/create">Create a product</Link>
                 </Button>
               </div>
             )}
