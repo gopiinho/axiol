@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth-server";
 
-const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
+const IG_OAUTH_STATE_COOKIE = "axiol_ig_oauth_state";
 
 export async function GET(request: NextRequest) {
   const authed = await isAuthenticated();

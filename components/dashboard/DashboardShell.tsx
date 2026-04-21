@@ -64,16 +64,14 @@ export default function DashboardShell({
   return (
     <UserProvider>
       <div className="min-h-screen min-w-full">
-        <div className="app-shell w-full">
+        <div className="bg-red-500w-full">
           <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
             <aside className="sticky top-0 h-screen border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
               <div className="border-b border-border/70 px-5 py-5">
-                <h1 className="heading-playful text-3xl text-primary">
-                  linkkit
-                </h1>
+                <h1 className="heading-playful text-3xl text-primary">Axiol</h1>
               </div>
 
-              <nav className="flex-1 space-y-1 p-3">
+              <nav className="flex-1 space-y-1 py-3">
                 {NAV_ITEMS.map((item) => {
                   const active =
                     item.href === "/dashboard"
@@ -87,9 +85,9 @@ export default function DashboardShell({
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
+                        "flex items-center gap-3 border px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
                         active
-                          ? "border-primary/25 bg-primary/10 text-primary shadow-[0_2px_8px_-4px_oklch(0.5_0.22_254/0.25)]"
+                          ? "border-primary/25 bg-foreground text-primary shadow-[0_2px_8px_-4px_oklch(0.5_0.22_254/0.25)]"
                           : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-card hover:text-foreground",
                       )}
                     >

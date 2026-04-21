@@ -18,42 +18,78 @@ npx convex dev   # Run Convex backend locally (separate terminal)
 
 ## Architecture
 
-**Linkkit** is a multi-user affiliate marketing/curator platform with Instagram DM automation. Creators sign up, build public profile pages with product collections, and use keyword-triggered auto-DMs to respond to Instagram reel comments with product links.
+**Axiol** is a creator commerce / link-in-bio platform. Creators sign up, build a public storefront at `axiol.store/<username>` showcasing collections of products, affiliate links, and bookings, and optionally layer on Instagram DM automation that auto-replies to reel comments with product links. The codebase lives under the `nemeowww` org and is deployed at nemeowww.com.
 
 ### Tech Stack
 
 - **Next.js 15** (App Router) + React 19 + TypeScript
 - **Convex** — real-time backend (database + server functions). All data mutations and queries go through Convex, not REST APIs.
+- **better-auth** (`better-auth@1.5.3`) integrated with Convex via **`@convex-dev/better-auth@0.11.2`**
 - **Tailwind CSS 4** + shadcn/ui (Radix UI)
 - **PostHog** for analytics
 
 ### Key Architectural Patterns
 
-**Convex as the backend**: All database operations are defined in `/convex/*.ts` as typed mutations/queries. The frontend uses `useQuery` and `useMutation` hooks from `convex/react` for real-time sync. Server-side fetching uses the Convex HTTP client from `/server/convex.ts`.
+**Convex as the backend**: All database operations are defined in `/convex/*.ts` as typed mutations/queries. The frontend uses `useQuery` and `useMutation` hooks from `convex/react` for real-time sync. Server-side fetching uses the authenticated Convex helpers from `/lib/auth-server.ts` (which wraps the Convex HTTP client with a better-auth-issued token).
 
-**Authentication**: Custom session-based auth (no OAuth). Users self-register at `/signup` (creator accounts with 14-day trial) or are created as admins. Login → Convex stores session in DB with token → token set in HttpOnly cookie by `/app/api/auth/` routes. Convex mutations use `requireSession()` for any authenticated user, `requireCreatorSession()` for creator+admin, or `requireAdminSession()` for admin-only. Route protection is handled by `/proxy.ts` which redirects unauthenticated requests to `/login`.
+**Authentication (better-auth)**: The app uses better-auth with the Convex adapter — not a custom session scheme. Key files:
 
-**Multi-user data ownership**: All data (collections, items, reelMappings, dmJobs, etc.) is scoped per-user via `createdBy` or `userId` fields. Each user only sees and manages their own data.
+- `/lib/auth-client.ts` — exports `authClient` from `createAuthClient({ plugins: [convexClient()], sessionOptions: { refetchOnWindowFocus: false } })`. Window-focus refetch is disabled to avoid spamming `/api/auth/get-session` on every tab refocus.
+- `/lib/auth-server.ts` — `convexBetterAuthNextJs()` handler plus `isAuthenticated()`, `getToken()`, and authenticated `fetchQuery` / `fetchMutation` helpers for server components.
+- `/convex/auth.ts` — `betterAuth()` instance configured with the Convex plugin and email/password auth (12-character minimum).
+- `/app/api/auth/[...all]/route.ts` — catch-all route that delegates every `/api/auth/*` request to the better-auth handler.
+- `/components/ConvexClientProvider.tsx` wraps the app in `ConvexBetterAuthProvider`, which exchanges the better-auth session for a Convex JWT via `/api/auth/convex/token` and keeps live queries authenticated.
 
-**Public profile pages**: Each creator has a public page at `/[username]` showing their collections, powered by `convex/users.ts` (getByUsername) and `convex/collections.ts` (listPublic).
+Sessions are stored as an HttpOnly cookie (`better-auth.session_token`, or `__Secure-better-auth.session_token` in production). There is **no** `sessions` table in Convex — better-auth manages session storage internally.
 
-**Feature modules**: Complex features have their own directory under `/features/` (e.g., `auth`, `instagram-mappings`, `dm-queue`, `collections`, `items`, `analytics`). Each feature typically has components, hooks, and server actions co-located.
+**Signup / login flow**: `/signup` collects email, username, full name, and password. Username availability is checked live via `api.users.checkUsernameAvailable`. On submit, `authClient.signUp.email()` creates the identity, and once `useConvexAuth` reports authed, the client calls `api.users.createProfile` to create the corresponding user row, then redirects to `/dashboard`. `/login` is email + password only. There are no OAuth providers for app login — the Instagram OAuth flow under `/app/api/auth/instagram/` is a separate integration for connecting a creator's IG account, not a login method.
+
+**Authorization helpers** (`/convex/security.ts`):
+
+- `requireSession(ctx)` — any authenticated user
+- `requireCreatorSession(ctx)` — creator OR admin
+- `requireAdminSession(ctx)` — admin only
+
+All three resolve the Convex identity via `ctx.auth.getUserIdentity()` and look up the user row by the `betterAuthId` field.
+
+**Route protection**: `/proxy.ts` is the Next.js middleware (the filename is historical). It reads the better-auth session cookie and redirects authed users away from `/login` / `/signup` and unauthed users on `/dashboard/*` to `/login?next=<path>`. `app/dashboard/layout.tsx` additionally calls `isAuthenticated()` server-side as a second gate.
+
+**Multi-user data ownership**: All data (collections, items, reelMappings, dmJobs, instagramConfig, etc.) is scoped per-user via `createdBy` or `userId` fields. Each user only sees and manages their own data.
+
+**Public profile pages**: Each creator has a public storefront at `/[username]` rendered from `convex/users.ts` (getByUsername) and `convex/collections.ts` (listPublic). Individual collections can also be viewed at `/list/[collectionId]`.
+
+**Feature modules**: Complex features have their own directory under `/features/`. Current modules: `analytics`, `auth`, `collections`, `dm-queue`, `instagram-mappings`, `items`, `onboarding`. Each typically has components, hooks, and client/server logic co-located.
+
+**Dashboard routes** (`/app/dashboard/`):
+
+- `page.tsx` — overview
+- `store/` — the creator's public storefront management
+- `create/` — new collection / item creation
+- `drafts/` — drafts
+- `lists/` — collections management
+- `analytics/` — engagement and DM analytics
+- `settings/` — profile, theme, Instagram connection
 
 **Instagram automation flow**:
 
-1. Instagram webhook → `/app/api/webhooks/instagram/` validates and parses events
-2. Comment/mention events create `dmJobs` in Convex DB
-3. Background Convex scheduler processes the queue, respects rate limits (195 DMs/hour), and sends DMs via Meta Graph API
-4. All activity logged to `commentLogs` and `dmLogs` tables
+1. Meta webhook → `/app/api/webhooks/instagram/` validates and parses events.
+2. Comment/mention events create `dmJobs` in Convex.
+3. A Convex scheduler drains the queue, respects rate limits (195 DMs/hour), and sends DMs via the Meta Graph API.
+4. All activity is written to `commentLogs` and `dmLogs`.
+
+**Meta webhook auto-subscription**: When a creator completes the Instagram OAuth callback at `/app/api/auth/instagram/callback/route.ts`, the server POSTs to `https://graph.instagram.com/v25.0/{igAccountId}/subscribed_apps` to subscribe the account to `comments` and `messages` events, then records success/failure via `api.instagram.setWebhookSubscribed` (`convex/instagram.ts`), which patches the `instagramConfig.webhookSubscribed` boolean.
 
 ### Database Schema (Convex tables)
 
-- `users` (accountType: creator|admin, with username, profile fields, trial/subscription tracking) + `sessions` — auth & user management
-- `collections` + `items` — product collections and affiliate links (scoped per-user via `createdBy`)
-- `instagramConfig` — IG tokens and rate-limit state (per-user)
-- `reelMappings` — maps reel IDs to collections with keyword matching for auto-DM (per-user)
-- `dmJobs` + `dmRateLimitState` — automation queue and rate limiting (per-user)
-- `commentLogs` + `dmLogs` — audit trail
+- **`users`** — `betterAuthId`, `email`, `username`, `name`, `bio`, `avatarUrl`, `instagramUrl`, `youtubeUrl`, `websiteUrl`, `profileImageId`, `coverImageId`, `theme`, `accentColor`, `storeName`, `accountType` (`creator` | `admin`), `trialStartedAt`, `trialEndsAt`, `subscriptionStatus` (`trial` | `active` | `expired` | `cancelled`), `createdAt`. Indexes: `by_email`, `by_username`, `by_betterAuthId`.
+- **`collections`** + **`items`** — product collections and affiliate links, scoped per-user via `createdBy`.
+- **`instagramConfig`** — IG access tokens, rate-limit state, and the `webhookSubscribed` flag (per-user).
+- **`reelMappings`** — maps reel IDs to collections with keyword matching for auto-DM (per-user).
+- **`dmJobs`** + **`dmRateLimitState`** — DM automation queue (`pending` / `processing` / `sent` / `failed` / `duplicate`) and per-user rate limiting.
+- **`commentLogs`** + **`dmLogs`** — audit trails.
+- **`catCounter`**, **`waitlist`** — misc.
+
+There is no `sessions` table — sessions live inside better-auth's own storage.
 
 ### Path Alias
 

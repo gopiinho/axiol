@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Data Deletion — Linkkit",
+  title: "Data Deletion — Axiol",
 };
 
 export default function DataDeletionPage() {
@@ -13,13 +13,13 @@ export default function DataDeletionPage() {
             href="/"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            &larr; Back to Linkkit
+            &larr; Back to Axiol
           </Link>
           <h1 className="font-accent mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Data Deletion
           </h1>
           <p className="text-sm text-muted-foreground">
-            How to delete your data from Linkkit.
+            How to delete your data from Axiol.
           </p>
         </header>
 
@@ -29,11 +29,11 @@ export default function DataDeletionPage() {
               Delete Your Account
             </h2>
             <p className="text-[0.938rem] leading-relaxed text-muted-foreground">
-              You can permanently delete your Linkkit account and all associated
+              You can permanently delete your Axiol account and all associated
               data directly from your dashboard:
             </p>
             <ol className="list-decimal space-y-2 pl-5 text-[0.938rem] leading-relaxed text-muted-foreground marker:text-border marker:font-semibold">
-              <li>Log in to your Linkkit account.</li>
+              <li>Log in to your Axiol account.</li>
               <li>
                 Go to{" "}
                 <Link
@@ -69,7 +69,7 @@ export default function DataDeletionPage() {
             </h2>
             <p className="text-[0.938rem] leading-relaxed text-muted-foreground">
               If you only want to remove your Instagram connection without
-              deleting your entire account, you can revoke Linkkit&apos;s access
+              deleting your entire account, you can revoke Axiol&apos;s access
               from your Instagram settings:
             </p>
             <ol className="list-decimal space-y-2 pl-5 text-[0.938rem] leading-relaxed text-muted-foreground marker:text-border marker:font-semibold">
@@ -88,7 +88,7 @@ export default function DataDeletionPage() {
                 <strong className="text-foreground">Apps and websites</strong>.
               </li>
               <li>
-                Find <strong className="text-foreground">Linkkit</strong> and
+                Find <strong className="text-foreground">Axiol</strong> and
                 remove it.
               </li>
             </ol>

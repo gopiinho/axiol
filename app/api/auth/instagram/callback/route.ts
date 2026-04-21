@@ -3,7 +3,7 @@ import { api } from "@/convex/_generated/api";
 import { encryptToken } from "@/lib/instagram-crypto";
 import { fetchAuthMutation, isAuthenticated } from "@/lib/auth-server";
 
-const IG_OAUTH_STATE_COOKIE = "linkkit_ig_oauth_state";
+const IG_OAUTH_STATE_COOKIE = "axiol_ig_oauth_state";
 
 function timingSafeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
