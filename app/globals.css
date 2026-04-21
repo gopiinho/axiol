@@ -297,6 +297,31 @@
     letter-spacing: -0.01em;
   }
 
+  .marker-stroke {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+  }
+
+  .marker-stroke::after {
+    content: "";
+    position: absolute;
+    left: -0.2em;
+    right: -0.2em;
+    bottom: 0.15em;
+    height: 0.4em;
+    background: var(--pink-subtle);
+    z-index: -1;
+    border-radius: 100% 10% 80% 5%;
+    transform: rotate(-0.5deg);
+    opacity: 0.8;
+  }
+
+  .text-outline-black {
+    -webkit-text-stroke: 3px black;
+    paint-order: stroke fill;
+  }
+
   /* Decorative dot grid — subtle background texture */
   .dot-grid {
     background-image: radial-gradient(

@@ -21,11 +21,11 @@
   <!-- The Main 'A' Shape, masked to create the gaps for the swoosh -->
   <!-- Coordinates are calculated to perfectly maintain the parallel lines and uniform thickness -->
   <polygon points="500,220 210,770 325,770 500,438 675,770 790,770"
-           fill="#005BDB" mask="url(#knockout)" />
+           fill="#ff90e8" mask="url(#knockout)" />
 
   <!-- The Swoosh, clipped on the left to align perfectly with the 'A' -->
   <path d="M 235 722 C 420 800, 550 650, 735 420"
-        stroke="#005BDB" stroke-width="100" fill="none" stroke-linecap="round"
+        stroke="#ff90e8" stroke-width="100" fill="none" stroke-linecap="round"
         clip-path="url(#left-clip)" />
 
   <!-- The Dark Hole inside the end of the Swoosh (creating the ring effect) -->
