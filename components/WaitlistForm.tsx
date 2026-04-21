@@ -51,7 +51,7 @@ export function WaitlistForm() {
           {PARTICLES.map((p, i) => (
             <motion.div
               key={i}
-              className={`absolute top-1/2 left-1/2 h-2 w-2 rounded-full ${p.cls}`}
+              className={`absolute top-1/2 left-1/2 h-2 w-2${p.cls}`}
               initial={{ x: -4, y: -4, scale: 0, opacity: 1 }}
               animate={{
                 x: p.tx,
@@ -130,7 +130,7 @@ export function WaitlistForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={state === "loading"}
-          className="h-14 rounded-xl border-2 border-border bg-background px-5 text-base sm:text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary disabled:opacity-60 min-w-0 w-full sm:w-72"
+          className="h-14 border-2 border-primary bg-foreground px-5 text-base sm:text-lg text-background placeholder:text-background focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary disabled:opacity-60 min-w-0 w-full sm:w-72"
         />
         <Button
           type="submit"
