@@ -280,6 +280,7 @@ async function sendDM(
         collectionId: job.collectionId,
         maxItems: job.maxItemsInDM,
         includeWebsiteLink: job.includeWebsiteLink,
+        triggerType: job.triggerType,
       },
     );
 
@@ -303,11 +304,23 @@ async function sendDM(
     }
 
     const url = new URL(
-      `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`,
+      job.triggerType === "comment"
+        ? `https://graph.instagram.com/v25.0/${job.triggerId}/private_replies`
+        : `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`,
     );
+
     if (appSecretProof) {
       url.searchParams.set("appsecret_proof", appSecretProof);
     }
+
+    const body =
+      job.triggerType === "comment"
+        ? { message: messageText }
+        : {
+            messaging_type: "RESPONSE",
+            recipient: { id: job.instagramUserId },
+            message: { text: messageText },
+          };
 
     const response = await fetch(url.toString(), {
       method: "POST",
@@ -315,14 +328,7 @@ async function sendDM(
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({
-        messaging_type: "RESPONSE", // Identifies this as a reply to a comment
-        recipient:
-          job.triggerType === "comment"
-            ? { comment_id: job.triggerId }
-            : { id: job.instagramUserId },
-        message: { text: messageText },
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();

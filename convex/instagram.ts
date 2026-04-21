@@ -27,6 +27,7 @@ function buildDMMessage({
   includeWebsiteLink,
   siteUrl,
   collectionId,
+  triggerType,
 }: {
   collectionTitle: string;
   items: Array<{ itemTitle?: string; price?: string; affiliateLink: string }>;
@@ -34,6 +35,7 @@ function buildDMMessage({
   includeWebsiteLink: boolean;
   siteUrl: string;
   collectionId: string;
+  triggerType: "comment" | "dm";
 }) {
   const collectionUrl = `${siteUrl}/list/${collectionId}`;
   let message = `Hi! Here are my top picks from "${collectionTitle}":\n\n`;
@@ -57,6 +59,10 @@ function buildDMMessage({
   }
 
   message += `💕 Thank you for your support! xoxo`;
+
+  if (triggerType === "comment") {
+    message += `\n\nDM me if you want to see more collections or have questions! ✨`;
+  }
 
   return {
     message,
@@ -513,6 +519,7 @@ export const generateDMMessage = query({
     collectionId: v.id("collections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
+    triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
     await requireSession(ctx);
@@ -537,6 +544,7 @@ export const generateDMMessage = query({
       includeWebsiteLink: args.includeWebsiteLink,
       siteUrl,
       collectionId: args.collectionId,
+      triggerType: args.triggerType,
     });
   },
 });
@@ -546,6 +554,7 @@ export const generateDMMessageForJob = internalQuery({
     collectionId: v.id("collections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
+    triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
@@ -568,6 +577,7 @@ export const generateDMMessageForJob = internalQuery({
       includeWebsiteLink: args.includeWebsiteLink,
       siteUrl,
       collectionId: args.collectionId,
+      triggerType: args.triggerType,
     });
   },
 });

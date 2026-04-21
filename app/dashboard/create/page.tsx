@@ -91,6 +91,7 @@ export default function CreatePostPage() {
           collectionId: selectedSection as Id<"collections">,
           maxItems: maxItemsInDM,
           includeWebsiteLink,
+          triggerType: "comment",
         })
         .then((result) => {
           if (cancelled) return;
