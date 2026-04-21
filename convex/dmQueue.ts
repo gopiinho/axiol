@@ -270,6 +270,10 @@ async function sendDM(
       return { success: false, error: "Not configured" };
     }
 
+    if (job.instagramUserId === config.instagramAccountId) {
+      return { success: false, error: "Cannot send private reply to self" };
+    }
+
     const messageData = await ctx.runQuery(
       internal.instagram.generateDMMessageForJob,
       {
@@ -287,18 +291,20 @@ async function sendDM(
     }
 
     const accessToken = await decryptToken(config.accessToken);
-    const url = `https://graph.instagram.com/v24.0/me/messages`;
+    const url = `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`;
 
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({
         recipient:
           job.triggerType === "comment"
             ? { comment_id: job.triggerId }
             : { id: job.instagramUserId },
         message: { text: messageText },
-        access_token: accessToken,
       }),
     });
 
