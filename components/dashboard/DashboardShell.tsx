@@ -71,7 +71,7 @@ export default function DashboardShell({
                 <h1 className="heading-playful text-3xl text-primary">Axiol</h1>
               </div>
 
-              <nav className="flex-1 space-y-1 p-3">
+              <nav className="flex-1 space-y-1 py-3">
                 {NAV_ITEMS.map((item) => {
                   const active =
                     item.href === "/dashboard"
@@ -87,7 +87,7 @@ export default function DashboardShell({
                       className={cn(
                         "flex items-center gap-3 border px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
                         active
-                          ? "border-primary/25 bg-primary/10 text-primary shadow-[0_2px_8px_-4px_oklch(0.5_0.22_254/0.25)]"
+                          ? "border-primary/25 bg-foreground text-primary shadow-[0_2px_8px_-4px_oklch(0.5_0.22_254/0.25)]"
                           : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-card hover:text-foreground",
                       )}
                     >
