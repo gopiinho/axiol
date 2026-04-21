@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <defs>
+    <clipPath id="left-clip">
+      <polygon points="89,1000 616,0 1000,0 1000,1000" />
+    </clipPath>
+
+    <!-- Mask to create the dark gaps where the swoosh passes over the 'A' -->
+    <mask id="knockout">
+      <!-- White background makes everything visible by default -->
+      <rect width="1000" height="1000" fill="white" />
+      <!-- Black stroke cuts out the gap (Swoosh width 100 + 35px extra for the gaps) -->
+      <path d="M 235 722 C 420 800, 550 650, 735 420"
+            stroke="black" stroke-width="135" fill="none" stroke-linecap="round"
+            clip-path="url(#left-clip)" />
+    </mask>
+  </defs>
+
+  <!-- The Dark App Icon Background -->
+  <!-- <rect width="1000" height="1000" rx="225" fill="#0A0D14" /> -->
+
+  <!-- The Main 'A' Shape, masked to create the gaps for the swoosh -->
+  <!-- Coordinates are calculated to perfectly maintain the parallel lines and uniform thickness -->
+  <polygon points="500,220 210,770 325,770 500,438 675,770 790,770"
+           fill="#005BDB" mask="url(#knockout)" />
+
+  <!-- The Swoosh, clipped on the left to align perfectly with the 'A' -->
+  <path d="M 235 722 C 420 800, 550 650, 735 420"
+        stroke="#005BDB" stroke-width="100" fill="none" stroke-linecap="round"
+        clip-path="url(#left-clip)" />
+
+  <!-- The Dark Hole inside the end of the Swoosh (creating the ring effect) -->
+  <!-- It perfectly matches the dark background color -->
+  <circle cx="735" cy="420" r="22" fill="background" />
+
+</svg>
