@@ -179,7 +179,9 @@ export const getConfigByBetterAuthId = internalQuery({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_betterAuthId", (q) => q.eq("betterAuthId", args.betterAuthId))
+      .withIndex("by_betterAuthId", (q) =>
+        q.eq("betterAuthId", args.betterAuthId),
+      )
       .first();
 
     if (!user) return null;
@@ -226,9 +228,12 @@ export const fetchRecentReels = action({
       error?: { message?: string };
     };
 
-    const config = await ctx.runQuery(internal.instagram.getConfigByBetterAuthId, {
-      betterAuthId: identity.subject,
-    });
+    const config = await ctx.runQuery(
+      internal.instagram.getConfigByBetterAuthId,
+      {
+        betterAuthId: identity.subject,
+      },
+    );
 
     if (!config) {
       throw new Error(
@@ -242,7 +247,7 @@ export const fetchRecentReels = action({
 
     const accessToken = await decryptToken(config.accessToken);
     const url =
-      `https://graph.instagram.com/v24.0/${config.instagramAccountId}/media` +
+      `https://graph.instagram.com/v25.0/${config.instagramAccountId}/media` +
       `?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp` +
       `&limit=20` +
       `&access_token=${accessToken}`;
