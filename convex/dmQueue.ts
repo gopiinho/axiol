@@ -304,9 +304,10 @@ async function sendDM(
     }
 
     const url = new URL(
-      `https://graph.facebook.com/v20.0/${config.instagramAccountId}/messages`,
+      `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`,
     );
 
+    url.searchParams.set("access_token", accessToken);
     if (appSecretProof) {
       url.searchParams.set("appsecret_proof", appSecretProof);
     }
@@ -325,10 +326,7 @@ async function sendDM(
 
     const response = await fetch(url.toString(), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
