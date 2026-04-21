@@ -304,9 +304,7 @@ async function sendDM(
     }
 
     const url = new URL(
-      job.triggerType === "comment"
-        ? `https://graph.instagram.com/v25.0/${job.triggerId}/private_replies`
-        : `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`,
+      `https://graph.facebook.com/v20.0/${config.instagramAccountId}/messages`,
     );
 
     if (appSecretProof) {
@@ -315,7 +313,10 @@ async function sendDM(
 
     const body =
       job.triggerType === "comment"
-        ? { message: messageText }
+        ? {
+            recipient: { comment_id: job.triggerId },
+            message: { text: messageText },
+          }
         : {
             messaging_type: "RESPONSE",
             recipient: { id: job.instagramUserId },
