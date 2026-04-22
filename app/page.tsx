@@ -24,9 +24,10 @@ export default function Home() {
               <span className="marker-stroke">income.</span>
             </h1>
 
-            <p className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-md sm:max-w-lg leading-relaxed">
+            <p className="text-sm sm:text-lg lg:text-xl max-w-md sm:max-w-lg leading-relaxed">
               The easiest way to make money online. All of your digital
-              products, and bookings — hosted within your link-in-bio.
+              products, affiliate links and bookings — hosted within your
+              link-in-bio.
             </p>
 
             <WaitlistForm />
