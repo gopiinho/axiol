@@ -28,7 +28,7 @@ const CloudIcon = () => (
         C 180 80, 100 120, 120 180 
         C 60 180, 50 250, 120 260 
         Z"
-      fill="#FFFFFF"
+      fill="#F0F9FF"
       stroke="#000000"
       strokeWidth="8"
       strokeLinecap="round"
@@ -44,7 +44,7 @@ export const CloudBackground = () => {
     const newClouds: CloudConfig[] = [
       {
         id: 1,
-        top: "10%",
+        top: "22%",
         scale: 0.7,
         duration: 35,
         direction: "left-to-right",
@@ -52,7 +52,7 @@ export const CloudBackground = () => {
       },
       {
         id: 2,
-        top: "22%",
+        top: "32%",
         scale: 1.1,
         duration: 85,
         direction: "right-to-left",
@@ -60,7 +60,7 @@ export const CloudBackground = () => {
       },
       {
         id: 3,
-        top: "38%",
+        top: "45%",
         scale: 0.5,
         duration: 45,
         direction: "left-to-right",
@@ -68,15 +68,15 @@ export const CloudBackground = () => {
       },
       {
         id: 4,
-        top: "55%",
+        top: "60%",
         scale: 1.4,
         duration: 110,
-        direction: "right-to-left",
+        direction: "left-to-right",
         delay: 2,
       },
       {
         id: 5,
-        top: "72%",
+        top: "75%",
         scale: 0.8,
         duration: 30,
         direction: "left-to-right",
@@ -84,7 +84,7 @@ export const CloudBackground = () => {
       },
       {
         id: 6,
-        top: "5%",
+        top: "12%",
         scale: 1.2,
         duration: 75,
         direction: "right-to-left",
