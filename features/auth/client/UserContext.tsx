@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 type UserProfile = {
@@ -34,11 +34,15 @@ type UserContextValue = {
 const UserContext = createContext<UserContextValue | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const profile = useQuery(api.users.getProfile);
+  const { isAuthenticated: convexAuthed, isLoading: convexLoading } = useConvexAuth();
+  const profile = useQuery(
+    api.users.getProfile,
+    convexAuthed ? undefined : "skip"
+  );
 
   const value: UserContextValue = {
     user: profile ?? null,
-    isLoading: profile === undefined,
+    isLoading: convexLoading || (convexAuthed && profile === undefined),
     isAuthenticated: profile !== null && profile !== undefined,
   };
 
