@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import { isAuthenticated } from "@/lib/auth-server";
+import { UserProvider } from "@/features/auth/client/UserContext";
 
 export default async function DashboardLayout({
   children,
@@ -12,5 +13,9 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  return <DashboardShell>{children}</DashboardShell>;
+  return (
+    <UserProvider>
+      <DashboardShell>{children}</DashboardShell>
+    </UserProvider>
+  );
 }

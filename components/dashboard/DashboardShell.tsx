@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -12,10 +12,14 @@ import {
   Settings,
   Store,
   FileText,
+  HelpCircle,
+  User,
+  ChevronRight,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { UserProvider } from "@/features/auth/client/UserContext";
+import { useUser } from "@/features/auth/client/UserContext";
 import BottomNav from "@/components/BottomNav";
+import { UserProfile } from "./UserProfile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,8 +50,18 @@ export default function DashboardShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useUser();
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const isTrial = user?.subscriptionStatus === "trial";
+
+  useEffect(() => {
+    const handleOpenLogout = () => setLogoutOpen(true);
+    window.addEventListener("open-logout-dialog", handleOpenLogout);
+    return () =>
+      window.removeEventListener("open-logout-dialog", handleOpenLogout);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -62,85 +76,68 @@ export default function DashboardShell({
   };
 
   return (
-    <UserProvider>
-      <div className="min-h-screen min-w-full">
-        <div className="bg-red-500w-full">
-          <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
-            <aside className="sticky top-0 h-screen border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
-              <div className="border-b border-border/70 px-5 py-5">
-                <h1 className="heading-playful text-3xl text-primary">Axiol</h1>
-              </div>
+    <div className="min-h-screen min-w-full">
+      <div className="w-full">
+        <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
+          <aside className="sticky top-0 h-screen border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
+            <UserProfile />
 
-              <nav className="flex-1 space-y-1 py-3">
-                {NAV_ITEMS.map((item) => {
-                  const active =
-                    item.href === "/dashboard"
-                      ? pathname === item.href
-                      : pathname.startsWith(item.href);
-                  const Icon = item.icon;
+            <nav className="flex-1 py-3">
+              {NAV_ITEMS.map((item) => {
+                const active =
+                  item.href === "/dashboard"
+                    ? pathname === item.href
+                    : pathname.startsWith(item.href);
+                const Icon = item.icon;
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      aria-current={active ? "page" : undefined}
-                      className={cn(
-                        "flex items-center gap-3 border px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
-                        active
-                          ? "border-primary/25 bg-foreground text-primary shadow-[0_2px_8px_-4px_oklch(0.5_0.22_254/0.25)]"
-                          : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-card hover:text-foreground",
-                      )}
-                    >
-                      <Icon
-                        className={cn("h-4 w-4", active && "stroke-[2.5]")}
-                      />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </nav>
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex items-center gap-3 border px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
+                      active
+                        ? "border-primary/25 bg-foreground text-primary shadow-[0_2px_8px_-4px_oklch(0.5_0.22_254/0.25)]"
+                        : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-card hover:text-foreground",
+                    )}
+                  >
+                    <Icon className={cn("h-4 w-4", active && "stroke-[2.5]")} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </aside>
 
-              <div className="border-t border-border/70 p-3">
-                <Button
-                  onClick={() => setLogoutOpen(true)}
-                  variant="outline"
-                  className="w-full justify-start gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log out
-                </Button>
-              </div>
-            </aside>
-
-            <section className="min-w-0">
-              <main>{children}</main>
-            </section>
-          </div>
+          <section className="min-w-0">
+            <main>{children}</main>
+          </section>
         </div>
-
-        <div className="md:hidden">
-          <BottomNav />
-        </div>
-
-        <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Log out?</AlertDialogTitle>
-              <AlertDialogDescription>
-                You will need to sign in again to manage your dashboard.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isLoggingOut}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
-                {isLoggingOut ? "Logging out..." : "Log out"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
-    </UserProvider>
+
+      <div className="md:hidden">
+        <BottomNav />
+      </div>
+
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will need to sign in again to manage your dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoggingOut}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut ? "Logging out..." : "Log out"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
