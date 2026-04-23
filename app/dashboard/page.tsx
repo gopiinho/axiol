@@ -54,7 +54,7 @@ export default function DashboardPage() {
             <AnimatedListItem key={action.href}>
               <Link
                 href={action.href}
-                className="group flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
+                className="group flex flex-col gap-4 rounded-xs border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
               >
                 <div
                   className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${action.accent} transition-transform duration-200 group-hover:scale-105`}

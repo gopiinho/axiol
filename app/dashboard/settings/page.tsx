@@ -247,7 +247,7 @@ function AdvancedTab({ username }: { username?: string }) {
         description="Irreversible actions that permanently affect your account."
       />
 
-      <div className="rounded-2xl border border-destructive/20 bg-destructive/[0.03] p-4">
+      <div className="rounded-xs border border-destructive/20 bg-destructive/[0.09] p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">

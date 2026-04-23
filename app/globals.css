@@ -167,8 +167,7 @@
 
   .app-panel {
     background: var(--surface-1);
-    box-shadow: var(--surface-elevated);
-    @apply rounded-2xl border border-border/70;
+    @apply rounded-xs border border-border/70;
   }
 
   .app-panel-soft {
