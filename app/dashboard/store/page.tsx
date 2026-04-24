@@ -542,7 +542,7 @@ export default function MyStorePage() {
                     size="sm"
                     onClick={handleThemeSave}
                     disabled={themeSaving || !themeDirty}
-                    className="shrink-0 rounded-full"
+                    className="shrink-0"
                   >
                     {themeSaving ? "Saving..." : "Save theme"}
                   </Button>

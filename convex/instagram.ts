@@ -8,6 +8,7 @@ import {
   internalAction,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { getSession } from "./security";
 import { requireSession } from "./security";
 import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
@@ -427,7 +428,10 @@ export const publishReelMapping = mutation({
 export const getDraftMappings = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return [];
+
+    const { userId } = session;
 
     const drafts = await ctx.db
       .query("reelMappings")
@@ -463,7 +467,10 @@ export const getPublishedMappings = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return [];
+
+    const { userId } = session;
 
     const limit =
       args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
@@ -741,7 +748,10 @@ export const logDM = mutation({
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return { totalComments: 0, commentsLast24h: 0, totalDMs: 0, dmsLast24h: 0, totalMappings: 0, activeMappings: 0, failedDMs: 0 };
+
+    const { userId } = session;
 
     const comments = await ctx.db
       .query("commentLogs")

@@ -321,12 +321,30 @@
     paint-order: stroke fill;
   }
 
-  /* Decorative dot grid — subtle background texture */
-  .dot-grid {
-    background-image: radial-gradient(
-      oklch(0.85 0.03 250 / 0.4) 1px,
-      transparent 1px
-    );
-    background-size: 20px 20px;
-  }
-}
+/* Decorative dot grid — subtle background texture */
+      .dot-grid {
+        background-image: radial-gradient(
+          oklch(0.85 0.03 250 / 0.4) 1px,
+          transparent 1px
+        );
+        background-size: 20px 20px;
+      }
+
+      /* Logo flip animation - continuous left to right spin */
+      @keyframes logo-flip {
+        0% {
+          transform: perspective(500px) rotateY(0deg);
+        }
+        50% {
+          transform: perspective(500px) rotateY(180deg) scale(0.95);
+        }
+        100% {
+          transform: perspective(500px) rotateY(360deg) scale(1);
+        }
+      }
+
+      .animate-logo-flip {
+        animation: logo-flip 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        transform-style: preserve-3d;
+      }
+    }

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, MutationCtx } from "./_generated/server";
-import { requireSession } from "./security";
+import { requireSession, getSession } from "./security";
 import { Id } from "./_generated/dataModel";
 
 const TRIAL_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days
@@ -102,7 +102,10 @@ export const getPublicStore = query({
 export const getProfile = query({
   args: {},
   handler: async (ctx) => {
-    const { user } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return null;
+
+    const { user } = session;
 
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)

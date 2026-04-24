@@ -109,12 +109,7 @@ export function EditProfile({
           <DialogTitle className="text-lg font-semibold">
             Edit store
           </DialogTitle>
-          <Button
-            size="sm"
-            onClick={onSave}
-            disabled={saving}
-            className="rounded-full px-5"
-          >
+          <Button size="sm" onClick={onSave} disabled={saving} className="px-5">
             {saving ? "Saving..." : "Save"}
           </Button>
         </DialogHeader>

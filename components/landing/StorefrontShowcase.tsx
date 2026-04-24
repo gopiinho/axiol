@@ -41,7 +41,7 @@ export function StorefrontShowcase() {
               Your branded storefront, ready in minutes
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto">
-              Get a beautiful axiol.com/yourname page with themed product
+              Get a beautifu axiol.com/yourname page with themed product
               collections. Share it in your bio.
             </p>
           </div>

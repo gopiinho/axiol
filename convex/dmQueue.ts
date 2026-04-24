@@ -11,7 +11,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
-import { requireSession } from "./security";
+import { requireSession, getSession } from "./security";
 import { decryptToken } from "./lib/instagramCrypto";
 
 const MAX_DMS_PER_HOUR = 195;
@@ -407,7 +407,10 @@ export const kickoffWorker = mutation({
 export const getQueueStats = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return { pending: 0, processing: 0, sent: 0, failed: 0, scheduled: 0, successRate: 0 };
+
+    const { userId } = session;
 
     const pending = await ctx.db
       .query("dmJobs")

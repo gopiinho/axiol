@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo, useEffect } from "react";
 import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import Image from "next/image";
 
 type UserProfile = {
   _id: string;
@@ -34,17 +35,40 @@ type UserContextValue = {
 const UserContext = createContext<UserContextValue | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated: convexAuthed, isLoading: convexLoading } = useConvexAuth();
+  const { isAuthenticated: convexAuthed, isLoading: convexLoading } =
+    useConvexAuth();
   const profile = useQuery(
     api.users.getProfile,
-    convexAuthed ? undefined : "skip"
+    convexLoading || !convexAuthed ? "skip" : undefined,
   );
 
-  const value: UserContextValue = {
-    user: profile ?? null,
-    isLoading: convexLoading || (convexAuthed && profile === undefined),
-    isAuthenticated: profile !== null && profile !== undefined,
-  };
+  const isReady = !convexLoading && convexAuthed;
+
+  const value = useMemo((): UserContextValue => {
+    if (!isReady) {
+      return { user: null, isLoading: true, isAuthenticated: false };
+    }
+    return {
+      user: profile ?? null,
+      isLoading: convexLoading || (convexAuthed && profile === undefined),
+      isAuthenticated: profile !== null && profile !== undefined,
+    };
+  }, [convexLoading, convexAuthed, isReady, profile]);
+
+  if (!isReady) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-linear-to-b from-white to-gray-50">
+        <div className="relative h-16 w-16 animate-logo-flip">
+          <Image
+            src="/axiol-logo.svg"
+            alt="Loading"
+            fill
+            className="object-contain"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
