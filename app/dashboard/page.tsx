@@ -38,8 +38,8 @@ export default function DashboardPage() {
     <div className="px-5 lg:px-6 py-6 lg:py-8">
       <FadeIn>
         <div className="space-y-1">
-          <h1 className="heading-playful text-4xl text-primary sm:text-5xl">
-            axiol
+          <h1 className="heading-playful text-4xl sm:text-5xl">
+            Welcome back!
           </h1>
           <p className="text-muted-foreground">
             What would you like to do today?

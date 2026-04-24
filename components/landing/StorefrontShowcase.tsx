@@ -33,7 +33,7 @@ export function StorefrontShowcase() {
   const [activeTheme, setActiveTheme] = useState<ThemeKey>("default");
 
   return (
-    <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24">
+    <section className="relative bg-sidebar px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24">
       <div className="w-full max-w-7xl mx-auto">
         <ScrollFadeIn>
           <div className="text-center space-y-2 mb-10 sm:mb-14">

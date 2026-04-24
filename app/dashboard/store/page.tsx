@@ -538,16 +538,14 @@ export default function MyStorePage() {
                       })}
                     </div>
                   </div>
-                  {themeDirty && (
-                    <Button
-                      size="sm"
-                      onClick={handleThemeSave}
-                      disabled={themeSaving}
-                      className="shrink-0 rounded-full"
-                    >
-                      {themeSaving ? "Saving..." : "Save theme"}
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    onClick={handleThemeSave}
+                    disabled={themeSaving || !themeDirty}
+                    className="shrink-0 rounded-full"
+                  >
+                    {themeSaving ? "Saving..." : "Save theme"}
+                  </Button>
                 </div>
               </div>
 

@@ -27,7 +27,7 @@ export function UserProfile() {
             className={cn(
               "w-full flex items-center cursor-pointer justify-between p-2 transition-all duration-300 group outline-none relative border border-transparent",
               open
-                ? "bg-card border-border border-b-transparent z-[51]"
+                ? "bg-card border-border border-b-transparent z-51"
                 : "hover:bg-muted/50 hover:border-border/50",
             )}
           >
@@ -47,7 +47,7 @@ export function UserProfile() {
                 <span className="text-sm font-bold truncate tracking-tight">
                   {user?.username || "User"}
                 </span>
-                <span className="text-[10px] text-muted-foreground truncate font-medium uppercase tracking-wider">
+                <span className="text-[10px] text-muted-foreground truncate font-medium tracking-wider">
                   {user?.email}
                 </span>
               </motion.div>
@@ -64,7 +64,7 @@ export function UserProfile() {
         <DropdownMenuContent
           align="start"
           sideOffset={0}
-          className="w-[260px] p-0 bg-card border-border shadow-none rounded-none overflow-hidden border-t-0"
+          className="w-65 p-0 text-foreground border-border shadow-none rounded-none overflow-hidden border-t-0"
         >
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -72,8 +72,8 @@ export function UserProfile() {
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <div className="px-4 py-2 bg-muted/20 border-b border-border">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                Profile Actions
+              <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
+                Actions
               </span>
             </div>
 
