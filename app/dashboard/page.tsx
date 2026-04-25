@@ -11,10 +11,10 @@ import {
 
 const QUICK_ACTIONS = [
   {
-    href: "/dashboard/create",
+    href: "/dashboard/products/new",
     icon: PlusCircle,
-    title: "Create Post",
-    description: "Pick a reel and set up automatic DM replies for commenters",
+    title: "Create Product",
+    description: "Create a new product to share with your audience.",
     accent: "bg-primary/10 text-primary",
   },
   {

@@ -149,7 +149,7 @@ export default function ListsPage() {
                   <CardContent className="space-y-4 pt-5">
                     <p className="text-xs text-muted-foreground">
                       Created{" "}
-                      {new Date(collection.createdAt).toLocaleDateString()}
+                      {new Date(collection._creationTime).toLocaleDateString()}
                     </p>
 
                     <div className="flex gap-2">

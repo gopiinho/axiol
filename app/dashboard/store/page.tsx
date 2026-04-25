@@ -445,7 +445,7 @@ export default function MyStorePage() {
                   No active product yet. Let&apos;s publish one to get started.
                 </p>
                 <Button className="mt-5">
-                  <Link href="/dashboard/create">Create a product</Link>
+                  <Link href="/dashboard/products/new">Create a product</Link>
                 </Button>
               </div>
             )}
