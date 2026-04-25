@@ -26,7 +26,7 @@ export default function BottomNav() {
       label: "My Store",
     },
     {
-      href: "/dashboard/create",
+      href: "/dashboard/products",
       icon: PlusCircle,
       label: "Create",
     },

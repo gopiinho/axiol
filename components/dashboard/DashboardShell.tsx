@@ -8,7 +8,7 @@ import {
   Home,
   List,
   LogOut,
-  PencilRuler,
+  Box,
   Settings,
   Store,
   FileText,
@@ -36,7 +36,8 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/store", label: "My Store", icon: Store },
-  { href: "/dashboard/create", label: "Create", icon: PencilRuler },
+  { href: "/dashboard/products", label: "Products", icon: Box },
+  { href: "/dashboard/auto-dm", label: "Auto DM", icon: HelpCircle },
   { href: "/dashboard/drafts", label: "Drafts", icon: FileText },
   { href: "/dashboard/lists", label: "Collections", icon: List },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
