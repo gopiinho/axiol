@@ -1,10 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const accountTypes = v.union(
-  v.literal("creator"),
-  v.literal("admin"),
-);
+const accountTypes = v.union(v.literal("creator"), v.literal("admin"));
 
 export default defineSchema({
   users: defineTable({
@@ -33,18 +30,44 @@ export default defineSchema({
         v.literal("cancelled"),
       ),
     ),
-    createdAt: v.number(),
   })
     .index("by_email", ["email"])
     .index("by_username", ["username"])
     .index("by_betterAuthId", ["betterAuthId"]),
+
+  products: defineTable({
+    createdBy: v.id("users"),
+    name: v.string(),
+    slug: v.string(), // axiol.store/jackson/lord-of-fire
+    description: v.optional(v.string()),
+    coverImageUrl: v.optional(v.string()),
+    price: v.optional(v.string()), // display price (free, $29, etc.)
+    type: v.union(
+      v.literal("affiliate"),
+      // future: v.literal("digital"), v.literal("course"), v.literal("membership")
+    ),
+    // when type === "affiliate"
+    collectionId: v.optional(v.id("collections")), // link to existing collection
+    affiliateLink: v.optional(v.string()), // OR a single direct link
+    status: v.union(
+      v.literal("draft"),
+      v.literal("published"),
+      v.literal("archived"),
+    ),
+    publishedAt: v.optional(v.number()),
+
+    // automation config (optional — only if IG auto-DM is enabled for this product)
+    automationEnabled: v.boolean(),
+  })
+    .index("by_user", ["createdBy"])
+    .index("by_slug", ["slug", "createdBy"])
+    .index("by_status", ["createdBy", "status"]),
 
   collections: defineTable({
     title: v.string(),
     description: v.optional(v.string()),
     order: v.number(),
     createdBy: v.id("users"),
-    createdAt: v.number(),
   }).index("by_user", ["createdBy"]),
 
   items: defineTable({
@@ -55,7 +78,6 @@ export default defineSchema({
     itemTitle: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     order: v.number(),
-    createdAt: v.number(),
   }).index("by_collection", ["collectionId"]),
 
   instagramConfig: defineTable({
@@ -105,7 +127,6 @@ export default defineSchema({
       v.literal("failed"),
       v.literal("duplicate"),
     ),
-    createdAt: v.number(),
     scheduledFor: v.optional(v.number()),
     attemptCount: v.number(),
     lastAttemptAt: v.optional(v.number()),
