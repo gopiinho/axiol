@@ -77,7 +77,7 @@
   --accent: oklch(0.88 0.08 230);
   --accent-foreground: oklch(0.22 0.04 252);
   --destructive: oklch(0.59 0.24 28);
-  --border: oklch(0.89 0.025 250);
+  --border: oklch(0.5064 0.0016 106.46);
   --input: oklch(0.89 0.025 250);
   --ring: oklch(0.54 0.19 252);
   --chart-1: oklch(0.62 0.18 256);
@@ -150,7 +150,7 @@
 
   .app-title {
     font-family: var(--font-space-grotesk), sans-serif;
-    @apply text-2xl font-bold tracking-tight sm:text-3xl;
+    @apply text-2xl font-bold tracking-tight;
   }
 
   .home-font-primary {
@@ -321,30 +321,30 @@
     paint-order: stroke fill;
   }
 
-/* Decorative dot grid — subtle background texture */
-      .dot-grid {
-        background-image: radial-gradient(
-          oklch(0.85 0.03 250 / 0.4) 1px,
-          transparent 1px
-        );
-        background-size: 20px 20px;
-      }
+  /* Decorative dot grid — subtle background texture */
+  .dot-grid {
+    background-image: radial-gradient(
+      oklch(0.85 0.03 250 / 0.4) 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+  }
 
-      /* Logo flip animation - continuous left to right spin */
-      @keyframes logo-flip {
-        0% {
-          transform: perspective(500px) rotateY(0deg);
-        }
-        50% {
-          transform: perspective(500px) rotateY(180deg) scale(0.95);
-        }
-        100% {
-          transform: perspective(500px) rotateY(360deg) scale(1);
-        }
-      }
-
-      .animate-logo-flip {
-        animation: logo-flip 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        transform-style: preserve-3d;
-      }
+  /* Logo flip animation - continuous left to right spin */
+  @keyframes logo-flip {
+    0% {
+      transform: perspective(500px) rotateY(0deg);
     }
+    50% {
+      transform: perspective(500px) rotateY(180deg) scale(0.95);
+    }
+    100% {
+      transform: perspective(500px) rotateY(360deg) scale(1);
+    }
+  }
+
+  .animate-logo-flip {
+    animation: logo-flip 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    transform-style: preserve-3d;
+  }
+}
