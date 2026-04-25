@@ -7,7 +7,7 @@ export default function Products() {
   return (
     <div>
       <FadeIn>
-        <section className="px-5 lg:px-6 py-6 lg:py-8 border border-b">
+        <section className="px-5 lg:px-6 py-6 lg:py-8 border-b">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="app-title">Products</h1>

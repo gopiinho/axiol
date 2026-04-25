@@ -27,8 +27,8 @@ export function UserProfile() {
             className={cn(
               "w-full flex items-center cursor-pointer justify-between p-2 transition-all duration-300 group outline-none relative border border-transparent",
               open
-                ? "bg-card border-border border-b-transparent z-51"
-                : "hover:bg-muted/50 hover:border-border/50",
+                ? "bg-foreground border-b-transparent z-51"
+                : "bg-foreground",
             )}
           >
             <div className="flex items-center gap-3 overflow-hidden">
@@ -44,10 +44,10 @@ export function UserProfile() {
                 )}
               </div>
               <motion.div layout className="flex flex-col items-start min-w-0">
-                <span className="text-sm font-bold truncate tracking-tight">
+                <span className="text-sm font-bold text-background truncate tracking-tight">
                   {user?.username || "User"}
                 </span>
-                <span className="text-[10px] text-muted-foreground truncate font-medium tracking-wider">
+                <span className="text-[10px] text-muted/80 truncate font-medium tracking-wider">
                   {user?.email}
                 </span>
               </motion.div>
@@ -64,51 +64,43 @@ export function UserProfile() {
         <DropdownMenuContent
           align="start"
           sideOffset={0}
-          className="w-65 p-0 text-foreground border-border shadow-none rounded-none overflow-hidden border-t-0"
+          className="w-65 p-0 bg-sidebar text-foreground shadow-xl rounded-none overflow-hidden border border-border"
         >
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
-            <div className="px-4 py-2 bg-muted/20 border-b border-border">
-              <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-                Actions
-              </span>
-            </div>
-
-            <div className="p-1 space-y-0.5">
-              <DropdownMenuItem
-                asChild
-                className="focus:bg-transparent p-0 rounded-none"
-              >
-                <Link
-                  href="/dashboard/help"
-                  className="flex items-center justify-between px-3 py-2 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all group cursor-pointer rounded-none border border-transparent hover:border-border"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <HelpCircle className="h-4 w-4" />
-                    Help Center
-                  </div>
-                  <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all" />
-                </Link>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent("open-logout-dialog"));
-                }}
-                className="flex items-center justify-between px-3 py-2 text-sm font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all group cursor-pointer outline-none focus:bg-destructive/5 focus:text-destructive rounded-none border border-transparent hover:border-destructive/20"
+            <DropdownMenuItem
+              asChild
+              className="focus:bg-transparent p-0 rounded-none"
+            >
+              <Link
+                href="/dashboard/help"
+                className="flex items-center justify-between px-3 text-foreground py-2 text-sm font-bold transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <LogOut className="h-4 w-4" />
-                  Log Out
+                  <HelpCircle className="h-4 w-4" />
+                  Help Center
                 </div>
                 <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all" />
-              </DropdownMenuItem>
-            </div>
+              </Link>
+            </DropdownMenuItem>
 
-            <div className="p-2 border-t border-border mt-1">
+            <DropdownMenuItem
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("open-logout-dialog"));
+              }}
+              className="flex items-center justify-between px-3 py-2 text-sm font-bold text-foreground transition-all group cursor-pointer outline-none focus:bg-destructive/5 focus:text-destructive rounded-none"
+            >
+              <div className="flex items-center gap-2.5">
+                <LogOut className="h-4 w-4" />
+                Log Out
+              </div>
+              <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all" />
+            </DropdownMenuItem>
+
+            <div className="p-2 border-t border-border">
               <Button
                 variant={isTrial ? "secondary" : "default"}
                 className={cn(
