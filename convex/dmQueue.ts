@@ -65,7 +65,6 @@ export const createDmJob = mutation({
       maxItemsInDM: args.maxItemsInDM,
       includeWebsiteLink: args.includeWebsiteLink,
       status: "pending",
-      createdAt: Date.now(),
       attemptCount: 0,
       triggerType: args.triggerType,
       triggerId: args.triggerId,
@@ -408,7 +407,15 @@ export const getQueueStats = query({
   args: {},
   handler: async (ctx) => {
     const session = await getSession(ctx);
-    if (!session) return { pending: 0, processing: 0, sent: 0, failed: 0, scheduled: 0, successRate: 0 };
+    if (!session)
+      return {
+        pending: 0,
+        processing: 0,
+        sent: 0,
+        failed: 0,
+        scheduled: 0,
+        successRate: 0,
+      };
 
     const { userId } = session;
 

@@ -86,7 +86,6 @@ export const create = mutation({
       description: validated.description,
       order: Date.now(),
       createdBy: userId,
-      createdAt: Date.now(),
     });
   },
 });

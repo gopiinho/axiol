@@ -132,7 +132,6 @@ export const getProfile = query({
       accountType: user.accountType,
       subscriptionStatus: user.subscriptionStatus,
       trialEndsAt: user.trialEndsAt,
-      createdAt: user.createdAt,
     };
   },
 });
@@ -241,7 +240,6 @@ export const createProfile = mutation({
       trialStartedAt: now,
       trialEndsAt: now + TRIAL_DURATION,
       subscriptionStatus: "trial",
-      createdAt: now,
     });
   },
 });

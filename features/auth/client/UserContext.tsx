@@ -23,7 +23,6 @@ type UserProfile = {
   accountType: string;
   subscriptionStatus?: string;
   trialEndsAt?: number;
-  createdAt: number;
 };
 
 type UserContextValue = {
