@@ -20,7 +20,7 @@ export function UserProfile() {
   const isTrial = user?.subscriptionStatus === "trial";
 
   return (
-    <div className="w-full border-b border-border/70">
+    <div className="border-b border-border/10">
       <DropdownMenu onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <button
@@ -80,7 +80,7 @@ export function UserProfile() {
                 className="flex items-center justify-between px-3 text-foreground py-2 text-sm font-bold transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <HelpCircle className="h-4 w-4" />
+                  <HelpCircle className="h-4 w-4 text-foreground" />
                   Help Center
                 </div>
                 <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all" />
@@ -94,7 +94,7 @@ export function UserProfile() {
               className="flex items-center justify-between px-3 py-2 text-sm font-bold text-foreground transition-all group cursor-pointer outline-none focus:bg-destructive/5 focus:text-destructive rounded-none"
             >
               <div className="flex items-center gap-2.5">
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 text-foreground" />
                 Log Out
               </div>
               <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all" />

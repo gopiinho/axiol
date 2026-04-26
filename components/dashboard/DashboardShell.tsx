@@ -83,7 +83,7 @@ export default function DashboardShell({
           <aside className="sticky top-0 h-screen bg-sidebar border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
             <UserProfile />
 
-            <nav className="flex-1">
+            <nav className="flex-1 border-0">
               {NAV_ITEMS.map((item) => {
                 const active =
                   item.href === "/dashboard"
@@ -97,7 +97,7 @@ export default function DashboardShell({
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex items-center gap-3   px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
+                      "flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
                       active
                         ? "border-l-5 border-primary bg-foreground text-primary"
                         : "border-transparent text-foreground hover:bg-card",
