@@ -55,7 +55,7 @@ export default defineSchema({
       v.literal("archived"),
     ),
     publishedAt: v.optional(v.number()),
-
+    updatedAt: v.number(),
     // automation config (optional — only if IG auto-DM is enabled for this product)
     automationEnabled: v.boolean(),
   })
