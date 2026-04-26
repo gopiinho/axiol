@@ -46,7 +46,6 @@ export const create = mutation({
       itemTitle: validated.itemTitle,
       imageUrl: validated.imageUrl,
       order: Date.now(),
-      createdAt: Date.now(),
     });
   },
 });
