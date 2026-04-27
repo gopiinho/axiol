@@ -48,6 +48,47 @@ export const listByUser = query({
   },
 });
 
+export const allProducts = query({
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
+
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_user", (q) => q.eq("createdBy", userId))
+      .order("desc")
+      .collect();
+
+    return await Promise.all(
+      products.map(async (product) => {
+        const linkedCollection = product.collectionId
+          ? await ctx.db.get(product.collectionId)
+          : null;
+
+        const linkedItems =
+          product.collectionId && linkedCollection
+            ? await ctx.db
+                .query("items")
+                .withIndex("by_collection", (q) =>
+                  q.eq("collectionId", product.collectionId!),
+                )
+                .collect()
+            : [];
+
+        const fallbackCoverImage =
+          linkedItems.find((item) => item.imageUrl)?.imageUrl ?? null;
+
+        return {
+          ...product,
+          linkedCollectionTitle: linkedCollection?.title ?? null,
+          linkedCollectionItemCount: linkedItems.length,
+          coverImageUrl: product.coverImageUrl ?? fallbackCoverImage ?? null,
+        };
+      }),
+    );
+  },
+});
+
 export const getById = query({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
@@ -69,7 +110,9 @@ export const getBySlug = query({
 
     return await ctx.db
       .query("products")
-      .withIndex("by_slug", (q) => q.eq("slug", args.slug).eq("createdBy", userId))
+      .withIndex("by_slug", (q) =>
+        q.eq("slug", args.slug).eq("createdBy", userId),
+      )
       .first();
   },
 });
@@ -205,5 +248,19 @@ export const publish = mutation({
       publishedAt: product.publishedAt ?? Date.now(),
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const product = await ctx.db.get(args.id);
+
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found.");
+    }
+
+    await ctx.db.delete(args.id);
   },
 });
