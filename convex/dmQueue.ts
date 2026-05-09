@@ -11,7 +11,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
-import { requireSession } from "./security";
+import { requireSession, getSession } from "./security";
 import { decryptToken } from "./lib/instagramCrypto";
 
 const MAX_DMS_PER_HOUR = 195;
@@ -65,7 +65,6 @@ export const createDmJob = mutation({
       maxItemsInDM: args.maxItemsInDM,
       includeWebsiteLink: args.includeWebsiteLink,
       status: "pending",
-      createdAt: Date.now(),
       attemptCount: 0,
       triggerType: args.triggerType,
       triggerId: args.triggerId,
@@ -270,12 +269,17 @@ async function sendDM(
       return { success: false, error: "Not configured" };
     }
 
+    if (job.instagramUserId === config.instagramAccountId) {
+      return { success: false, error: "Cannot send private reply to self" };
+    }
+
     const messageData = await ctx.runQuery(
       internal.instagram.generateDMMessageForJob,
       {
         collectionId: job.collectionId,
         maxItems: job.maxItemsInDM,
         includeWebsiteLink: job.includeWebsiteLink,
+        triggerType: job.triggerType,
       },
     );
 
@@ -287,19 +291,42 @@ async function sendDM(
     }
 
     const accessToken = await decryptToken(config.accessToken);
-    const url = `https://graph.instagram.com/v24.0/me/messages`;
+    const appSecret = process.env.DMHELPER_APP_SECRET;
 
-    const response = await fetch(url, {
+    // Calculate appsecret_proof for production security
+    let appSecretProof: string | undefined;
+    if (appSecret) {
+      const { createHmac } = await import("node:crypto");
+      appSecretProof = createHmac("sha256", appSecret)
+        .update(accessToken)
+        .digest("hex");
+    }
+
+    const url = new URL(
+      `https://graph.instagram.com/v25.0/${config.instagramAccountId}/messages`,
+    );
+
+    url.searchParams.set("access_token", accessToken);
+    if (appSecretProof) {
+      url.searchParams.set("appsecret_proof", appSecretProof);
+    }
+
+    const body =
+      job.triggerType === "comment"
+        ? {
+            recipient: { comment_id: job.triggerId },
+            message: { text: messageText },
+          }
+        : {
+            messaging_type: "RESPONSE",
+            recipient: { id: job.instagramUserId },
+            message: { text: messageText },
+          };
+
+    const response = await fetch(url.toString(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        recipient:
-          job.triggerType === "comment"
-            ? { comment_id: job.triggerId }
-            : { id: job.instagramUserId },
-        message: { text: messageText },
-        access_token: accessToken,
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -379,7 +406,18 @@ export const kickoffWorker = mutation({
 export const getQueueStats = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session)
+      return {
+        pending: 0,
+        processing: 0,
+        sent: 0,
+        failed: 0,
+        scheduled: 0,
+        successRate: 0,
+      };
+
+    const { userId } = session;
 
     const pending = await ctx.db
       .query("dmJobs")

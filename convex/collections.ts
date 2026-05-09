@@ -1,12 +1,14 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireSession } from "./security";
+import { requireSession, getSession } from "./security";
 import { validateSectionInput } from "../lib/validators/sections";
 
 export const listByUser = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return [];
+    const { userId } = session;
     return await ctx.db
       .query("collections")
       .withIndex("by_user", (q) => q.eq("createdBy", userId))
@@ -84,7 +86,6 @@ export const create = mutation({
       description: validated.description,
       order: Date.now(),
       createdBy: userId,
-      createdAt: Date.now(),
     });
   },
 });

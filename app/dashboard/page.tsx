@@ -11,10 +11,10 @@ import {
 
 const QUICK_ACTIONS = [
   {
-    href: "/dashboard/create",
+    href: "/dashboard/products/new",
     icon: PlusCircle,
-    title: "Create Post",
-    description: "Pick a reel and set up automatic DM replies for commenters",
+    title: "Create Product",
+    description: "Create a new product to share with your audience.",
     accent: "bg-primary/10 text-primary",
   },
   {
@@ -38,8 +38,8 @@ export default function DashboardPage() {
     <div className="px-5 lg:px-6 py-6 lg:py-8">
       <FadeIn>
         <div className="space-y-1">
-          <h1 className="heading-playful text-4xl text-primary sm:text-5xl">
-            axiol
+          <h1 className="heading-playful text-4xl sm:text-5xl">
+            Welcome back!
           </h1>
           <p className="text-muted-foreground">
             What would you like to do today?
@@ -54,7 +54,7 @@ export default function DashboardPage() {
             <AnimatedListItem key={action.href}>
               <Link
                 href={action.href}
-                className="group flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
+                className="group flex flex-col gap-4 rounded-xs border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
               >
                 <div
                   className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${action.accent} transition-transform duration-200 group-hover:scale-105`}

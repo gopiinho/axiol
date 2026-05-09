@@ -23,6 +23,16 @@ export async function requireSession(
   return { userId: user._id, user };
 }
 
+export async function getSession(
+  ctx: SessionCtx,
+): Promise<{ userId: Id<"users">; user: Doc<"users"> } | null> {
+  try {
+    return await requireSession(ctx);
+  } catch {
+    return null;
+  }
+}
+
 export async function requireCreatorSession(
   ctx: SessionCtx,
 ): Promise<{ userId: Id<"users">; user: Doc<"users"> }> {

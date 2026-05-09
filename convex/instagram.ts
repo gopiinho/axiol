@@ -8,6 +8,7 @@ import {
   internalAction,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { getSession } from "./security";
 import { requireSession } from "./security";
 import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
@@ -27,6 +28,7 @@ function buildDMMessage({
   includeWebsiteLink,
   siteUrl,
   collectionId,
+  triggerType,
 }: {
   collectionTitle: string;
   items: Array<{ itemTitle?: string; price?: string; affiliateLink: string }>;
@@ -34,6 +36,7 @@ function buildDMMessage({
   includeWebsiteLink: boolean;
   siteUrl: string;
   collectionId: string;
+  triggerType: "comment" | "dm";
 }) {
   const collectionUrl = `${siteUrl}/list/${collectionId}`;
   let message = `Hi! Here are my top picks from "${collectionTitle}":\n\n`;
@@ -57,6 +60,10 @@ function buildDMMessage({
   }
 
   message += `💕 Thank you for your support! xoxo`;
+
+  if (triggerType === "comment") {
+    message += `\n\nDM me if you want to see more collections or have questions! ✨`;
+  }
 
   return {
     message,
@@ -179,7 +186,9 @@ export const getConfigByBetterAuthId = internalQuery({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_betterAuthId", (q) => q.eq("betterAuthId", args.betterAuthId))
+      .withIndex("by_betterAuthId", (q) =>
+        q.eq("betterAuthId", args.betterAuthId),
+      )
       .first();
 
     if (!user) return null;
@@ -226,9 +235,12 @@ export const fetchRecentReels = action({
       error?: { message?: string };
     };
 
-    const config = await ctx.runQuery(internal.instagram.getConfigByBetterAuthId, {
-      betterAuthId: identity.subject,
-    });
+    const config = await ctx.runQuery(
+      internal.instagram.getConfigByBetterAuthId,
+      {
+        betterAuthId: identity.subject,
+      },
+    );
 
     if (!config) {
       throw new Error(
@@ -242,7 +254,7 @@ export const fetchRecentReels = action({
 
     const accessToken = await decryptToken(config.accessToken);
     const url =
-      `https://graph.instagram.com/v24.0/${config.instagramAccountId}/media` +
+      `https://graph.instagram.com/v25.0/${config.instagramAccountId}/media` +
       `?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp` +
       `&limit=20` +
       `&access_token=${accessToken}`;
@@ -416,7 +428,10 @@ export const publishReelMapping = mutation({
 export const getDraftMappings = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return [];
+
+    const { userId } = session;
 
     const drafts = await ctx.db
       .query("reelMappings")
@@ -452,7 +467,10 @@ export const getPublishedMappings = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return [];
+
+    const { userId } = session;
 
     const limit =
       args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
@@ -508,6 +526,7 @@ export const generateDMMessage = query({
     collectionId: v.id("collections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
+    triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
     await requireSession(ctx);
@@ -532,6 +551,7 @@ export const generateDMMessage = query({
       includeWebsiteLink: args.includeWebsiteLink,
       siteUrl,
       collectionId: args.collectionId,
+      triggerType: args.triggerType,
     });
   },
 });
@@ -541,6 +561,7 @@ export const generateDMMessageForJob = internalQuery({
     collectionId: v.id("collections"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
+    triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
@@ -563,6 +584,7 @@ export const generateDMMessageForJob = internalQuery({
       includeWebsiteLink: args.includeWebsiteLink,
       siteUrl,
       collectionId: args.collectionId,
+      triggerType: args.triggerType,
     });
   },
 });
@@ -726,7 +748,10 @@ export const logDM = mutation({
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const session = await getSession(ctx);
+    if (!session) return { totalComments: 0, commentsLast24h: 0, totalDMs: 0, dmsLast24h: 0, totalMappings: 0, activeMappings: 0, failedDMs: 0 };
+
+    const { userId } = session;
 
     const comments = await ctx.db
       .query("commentLogs")

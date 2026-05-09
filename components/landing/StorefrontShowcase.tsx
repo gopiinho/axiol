@@ -33,7 +33,7 @@ export function StorefrontShowcase() {
   const [activeTheme, setActiveTheme] = useState<ThemeKey>("default");
 
   return (
-    <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24">
+    <section className="relative bg-sidebar px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24">
       <div className="w-full max-w-7xl mx-auto">
         <ScrollFadeIn>
           <div className="text-center space-y-2 mb-10 sm:mb-14">
@@ -41,7 +41,7 @@ export function StorefrontShowcase() {
               Your branded storefront, ready in minutes
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto">
-              Get a beautiful axiol.com/yourname page with themed product
+              Get a beautifu axiol.com/yourname page with themed product
               collections. Share it in your bio.
             </p>
           </div>

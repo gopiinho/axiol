@@ -7,6 +7,7 @@ import { AutoDmShowcase } from "@/components/landing/AutoDmShowcase";
 import { StorefrontShowcase } from "@/components/landing/StorefrontShowcase";
 import { FeatureGrid } from "@/components/landing/FeatureGrid";
 import { FinalCta } from "@/components/landing/FinalCta";
+import { CloudBackground } from "@/components/landing/CloudBackground";
 
 export default function Home() {
   return (
@@ -15,15 +16,18 @@ export default function Home() {
       <HomeNav />
 
       <section className="relative min-h-screen flex items-end px-6 sm:px-16 lg:px-28 xl:px-32 pb-16 sm:pb-20 lg:pb-28 pt-28 sm:pt-40">
-        <div className="w-full max-w-7xl mx-auto">
+        <CloudBackground />
+        <div className="w-full max-w-7xl mx-auto relative z-10">
           <div className="max-w-2xl lg:max-w-3xl space-y-6 sm:space-y-8">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-primary leading-[0.95] text-outline-black">
-              Turn your content into <span className="marker-stroke">income.</span>
+              Turn your content into{" "}
+              <span className="marker-stroke">income.</span>
             </h1>
 
-            <p className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-md sm:max-w-lg leading-relaxed">
+            <p className="text-sm sm:text-lg lg:text-xl max-w-md sm:max-w-lg leading-relaxed">
               The easiest way to make money online. All of your digital
-              products, and bookings — hosted within your link-in-bio.
+              products, affiliate links and bookings — hosted within your
+              link-in-bio.
             </p>
 
             <WaitlistForm />

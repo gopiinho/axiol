@@ -39,10 +39,7 @@ import {
 export default function DraftsPage() {
   useUser();
   const rawDrafts = useQuery(api.instagram.getDraftMappings);
-  const drafts = useCachedQueryResult(
-    "dashboard:drafts",
-    rawDrafts,
-  );
+  const drafts = useCachedQueryResult("dashboard:drafts", rawDrafts);
   const publishMapping = useMutation(api.instagram.publishReelMapping);
   const deleteMapping = useMutation(api.instagram.deleteReelMapping);
   const [publishTarget, setPublishTarget] = useState<Id<"reelMappings"> | null>(
@@ -87,7 +84,7 @@ export default function DraftsPage() {
                 Review and publish your auto-DM posts
               </p>
             </div>
-            <Link href="/dashboard/create">
+            <Link href="/dashboard/products/new">
               <Button size="lg" className="gap-2 sm:self-start">
                 <Plus className="h-4 w-4" />
                 Create New
@@ -129,7 +126,8 @@ export default function DraftsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Publish this draft?</AlertDialogTitle>
             <AlertDialogDescription>
-              Followers who comment the trigger keyword will start receiving DMs automatically.
+              Followers who comment the trigger keyword will start receiving DMs
+              automatically.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -176,7 +174,8 @@ export default function DraftsPage() {
             <SuccessCheckmark className="mb-2" />
             <DialogTitle>Draft published</DialogTitle>
             <DialogDescription>
-              Auto-DM is now live — followers who comment the keyword will get a DM.
+              Auto-DM is now live — followers who comment the keyword will get a
+              DM.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

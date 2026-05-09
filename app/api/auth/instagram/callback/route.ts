@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
     };
 
     // 3. Fetch IG user profile
-    const profileUrl = new URL("https://graph.instagram.com/v24.0/me");
+    const profileUrl = new URL("https://graph.instagram.com/v25.0/me");
     profileUrl.searchParams.set("fields", "user_id,username");
     profileUrl.searchParams.set("access_token", longLivedData.access_token);
 

@@ -26,7 +26,7 @@ export default function BottomNav() {
       label: "My Store",
     },
     {
-      href: "/dashboard/create",
+      href: "/dashboard/products",
       icon: PlusCircle,
       label: "Create",
     },
@@ -44,7 +44,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed right-0 bottom-2 left-0 z-50 px-3 safe-area-inset-bottom">
-      <div className="mx-auto max-w-xl rounded-2xl border border-border/80 bg-card/95 p-1.5 shadow-[0_-4px_24px_-8px_oklch(0.25_0.06_252/0.2)] backdrop-blur-lg">
+      <div className="mx-auto max-w-xl rounded-none border border-border/80 bg-card/95 p-1.5 shadow-[0_-4px_24px_-8px_oklch(0.25_0.06_252/0.4)] backdrop-blur-lg">
         <div className="flex items-center justify-around gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -56,7 +56,7 @@ export default function BottomNav() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-14 flex-1 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200",
+                  "flex min-h-14 flex-1 flex-col items-center justify-center px-1 transition-all duration-200",
                   active
                     ? "bg-primary/12 text-primary"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"

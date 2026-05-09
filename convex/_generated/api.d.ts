@@ -17,6 +17,7 @@ import type * as http from "../http.js";
 import type * as instagram from "../instagram.js";
 import type * as items from "../items.js";
 import type * as lib_instagramCrypto from "../lib/instagramCrypto.js";
+import type * as products from "../products.js";
 import type * as security from "../security.js";
 import type * as storage from "../storage.js";
 import type * as users from "../users.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   instagram: typeof instagram;
   items: typeof items;
   "lib/instagramCrypto": typeof lib_instagramCrypto;
+  products: typeof products;
   security: typeof security;
   storage: typeof storage;
   users: typeof users;

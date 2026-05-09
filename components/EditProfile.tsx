@@ -109,18 +109,39 @@ export function EditProfile({
           <DialogTitle className="text-lg font-semibold">
             Edit store
           </DialogTitle>
-          <Button
-            size="sm"
-            onClick={onSave}
-            disabled={saving}
-            className="rounded-full px-5"
-          >
+          <Button size="sm" onClick={onSave} disabled={saving} className="px-5">
             {saving ? "Saving..." : "Save"}
           </Button>
         </DialogHeader>
 
         <div className="max-h-[70vh] overflow-y-auto lg:max-h-none lg:overflow-visible">
-          <div className="flex flex-col sm:flex-row gap-5 border-b border-border/50 px-5 py-5">
+          <div className="flex flex-row gap-5 border-b border-border/50 px-5 py-5">
+            <div className="flex flex-col items-center gap-3 sm:gap-2 sm:w-24">
+              <Label className="text-xs text-muted-foreground sm:text-center">
+                Profile
+              </Label>
+              <ImageUpload
+                currentImageUrl={user?.profileImageUrl}
+                onUploaded={(storageId) =>
+                  saveProfileImage({ storageId: storageId as never })
+                }
+                onRemove={() => removeProfileImage()}
+                maxSizeBytes={2 * 1024 * 1024}
+                maxSizeLabel="2 MB"
+                className="h-20 w-20 shrink-0 sm:h-full sm:w-full"
+                placeholder={
+                  <div className="flex h-full w-full items-center justify-center overflow-hidden bg-linear-to-br from-primary/20 to-pink-400/20">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`}
+                      alt="Avatar"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                }
+              />
+            </div>
+
             <div className="flex-1 space-y-2">
               <Label className="text-xs text-muted-foreground">
                 Cover photo
@@ -136,37 +157,11 @@ export function EditProfile({
                 aspectRatio="3/1"
                 placeholder={
                   <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                    <ImageIcon className="h-5 w-5" />
+                    <ImageIcon className="h-5 w-5 text-primary" />
                     <span className="text-xs">Add cover photo</span>
                     <span className="text-[10px] text-muted-foreground/60">
                       1200x400 recommended
                     </span>
-                  </div>
-                }
-              />
-            </div>
-
-            <div className="flex sm:flex-col items-center gap-3 sm:gap-2 sm:w-24">
-              <Label className="text-xs text-muted-foreground sm:text-center">
-                Profile
-              </Label>
-              <ImageUpload
-                currentImageUrl={user?.profileImageUrl}
-                onUploaded={(storageId) =>
-                  saveProfileImage({ storageId: storageId as never })
-                }
-                onRemove={() => removeProfileImage()}
-                maxSizeBytes={2 * 1024 * 1024}
-                maxSizeLabel="2 MB"
-                className="h-16 w-16 shrink-0"
-                placeholder={
-                  <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary/20 to-pink-400/20">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`}
-                      alt="Avatar"
-                      className="h-full w-full object-cover"
-                    />
                   </div>
                 }
               />
