@@ -6,26 +6,12 @@ const PRODUCT_STATUSES = ["draft", "published", "archived"] as const;
 type ProductType = (typeof PRODUCT_TYPES)[number];
 type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
-function assertHttpUrl(value: string, fieldLabel: string) {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      throw new Error();
-    }
-  } catch {
-    throw new Error(`${fieldLabel} must be a valid http(s) URL.`);
-  }
-}
-
 export interface ProductInput {
   name: string;
   slug?: string;
   description?: string;
-  coverImageUrl?: string;
   price?: string;
   type: string;
-  collectionId?: string;
-  affiliateLink?: string;
   status?: string;
   automationEnabled?: boolean;
 }
@@ -34,11 +20,8 @@ export function validateProductInput(input: ProductInput): {
   name: string;
   slug: string;
   description?: string;
-  coverImageUrl?: string;
   price?: string;
   type: ProductType;
-  collectionId?: string;
-  affiliateLink?: string;
   status: ProductStatus;
   automationEnabled: boolean;
 } {
@@ -68,26 +51,9 @@ export function validateProductInput(input: ProductInput): {
     throw new Error("Description must be at most 2000 characters.");
   }
 
-  const coverImageUrl = input.coverImageUrl?.trim() || undefined;
-  if (coverImageUrl) {
-    assertHttpUrl(coverImageUrl, "Cover image URL");
-  }
-
   const price = input.price?.trim() || undefined;
   if (price && price.length > 32) {
     throw new Error("Price must be at most 32 characters.");
-  }
-
-  const collectionId = input.collectionId?.trim() || undefined;
-  const affiliateLink = input.affiliateLink?.trim() || undefined;
-  if (affiliateLink) {
-    assertHttpUrl(affiliateLink, "Affiliate link");
-  }
-
-  if ((collectionId ? 1 : 0) + (affiliateLink ? 1 : 0) !== 1) {
-    throw new Error(
-      "Affiliate products must link to either one collection or one direct affiliate link.",
-    );
   }
 
   const status = (input.status ?? "draft").trim();
@@ -99,11 +65,8 @@ export function validateProductInput(input: ProductInput): {
     name,
     slug,
     description,
-    coverImageUrl,
     price,
     type: input.type as ProductType,
-    collectionId,
-    affiliateLink,
     status: status as ProductStatus,
     automationEnabled: input.automationEnabled ?? false,
   };
