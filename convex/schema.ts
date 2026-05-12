@@ -38,17 +38,11 @@ export default defineSchema({
   products: defineTable({
     createdBy: v.id("users"),
     name: v.string(),
-    slug: v.string(), // axiol.store/jackson/lord-of-fire
+    slug: v.string(),
     description: v.optional(v.string()),
-    coverImageUrl: v.optional(v.string()),
-    price: v.optional(v.string()), // display price (free, $29, etc.)
-    type: v.union(
-      v.literal("affiliate"),
-      // future: v.literal("digital"), v.literal("course"), v.literal("membership")
-    ),
-    // when type === "affiliate"
-    collectionId: v.optional(v.id("collections")), // link to existing collection
-    affiliateLink: v.optional(v.string()), // OR a single direct link
+    coverImageId: v.optional(v.id("_storage")),
+    price: v.optional(v.string()),
+    type: v.union(v.literal("affiliate")),
     status: v.union(
       v.literal("draft"),
       v.literal("published"),
@@ -56,29 +50,21 @@ export default defineSchema({
     ),
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
-    // automation config (optional — only if IG auto-DM is enabled for this product)
     automationEnabled: v.boolean(),
   })
     .index("by_user", ["createdBy"])
     .index("by_slug", ["slug", "createdBy"])
     .index("by_status", ["createdBy", "status"]),
 
-  collections: defineTable({
-    title: v.string(),
-    description: v.optional(v.string()),
-    order: v.number(),
-    createdBy: v.id("users"),
-  }).index("by_user", ["createdBy"]),
-
-  items: defineTable({
-    collectionId: v.id("collections"),
+  productItems: defineTable({
+    productId: v.id("products"),
     affiliateLink: v.string(),
     price: v.optional(v.string()),
-    platform: v.string(),
-    itemTitle: v.optional(v.string()),
+    platform: v.optional(v.string()),
+    title: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     order: v.number(),
-  }).index("by_collection", ["collectionId"]),
+  }).index("by_product", ["productId"]),
 
   instagramConfig: defineTable({
     userId: v.id("users"),
@@ -101,7 +87,7 @@ export default defineSchema({
     reelUrl: v.string(),
     thumbnailUrl: v.optional(v.string()),
     caption: v.optional(v.string()),
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     keyword: v.string(),
     active: v.boolean(),
     maxItemsInDM: v.number(),
@@ -110,13 +96,14 @@ export default defineSchema({
   })
     .index("by_reel", ["reelId"])
     .index("by_active", ["active"])
-    .index("by_user", ["userId"]),
+    .index("by_user", ["userId"])
+    .index("by_product", ["productId"]),
 
   dmJobs: defineTable({
     userId: v.id("users"),
     instagramUserId: v.string(),
     username: v.string(),
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     reelId: v.string(),
     maxItemsInDM: v.number(),
     includeWebsiteLink: v.boolean(),
@@ -139,7 +126,8 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_user_reel", ["instagramUserId", "reelId"])
     .index("by_scheduled", ["scheduledFor"])
-    .index("by_owner", ["userId"]),
+    .index("by_owner", ["userId"])
+    .index("by_product", ["productId"]),
 
   dmRateLimitState: defineTable({
     userId: v.id("users"),
@@ -156,7 +144,7 @@ export default defineSchema({
     username: v.string(),
     commentText: v.string(),
     keyword: v.string(),
-    collectionId: v.optional(v.id("collections")),
+    productId: v.optional(v.id("products")),
     userId: v.optional(v.id("users")),
     dmSent: v.boolean(),
     dmError: v.optional(v.string()),
@@ -168,7 +156,7 @@ export default defineSchema({
   dmLogs: defineTable({
     instagramUserId: v.string(),
     username: v.string(),
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     userId: v.optional(v.id("users")),
     messageText: v.string(),
     success: v.boolean(),
