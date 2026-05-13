@@ -6,19 +6,32 @@ import { validateProductInput } from "../lib/validators/products";
 
 type ProductCtx = MutationCtx | QueryCtx;
 
-async function ensureSlugAvailable(
+async function ensureUniqueSlug(
   ctx: ProductCtx,
   userId: Id<"users">,
   slug: string,
   excludeProductId?: Id<"products">,
-) {
+): Promise<string> {
   const existing = await ctx.db
     .query("products")
     .withIndex("by_slug", (q) => q.eq("slug", slug).eq("createdBy", userId))
     .first();
 
-  if (existing && existing._id !== excludeProductId) {
-    throw new Error("You already have a product with this slug.");
+  if (!existing || existing._id === excludeProductId) {
+    return slug;
+  }
+
+  let counter = 2;
+  while (true) {
+    const candidate = `${slug}-${counter}`;
+    const dup = await ctx.db
+      .query("products")
+      .withIndex("by_slug", (q) => q.eq("slug", candidate).eq("createdBy", userId))
+      .first();
+    if (!dup || dup._id === excludeProductId) {
+      return candidate;
+    }
+    counter++;
   }
 }
 
@@ -45,7 +58,14 @@ export const getById = query({
       return null;
     }
 
-    return product;
+    const coverImageUrl = product.coverImageId
+      ? await ctx.storage.getUrl(product.coverImageId)
+      : null;
+
+    return {
+      ...product,
+      coverImageUrl,
+    };
   },
 });
 
@@ -80,14 +100,14 @@ export const create = mutation({
       status: "draft",
     });
 
-    await ensureSlugAvailable(ctx, userId, validated.slug);
+    const slug = await ensureUniqueSlug(ctx, userId, validated.slug);
 
     const now = Date.now();
 
     return await ctx.db.insert("products", {
       createdBy: userId,
       name: validated.name,
-      slug: validated.slug,
+      slug,
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
@@ -124,11 +144,11 @@ export const update = mutation({
       status: product.status,
     });
 
-    await ensureSlugAvailable(ctx, userId, validated.slug, args.id);
+    const slug = await ensureUniqueSlug(ctx, userId, validated.slug, args.id);
 
     await ctx.db.patch(args.id, {
       name: validated.name,
-      slug: validated.slug,
+      slug,
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
@@ -175,7 +195,7 @@ export const publish = mutation({
       automationEnabled: product.automationEnabled,
     });
 
-    await ensureSlugAvailable(ctx, userId, validated.slug, args.id);
+    await ensureUniqueSlug(ctx, userId, validated.slug, args.id);
 
     await ctx.db.patch(args.id, {
       status: "published",
