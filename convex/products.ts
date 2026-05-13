@@ -22,19 +22,6 @@ async function ensureSlugAvailable(
   }
 }
 
-async function ensureCollectionOwnership(
-  ctx: ProductCtx,
-  userId: Id<"users">,
-  collectionId?: Id<"collections">,
-) {
-  if (!collectionId) return;
-
-  const collection = await ctx.db.get(collectionId);
-  if (!collection || collection.createdBy !== userId) {
-    throw new Error("Collection not found.");
-  }
-}
-
 export const listByUser = query({
   args: {},
   handler: async (ctx) => {
@@ -44,48 +31,7 @@ export const listByUser = query({
       .query("products")
       .withIndex("by_user", (q) => q.eq("createdBy", userId))
       .order("desc")
-      .collect();
-  },
-});
-
-export const allProducts = query({
-  args: {},
-  handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
-
-    const products = await ctx.db
-      .query("products")
-      .withIndex("by_user", (q) => q.eq("createdBy", userId))
-      .order("desc")
-      .collect();
-
-    return await Promise.all(
-      products.map(async (product) => {
-        const linkedCollection = product.collectionId
-          ? await ctx.db.get(product.collectionId)
-          : null;
-
-        const linkedItems =
-          product.collectionId && linkedCollection
-            ? await ctx.db
-                .query("items")
-                .withIndex("by_collection", (q) =>
-                  q.eq("collectionId", product.collectionId!),
-                )
-                .collect()
-            : [];
-
-        const fallbackCoverImage =
-          linkedItems.find((item) => item.imageUrl)?.imageUrl ?? null;
-
-        return {
-          ...product,
-          linkedCollectionTitle: linkedCollection?.title ?? null,
-          linkedCollectionItemCount: linkedItems.length,
-          coverImageUrl: product.coverImageUrl ?? fallbackCoverImage ?? null,
-        };
-      }),
-    );
+      .take(100);
   },
 });
 
@@ -122,18 +68,18 @@ export const create = mutation({
     name: v.string(),
     slug: v.optional(v.string()),
     description: v.optional(v.string()),
-    coverImageUrl: v.optional(v.string()),
+    coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
     type: v.union(v.literal("affiliate")),
-    collectionId: v.optional(v.id("collections")),
-    affiliateLink: v.optional(v.string()),
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
-    const validated = validateProductInput(args);
+    const validated = validateProductInput({
+      ...args,
+      status: "draft",
+    });
 
-    await ensureCollectionOwnership(ctx, userId, args.collectionId);
     await ensureSlugAvailable(ctx, userId, validated.slug);
 
     const now = Date.now();
@@ -143,11 +89,9 @@ export const create = mutation({
       name: validated.name,
       slug: validated.slug,
       description: validated.description,
-      coverImageUrl: validated.coverImageUrl,
+      coverImageId: args.coverImageId,
       price: validated.price,
       type: validated.type,
-      collectionId: args.collectionId,
-      affiliateLink: validated.affiliateLink,
       status: "draft",
       publishedAt: undefined,
       updatedAt: now,
@@ -162,11 +106,9 @@ export const update = mutation({
     name: v.string(),
     slug: v.optional(v.string()),
     description: v.optional(v.string()),
-    coverImageUrl: v.optional(v.string()),
+    coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
     type: v.union(v.literal("affiliate")),
-    collectionId: v.optional(v.id("collections")),
-    affiliateLink: v.optional(v.string()),
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -182,18 +124,15 @@ export const update = mutation({
       status: product.status,
     });
 
-    await ensureCollectionOwnership(ctx, userId, args.collectionId);
     await ensureSlugAvailable(ctx, userId, validated.slug, args.id);
 
     await ctx.db.patch(args.id, {
       name: validated.name,
       slug: validated.slug,
       description: validated.description,
-      coverImageUrl: validated.coverImageUrl,
+      coverImageId: args.coverImageId,
       price: validated.price,
       type: validated.type,
-      collectionId: args.collectionId,
-      affiliateLink: validated.affiliateLink,
       automationEnabled: validated.automationEnabled,
       updatedAt: Date.now(),
     });
@@ -231,16 +170,11 @@ export const publish = mutation({
       name: product.name,
       slug: product.slug,
       description: product.description,
-      coverImageUrl: product.coverImageUrl,
-      price: product.price,
       type: product.type,
-      collectionId: product.collectionId,
-      affiliateLink: product.affiliateLink,
       status: "published",
       automationEnabled: product.automationEnabled,
     });
 
-    await ensureCollectionOwnership(ctx, userId, product.collectionId);
     await ensureSlugAvailable(ctx, userId, validated.slug, args.id);
 
     await ctx.db.patch(args.id, {
@@ -261,6 +195,82 @@ export const remove = mutation({
       throw new Error("Product not found.");
     }
 
+    const items = await ctx.db
+      .query("productItems")
+      .withIndex("by_product", (q) => q.eq("productId", args.id))
+      .collect();
+
+    for (const item of items) {
+      await ctx.db.delete(item._id);
+    }
+
+    const mappings = await ctx.db
+      .query("reelMappings")
+      .withIndex("by_product", (q) => q.eq("productId", args.id))
+      .collect();
+
+    for (const mapping of mappings) {
+      await ctx.db.delete(mapping._id);
+    }
+
     await ctx.db.delete(args.id);
+  },
+});
+
+export const getPublicProduct = query({
+  args: { username: v.string(), slug: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .first();
+
+    if (!user) return null;
+
+    const product = await ctx.db
+      .query("products")
+      .withIndex("by_slug", (q) =>
+        q.eq("slug", args.slug).eq("createdBy", user._id),
+      )
+      .first();
+
+    if (!product || product.status !== "published") return null;
+
+    const items = await ctx.db
+      .query("productItems")
+      .withIndex("by_product", (q) => q.eq("productId", product._id))
+      .order("asc")
+      .collect();
+
+    const coverUrl = product.coverImageId
+      ? await ctx.storage.getUrl(product.coverImageId)
+      : null;
+
+    return {
+      product: {
+        ...product,
+        coverImageUrl: coverUrl,
+      },
+      items,
+    };
+  },
+});
+
+export const listForSelect = query({
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
+
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_user", (q) => q.eq("createdBy", userId))
+      .order("desc")
+      .collect();
+
+    return products.map((p) => ({
+      _id: p._id,
+      name: p.name,
+      slug: p.slug,
+    }));
   },
 });

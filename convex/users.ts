@@ -74,11 +74,33 @@ export const getPublicStore = query({
       ? await ctx.storage.getUrl(user.coverImageId)
       : null;
 
-    const collections = await ctx.db
-      .query("collections")
-      .withIndex("by_user", (q) => q.eq("createdBy", user._id))
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_status", (q) =>
+        q.eq("createdBy", user._id).eq("status", "published"),
+      )
       .order("desc")
       .collect();
+
+    const enriched = await Promise.all(
+      products.map(async (product) => {
+        const items = await ctx.db
+          .query("productItems")
+          .withIndex("by_product", (q) => q.eq("productId", product._id))
+          .order("asc")
+          .collect();
+
+        const coverUrl = product.coverImageId
+          ? await ctx.storage.getUrl(product.coverImageId)
+          : null;
+
+        return {
+          ...product,
+          coverImageUrl: coverUrl,
+          items,
+        };
+      }),
+    );
 
     return {
       user: {
@@ -94,7 +116,7 @@ export const getPublicStore = query({
         youtubeUrl: user.youtubeUrl,
         websiteUrl: user.websiteUrl,
       },
-      collections,
+      products: enriched,
     };
   },
 });
@@ -301,19 +323,20 @@ async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
     await ctx.db.delete(config._id);
   }
 
-  const collections = await ctx.db
-    .query("collections")
+  const products = await ctx.db
+    .query("products")
     .withIndex("by_user", (q) => q.eq("createdBy", userId))
     .collect();
-  for (const collection of collections) {
+  for (const product of products) {
     const items = await ctx.db
-      .query("items")
-      .withIndex("by_collection", (q) => q.eq("collectionId", collection._id))
+      .query("productItems")
+      .withIndex("by_product", (q) => q.eq("productId", product._id))
       .collect();
     for (const item of items) {
       await ctx.db.delete(item._id);
     }
-    await ctx.db.delete(collection._id);
+
+    await ctx.db.delete(product._id);
   }
 
   const mappings = await ctx.db
