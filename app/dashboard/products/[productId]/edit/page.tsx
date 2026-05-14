@@ -72,12 +72,6 @@ export default function EditProduct({
     }
   };
 
-  const statusStyles: Record<string, string> = {
-    draft: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    published: "bg-green-100 text-green-800 border-green-200",
-    archived: "bg-gray-100 text-gray-500 border-gray-200",
-  };
-
   return (
     <div>
       <FadeIn>

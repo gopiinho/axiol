@@ -34,9 +34,9 @@ interface ProductRowProps {
 }
 
 const statusStyles: Record<string, string> = {
-  draft: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  published: "bg-green-100 text-green-800 border-green-200",
-  archived: "bg-gray-100 text-gray-500 border-gray-200",
+  draft: "text-amber-700",
+  published: "text-emerald-700",
+  archived: "text-slate-500",
 };
 
 export function ProductRow({
@@ -96,12 +96,9 @@ export function ProductRow({
           )}
         </td>
         <td className="py-3.5 px-4">
-          <Badge
-            variant="outline"
-            className={cn("text-[11px] font-semibold", statusStyles[product.status])}
-          >
-            {product.status}
-          </Badge>
+          <span className={cn("text-[11px] font-semibold", statusStyles[product.status])}>
+            {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+          </span>
         </td>
         <td className="py-3.5 px-4 hidden lg:table-cell">
           {product.automationEnabled ? (
