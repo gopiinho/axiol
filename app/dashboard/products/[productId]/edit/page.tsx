@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id, Doc } from "@/convex/_generated/dataModel";
+import { useUser } from "@/features/auth/client/UserContext";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save } from "lucide-react";
@@ -28,6 +29,7 @@ export default function EditProduct({
   params: Promise<{ productId: Id<"products"> }>;
 }) {
   const { productId } = use(params);
+  const { user } = useUser();
   const product = useQuery(api.products.getById, { id: productId });
   const items = useQuery(api.productItems.listByProduct, {
     productId,
@@ -139,6 +141,7 @@ export default function EditProduct({
           <div className="space-y-12">
             <ProductDetail
               ref={detailRef}
+              username={user?.username ?? ""}
               product={
                 product as Doc<"products"> & { coverImageUrl?: string | null }
               }
