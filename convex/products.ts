@@ -6,27 +6,27 @@ import { validateProductInput } from "../lib/validators/products";
 
 type ProductCtx = MutationCtx | QueryCtx;
 
-async function ensureUniqueSlug(
+async function ensureUniqueProductUrl(
   ctx: ProductCtx,
   userId: Id<"users">,
-  slug: string,
+  productUrl: string,
   excludeProductId?: Id<"products">,
 ): Promise<string> {
   const existing = await ctx.db
     .query("products")
-    .withIndex("by_slug", (q) => q.eq("slug", slug).eq("createdBy", userId))
+    .withIndex("by_productUrl", (q) => q.eq("productUrl", productUrl).eq("createdBy", userId))
     .first();
 
   if (!existing || existing._id === excludeProductId) {
-    return slug;
+    return productUrl;
   }
 
   let counter = 2;
   while (true) {
-    const candidate = `${slug}-${counter}`;
+    const candidate = `${productUrl}-${counter}`;
     const dup = await ctx.db
       .query("products")
-      .withIndex("by_slug", (q) => q.eq("slug", candidate).eq("createdBy", userId))
+      .withIndex("by_productUrl", (q) => q.eq("productUrl", candidate).eq("createdBy", userId))
       .first();
     if (!dup || dup._id === excludeProductId) {
       return candidate;
@@ -81,15 +81,15 @@ export const getById = query({
   },
 });
 
-export const getBySlug = query({
-  args: { slug: v.string() },
+export const getByProductUrl = query({
+  args: { productUrl: v.string() },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
 
     return await ctx.db
       .query("products")
-      .withIndex("by_slug", (q) =>
-        q.eq("slug", args.slug).eq("createdBy", userId),
+      .withIndex("by_productUrl", (q) =>
+        q.eq("productUrl", args.productUrl).eq("createdBy", userId),
       )
       .first();
   },
@@ -98,7 +98,7 @@ export const getBySlug = query({
 export const create = mutation({
   args: {
     name: v.string(),
-    slug: v.optional(v.string()),
+    productUrl: v.optional(v.string()),
     description: v.optional(v.string()),
     coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
@@ -112,14 +112,14 @@ export const create = mutation({
       status: "draft",
     });
 
-    const slug = await ensureUniqueSlug(ctx, userId, validated.slug);
+    const productUrl = await ensureUniqueProductUrl(ctx, userId, validated.productUrl);
 
     const now = Date.now();
 
     return await ctx.db.insert("products", {
       createdBy: userId,
       name: validated.name,
-      slug,
+      productUrl,
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
@@ -136,7 +136,7 @@ export const update = mutation({
   args: {
     id: v.id("products"),
     name: v.string(),
-    slug: v.optional(v.string()),
+    productUrl: v.optional(v.string()),
     description: v.optional(v.string()),
     coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
@@ -156,11 +156,11 @@ export const update = mutation({
       status: product.status,
     });
 
-    const slug = await ensureUniqueSlug(ctx, userId, validated.slug, args.id);
+    const productUrl = await ensureUniqueProductUrl(ctx, userId, validated.productUrl, args.id);
 
     await ctx.db.patch(args.id, {
       name: validated.name,
-      slug,
+      productUrl,
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
@@ -210,14 +210,14 @@ export const publish = mutation({
 
     const validated = validateProductInput({
       name: product.name,
-      slug: product.slug,
+      productUrl: product.productUrl,
       description: product.description,
       type: product.type,
       status: "published",
       automationEnabled: product.automationEnabled,
     });
 
-    await ensureUniqueSlug(ctx, userId, validated.slug, args.id);
+    await ensureUniqueProductUrl(ctx, userId, validated.productUrl, args.id);
 
     await ctx.db.patch(args.id, {
       status: "published",
@@ -260,7 +260,7 @@ export const remove = mutation({
 });
 
 export const getPublicProduct = query({
-  args: { username: v.string(), slug: v.string() },
+  args: { username: v.string(), productUrl: v.string() },
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
@@ -271,8 +271,8 @@ export const getPublicProduct = query({
 
     const product = await ctx.db
       .query("products")
-      .withIndex("by_slug", (q) =>
-        q.eq("slug", args.slug).eq("createdBy", user._id),
+      .withIndex("by_productUrl", (q) =>
+        q.eq("productUrl", args.productUrl).eq("createdBy", user._id),
       )
       .first();
 
@@ -312,7 +312,7 @@ export const listForSelect = query({
     return products.map((p) => ({
       _id: p._id,
       name: p.name,
-      slug: p.slug,
+      productUrl: p.productUrl,
     }));
   },
 });

@@ -520,7 +520,7 @@ export const generateDMMessage = query({
     const { user } = await requireSession(ctx);
 
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
-    const product = await ctx.db.get(args.productId);
+    const product =     await ctx.db.get(args.productId);
     if (!product) throw new Error("Product not found");
 
     const items = await ctx.db
@@ -530,7 +530,7 @@ export const generateDMMessage = query({
       .take(normalizedMaxItems);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
-    const productUrl = `${siteUrl}/${user.username}/${product.slug}`;
+    const productUrl = `${siteUrl}/${user.username}/p/${product.productUrl}`;
     return buildDmMessage({
       productName: product.name,
       items,
@@ -564,7 +564,7 @@ export const generateDMMessageForJob = internalQuery({
       .take(normalizedMaxItems);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
-    const productUrl = `${siteUrl}/${user.username}/${product.slug}`;
+    const productUrl = `${siteUrl}/${user.username}/p/${product.productUrl}`;
     return buildDmMessage({
       productName: product.name,
       items,

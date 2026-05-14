@@ -280,7 +280,7 @@ export default function MyStorePage() {
               <div className="px-5 py-6">
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="text-lg font-bold text-foreground">
-                    Your Products
+                    Your Store
                   </h2>
                   <Button variant="ghost" size="sm" className="gap-1.5" asChild>
                     <Link href="/dashboard/products">
@@ -296,13 +296,12 @@ export default function MyStorePage() {
                         product={{
                           _id: product._id,
                           name: product.name,
-                          slug: product.slug,
+                          productUrl: product.productUrl,
                           type: product.type,
                           price: product.price,
                           coverImageUrl: null,
                           itemCount: 0,
                         }}
-                        href={`/dashboard/products/${product._id}/edit`}
                         index={index}
                         interactive={true}
                       />
@@ -433,7 +432,7 @@ export default function MyStorePage() {
                 products={publishedProducts.map((p) => ({
                   _id: p._id,
                   name: p.name,
-                  slug: p.slug,
+                  productUrl: p.productUrl,
                   price: p.price,
                   coverImageUrl: null,
                   itemCount: 0,

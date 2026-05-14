@@ -38,7 +38,7 @@ export default defineSchema({
   products: defineTable({
     createdBy: v.id("users"),
     name: v.string(),
-    slug: v.string(),
+    productUrl: v.string(),
     description: v.optional(v.string()),
     coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
@@ -53,7 +53,7 @@ export default defineSchema({
     automationEnabled: v.boolean(),
   })
     .index("by_user", ["createdBy"])
-    .index("by_slug", ["slug", "createdBy"])
+    .index("by_productUrl", ["productUrl", "createdBy"])
     .index("by_status", ["createdBy", "status"]),
 
   productItems: defineTable({

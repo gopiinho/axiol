@@ -11,7 +11,7 @@ const mockProducts = [
   {
     _id: "1",
     name: "Summer Skincare Essentials",
-    slug: "summer-skincare-essentials",
+    productUrl: "summer-skincare-essentials",
     price: null,
     coverImageUrl: null,
     itemCount: 4,
@@ -19,7 +19,7 @@ const mockProducts = [
   {
     _id: "2",
     name: "Budget Fashion Finds",
-    slug: "budget-fashion-finds",
+    productUrl: "budget-fashion-finds",
     price: "Under ₹500",
     coverImageUrl: null,
     itemCount: 6,

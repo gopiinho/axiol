@@ -1,4 +1,4 @@
-import { buildProductSlug } from "@/features/products/lib/slugify";
+import { buildProductUrl } from "@/features/products/lib/slugify";
 
 const PRODUCT_TYPES = ["affiliate"] as const;
 const PRODUCT_STATUSES = ["draft", "published", "archived"] as const;
@@ -8,7 +8,7 @@ type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
 export interface ProductInput {
   name: string;
-  slug?: string;
+  productUrl?: string;
   description?: string;
   price?: string;
   type: string;
@@ -18,7 +18,7 @@ export interface ProductInput {
 
 export function validateProductInput(input: ProductInput): {
   name: string;
-  slug: string;
+  productUrl: string;
   description?: string;
   price?: string;
   type: ProductType;
@@ -37,13 +37,13 @@ export function validateProductInput(input: ProductInput): {
     throw new Error("Please select a valid product type.");
   }
 
-  const slugSource = input.slug?.trim() || name;
-  const slug = buildProductSlug(slugSource);
-  if (!slug) {
-    throw new Error("Product slug is required.");
+  const urlSource = input.productUrl?.trim() || name;
+  const productUrl = buildProductUrl(urlSource);
+  if (!productUrl) {
+    throw new Error("Product URL is required.");
   }
-  if (slug.length > 80) {
-    throw new Error("Product slug must be at most 80 characters.");
+  if (productUrl.length > 80) {
+    throw new Error("Product URL must be at most 80 characters.");
   }
 
   const description = input.description?.trim() || undefined;
@@ -63,7 +63,7 @@ export function validateProductInput(input: ProductInput): {
 
   return {
     name,
-    slug,
+    productUrl,
     description,
     price,
     type: input.type as ProductType,

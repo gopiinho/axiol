@@ -19,10 +19,10 @@ export default async function UserStorePage({
   }
 
   const { user, products: rawProducts } = result;
-  const products = rawProducts.map((p: { _id: string; name: string; slug: string; price?: string | null; coverImageUrl?: string | null; items?: unknown[] }) => ({
+  const products = rawProducts.map((p: { _id: string; name: string; productUrl: string; price?: string | null; coverImageUrl?: string | null; items?: unknown[] }) => ({
     _id: p._id,
     name: p.name,
-    slug: p.slug,
+    productUrl: p.productUrl,
     price: p.price,
     coverImageUrl: p.coverImageUrl,
     itemCount: p.items?.length ?? 0,

@@ -28,7 +28,7 @@ export const ProductDetail = forwardRef<
   ProductDetailProps
 >(function ProductDetail({ username, product }, ref) {
   const [name, setName] = useState(product.name);
-  const [slug, setSlug] = useState(product.slug);
+  const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
   const [price, setPrice] = useState(product.price ?? "");
 
@@ -41,7 +41,7 @@ export const ProductDetail = forwardRef<
 
   useEffect(() => {
     setName(product.name);
-    setSlug(product.slug);
+    setProductUrl(product.productUrl);
     setDescription(product.description ?? "");
     setPrice(product.price ?? "");
   }, [product]);
@@ -53,7 +53,7 @@ export const ProductDetail = forwardRef<
       await updateProduct({
         id: product._id,
         name: name.trim(),
-        slug: slug.trim(),
+        productUrl: productUrl.trim(),
         description: description.trim() || undefined,
         price: price.trim() || undefined,
         type: "affiliate",
@@ -92,7 +92,7 @@ export const ProductDetail = forwardRef<
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="product-slug">URL</Label>
+          <Label htmlFor="product-url">URL</Label>
           <div
             className={cn(
               "flex h-10 w-full items-center gap-0 rounded-xs border bg-card/90 px-2 py-2 text-base shadow-sm transition-[color,box-shadow,transform]",
@@ -100,16 +100,16 @@ export const ProductDetail = forwardRef<
             )}
           >
             <span className="border border-primary px-3 bg-primary/20 py-1.5 rounded-full mr-1 shrink-0 select-none whitespace-nowrap text-sm">
-              axiol.store/{username}/
+              axiol.store/{username}/p/
             </span>
             <input
-              id="product-slug"
-              value={slug}
+              id="product-url"
+              value={productUrl}
               onChange={(e) => {
                 const filtered = e.target.value.replace(/[^a-zA-Z0-9-]/g, "");
-                setSlug(filtered);
+                setProductUrl(filtered);
               }}
-              placeholder="my-product-slug"
+              placeholder="my-product-url"
               className="min-w-0 flex-1 border-none bg-transparent p-0 text-base outline-none placeholder:text-muted-foreground md:text-sm"
             />
           </div>

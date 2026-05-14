@@ -9,7 +9,7 @@ interface ProductCardProps {
   product: {
     _id: string;
     name: string;
-    slug: string;
+    productUrl: string;
     type?: string;
     price?: string | null;
     coverImageUrl?: string | null;
@@ -70,7 +70,7 @@ export function ProductCard({
     </div>
   );
 
-  const href = username ? `/${username}/${product.slug}` : undefined;
+  const href = username ? `/${username}/p/${product.productUrl}` : undefined;
 
   return (
     <motion.div

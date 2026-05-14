@@ -13,7 +13,7 @@ type SocialLink = {
 type ProductItem = {
   _id: string;
   name: string;
-  slug: string;
+  productUrl: string;
   price?: string | null;
   coverImageUrl?: string | null;
   itemCount: number;

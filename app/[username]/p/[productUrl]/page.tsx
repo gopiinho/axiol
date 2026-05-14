@@ -29,14 +29,14 @@ const platformNames: Record<string, string> = {
 export default async function ProductDetailPage({
   params,
 }: {
-  params: Promise<{ username: string; productSlug: string }>;
+  params: Promise<{ username: string; productUrl: string }>;
 }) {
-  const { username, productSlug } = await params;
+  const { username, productUrl } = await params;
   const convex = getServerConvexClient();
 
   const data = await convex.query(api.products.getPublicProduct, {
     username,
-    slug: productSlug,
+    productUrl,
   });
 
   if (!data) {
