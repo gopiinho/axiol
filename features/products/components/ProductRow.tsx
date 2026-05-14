@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Archive, Trash2, Send, Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ProductTypeIcon, getProductTypeLabel } from "./ProductTypeIcon";
 
 interface ProductRowProps {
   product: Doc<"products">;
@@ -80,9 +81,12 @@ export function ProductRow({
           </div>
         </td>
         <td className="py-3.5 px-4 hidden sm:table-cell">
-          <span className="text-xs capitalize text-muted-foreground">
-            {product.type}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <ProductTypeIcon type={product.type} className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs capitalize text-muted-foreground">
+              {getProductTypeLabel(product.type)}
+            </span>
+          </div>
         </td>
         <td className="py-3.5 px-4 hidden md:table-cell">
           {product.price ? (

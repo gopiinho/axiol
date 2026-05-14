@@ -298,6 +298,7 @@ export default function MyStorePage() {
                           _id: product._id,
                           name: product.name,
                           slug: product.slug,
+                          type: product.type,
                           price: product.price,
                           coverImageUrl: null,
                           itemCount: 0,

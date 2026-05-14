@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { MousePointer2, Lock, ImageIcon, FileText } from "lucide-react";
+import { Link, Lock, ImageIcon, FileText } from "lucide-react";
 
 interface ProductTypeOption {
   value: string;
@@ -16,7 +16,7 @@ const TYPES: ProductTypeOption[] = [
     value: "affiliate",
     label: "Affiliate",
     description: "Refer products and earn commissions",
-    icon: <MousePointer2 className="h-5 w-5" />,
+    icon: <Link className="h-5 w-5" />,
   },
   {
     value: "digital",

@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Package } from "lucide-react";
+import { ProductTypeIcon } from "./ProductTypeIcon";
 
 interface ProductCardProps {
   product: {
     _id: string;
     name: string;
     slug: string;
+    type?: string;
     price?: string | null;
     coverImageUrl?: string | null;
     itemCount: number;
@@ -42,9 +44,14 @@ export function ProductCard({
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-sm leading-tight text-foreground line-clamp-2">
-          {product.name}
-        </h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-sm leading-tight text-foreground line-clamp-2">
+            {product.name}
+          </h3>
+          {product.type && (
+            <ProductTypeIcon type={product.type} className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
+          )}
+        </div>
 
         <div className="mt-2 flex items-center justify-between">
           {product.price ? (

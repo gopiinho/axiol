@@ -8,8 +8,8 @@ import { api } from "@/convex/_generated/api";
 import type { Id, Doc } from "@/convex/_generated/dataModel";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Save } from "lucide-react";
+import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon";
 import {
   ProductDetail,
   type ProductDetailHandle,
@@ -90,11 +90,7 @@ export default function EditProduct({
                   : (product?.name ?? "Product not found")}
               </h1>
               {product && (
-                <>
-                  <Badge variant="secondary" className="text-[11px] capitalize">
-                    {product.type}
-                  </Badge>
-                </>
+                <ProductTypeIcon type={product.type} className="h-5 w-5 text-muted-foreground" />
               )}
             </div>
             {product && (
