@@ -7,16 +7,22 @@ import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
 import { ScrollFadeIn } from "@/components/motion/ScrollFadeIn";
 import { Button } from "@/components/ui/button";
 
-const mockCollections = [
+const mockProducts = [
   {
     _id: "1",
-    title: "Summer Skincare Essentials",
-    description: "My holy grail products for glowing skin",
+    name: "Summer Skincare Essentials",
+    slug: "summer-skincare-essentials",
+    price: null,
+    coverImageUrl: null,
+    itemCount: 4,
   },
   {
     _id: "2",
-    title: "Budget Fashion Finds",
-    description: "Under ₹500 fits that look expensive",
+    name: "Budget Fashion Finds",
+    slug: "budget-fashion-finds",
+    price: "Under ₹500",
+    coverImageUrl: null,
+    itemCount: 6,
   },
 ];
 
@@ -63,7 +69,7 @@ export function StorefrontShowcase() {
                 displayName="Nemeowww"
                 bio="why are you here?"
                 socialLinks={mockSocialLinks}
-                collections={mockCollections}
+                products={mockProducts}
                 theme={activeTheme}
               />
             </div>

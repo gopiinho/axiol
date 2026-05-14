@@ -18,7 +18,15 @@ export default async function UserStorePage({
     notFound();
   }
 
-  const { user, collections } = result;
+  const { user, products: rawProducts } = result;
+  const products = rawProducts.map((p: { _id: string; name: string; slug: string; price?: string | null; coverImageUrl?: string | null; items?: unknown[] }) => ({
+    _id: p._id,
+    name: p.name,
+    slug: p.slug,
+    price: p.price,
+    coverImageUrl: p.coverImageUrl,
+    itemCount: p.items?.length ?? 0,
+  }));
   const displayName = user.storeName || user.name;
   const theme = getTheme(user.theme);
   const themeStyle = buildThemeStyle(user.theme, user.accentColor);
@@ -86,7 +94,7 @@ export default async function UserStorePage({
           profileImageUrl={profileSrc}
           coverImageUrl={user.coverImageUrl}
           socialLinks={socialLinks}
-          collections={collections}
+          products={products}
           themeStyle={themeStyle}
           showDots={showDots}
           interactive={true}

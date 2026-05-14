@@ -1,37 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import {
-  ArrowUpRight,
   Check,
   ExternalLink,
-  EyeOff,
   Globe,
   Instagram,
+  Package,
   Pencil,
-  Settings2,
-  Sparkles,
-  Trash2,
-  X,
   Youtube,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -41,6 +23,7 @@ import {
 } from "@/components/motion/AnimatedList";
 import { StorePreview } from "@/components/StorePreview";
 import { EditProfile } from "@/components/EditProfile";
+import { ProductCard } from "@/features/products/components/ProductCard";
 import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
 
 const ACCENT_PRESETS = [
@@ -56,24 +39,13 @@ const ACCENT_PRESETS = [
 
 export default function MyStorePage() {
   const { user } = useUser();
-  const rawMappings = useQuery(api.instagram.getPublishedMappings, {
-    limit: 24,
-  });
-  const publishedMappings = useCachedQueryResult("store:mappings", rawMappings);
-  const rawCollections = useQuery(api.collections.listByUser);
-  const collections = useCachedQueryResult("store:collections", rawCollections);
-  const updateProfile = useMutation(api.users.updateProfile);
-  const deleteMapping = useMutation(api.instagram.deleteReelMapping);
-  const toggleMapping = useMutation(api.instagram.toggleReelMapping);
+  const rawProducts = useQuery(api.products.listByUser);
+  const products = useCachedQueryResult("store:products", rawProducts);
 
-  const [deleteTarget, setDeleteTarget] = useState<Id<"reelMappings"> | null>(
-    null,
-  );
-  const [unpublishTarget, setUnpublishTarget] =
-    useState<Id<"reelMappings"> | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUnpublishing, setIsUnpublishing] = useState(false);
-  const [isManaging, setIsManaging] = useState(false);
+  const publishedProducts =
+    products?.filter((p) => p.status === "published") ?? [];
+
+  const updateProfile = useMutation(api.users.updateProfile);
 
   const [editOpen, setEditOpen] = useState(false);
   const [storeName, setStoreName] = useState("");
@@ -158,26 +130,6 @@ export default function MyStorePage() {
   const handleAccentChange = (value: string) => {
     setSelectedAccent(value);
     setThemeDirty(true);
-  };
-
-  const handleDelete = async (id: Id<"reelMappings">) => {
-    try {
-      setIsDeleting(true);
-      await deleteMapping({ id });
-    } finally {
-      setDeleteTarget(null);
-      setIsDeleting(false);
-    }
-  };
-
-  const handleUnpublish = async (id: Id<"reelMappings">) => {
-    try {
-      setIsUnpublishing(true);
-      await toggleMapping({ id });
-    } finally {
-      setUnpublishTarget(null);
-      setIsUnpublishing(false);
-    }
   };
 
   const publicUrl = user?.username
@@ -328,123 +280,42 @@ export default function MyStorePage() {
           <div className="border-t border-border/70" />
 
           <FadeIn delay={0.1}>
-            {publishedMappings && publishedMappings.length > 0 ? (
-              <>
-                <div className="flex items-center justify-end px-3 py-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsManaging((v) => !v)}
-                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
-                      isManaging
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {isManaging ? (
-                      <>
-                        <X className="h-3 w-3" />
-                        Done
-                      </>
-                    ) : (
-                      <>
-                        <Settings2 className="h-3 w-3" />
-                        Manage
-                      </>
-                    )}
-                  </button>
+            {publishedProducts.length > 0 ? (
+              <div className="px-5 py-6">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-sm font-semibold text-foreground">
+                    Published Products
+                  </h2>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/dashboard/products">Manage</Link>
+                  </Button>
                 </div>
-                <AnimatedList className="grid grid-cols-3 gap-1">
-                  {publishedMappings.map((mapping) => (
-                    <AnimatedListItem key={mapping._id}>
-                      <div className="relative block">
-                        {isManaging ? (
-                          <div className="relative aspect-square overflow-hidden bg-secondary/40">
-                            {mapping.thumbnailUrl ? (
-                              <Image
-                                src={mapping.thumbnailUrl}
-                                alt={mapping.sectionTitle}
-                                fill
-                                className="object-cover brightness-50"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-primary/20 to-pink-400/20" />
-                            )}
-
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setUnpublishTarget(mapping._id)}
-                                className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition active:bg-white/30"
-                              >
-                                <EyeOff className="h-3.5 w-3.5" />
-                                Unpublish
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget(mapping._id)}
-                                className="flex items-center gap-1.5 rounded-lg bg-destructive/80 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition active:bg-destructive"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                                Delete
-                              </button>
-                            </div>
-
-                            <div className="absolute bottom-1.5 left-1.5">
-                              <Badge className="border-0 bg-black/50 px-1.5 py-0.5 text-[10px] text-white backdrop-blur-sm">
-                                {mapping.keyword}
-                              </Badge>
-                            </div>
-                          </div>
-                        ) : (
-                          <a
-                            href={mapping.reelUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group block"
-                          >
-                            <div className="relative aspect-square overflow-hidden bg-secondary/40">
-                              {mapping.thumbnailUrl ? (
-                                <Image
-                                  src={mapping.thumbnailUrl}
-                                  alt={mapping.sectionTitle}
-                                  fill
-                                  className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-primary/20 to-pink-400/20">
-                                  <Sparkles className="h-6 w-6 text-muted-foreground/50" />
-                                </div>
-                              )}
-
-                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 transition group-hover:bg-black/40">
-                                <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-                                  <ArrowUpRight className="h-4 w-4 text-white" />
-                                  <span className="text-xs font-medium text-white">
-                                    Open Reel
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="absolute bottom-1.5 left-1.5">
-                                <Badge className="border-0 bg-black/50 px-1.5 py-0.5 text-[10px] text-white backdrop-blur-sm">
-                                  {mapping.keyword}
-                                </Badge>
-                              </div>
-                            </div>
-                          </a>
-                        )}
-                      </div>
+                <AnimatedList className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {publishedProducts.map((product, index) => (
+                    <AnimatedListItem key={product._id}>
+                      <ProductCard
+                        product={{
+                          _id: product._id,
+                          name: product.name,
+                          slug: product.slug,
+                          price: product.price,
+                          coverImageUrl: null,
+                          itemCount: 0,
+                        }}
+                        index={index}
+                        interactive={false}
+                      />
                     </AnimatedListItem>
                   ))}
                 </AnimatedList>
-              </>
+              </div>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
-                <Sparkles className="mx-auto h-10 w-10 text-primary" />
+                <Package className="mx-auto h-10 w-10 text-primary" />
                 <p className="mt-4 text-sm text-muted-foreground">
-                  No active product yet. Let&apos;s publish one to get started.
+                  No published products yet. Publish one to get started.
                 </p>
-                <Button className="mt-5">
+                <Button className="mt-5" asChild>
                   <Link href="/dashboard/products/new">Create a product</Link>
                 </Button>
               </div>
@@ -558,64 +429,20 @@ export default function MyStorePage() {
                 username={user?.username ?? ""}
                 theme={selectedTheme}
                 accentColor={selectedAccent}
-                collections={collections ?? []}
+                products={publishedProducts.map((p) => ({
+                  _id: p._id,
+                  name: p.name,
+                  slug: p.slug,
+                  price: p.price,
+                  coverImageUrl: null,
+                  itemCount: 0,
+                }))}
                 socialLinks={storeSocialLinks}
               />
             </div>
           </FadeIn>
         </div>
       </div>
-
-      <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this post?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes the post permanently and cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
-              onClick={() => deleteTarget && handleDelete(deleteTarget)}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete post"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={unpublishTarget !== null}
-        onOpenChange={(open) => !open && setUnpublishTarget(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unpublish this post?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Auto-DMs will stop and the post will move back to drafts.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isUnpublishing}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() =>
-                unpublishTarget && handleUnpublish(unpublishTarget)
-              }
-              disabled={isUnpublishing}
-            >
-              {isUnpublishing ? "Unpublishing..." : "Unpublish"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <EditProfile
         open={editOpen}

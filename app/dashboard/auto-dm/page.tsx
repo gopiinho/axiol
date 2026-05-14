@@ -34,8 +34,8 @@ export default function CreatePostPage() {
   useUser();
   const ig = useInstagramConnection();
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
-  const [selectedSection, setSelectedSection] = useState<
-    Id<"collections"> | ""
+  const [selectedProductId, setSelectedProductId] = useState<
+    Id<"products"> | ""
   >("");
   const [keywordInput, setKeywordInput] = useState("link");
   const [keywordPresets, setKeywordPresets] = useState<string[]>(
@@ -59,7 +59,7 @@ export default function CreatePostPage() {
   } | null>(null);
 
   const convex = useConvex();
-  const sections = useQuery(api.collections.listByUser);
+  const products = useQuery(api.products.listForSelect);
   const fetchReels = useAction(api.instagram.fetchRecentReels);
   const createMapping = useMutation(api.instagram.createReelMapping);
 
@@ -71,7 +71,7 @@ export default function CreatePostPage() {
   const keywordValid = keywordList.length > 0;
   const maxItemsValid =
     Number.isInteger(maxItemsInDM) && maxItemsInDM >= 1 && maxItemsInDM <= 20;
-  const canPreview = Boolean(selectedSection) && maxItemsValid;
+  const canPreview = Boolean(selectedProductId) && maxItemsValid;
 
   useEffect(() => {
     if (!canPreview) {
@@ -88,7 +88,7 @@ export default function CreatePostPage() {
 
       void convex
         .query(api.instagram.generateDMMessage, {
-          collectionId: selectedSection as Id<"collections">,
+          productId: selectedProductId as Id<"products">,
           maxItems: maxItemsInDM,
           includeWebsiteLink,
           triggerType: "comment",
@@ -119,7 +119,7 @@ export default function CreatePostPage() {
   }, [
     convex,
     canPreview,
-    selectedSection,
+    selectedProductId,
     maxItemsInDM,
     includeWebsiteLink,
   ]);
@@ -232,7 +232,7 @@ export default function CreatePostPage() {
   }, [loadReels]);
 
   const handleSaveDraft = async () => {
-    if (!selectedReel || !selectedSection || !keywordValid || !maxItemsValid) {
+    if (!selectedReel || !selectedProductId || !keywordValid || !maxItemsValid) {
       return;
     }
 
@@ -243,7 +243,7 @@ export default function CreatePostPage() {
         reelUrl: selectedReel.url,
         thumbnailUrl: selectedReel.thumbnailUrl,
         caption: selectedReel.caption,
-        collectionId: selectedSection,
+        productId: selectedProductId,
         keyword: keywordNormalized,
         maxItemsInDM,
         includeWebsiteLink,
@@ -265,7 +265,7 @@ export default function CreatePostPage() {
   };
 
   const canContinueFromStep1 = Boolean(selectedReel);
-  const canContinueFromStep2 = Boolean(selectedSection) && keywordValid;
+  const canContinueFromStep2 = Boolean(selectedProductId) && keywordValid;
 
   const primaryActionDisabled =
     (currentStep === 1 && !canContinueFromStep1) ||
@@ -273,7 +273,7 @@ export default function CreatePostPage() {
     (currentStep === 3 &&
       (isSavingDraft ||
         !selectedReel ||
-        !selectedSection ||
+        !selectedProductId ||
         !keywordValid ||
         !maxItemsValid));
 
@@ -345,13 +345,13 @@ export default function CreatePostPage() {
                 transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
               >
                 <MappingRulesStep
-                  sections={sections ?? undefined}
-                  selectedSection={selectedSection}
+                  products={products ?? undefined}
+                  selectedProductId={selectedProductId}
                   keywordInput={keywordInput}
                   keywordPresets={keywordPresets}
                   keywordList={keywordList}
                   keywordValid={keywordValid}
-                  onSelectSection={setSelectedSection}
+                  onSelectProduct={setSelectedProductId}
                   onKeywordInputChange={setKeywordInput}
                   onTogglePreset={togglePresetKeyword}
                   onRemoveKeyword={removeKeywordFromInput}

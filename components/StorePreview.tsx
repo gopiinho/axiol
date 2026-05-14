@@ -81,6 +81,7 @@ export function StorePreview({
             <div style={{ width: CONTENT_WIDTH, zoom: ZOOM_FACTOR }}>
               <StoreContent
                 {...contentProps}
+                username={username}
                 themeStyle={themeStyle}
                 showDots={showDots}
                 interactive={false}
