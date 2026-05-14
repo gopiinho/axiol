@@ -15,59 +15,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface CollectionOption {
-  _id: Id<"collections">;
-  title: string;
+interface ProductOption {
+  _id: Id<"products">;
+  name: string;
 }
 
 interface MappingRulesStepProps {
-  sections?: CollectionOption[];
-  selectedSection: Id<"collections"> | "";
+  products?: ProductOption[];
+  selectedProductId: Id<"products"> | "";
   keywordInput: string;
   keywordPresets: string[];
   keywordList: string[];
   keywordValid: boolean;
-  onSelectSection: (collectionId: Id<"collections">) => void;
+  onSelectProduct: (productId: Id<"products">) => void;
   onKeywordInputChange: (value: string) => void;
   onTogglePreset: (preset: string) => void;
   onRemoveKeyword: (keyword: string) => void;
 }
 
 export default function MappingRulesStep({
-  sections,
-  selectedSection,
+  products,
+  selectedProductId,
   keywordInput,
   keywordPresets,
   keywordList,
   keywordValid,
-  onSelectSection,
+  onSelectProduct,
   onKeywordInputChange,
   onTogglePreset,
   onRemoveKeyword,
 }: MappingRulesStepProps) {
   return (
     <div className="space-y-6">
-      {/* Collection */}
+      {/* Product */}
       <div className="space-y-2.5">
         <div>
-          <Label className="text-base font-semibold">Collection</Label>
+          <Label className="text-base font-semibold">Product</Label>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Which product collection should followers receive in the DM?
+            Which product should followers receive in the DM?
           </p>
         </div>
         <Select
-          value={selectedSection}
+          value={selectedProductId}
           onValueChange={(value) =>
-            onSelectSection(value as Id<"collections">)
+            onSelectProduct(value as Id<"products">)
           }
         >
           <SelectTrigger>
-            <SelectValue placeholder="Choose collection..." />
+            <SelectValue placeholder="Choose product..." />
           </SelectTrigger>
           <SelectContent>
-            {sections?.map((section) => (
-              <SelectItem key={section._id} value={section._id}>
-                {section.title}
+            {products?.map((product) => (
+              <SelectItem key={product._id} value={product._id}>
+                {product.name}
               </SelectItem>
             ))}
           </SelectContent>

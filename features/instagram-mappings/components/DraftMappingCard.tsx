@@ -12,8 +12,8 @@ export interface DraftMappingCardData {
   thumbnailUrl?: string;
   caption?: string;
   keyword: string;
-  itemCount: number;
-  sectionTitle: string;
+  itemCount?: number;
+  productName: string;
 }
 
 interface DraftMappingCardProps {
@@ -48,7 +48,7 @@ export default function DraftMappingCard({
                 <Badge variant="outline">{draft.itemCount} items</Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Collection: {draft.sectionTitle}
+                Product: {draft.productName}
               </p>
             </div>
           </div>
