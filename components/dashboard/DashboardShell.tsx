@@ -6,15 +6,12 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
   Home,
-  List,
   LogOut,
   Box,
   Settings,
   Store,
-  FileText,
-  HelpCircle,
-  User,
-  ChevronRight,
+  Zap,
+  ChevronLeft,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useUser } from "@/features/auth/client/UserContext";
@@ -37,7 +34,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/store", label: "My Store", icon: Store },
   { href: "/dashboard/products", label: "Products", icon: Box },
-  { href: "/dashboard/auto-dm", label: "Automations", icon: HelpCircle },
+  { href: "/dashboard/automations", label: "Automations", icon: Zap },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

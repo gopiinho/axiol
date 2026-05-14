@@ -13,8 +13,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useUser } from "@/features/auth/client/UserContext";
-import { useInstagramConnection } from "@/features/instagram-mappings/hooks/useInstagramConnection";
-import ConnectInstagramCTA from "@/features/instagram-mappings/components/ConnectInstagramCTA";
+import { useInstagramConnection } from "@/features/automations/hooks/useInstagramConnection";
+import ConnectInstagramCTA from "@/features/automations/components/ConnectInstagramCTA";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
