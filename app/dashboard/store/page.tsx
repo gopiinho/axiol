@@ -10,6 +10,7 @@ import {
   Instagram,
   Package,
   Pencil,
+  Settings,
   Youtube,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -263,12 +264,7 @@ export default function MyStorePage() {
                       </Link>
                     </Button>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={openEditModal}
-                    className="gap-1.5"
-                  >
+                  <Button size="sm" onClick={openEditModal} className="gap-1.5">
                     <Pencil className="h-3.5 w-3.5" />
                     Edit Store
                   </Button>
@@ -283,11 +279,14 @@ export default function MyStorePage() {
             {publishedProducts.length > 0 ? (
               <div className="px-5 py-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-sm font-semibold text-foreground">
-                    Published Products
+                  <h2 className="text-lg font-bold text-foreground">
+                    Your Products
                   </h2>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href="/dashboard/products">Manage</Link>
+                  <Button variant="ghost" size="sm" className="gap-1.5" asChild>
+                    <Link href="/dashboard/products">
+                      <Settings className="h-3.5 w-3.5" />
+                      Manage
+                    </Link>
                   </Button>
                 </div>
                 <AnimatedList className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -303,8 +302,9 @@ export default function MyStorePage() {
                           coverImageUrl: null,
                           itemCount: 0,
                         }}
+                        href={`/dashboard/products/${product._id}/edit`}
                         index={index}
-                        interactive={false}
+                        interactive={true}
                       />
                     </AnimatedListItem>
                   ))}
