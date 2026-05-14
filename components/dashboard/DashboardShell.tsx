@@ -37,9 +37,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/store", label: "My Store", icon: Store },
   { href: "/dashboard/products", label: "Products", icon: Box },
-  { href: "/dashboard/auto-dm", label: "Auto DM", icon: HelpCircle },
-  { href: "/dashboard/drafts", label: "Drafts", icon: FileText },
-  { href: "/dashboard/lists", label: "Collections", icon: List },
+  { href: "/dashboard/auto-dm", label: "Automations", icon: HelpCircle },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
