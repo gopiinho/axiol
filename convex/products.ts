@@ -40,11 +40,23 @@ export const listByUser = query({
   handler: async (ctx) => {
     const { userId } = await requireSession(ctx);
 
-    return await ctx.db
+    const products = await ctx.db
       .query("products")
       .withIndex("by_user", (q) => q.eq("createdBy", userId))
       .order("desc")
       .take(100);
+
+    const withItemCounts = await Promise.all(
+      products.map(async (product) => {
+        const items = await ctx.db
+          .query("productItems")
+          .withIndex("by_product", (q) => q.eq("productId", product._id))
+          .collect();
+        return { ...product, itemCount: items.length };
+      }),
+    );
+
+    return withItemCounts;
   },
 });
 
@@ -184,6 +196,16 @@ export const publish = mutation({
 
     if (!product || product.createdBy !== userId) {
       throw new Error("Product not found.");
+    }
+
+    if (product.type === "affiliate") {
+      const items = await ctx.db
+        .query("productItems")
+        .withIndex("by_product", (q) => q.eq("productId", args.id))
+        .take(1);
+      if (items.length === 0) {
+        throw new Error("Add at least one item before publishing.");
+      }
     }
 
     const validated = validateProductInput({

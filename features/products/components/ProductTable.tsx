@@ -42,13 +42,15 @@ function ProductMobileCard({
   onArchive,
   onDelete,
 }: {
-  product: Doc<"products">;
+  product: Doc<"products"> & { itemCount: number };
   onPublish: (id: Id<"products">) => void;
   onArchive: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
 }) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const needsItems = product.type === "affiliate" && product.itemCount === 0;
 
   return (
     <>
@@ -116,7 +118,15 @@ function ProductMobileCard({
                 Edit
               </DropdownMenuItem>
               {product.status !== "published" && (
-                <DropdownMenuItem onClick={() => onPublish(product._id)}>
+                <DropdownMenuItem
+                  onClick={() => onPublish(product._id)}
+                  disabled={needsItems}
+                  title={
+                    needsItems
+                      ? "Add at least one item before publishing"
+                      : undefined
+                  }
+                >
                   <Send className="h-4 w-4" />
                   Publish
                 </DropdownMenuItem>
