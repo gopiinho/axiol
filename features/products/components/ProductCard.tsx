@@ -27,8 +27,8 @@ export function ProductCard({
   interactive = true,
 }: ProductCardProps) {
   const card = (
-    <div className="group relative w-full overflow-hidden rounded-2xl border border-border/60 bg-white transition-all duration-300 hover:shadow-lg hover:border-border">
-      <div className="aspect-[4/3] overflow-hidden bg-secondary/20">
+    <div className="group relative w-full overflow-hidden rounded-sm border border-border/60 bg-white transition-all duration-300 cursor-pointer hover:border-border">
+      <div className="aspect-4/3 overflow-hidden bg-secondary/20">
         {product.coverImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -49,7 +49,10 @@ export function ProductCard({
             {product.name}
           </h3>
           {product.type && (
-            <ProductTypeIcon type={product.type} className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
+            <ProductTypeIcon
+              type={product.type}
+              className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5"
+            />
           )}
         </div>
 
@@ -62,9 +65,11 @@ export function ProductCard({
             <span className="text-xs text-muted-foreground">No price set</span>
           )}
 
-          <span className="text-[10px] text-muted-foreground">
-            {product.itemCount} {product.itemCount === 1 ? "link" : "links"}
-          </span>
+          {product.type === "affiliate" && (
+            <span className="text-[10px] text-muted-foreground">
+              {product.itemCount} {product.itemCount === 1 ? "link" : "links"}
+            </span>
+          )}
         </div>
       </div>
     </div>
