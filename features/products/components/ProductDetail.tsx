@@ -92,6 +92,18 @@ export const ProductDetail = forwardRef<
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="product-description">Description</Label>
+          <Textarea
+            id="product-description"
+            value={description}
+            placeholder="Describe your product..."
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="resize-none"
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="product-url">URL</Label>
           <div
             className={cn(
@@ -118,17 +130,6 @@ export const ProductDetail = forwardRef<
               ? "Changing the URL will break existing links."
               : "URL-friendly name for your product page."}
           </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="product-description">Description</Label>
-          <Textarea
-            id="product-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="resize-none"
-          />
         </div>
 
         <div className="space-y-2">
