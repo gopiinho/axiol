@@ -1,22 +1,18 @@
 "use client";
 
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import type { Id, Doc } from "@/convex/_generated/dataModel";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ImageUpload } from "@/components/ImageUpload";
 import { cn } from "@/lib/utils";
-import {
-  useUpdateProduct,
-  useSaveProductCoverImage,
-  useRemoveProductCoverImage,
-} from "../hooks/useProduct";
+import { useUpdateProduct } from "../hooks/useProduct";
 
 interface ProductDetailProps {
   username: string;
   product: Doc<"products"> & { coverImageUrl?: string | null };
+  productType?: string;
 }
 
 export type ProductDetailHandle = {
@@ -26,25 +22,25 @@ export type ProductDetailHandle = {
 export const ProductDetail = forwardRef<
   ProductDetailHandle,
   ProductDetailProps
->(function ProductDetail({ username, product }, ref) {
+>(function ProductDetail({ username, product, productType }, ref) {
   const [name, setName] = useState(product.name);
   const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
   const [price, setPrice] = useState(product.price ?? "");
 
-  const [saving, setSaving] = useState(false);
+  const [, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const updateProduct = useUpdateProduct();
-  const saveCoverImage = useSaveProductCoverImage();
-  const removeCoverImage = useRemoveProductCoverImage();
 
   useEffect(() => {
     setName(product.name);
     setProductUrl(product.productUrl);
     setDescription(product.description ?? "");
-    setPrice(product.price ?? "");
-  }, [product]);
+    if (productType !== "affiliate") {
+      setPrice(product.price ?? "");
+    }
+  }, [product, productType]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -55,8 +51,9 @@ export const ProductDetail = forwardRef<
         name: name.trim(),
         productUrl: productUrl.trim(),
         description: description.trim() || undefined,
-        price: price.trim() || undefined,
-        type: "affiliate",
+        price:
+          productType !== "affiliate" ? price.trim() || undefined : undefined,
+        type: productType as "affiliate",
       });
     } catch (error) {
       setErrorMessage(
@@ -132,53 +129,20 @@ export const ProductDetail = forwardRef<
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="product-price">Display price</Label>
-          <Input
-            id="product-price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="e.g., Free, $29, Starting at ₹999"
-          />
-          <p className="text-xs text-muted-foreground">
-            Optional. Shown on the product card.
-          </p>
-        </div>
-      </div>
-
-      <div className="space-y-2 max-w-xs">
-        <Label>Cover image</Label>
-        <ImageUpload
-          currentImageUrl={product.coverImageUrl}
-          onUploaded={async (storageId) => {
-            try {
-              await saveCoverImage({
-                productId: product._id,
-                storageId: storageId as unknown as Id<"_storage">,
-              });
-            } catch (error) {
-              setErrorMessage(
-                error instanceof Error
-                  ? error.message
-                  : "Failed to upload cover image.",
-              );
-            }
-          }}
-          onRemove={async () => {
-            try {
-              await removeCoverImage({ productId: product._id });
-            } catch (error) {
-              setErrorMessage(
-                error instanceof Error
-                  ? error.message
-                  : "Failed to remove cover image.",
-              );
-            }
-          }}
-          maxSizeBytes={2 * 1024 * 1024}
-          maxSizeLabel="2 MB"
-          aspectRatio="4/1"
-        />
+        {productType !== "affiliate" && (
+          <div className="space-y-2">
+            <Label htmlFor="product-price">Display price</Label>
+            <Input
+              id="product-price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="e.g., Free, $29, Starting at ₹999"
+            />
+            <p className="text-xs text-muted-foreground">
+              Optional. Shown on the product card.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -9,19 +9,19 @@ import type { Id, Doc } from "@/convex/_generated/dataModel";
 import { useUser } from "@/features/auth/client/UserContext";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon";
 import {
   ProductDetail,
   type ProductDetailHandle,
 } from "@/features/products/components/ProductDetail";
 import { ProductItemsManager } from "@/features/products/components/ProductItemsManager";
+import { CoverUpload } from "@/components/CoverUpload";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import {
   usePublishProduct,
   useArchiveProduct,
 } from "@/features/products/hooks/useProduct";
-import { cn } from "@/lib/utils";
 
 export default function EditProduct({
   params,
@@ -49,17 +49,13 @@ export default function EditProduct({
     if (needsItems) return;
     try {
       await publishProduct({ id: productId });
-    } catch {
-      // handled in future via toast
-    }
+    } catch {}
   };
 
   const handleArchive = async () => {
     try {
       await archiveProduct({ id: productId });
-    } catch {
-      // handled in future via toast
-    }
+    } catch {}
   };
 
   const handleSave = async () => {
@@ -68,7 +64,6 @@ export default function EditProduct({
       await detailRef.current?.save();
       router.push("/dashboard/products");
     } catch {
-      // error shown inline in ProductDetail
     } finally {
       setSaving(false);
     }
@@ -86,7 +81,10 @@ export default function EditProduct({
                   : (product?.name ?? "Product not found")}
               </h1>
               {product && (
-                <ProductTypeIcon type={product.type} className="h-5 w-5 text-muted-foreground" />
+                <ProductTypeIcon
+                  type={product.type}
+                  className="h-5 w-5 text-muted-foreground"
+                />
               )}
             </div>
             {product && (
@@ -145,12 +143,31 @@ export default function EditProduct({
               product={
                 product as Doc<"products"> & { coverImageUrl?: string | null }
               }
-            />
-            <ProductItemsManager
-              productId={productId}
-              items={items ?? []}
               productType={product.type}
             />
+
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Cover</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Horizontal image shown at the top of your product page.
+                </p>
+              </div>
+              <CoverUpload
+                currentImageUrl={product.coverImageUrl}
+                productId={product._id}
+              />
+            </div>
+
+            {product.type === "affiliate" && (
+              <div className="pt-4 border-t border-border/70">
+                <ProductItemsManager
+                  productId={productId}
+                  items={items ?? []}
+                  productType={product.type}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

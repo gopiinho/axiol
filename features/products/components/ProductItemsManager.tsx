@@ -93,7 +93,10 @@ function SortableItem({
             {item.title || "Untitled item"}
           </p>
           {item.platform && (
-            <Badge variant="secondary" className="text-[10px] capitalize shrink-0">
+            <Badge
+              variant="secondary"
+              className="text-[10px] capitalize shrink-0"
+            >
               {item.platform}
             </Badge>
           )}
@@ -150,8 +153,12 @@ export function ProductItemsManager({
   productType,
 }: ProductItemsManagerProps) {
   const [createOpen, setCreateOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<Doc<"productItems"> | null>(null);
-  const [deletingItem, setDeletingItem] = useState<Doc<"productItems"> | null>(null);
+  const [editingItem, setEditingItem] = useState<Doc<"productItems"> | null>(
+    null,
+  );
+  const [deletingItem, setDeletingItem] = useState<Doc<"productItems"> | null>(
+    null,
+  );
   const [localItems, setLocalItems] = useState(items);
 
   useEffect(() => {
@@ -163,7 +170,9 @@ export function ProductItemsManager({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const sortedItems = [...localItems].sort((a, b) => a.order - b.order);
@@ -222,10 +231,7 @@ export function ProductItemsManager({
             Affiliate links in this product
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4 mr-1.5" />
-          Add item
-        </Button>
+        <Button onClick={() => setCreateOpen(true)}>Add item</Button>
       </div>
 
       {sortedItems.length === 0 ? (
@@ -282,8 +288,8 @@ export function ProductItemsManager({
               Delete &ldquo;{deletingItem?.title || "this item"}&rdquo;?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove this affiliate link from your product.
-              This action cannot be undone.
+              This will permanently remove this affiliate link from your
+              product. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
