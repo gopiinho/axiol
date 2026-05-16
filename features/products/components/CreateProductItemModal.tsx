@@ -5,8 +5,6 @@ import type { Id } from "@/convex/_generated/dataModel";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -78,15 +76,39 @@ export function CreateProductItemModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-155 max-h-[90svh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add item</DialogTitle>
-          <DialogDescription>
-            Add an affiliate link to this product.
-          </DialogDescription>
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-lg gap-0 overflow-hidden p-0"
+      >
+        <DialogHeader className="flex-row items-center justify-between border-b border-border/70 px-5 py-3.5">
+          <DialogTitle className="text-lg font-semibold">Add item</DialogTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="text-background"
+              size="sm"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              type="submit"
+              form="add-item-form"
+              disabled={loading || !affiliateLink.trim()}
+              className="px-5"
+            >
+              {loading ? "Adding..." : "Add"}
+            </Button>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          id="add-item-form"
+          onSubmit={handleSubmit}
+          className="space-y-4 px-5 py-5"
+        >
           {errorMessage && (
             <Alert variant="destructive">
               <AlertTitle>Couldn&apos;t add item</AlertTitle>
@@ -107,7 +129,9 @@ export function CreateProductItemModal({
           <div className="space-y-2">
             <Label htmlFor="affiliate-link">
               Affiliate link{" "}
-              <span className="text-destructive" aria-hidden="true">*</span>
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>
             </Label>
             <Input
               id="affiliate-link"
@@ -124,7 +148,9 @@ export function CreateProductItemModal({
             <div className="space-y-2">
               <Label htmlFor="platform">
                 Platform{" "}
-                <span className="text-destructive" aria-hidden="true">*</span>
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </Label>
               <Select value={platform} onValueChange={setPlatform}>
                 <SelectTrigger id="platform" aria-required="true">
@@ -165,15 +191,6 @@ export function CreateProductItemModal({
               Optional: add a product image URL.
             </p>
           </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading || !affiliateLink.trim()}>
-              {loading ? "Adding..." : "Add item"}
-            </Button>
-          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
