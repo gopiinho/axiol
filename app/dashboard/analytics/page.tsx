@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
   return (
     <div>
       <FadeIn>
-        <section className="px-5 lg:px-6 py-6 lg:py-8">
+        <section className="p-5 sm:p-8 border-b">
           <h1 className="app-title">Analytics</h1>
           <p className="app-subtitle mt-1">
             See how your auto-DMs are performing
@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <section className="grid gap-4 pb-10 px-5 lg:px-6 xl:grid-cols-[1.3fr_1fr]">
+        <section className="grid p-5 sm:p-8 xl:grid-cols-[1.3fr_1fr]">
           <Card className="overflow-hidden">
             <CardHeader className="border-b border-border/70">
               <div className="flex items-start justify-between gap-4">

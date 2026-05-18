@@ -5,7 +5,7 @@ import type { Id, Doc } from "@/convex/_generated/dataModel";
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
   DndContext,
-  closestCenter,
+  closestCorners,
   PointerSensor,
   useSensor,
   useSensors,
@@ -15,7 +15,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { GripVertical, Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import {
+  GripVertical,
+  Plus,
+  Pencil,
+  Trash2,
+  ExternalLink,
+  ShoppingBag,
+} from "lucide-react";
 import { CreateProductItemModal } from "./CreateProductItemModal";
 import { EditProductItemModal } from "./EditProductItemModal";
 import {
@@ -73,75 +80,90 @@ function SortableItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center gap-3 p-3 border border-border/60 rounded-xs bg-card transition-colors",
-        isDragging && "opacity-50 shadow-lg border-primary/30",
+        "group relative flex flex-col cursor-pointer rounded-sm border border-border/60 bg-card overflow-hidden transition-all",
+        isDragging && "opacity-50 ring-2 ring-primary/30 scale-[1.02] z-10",
+        "hover:shadow-md hover:border-border",
       )}
     >
       <button
         type="button"
-        className="cursor-grab touch-none text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-2 left-2 z-10 cursor-grab touch-none text-muted-foreground/40 hover:text-muted-foreground transition-colors"
         {...attributes}
         {...listeners}
         aria-label="Drag to reorder"
       >
-        <GripVertical className="h-4 w-4" />
+        <GripVertical className="h-3.5 w-3.5" />
       </button>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium truncate">
-            {item.title || "Untitled item"}
-          </p>
-          {item.platform && (
-            <Badge
-              variant="secondary"
-              className="text-[10px] capitalize shrink-0"
-            >
-              {item.platform}
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs text-muted-foreground truncate">
-            {item.affiliateLink}
-          </span>
-          {item.price && (
-            <>
-              <span className="text-xs text-muted-foreground">·</span>
-              <span className="text-xs font-medium">{item.price}</span>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5">
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-7 w-7 bg-background/60 backdrop-blur-xs hover:bg-background/90"
           onClick={() => window.open(item.affiliateLink, "_blank", "noopener")}
           title="Open link"
         >
-          <ExternalLink className="h-3.5 w-3.5" />
+          <ExternalLink className="h-3 w-3" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-7 w-7 bg-background/60 backdrop-blur-xs hover:bg-background/90"
           onClick={() => onEdit(item)}
           title="Edit item"
         >
-          <Pencil className="h-3.5 w-3.5" />
+          <Pencil className="h-3 w-3" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-destructive hover:text-destructive"
+          className="h-7 w-7 bg-background/60 backdrop-blur-xs hover:bg-background/90 text-destructive hover:text-destructive"
           onClick={() => onDelete(item)}
           title="Delete item"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-3 w-3" />
         </Button>
+      </div>
+
+      <div className="aspect-4/3 overflow-hidden bg-linear-to-br from-muted to-muted/50">
+        {item.imageUrl ? (
+          <img
+            src={item.imageUrl}
+            alt={item.title || ""}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <ShoppingBag className="h-7 w-7 text-muted-foreground/25" />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5 p-3 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+            {item.platform && (
+              <Badge
+                variant="secondary"
+                className="text-[10px] capitalize leading-none py-0.5"
+              >
+                {item.platform}
+              </Badge>
+            )}
+            {item.price && (
+              <span className="text-xs font-bold text-primary leading-none">
+                {item.price}
+              </span>
+            )}
+          </div>
+        </div>
+        <p className="text-sm font-semibold leading-snug line-clamp-2">
+          {item.title || "Untitled item"}
+        </p>
+        <p className="text-[10px] text-muted-foreground truncate mt-auto leading-none">
+          {item.affiliateLink}
+        </p>
       </div>
     </div>
   );
@@ -235,7 +257,7 @@ export function ProductItemsManager({
       </div>
 
       {sortedItems.length === 0 ? (
-        <div className="border border-dashed border-border/70 rounded-xs p-8 text-center">
+        <div className="border border-border/70 rounded-xs p-8 text-center">
           <p className="text-sm text-muted-foreground">
             No items yet. Add your first affiliate link.
           </p>
@@ -243,14 +265,14 @@ export function ProductItemsManager({
       ) : (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCenter}
+          collisionDetection={closestCorners}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
             items={sortedItems.map((i) => i._id)}
-            strategy={verticalListSortingStrategy}
+            strategy={rectSortingStrategy}
           >
-            <div className="space-y-2">
+            <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {sortedItems.map((item) => (
                 <SortableItem
                   key={item._id}

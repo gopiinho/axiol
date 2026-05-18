@@ -5,8 +5,6 @@ import type { Doc } from "@/convex/_generated/dataModel";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -81,15 +79,39 @@ export function EditProductItemModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-155 max-h-[90svh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit item</DialogTitle>
-          <DialogDescription>
-            Update this affiliate item&apos;s details.
-          </DialogDescription>
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-lg gap-0 overflow-hidden p-0"
+      >
+        <DialogHeader className="flex-row items-center justify-between border-b border-border/70 px-5 py-3.5">
+          <DialogTitle className="text-lg font-semibold">Edit item</DialogTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="text-background"
+              size="sm"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              type="submit"
+              form="edit-item-form"
+              disabled={loading || !affiliateLink.trim()}
+              className="px-5"
+            >
+              {loading ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          id="edit-item-form"
+          onSubmit={handleSubmit}
+          className="space-y-4 px-5 py-5"
+        >
           {errorMessage && (
             <Alert variant="destructive">
               <AlertTitle>Couldn&apos;t update item</AlertTitle>
@@ -110,7 +132,9 @@ export function EditProductItemModal({
           <div className="space-y-2">
             <Label htmlFor="edit-affiliate-link">
               Affiliate link{" "}
-              <span className="text-destructive" aria-hidden="true">*</span>
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>
             </Label>
             <Input
               id="edit-affiliate-link"
@@ -127,7 +151,9 @@ export function EditProductItemModal({
             <div className="space-y-2">
               <Label htmlFor="edit-platform">
                 Platform{" "}
-                <span className="text-destructive" aria-hidden="true">*</span>
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </Label>
               <Select value={platform} onValueChange={setPlatform}>
                 <SelectTrigger id="edit-platform" aria-required="true">
@@ -168,15 +194,6 @@ export function EditProductItemModal({
               Optional: add a product image URL.
             </p>
           </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading || !affiliateLink.trim()}>
-              {loading ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
