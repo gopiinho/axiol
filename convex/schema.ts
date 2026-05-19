@@ -81,6 +81,29 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_instagram_account", ["instagramAccountId"]),
 
+  integrations: defineTable({
+    userId: v.id("users"),
+    provider: v.union(
+      v.literal("instagram"),
+      v.literal("google_calendar"),
+    ),
+    status: v.union(
+      v.literal("connected"),
+      v.literal("disconnected"),
+      v.literal("expiring_soon"),
+      v.literal("expired"),
+      v.literal("error"),
+    ),
+    connectedAt: v.optional(v.number()),
+    lastSyncAt: v.optional(v.number()),
+    displayName: v.optional(v.string()),
+    externalId: v.optional(v.string()),
+    errorMessage: v.optional(v.string()),
+    metadata: v.optional(v.record(v.string(), v.string())),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_provider", ["userId", "provider"]),
+
   reelMappings: defineTable({
     userId: v.id("users"),
     reelId: v.string(),

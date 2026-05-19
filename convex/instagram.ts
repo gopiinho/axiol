@@ -103,6 +103,35 @@ export const saveConfig = mutation({
     } else {
       await ctx.db.insert("instagramConfig", data);
     }
+
+    const integrationExisting = await ctx.db
+      .query("integrations")
+      .withIndex("by_user_provider", (q) =>
+        q.eq("userId", userId).eq("provider", "instagram"),
+      )
+      .first();
+
+    const integrationData = {
+      userId,
+      provider: "instagram" as const,
+      status: "connected" as const,
+      connectedAt: Date.now(),
+      lastSyncAt: Date.now(),
+      displayName: args.instagramUsername,
+      externalId: args.instagramAccountId,
+      errorMessage: undefined,
+    };
+
+    if (integrationExisting) {
+      await ctx.db.patch(integrationExisting._id, {
+        ...integrationData,
+        ...(integrationExisting.connectedAt
+          ? {}
+          : { connectedAt: Date.now() }),
+      });
+    } else {
+      await ctx.db.insert("integrations", integrationData);
+    }
   },
 });
 
