@@ -253,7 +253,7 @@ export default function MyStorePage() {
                 <div className="flex items-start justify-center h-full max-lg:mt-8 gap-2">
                   {publicUrl && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       className="gap-1.5"
                       asChild
@@ -323,9 +323,9 @@ export default function MyStorePage() {
           </FadeIn>
         </div>
 
-        <div className="hidden lg:flex flex-col items-center sticky top-0 w-full h-screen overflow-y-auto">
+        <div className="hidden lg:flex flex-col items-center sticky top-0 w-full h-screen overflow-hidden">
           <FadeIn delay={0.15} className="w-full h-full">
-            <div className="flex flex-col h-full items-center justify-between gap-4 py-6 px-6 w-full">
+            <div className="flex flex-col items-center gap-6 py-6 px-6 w-full">
               <div className="w-full space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
@@ -425,7 +425,6 @@ export default function MyStorePage() {
                 bio={user?.bio}
                 profileImageUrl={user?.profileImageUrl}
                 coverImageUrl={user?.coverImageUrl}
-                publicUrl={publicUrl}
                 username={user?.username ?? ""}
                 theme={selectedTheme}
                 accentColor={selectedAccent}

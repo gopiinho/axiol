@@ -104,7 +104,7 @@ export const ProductDetail = forwardRef<
           <Label htmlFor="product-url">URL</Label>
           <div
             className={cn(
-              "flex h-10 w-full items-center gap-0 rounded-xs border bg-card/90 px-2 py-2 text-base shadow-sm transition-[color,box-shadow,transform]",
+              "flex h-10 w-full items-center gap-0 rounded-xs border bg-card/90 px-2 py-2 text-base transition-[color,box-shadow,transform]",
               "focus-within:border-ring focus-within:ring-ring/40 focus-within:ring-[3px] focus-within:bg-card",
             )}
           >

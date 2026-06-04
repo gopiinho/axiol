@@ -10,20 +10,12 @@ type StorePreviewProps = Omit<
   StoreContentProps,
   "themeStyle" | "showDots" | "interactive"
 > & {
-  publicUrl: string;
   username: string;
   theme?: string;
   accentColor?: string;
 };
 
-const PHONE_WIDTH = 340;
-const BORDER_WIDTH = 6;
-const INNER_WIDTH = PHONE_WIDTH - BORDER_WIDTH * 2;
-const CONTENT_WIDTH = 375;
-const ZOOM_FACTOR = INNER_WIDTH / CONTENT_WIDTH;
-
 export function StorePreview({
-  publicUrl,
   username,
   theme,
   accentColor,
@@ -68,25 +60,16 @@ export function StorePreview({
           </div>
 
           <div
-            className="mx-3 mb-2 rounded-lg px-3 py-1 text-center text-[10px] truncate"
-            style={{
-              backgroundColor: "var(--store-surface, #f3f4f6)",
-              color: "var(--store-text-muted, #6b7280)",
-            }}
+            className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {publicUrl || `axiol.com/${username}`}
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <div style={{ width: CONTENT_WIDTH, zoom: ZOOM_FACTOR }}>
-              <StoreContent
-                {...contentProps}
-                username={username}
-                themeStyle={themeStyle}
-                showDots={showDots}
-                interactive={false}
-              />
-            </div>
+            <StoreContent
+              {...contentProps}
+              username={username}
+              themeStyle={themeStyle}
+              showDots={showDots}
+              interactive={false}
+            />
           </div>
         </div>
 
