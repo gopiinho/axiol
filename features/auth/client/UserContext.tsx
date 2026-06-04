@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Image from "next/image";
@@ -36,10 +37,17 @@ const UserContext = createContext<UserContextValue | null>(null);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated: convexAuthed, isLoading: convexLoading } =
     useConvexAuth();
+  const router = useRouter();
   const profile = useQuery(
     api.users.getProfile,
     convexLoading || !convexAuthed ? "skip" : undefined,
   );
+
+  useEffect(() => {
+    if (!convexLoading && !convexAuthed) {
+      router.replace("/login");
+    }
+  }, [convexLoading, convexAuthed, router]);
 
   const isReady = !convexLoading && convexAuthed;
 
