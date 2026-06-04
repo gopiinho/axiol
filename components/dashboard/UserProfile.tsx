@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Settings, HelpCircle, LogOut, User, ChevronRight } from "lucide-react";
-import * as motion from "motion/react-client";
 import { useUser } from "@/features/auth/client/UserContext";
 import {
   DropdownMenu,
@@ -43,14 +42,14 @@ export function UserProfile() {
                   <User className="h-5 w-5 text-primary" />
                 )}
               </div>
-              <motion.div layout className="flex flex-col items-start min-w-0">
+              <div className="flex flex-col items-start min-w-0">
                 <span className="text-sm font-bold text-background truncate tracking-tight">
                   {user?.username || "User"}
                 </span>
                 <span className="text-[10px] text-muted/80 truncate font-medium tracking-wider">
                   {user?.email}
                 </span>
-              </motion.div>
+              </div>
             </div>
             <Settings
               className={cn(
@@ -66,11 +65,7 @@ export function UserProfile() {
           sideOffset={0}
           className="w-65 p-0 bg-sidebar text-foreground shadow-xl rounded-none overflow-hidden border border-border"
         >
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          >
+          <div>
             <DropdownMenuItem
               asChild
               className="focus:bg-transparent p-0 rounded-none"
@@ -113,7 +108,7 @@ export function UserProfile() {
                 {isTrial ? "Trial Status: Active" : "Upgrade to Pro"}
               </Button>
             </div>
-          </motion.div>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

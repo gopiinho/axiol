@@ -10,7 +10,6 @@ import { useUser } from "@/features/auth/client/UserContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -54,17 +53,14 @@ export default function SettingsPage() {
 
   return (
     <div className="px-5 py-6 lg:px-6 lg:py-8">
-      <FadeIn>
-        <div className="mx-auto max-w-xl">
-          <h1 className="app-title">Settings</h1>
-          <p className="app-subtitle mt-1">
-            Your account and connected services.
-          </p>
-        </div>
-      </FadeIn>
+      <div className="mx-auto max-w-xl">
+        <h1 className="app-title">Settings</h1>
+        <p className="app-subtitle mt-1">
+          Your account and connected services.
+        </p>
+      </div>
 
-      <FadeIn delay={0.06}>
-        <div className="mx-auto max-w-xl mt-6">
+      <div className="mx-auto max-w-xl mt-6">
           <Tabs defaultValue="general">
             <TabsList
               variant="line"
@@ -106,7 +102,6 @@ export default function SettingsPage() {
             </TabsContent>
           </Tabs>
         </div>
-      </FadeIn>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export function useProduct(id: Id<"products">) {
   const product = useQuery(api.products.getById, { id });
@@ -17,10 +18,11 @@ export function useProduct(id: Id<"products">) {
 
 export function useProducts() {
   const products = useQuery(api.products.listByUser);
+  const cached = useCachedQueryResult("products", products);
 
   return {
-    products: products ?? [],
-    isLoading: products === undefined,
+    products: cached ?? [],
+    isLoading: products === undefined && cached === undefined,
   };
 }
 

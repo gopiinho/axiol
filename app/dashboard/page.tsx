@@ -3,11 +3,7 @@
 import Link from "next/link";
 import { PlusCircle, Store, BarChart3, Package, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FadeIn } from "@/components/motion/FadeIn";
-import {
-  AnimatedList,
-  AnimatedListItem,
-} from "@/components/motion/AnimatedList";
+
 import { useProducts } from "@/features/products/hooks/useProduct";
 import { useReelMappings } from "@/features/automations/hooks/useAutomations";
 
@@ -59,19 +55,16 @@ export default function DashboardPage() {
 
   return (
     <div className="px-5 lg:px-6 py-6 lg:py-8">
-      <FadeIn>
-        <div className="space-y-1">
-          <h1 className="heading-playful text-4xl sm:text-5xl">
-            Welcome back!
-          </h1>
-          <p className="text-muted-foreground">
-            What would you like to do today?
-          </p>
-        </div>
-      </FadeIn>
+      <div className="space-y-1">
+        <h1 className="heading-playful text-4xl sm:text-5xl">
+          Welcome back!
+        </h1>
+        <p className="text-muted-foreground">
+          What would you like to do today?
+        </p>
+      </div>
 
-      <FadeIn>
-        <div className="mt-8 grid grid-cols-2 gap-3">
+      <div className="mt-8 grid grid-cols-2 gap-3">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -98,13 +91,12 @@ export default function DashboardPage() {
             );
           })}
         </div>
-      </FadeIn>
 
-      <AnimatedList className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
           return (
-            <AnimatedListItem key={action.href}>
+            <div key={action.href}>
               <Link
                 href={action.href}
                 className="group flex flex-col gap-4 rounded-xs border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
@@ -131,10 +123,10 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               </Link>
-            </AnimatedListItem>
+            </div>
           );
         })}
-      </AnimatedList>
+      </div>
     </div>
   );
 }

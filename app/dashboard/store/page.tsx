@@ -17,11 +17,7 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
-import { FadeIn } from "@/components/motion/FadeIn";
-import {
-  AnimatedList,
-  AnimatedListItem,
-} from "@/components/motion/AnimatedList";
+
 import { StorePreview } from "@/components/StorePreview";
 import { EditProfile } from "@/components/EditProfile";
 import { ProductCard } from "@/features/products/components/ProductCard";
@@ -198,8 +194,7 @@ export default function MyStorePage() {
     <>
       <div className="flex w-full min-h-screen">
         <div className="w-full lg:min-w-[60%] lg:border-r border-border/70">
-          <FadeIn>
-            <div className="flex max-lg:flex-col lg:flex items-center justify-center lg:items-start gap-4 px-5 lg:px-6 py-6 lg:py-8">
+          <div className="flex max-lg:flex-col lg:flex items-center justify-center lg:items-start gap-4 px-5 lg:px-6 py-6 lg:py-8">
               <div className="h-24 w-24 overflow-hidden border-2 border-border/25 bg-linear-to-br from-primary/15 to-pink/15 p-0.5">
                 <div className="h-full w-full overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -271,11 +266,8 @@ export default function MyStorePage() {
                 </div>
               </div>
             </div>
-          </FadeIn>
 
           <div className="border-t border-border/70" />
-
-          <FadeIn delay={0.1}>
             {publishedProducts.length > 0 ? (
               <div className="px-5 py-6">
                 <div className="flex items-center justify-between mb-5">
@@ -289,9 +281,9 @@ export default function MyStorePage() {
                     </Link>
                   </Button>
                 </div>
-                <AnimatedList className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {publishedProducts.map((product, index) => (
-                    <AnimatedListItem key={product._id}>
+                    <div key={product._id}>
                       <ProductCard
                         product={{
                           _id: product._id,
@@ -305,9 +297,9 @@ export default function MyStorePage() {
                         index={index}
                         interactive={true}
                       />
-                    </AnimatedListItem>
+                    </div>
                   ))}
-                </AnimatedList>
+                </div>
               </div>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
@@ -320,11 +312,9 @@ export default function MyStorePage() {
                 </Button>
               </div>
             )}
-          </FadeIn>
         </div>
 
         <div className="hidden lg:flex flex-col items-center sticky top-0 w-full h-screen overflow-hidden">
-          <FadeIn delay={0.15} className="w-full h-full">
             <div className="flex flex-col items-center gap-6 py-6 px-6 w-full">
               <div className="w-full space-y-4">
                 <div className="flex items-center gap-4">
@@ -439,7 +429,6 @@ export default function MyStorePage() {
                 socialLinks={storeSocialLinks}
               />
             </div>
-          </FadeIn>
         </div>
       </div>
 

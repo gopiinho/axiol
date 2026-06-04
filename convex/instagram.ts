@@ -781,11 +781,13 @@ export const getStats = query({
     const comments = await ctx.db
       .query("commentLogs")
       .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+      .order("desc")
+      .take(500);
     const dms = await ctx.db
       .query("dmLogs")
       .withIndex("by_owner", (q) => q.eq("userId", userId))
-      .collect();
+      .order("desc")
+      .take(500);
     const mappings = await ctx.db
       .query("reelMappings")
       .withIndex("by_user", (q) => q.eq("userId", userId))

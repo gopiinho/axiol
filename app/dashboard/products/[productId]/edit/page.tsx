@@ -7,7 +7,6 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id, Doc } from "@/convex/_generated/dataModel";
 import { useUser } from "@/features/auth/client/UserContext";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon";
@@ -71,8 +70,7 @@ export default function EditProduct({
 
   return (
     <div>
-      <FadeIn>
-        <section className="p-5 sm:p-8 border-b">
+      <section className="p-5 sm:p-8 border-b">
           <div className="flex items-center justify-between">
             <div className="sm:flex items-center gap-3 hidden">
               <h1 className="app-title">
@@ -121,7 +119,6 @@ export default function EditProduct({
             )}
           </div>
         </section>
-      </FadeIn>
 
       <div className="p-5 sm:p-8">
         {isLoading ? (

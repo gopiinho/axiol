@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CreateProductFlow, type CreateProductFlowHandle } from "@/features/products/components/CreateProductFlow";
@@ -11,8 +10,7 @@ export default function NewProduct() {
 
   return (
     <div>
-      <FadeIn>
-        <section className="p-5 sm:p-8 border-b">
+      <section className="p-5 sm:p-8 border-b">
           <div className="flex justify-between items-center">
             <h1 className="app-title">Publish your first product</h1>
             <div className="flex gap-2">
@@ -31,7 +29,6 @@ export default function NewProduct() {
             </div>
           </div>
         </section>
-      </FadeIn>
 
       <div className="p-5 sm:p-8 flex w-full flex-col gap-12 sm:gap-24 lg:flex-row justify-between">
         <p className="w-full sm:w-80 text-sm text-muted-foreground">

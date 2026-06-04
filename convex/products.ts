@@ -51,7 +51,7 @@ export const listByUser = query({
         const items = await ctx.db
           .query("productItems")
           .withIndex("by_product", (q) => q.eq("productId", product._id))
-          .collect();
+          .take(100);
         return { ...product, itemCount: items.length };
       }),
     );
