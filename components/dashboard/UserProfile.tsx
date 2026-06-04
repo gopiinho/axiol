@@ -68,11 +68,11 @@ export function UserProfile() {
           <div>
             <DropdownMenuItem
               asChild
-              className="focus:bg-transparent p-0 rounded-none"
+              className="focus:bg-card p-0 rounded-none"
             >
               <Link
                 href="/dashboard/help"
-                className="flex items-center justify-between px-3 text-foreground py-2 text-sm font-bold transition-all group cursor-pointer"
+                className="flex items-center justify-between px-3 text-foreground py-2 text-sm font-bold transition-all group cursor-pointer hover:bg-card"
               >
                 <div className="flex items-center gap-2.5">
                   <HelpCircle className="h-4 w-4 text-foreground" />
@@ -86,7 +86,7 @@ export function UserProfile() {
               onClick={() => {
                 window.dispatchEvent(new CustomEvent("open-logout-dialog"));
               }}
-              className="flex items-center justify-between px-3 py-2 text-sm font-bold text-foreground transition-all group cursor-pointer outline-none focus:bg-destructive/5 focus:text-destructive rounded-none"
+              className="flex items-center justify-between px-3 py-2 text-sm font-bold text-foreground transition-all group cursor-pointer outline-none rounded-none hover:bg-card focus:bg-card"
             >
               <div className="flex items-center gap-2.5">
                 <LogOut className="h-4 w-4 text-foreground" />
@@ -99,7 +99,7 @@ export function UserProfile() {
               <Button
                 variant={isTrial ? "secondary" : "default"}
                 className={cn(
-                  "w-full h-11 text-[10px] font-extrabold uppercase tracking-[0.2em] transition-all duration-200 rounded-none shadow-none",
+                  "w-full h-11 text-[10px] font-semibold transition-all duration-200 rounded-none shadow-none",
                   !isTrial &&
                     "bg-primary text-primary-foreground hover:bg-primary/90 border-none",
                   isTrial && "border border-border hover:bg-muted",
