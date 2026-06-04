@@ -63,7 +63,7 @@ export function StorefrontShowcase() {
                     "radial-gradient(circle, oklch(0.85 0.12 340 / 0.5), transparent 70%)",
                 }}
               />
-              <StorePreview
+              {/* <StorePreview
                 publicUrl="axiol.com/nemeowww"
                 username="nemeowww"
                 displayName="Nemeowww"
@@ -71,7 +71,7 @@ export function StorefrontShowcase() {
                 socialLinks={mockSocialLinks}
                 products={mockProducts}
                 theme={activeTheme}
-              />
+              /> */}
             </div>
             <div className="grid gap-4 mt-6">
               <div className="flex items-center mt-6 gap-3">
