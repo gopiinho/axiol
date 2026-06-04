@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useInstagramConnection } from "@/features/automations/hooks/useInstagramConnection";
+import InstagramConnectOverlay from "@/features/automations/components/InstagramConnectOverlay";
 import {
   DEFAULT_KEYWORD_PRESETS,
   KEYWORD_PRESET_STORAGE_KEY,
@@ -33,9 +34,26 @@ import CreateFlowFooter from "@/features/automations/components/CreateFlowFooter
 const TOTAL_STEPS = 4;
 
 export default function CreateAutomationPage() {
-  const router = useRouter();
   useUser();
   const ig = useInstagramConnection();
+
+  if (ig.status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-pink-500" />
+      </div>
+    );
+  }
+
+  if (!ig.isUsable) {
+    return <InstagramConnectOverlay />;
+  }
+
+  return <CreateAutomationWizard />;
+}
+
+function CreateAutomationWizard() {
+  const router = useRouter();
   const [selectedProductId, setSelectedProductId] = useState<
     Id<"products"> | ""
   >("");
@@ -76,7 +94,6 @@ export default function CreateAutomationPage() {
     Number.isInteger(maxItemsInDM) && maxItemsInDM >= 1 && maxItemsInDM <= 20;
   const canPreview = Boolean(selectedProductId) && maxItemsValid;
 
-  // DM preview debounce
   useEffect(() => {
     if (!canPreview) {
       setGeneratePreview(null);
@@ -223,11 +240,6 @@ export default function CreateAutomationPage() {
   };
 
   const loadReels = useCallback(async () => {
-    if (!ig.isUsable) {
-      setReelsLoading(false);
-      return;
-    }
-
     setReelsLoading(true);
     setReelsError(null);
 
@@ -243,7 +255,7 @@ export default function CreateAutomationPage() {
     } finally {
       setReelsLoading(false);
     }
-  }, [fetchReels, ig.isUsable]);
+  }, [fetchReels]);
 
   useEffect(() => {
     void loadReels();
@@ -325,7 +337,7 @@ export default function CreateAutomationPage() {
             selectedReelId={selectedReel?.id}
             reelsLoading={reelsLoading}
             reelsError={reelsError}
-            instagramStatus={ig.status}
+            instagramStatus="connected"
             onRetry={() => void loadReels()}
             onSelectReel={setSelectedReel}
           />
