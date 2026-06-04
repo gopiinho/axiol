@@ -5,9 +5,18 @@ import { requireSession } from "./security";
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const MAX_PROFILE_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
-const MAX_COVER_IMAGE_SIZE = 3 * 1024 * 1024; // 3 MB
+const MAX_COVER_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
+const MAX_PRODUCT_COVER_SIZE = 2 * 1024 * 1024; // 2 MB
 
 export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireSession(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const generateProductCoverUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
     await requireSession(ctx);
@@ -64,6 +73,54 @@ export const saveCoverImage = mutation({
     }
 
     await ctx.db.patch(userId, { coverImageId: args.storageId });
+  },
+});
+
+export const saveProductCoverImage = mutation({
+  args: { productId: v.id("products"), storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found");
+    }
+
+    const metadata = await ctx.storage.getMetadata(args.storageId);
+    if (!metadata) throw new Error("File not found");
+    if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error(
+        "Invalid file type. Please upload a JPEG, PNG, or WebP image.",
+      );
+    }
+    if (metadata.size > MAX_PRODUCT_COVER_SIZE) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error("File too large. Product cover must be under 3 MB.");
+    }
+
+    if (product.coverImageId) {
+      await ctx.storage.delete(product.coverImageId);
+    }
+
+    await ctx.db.patch(args.productId, { coverImageId: args.storageId });
+  },
+});
+
+export const removeProductCoverImage = mutation({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found");
+    }
+
+    if (product.coverImageId) {
+      await ctx.storage.delete(product.coverImageId);
+      await ctx.db.patch(args.productId, { coverImageId: undefined });
+    }
   },
 });
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { Globe, Heart, Instagram, Youtube } from "lucide-react";
-import { StoreCollectionCard } from "@/components/StoreCollectionCard";
+import { Globe, Package, Instagram, Youtube } from "lucide-react";
+import { ProductCard } from "@/features/products/components/ProductCard";
 
 type SocialLink = {
   url: string;
@@ -10,10 +10,13 @@ type SocialLink = {
   display: string;
 };
 
-type Collection = {
+type ProductItem = {
   _id: string;
-  title: string;
-  description?: string | null;
+  name: string;
+  productUrl: string;
+  price?: string | null;
+  coverImageUrl?: string | null;
+  itemCount: number;
 };
 
 export type StoreContentProps = {
@@ -22,11 +25,12 @@ export type StoreContentProps = {
   profileImageUrl?: string | null;
   coverImageUrl?: string | null;
   socialLinks?: SocialLink[];
-  collections: Collection[];
+  products: ProductItem[];
   themeStyle: React.CSSProperties;
   showDots?: boolean;
   interactive?: boolean;
   className?: string;
+  username?: string;
 };
 
 const iconMap = {
@@ -41,11 +45,12 @@ export function StoreContent({
   profileImageUrl,
   coverImageUrl,
   socialLinks,
-  collections,
+  products,
   themeStyle,
   className,
   showDots,
   interactive = true,
+  username,
 }: StoreContentProps) {
   return (
     <div
@@ -171,9 +176,9 @@ export function StoreContent({
             My store
           </h2>
 
-          {collections.length === 0 ? (
+          {products.length === 0 ? (
             <div className="text-center py-16">
-              <Heart
+              <Package
                 className="w-12 h-12 mx-auto mb-3"
                 style={{ color: "var(--store-accent)" }}
               />
@@ -181,15 +186,16 @@ export function StoreContent({
                 style={{ color: "var(--store-text-muted)" }}
                 className="text-base"
               >
-                building my collection... check back soon!
+                building my store... check back soon!
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-5">
-              {collections.map((collection, index) => (
-                <StoreCollectionCard
-                  key={collection._id}
-                  collection={collection}
+              {products.map((product, index) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  username={username}
                   index={index}
                   interactive={interactive}
                 />

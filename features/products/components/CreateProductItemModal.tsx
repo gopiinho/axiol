@@ -1,0 +1,198 @@
+"use client";
+
+import { useState } from "react";
+import type { Id } from "@/convex/_generated/dataModel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useCreateProductItem } from "../hooks/useProduct";
+
+interface CreateProductItemModalProps {
+  productId: Id<"products">;
+  open: boolean;
+  onClose: () => void;
+}
+
+export function CreateProductItemModal({
+  productId,
+  open,
+  onClose,
+}: CreateProductItemModalProps) {
+  const [affiliateLink, setAffiliateLink] = useState("");
+  const [price, setPrice] = useState("");
+  const [platform, setPlatform] = useState("amazon");
+  const [title, setTitle] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const createItem = useCreateProductItem();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      await createItem({
+        productId,
+        affiliateLink,
+        price: price || undefined,
+        platform,
+        title: title || undefined,
+        imageUrl: imageUrl || undefined,
+      });
+
+      setAffiliateLink("");
+      setPrice("");
+      setPlatform("amazon");
+      setTitle("");
+      setImageUrl("");
+      onClose();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Couldn't add this item. Check your connection and try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-lg gap-0 overflow-hidden p-0"
+      >
+        <DialogHeader className="flex-row items-center justify-between border-b border-border/70 px-5 py-3.5">
+          <DialogTitle className="text-lg font-semibold">Add item</DialogTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="text-background"
+              size="sm"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              type="submit"
+              form="add-item-form"
+              disabled={loading || !affiliateLink.trim()}
+              className="px-5"
+            >
+              {loading ? "Adding..." : "Add"}
+            </Button>
+          </div>
+        </DialogHeader>
+
+        <form
+          id="add-item-form"
+          onSubmit={handleSubmit}
+          className="space-y-4 px-5 py-5"
+        >
+          {errorMessage && (
+            <Alert variant="destructive">
+              <AlertTitle>Couldn&apos;t add item</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="item-title">Product name</Label>
+            <Input
+              id="item-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Levi's Women's Skinny Jeans"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="affiliate-link">
+              Affiliate link{" "}
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>
+            </Label>
+            <Input
+              id="affiliate-link"
+              type="url"
+              value={affiliateLink}
+              onChange={(e) => setAffiliateLink(e.target.value)}
+              placeholder="https://..."
+              required
+              aria-required="true"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="platform">
+                Platform{" "}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
+              </Label>
+              <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger id="platform" aria-required="true">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="amazon">Amazon</SelectItem>
+                  <SelectItem value="flipkart">Flipkart</SelectItem>
+                  <SelectItem value="nykaa">Nykaa</SelectItem>
+                  <SelectItem value="myntra">Myntra</SelectItem>
+                  <SelectItem value="meesho">Meesho</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
+              <Input
+                id="price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="₹1,999"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="image-url">Image URL</Label>
+            <Input
+              id="image-url"
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="text-xs text-muted-foreground">
+              Optional: add a product image URL.
+            </p>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

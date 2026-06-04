@@ -7,16 +7,22 @@ import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
 import { ScrollFadeIn } from "@/components/motion/ScrollFadeIn";
 import { Button } from "@/components/ui/button";
 
-const mockCollections = [
+const mockProducts = [
   {
     _id: "1",
-    title: "Summer Skincare Essentials",
-    description: "My holy grail products for glowing skin",
+    name: "Summer Skincare Essentials",
+    productUrl: "summer-skincare-essentials",
+    price: null,
+    coverImageUrl: null,
+    itemCount: 4,
   },
   {
     _id: "2",
-    title: "Budget Fashion Finds",
-    description: "Under ₹500 fits that look expensive",
+    name: "Budget Fashion Finds",
+    productUrl: "budget-fashion-finds",
+    price: "Under ₹500",
+    coverImageUrl: null,
+    itemCount: 6,
   },
 ];
 
@@ -57,15 +63,15 @@ export function StorefrontShowcase() {
                     "radial-gradient(circle, oklch(0.85 0.12 340 / 0.5), transparent 70%)",
                 }}
               />
-              <StorePreview
+              {/* <StorePreview
                 publicUrl="axiol.com/nemeowww"
                 username="nemeowww"
                 displayName="Nemeowww"
                 bio="why are you here?"
                 socialLinks={mockSocialLinks}
-                collections={mockCollections}
+                products={mockProducts}
                 theme={activeTheme}
-              />
+              /> */}
             </div>
             <div className="grid gap-4 mt-6">
               <div className="flex items-center mt-6 gap-3">

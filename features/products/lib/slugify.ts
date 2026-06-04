@@ -1,4 +1,4 @@
-export function slugifyProductName(value: string): string {
+export function urlifyProductName(value: string): string {
   return value
     .trim()
     .toLowerCase()
@@ -9,6 +9,6 @@ export function slugifyProductName(value: string): string {
     .replace(/-{2,}/g, "-");
 }
 
-export function buildProductSlug(value: string): string {
-  return slugifyProductName(value) || "product";
+export function buildProductUrl(value: string): string {
+  return urlifyProductName(value) || "product";
 }

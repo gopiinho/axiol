@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, PlusCircle, BarChart3, Settings, Store } from "lucide-react";
+import { Home, Box, BarChart3, Settings, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function BottomNav() {
@@ -27,8 +27,8 @@ export default function BottomNav() {
     },
     {
       href: "/dashboard/products",
-      icon: PlusCircle,
-      label: "Create",
+      icon: Box,
+      label: "Products",
     },
     {
       href: "/dashboard/analytics",

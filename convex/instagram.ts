@@ -21,53 +21,50 @@ function assertWebhookSourceSecret(sourceSecret: string) {
   }
 }
 
-function buildDMMessage({
-  collectionTitle,
+function buildDmMessage({
+  productName,
   items,
   maxItems,
   includeWebsiteLink,
-  siteUrl,
-  collectionId,
+  productUrl,
   triggerType,
 }: {
-  collectionTitle: string;
-  items: Array<{ itemTitle?: string; price?: string; affiliateLink: string }>;
+  productName: string;
+  items: Array<{ title?: string; price?: string; affiliateLink: string }>;
   maxItems: number;
   includeWebsiteLink: boolean;
-  siteUrl: string;
-  collectionId: string;
+  productUrl: string;
   triggerType: "comment" | "dm";
 }) {
-  const collectionUrl = `${siteUrl}/list/${collectionId}`;
-  let message = `Hi! Here are my top picks from "${collectionTitle}":\n\n`;
+  let message = `Hi! Check out "${productName}":\n\n`;
 
   if (includeWebsiteLink) {
-    message += `🔗 View full collection: ${collectionUrl}\n\n`;
+    message += `🔗 View full details: ${productUrl}\n\n`;
   }
 
-  items.forEach((item, index) => {
-    message += `${index + 1}. ${item.itemTitle || "Product"}`;
+  items.slice(0, maxItems).forEach((item, index) => {
+    message += `${index + 1}. ${item.title || "Product"}`;
     if (item.price) {
       message += ` - ₹${item.price}`;
     }
     message += `\n👉 ${item.affiliateLink}\n\n`;
   });
 
-  if (items.length < maxItems) {
+  if (items.length <= maxItems) {
     message += `(Showing all ${items.length} items)\n\n`;
   } else {
-    message += `(Showing top ${maxItems} items - visit link for more)\n\n`;
+    message += `(Showing top ${maxItems} items — visit link for more)\n\n`;
   }
 
   message += `💕 Thank you for your support! xoxo`;
 
   if (triggerType === "comment") {
-    message += `\n\nDM me if you want to see more collections or have questions! ✨`;
+    message += `\n\nDM me if you have any questions! ✨`;
   }
 
   return {
     message,
-    itemCount: items.length,
+    itemCount: Math.min(items.length, maxItems),
     characterCount: message.length,
   };
 }
@@ -105,6 +102,35 @@ export const saveConfig = mutation({
       await ctx.db.patch(existing._id, data);
     } else {
       await ctx.db.insert("instagramConfig", data);
+    }
+
+    const integrationExisting = await ctx.db
+      .query("integrations")
+      .withIndex("by_user_provider", (q) =>
+        q.eq("userId", userId).eq("provider", "instagram"),
+      )
+      .first();
+
+    const integrationData = {
+      userId,
+      provider: "instagram" as const,
+      status: "connected" as const,
+      connectedAt: Date.now(),
+      lastSyncAt: Date.now(),
+      displayName: args.instagramUsername,
+      externalId: args.instagramAccountId,
+      errorMessage: undefined,
+    };
+
+    if (integrationExisting) {
+      await ctx.db.patch(integrationExisting._id, {
+        ...integrationData,
+        ...(integrationExisting.connectedAt
+          ? {}
+          : { connectedAt: Date.now() }),
+      });
+    } else {
+      await ctx.db.insert("integrations", integrationData);
     }
   },
 });
@@ -180,7 +206,6 @@ export const getUserByInstagramAccount = internalQuery({
   },
 });
 
-// Internal query to get user's config by betterAuthId (for actions)
 export const getConfigByBetterAuthId = internalQuery({
   args: { betterAuthId: v.string() },
   handler: async (ctx, args) => {
@@ -357,7 +382,7 @@ export const createReelMapping = mutation({
     reelUrl: v.string(),
     thumbnailUrl: v.optional(v.string()),
     caption: v.optional(v.string()),
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     keyword: v.string(),
     maxItemsInDM: v.optional(v.number()),
     includeWebsiteLink: v.optional(v.boolean()),
@@ -374,9 +399,9 @@ export const createReelMapping = mutation({
       includeWebsiteLink: args.includeWebsiteLink,
     });
 
-    const collection = await ctx.db.get(args.collectionId);
-    if (!collection || collection.createdBy !== userId) {
-      throw new Error("Collection not found");
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found");
     }
 
     const existing = await ctx.db
@@ -386,7 +411,7 @@ export const createReelMapping = mutation({
 
     const data = {
       userId,
-      collectionId: args.collectionId,
+      productId: args.productId,
       keyword: validated.keyword,
       active: false,
       reelUrl: validated.reelUrl,
@@ -442,18 +467,10 @@ export const getDraftMappings = query({
 
     const enriched = await Promise.all(
       drafts.map(async (draft) => {
-        const collection = await ctx.db.get(draft.collectionId);
-        const items = await ctx.db
-          .query("items")
-          .withIndex("by_collection", (q) =>
-            q.eq("collectionId", draft.collectionId),
-          )
-          .collect();
-
+        const product = await ctx.db.get(draft.productId);
         return {
           ...draft,
-          sectionTitle: collection?.title || "Unknown Collection",
-          itemCount: items.length,
+          productName: product?.name || "Unknown Product",
         };
       }),
     );
@@ -484,10 +501,10 @@ export const getPublishedMappings = query({
 
     const enriched = await Promise.all(
       published.map(async (mapping) => {
-        const collection = await ctx.db.get(mapping.collectionId);
+        const product = await ctx.db.get(mapping.productId);
         return {
           ...mapping,
-          sectionTitle: collection?.title || "Unknown Collection",
+          productName: product?.name || "Unknown Product",
         };
       }),
     );
@@ -509,10 +526,10 @@ export const listReelMappings = query({
 
     const enriched = await Promise.all(
       mappings.map(async (mapping) => {
-        const collection = await ctx.db.get(mapping.collectionId);
+        const product = await ctx.db.get(mapping.productId);
         return {
           ...mapping,
-          sectionTitle: collection?.title || "Unknown Collection",
+          productName: product?.name || "Unknown Product",
         };
       }),
     );
@@ -523,34 +540,32 @@ export const listReelMappings = query({
 
 export const generateDMMessage = query({
   args: {
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
-    await requireSession(ctx);
+    const { user } = await requireSession(ctx);
 
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
-    const collection = await ctx.db.get(args.collectionId);
-    if (!collection) throw new Error("Collection not found");
+    const product =     await ctx.db.get(args.productId);
+    if (!product) throw new Error("Product not found");
 
     const items = await ctx.db
-      .query("items")
-      .withIndex("by_collection", (q) =>
-        q.eq("collectionId", args.collectionId),
-      )
-      .order("desc")
+      .query("productItems")
+      .withIndex("by_product", (q) => q.eq("productId", args.productId))
+      .order("asc")
       .take(normalizedMaxItems);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
-    return buildDMMessage({
-      collectionTitle: collection.title,
+    const productUrl = `${siteUrl}/${user.username}/p/${product.productUrl}`;
+    return buildDmMessage({
+      productName: product.name,
       items,
       maxItems: normalizedMaxItems,
       includeWebsiteLink: args.includeWebsiteLink,
-      siteUrl,
-      collectionId: args.collectionId,
+      productUrl,
       triggerType: args.triggerType,
     });
   },
@@ -558,32 +573,33 @@ export const generateDMMessage = query({
 
 export const generateDMMessageForJob = internalQuery({
   args: {
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     maxItems: v.number(),
     includeWebsiteLink: v.boolean(),
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
-    const collection = await ctx.db.get(args.collectionId);
-    if (!collection) throw new Error("Collection not found");
+    const product = await ctx.db.get(args.productId);
+    if (!product) throw new Error("Product not found");
+
+    const user = await ctx.db.get(product.createdBy);
+    if (!user) throw new Error("User not found");
 
     const items = await ctx.db
-      .query("items")
-      .withIndex("by_collection", (q) =>
-        q.eq("collectionId", args.collectionId),
-      )
-      .order("desc")
+      .query("productItems")
+      .withIndex("by_product", (q) => q.eq("productId", args.productId))
+      .order("asc")
       .take(normalizedMaxItems);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
-    return buildDMMessage({
-      collectionTitle: collection.title,
+    const productUrl = `${siteUrl}/${user.username}/p/${product.productUrl}`;
+    return buildDmMessage({
+      productName: product.name,
       items,
       maxItems: normalizedMaxItems,
       includeWebsiteLink: args.includeWebsiteLink,
-      siteUrl,
-      collectionId: args.collectionId,
+      productUrl,
       triggerType: args.triggerType,
     });
   },
@@ -648,12 +664,12 @@ export const findMappingForComment = query({
 
     if (!mapping) return null;
 
-    const collection = await ctx.db.get(mapping.collectionId);
+    const product = await ctx.db.get(mapping.productId);
 
     return {
       mappingId: mapping._id,
-      collectionId: mapping.collectionId,
-      collectionTitle: collection?.title || "Collection",
+      productId: mapping.productId,
+      productName: product?.name || "Product",
       keyword: mapping.keyword,
       userId: mapping.userId,
     };
@@ -675,12 +691,12 @@ export const findMappingForReel = query({
 
     if (!mapping) return null;
 
-    const collection = await ctx.db.get(mapping.collectionId);
+    const product = await ctx.db.get(mapping.productId);
 
     return {
       mappingId: mapping._id,
-      collectionId: mapping.collectionId,
-      collectionTitle: collection?.title || "Collection",
+      productId: mapping.productId,
+      productName: product?.name || "Product",
       keyword: mapping.keyword,
       userId: mapping.userId,
     };
@@ -696,7 +712,7 @@ export const logComment = mutation({
     username: v.string(),
     commentText: v.string(),
     keyword: v.string(),
-    collectionId: v.optional(v.id("collections")),
+    productId: v.optional(v.id("products")),
     userId: v.optional(v.id("users")),
     dmSent: v.boolean(),
     dmError: v.optional(v.string()),
@@ -718,7 +734,7 @@ export const logComment = mutation({
       username: args.username,
       commentText: args.commentText,
       keyword: args.keyword,
-      collectionId: args.collectionId,
+      productId: args.productId,
       userId: args.userId,
       dmSent: args.dmSent,
       dmError: args.dmError,
@@ -731,7 +747,7 @@ export const logDM = mutation({
   args: {
     instagramUserId: v.string(),
     username: v.string(),
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     userId: v.optional(v.id("users")),
     messageText: v.string(),
     success: v.boolean(),
@@ -749,7 +765,16 @@ export const getStats = query({
   args: {},
   handler: async (ctx) => {
     const session = await getSession(ctx);
-    if (!session) return { totalComments: 0, commentsLast24h: 0, totalDMs: 0, dmsLast24h: 0, totalMappings: 0, activeMappings: 0, failedDMs: 0 };
+    if (!session)
+      return {
+        totalComments: 0,
+        commentsLast24h: 0,
+        totalDMs: 0,
+        dmsLast24h: 0,
+        totalMappings: 0,
+        activeMappings: 0,
+        failedDMs: 0,
+      };
 
     const { userId } = session;
 
@@ -802,11 +827,11 @@ export const getRecentActivity = query({
 
     const enriched = await Promise.all(
       comments.map(async (comment) => {
-        if (!comment.collectionId) return comment;
-        const collection = await ctx.db.get(comment.collectionId);
+        if (!comment.productId) return comment;
+        const product = await ctx.db.get(comment.productId);
         return {
           ...comment,
-          sectionTitle: collection?.title,
+          productName: product?.name,
         };
       }),
     );

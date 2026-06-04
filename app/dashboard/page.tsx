@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { PlusCircle, Store, BarChart3 } from "lucide-react";
+import { PlusCircle, Store, BarChart3, Package, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
 import {
   AnimatedList,
   AnimatedListItem,
 } from "@/components/motion/AnimatedList";
+import { useProducts } from "@/features/products/hooks/useProduct";
+import { useReelMappings } from "@/features/automations/hooks/useAutomations";
 
 const QUICK_ACTIONS = [
   {
@@ -25,15 +27,36 @@ const QUICK_ACTIONS = [
     accent: "bg-pink-subtle text-pink",
   },
   {
-    href: "/dashboard/analytics",
-    icon: BarChart3,
-    title: "Analytics",
-    description: "Track DMs sent, engagement, and collection performance",
-    accent: "bg-accent text-accent-foreground",
+    href: "/dashboard/automations",
+    icon: Zap,
+    title: "Automations",
+    description: "Manage reel-to-product auto-DM mappings",
+    accent: "bg-status-warn-subtle text-status-warn-subtle-fg",
   },
 ];
 
 export default function DashboardPage() {
+  const { products, isLoading: productsLoading } = useProducts();
+  const { mappings, isLoading: mappingsLoading } = useReelMappings();
+
+  const isLoading = productsLoading || mappingsLoading;
+  const stats = [
+    {
+      icon: Package,
+      label: "Products",
+      value: products?.length ?? 0,
+      href: "/dashboard/products",
+      accent: "from-primary/20 to-primary/5",
+    },
+    {
+      icon: Zap,
+      label: "Automations",
+      value: mappings?.length ?? 0,
+      href: "/dashboard/automations",
+      accent: "from-amber/20 to-amber/5",
+    },
+  ];
+
   return (
     <div className="px-5 lg:px-6 py-6 lg:py-8">
       <FadeIn>
@@ -47,7 +70,37 @@ export default function DashboardPage() {
         </div>
       </FadeIn>
 
-      <AnimatedList className="mt-8 grid gap-4 sm:grid-cols-3">
+      <FadeIn>
+        <div className="mt-8 grid grid-cols-2 gap-3">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Link
+                key={stat.label}
+                href={stat.href}
+                className="group relative overflow-hidden rounded-xs border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${stat.accent} opacity-60`} />
+                <div className="relative z-10 flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+                    {isLoading ? (
+                      <div className="mt-1 h-9 w-16 animate-pulse rounded bg-muted" />
+                    ) : (
+                      <p className="mt-1 text-3xl font-bold tabular-nums">{stat.value}</p>
+                    )}
+                  </div>
+                  <div className="rounded-xl bg-background/80 p-2.5 backdrop-blur-sm">
+                    <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={2} />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </FadeIn>
+
+      <AnimatedList className="mt-6 grid gap-4 sm:grid-cols-3">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
           return (

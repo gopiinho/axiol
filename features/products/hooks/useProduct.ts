@@ -1,0 +1,73 @@
+"use client";
+
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+
+export function useProduct(id: Id<"products">) {
+  const product = useQuery(api.products.getById, { id });
+  const items = useQuery(api.productItems.listByProduct, { productId: id });
+
+  return {
+    product,
+    items,
+    isLoading: product === undefined || items === undefined,
+  };
+}
+
+export function useProducts() {
+  const products = useQuery(api.products.listByUser);
+
+  return {
+    products: products ?? [],
+    isLoading: products === undefined,
+  };
+}
+
+export function useCreateProduct() {
+  return useMutation(api.products.create);
+}
+
+export function useUpdateProduct() {
+  return useMutation(api.products.update);
+}
+
+export function useDeleteProduct() {
+  return useMutation(api.products.remove);
+}
+
+export function usePublishProduct() {
+  return useMutation(api.products.publish);
+}
+
+export function useArchiveProduct() {
+  return useMutation(api.products.archive);
+}
+
+export function useCreateProductItem() {
+  return useMutation(api.productItems.create);
+}
+
+export function useUpdateProductItem() {
+  return useMutation(api.productItems.update);
+}
+
+export function useDeleteProductItem() {
+  return useMutation(api.productItems.remove);
+}
+
+export function useReorderProductItems() {
+  return useMutation(api.productItems.reorder);
+}
+
+export function useGenerateProductCoverUploadUrl() {
+  return useMutation(api.storage.generateProductCoverUploadUrl);
+}
+
+export function useSaveProductCoverImage() {
+  return useMutation(api.storage.saveProductCoverImage);
+}
+
+export function useRemoveProductCoverImage() {
+  return useMutation(api.storage.removeProductCoverImage);
+}

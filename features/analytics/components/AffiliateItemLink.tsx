@@ -9,8 +9,8 @@ interface AffiliateItemLinkProps {
   itemTitle?: string;
   platform: string;
   price?: string;
-  collectionId: string;
-  collectionTitle: string;
+  productId?: string;
+  productName?: string;
   className: string;
   style?: CSSProperties;
   children: ReactNode;
@@ -22,8 +22,8 @@ export default function AffiliateItemLink({
   itemTitle,
   platform,
   price,
-  collectionId,
-  collectionTitle,
+  productId,
+  productName,
   className,
   style,
   children,
@@ -34,8 +34,8 @@ export default function AffiliateItemLink({
       item_title: itemTitle || undefined,
       platform,
       price: price || undefined,
-      collection_id: collectionId,
-      collection_title: collectionTitle,
+      product_id: productId,
+      product_name: productName,
     });
   };
 

@@ -24,7 +24,7 @@ export const createDmJob = mutation({
     instagramUserId: v.string(),
     username: v.string(),
     userId: v.id("users"),
-    collectionId: v.id("collections"),
+    productId: v.id("products"),
     reelId: v.string(),
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
     triggerId: v.string(),
@@ -60,7 +60,7 @@ export const createDmJob = mutation({
       userId: args.userId,
       instagramUserId: args.instagramUserId,
       username: args.username,
-      collectionId: args.collectionId,
+      productId: args.productId,
       reelId: args.reelId,
       maxItemsInDM: args.maxItemsInDM,
       includeWebsiteLink: args.includeWebsiteLink,
@@ -192,7 +192,7 @@ export const markJobSent = internalMutation({
     await ctx.db.insert("dmLogs", {
       instagramUserId: job.instagramUserId,
       username: job.username,
-      collectionId: job.collectionId,
+      productId: job.productId,
       userId: job.userId,
       messageText: args.messageText,
       success: true,
@@ -221,7 +221,7 @@ export const markJobFailed = internalMutation({
     await ctx.db.insert("dmLogs", {
       instagramUserId: job.instagramUserId,
       username: job.username,
-      collectionId: job.collectionId,
+      productId: job.productId,
       userId: job.userId,
       messageText: job.messageText ?? "",
       success: false,
@@ -276,7 +276,7 @@ async function sendDM(
     const messageData = await ctx.runQuery(
       internal.instagram.generateDMMessageForJob,
       {
-        collectionId: job.collectionId,
+        productId: job.productId,
         maxItems: job.maxItemsInDM,
         includeWebsiteLink: job.includeWebsiteLink,
         triggerType: job.triggerType,
@@ -293,7 +293,6 @@ async function sendDM(
     const accessToken = await decryptToken(config.accessToken);
     const appSecret = process.env.DMHELPER_APP_SECRET;
 
-    // Calculate appsecret_proof for production security
     let appSecretProof: string | undefined;
     if (appSecret) {
       const { createHmac } = await import("node:crypto");
@@ -384,7 +383,6 @@ async function ensureWorkerRunning(ctx: MutationCtx): Promise<void> {
   const anyActive = states.some((s) => s.workerActive);
 
   if (!anyActive) {
-    // Create or find any rate limit state to mark as active
     const firstState = states[0];
     if (firstState) {
       await ctx.db.patch(firstState._id, { workerActive: true });

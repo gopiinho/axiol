@@ -17,6 +17,7 @@ type ImageUploadProps = {
   aspectRatio?: string;
   className?: string;
   placeholder?: React.ReactNode;
+  generateUploadUrl?: () => Promise<string>;
 };
 
 export function ImageUpload({
@@ -28,12 +29,14 @@ export function ImageUpload({
   aspectRatio = "1/1",
   className,
   placeholder,
+  generateUploadUrl: customGenerateUploadUrl,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+  const defaultGenerateUploadUrl = useMutation(api.storage.generateUploadUrl);
+  const generateUploadUrl = customGenerateUploadUrl ?? defaultGenerateUploadUrl;
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

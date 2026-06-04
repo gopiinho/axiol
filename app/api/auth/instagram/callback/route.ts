@@ -14,11 +14,11 @@ function timingSafeCompare(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
-function settingsRedirect(
+function automationsRedirect(
   request: NextRequest,
   params: Record<string, string>,
 ) {
-  const url = new URL("/dashboard/settings", request.url);
+  const url = new URL("/dashboard/automations", request.url);
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   // Check for errors from Meta
   if (searchParams.get("error")) {
     const reason = searchParams.get("error_reason") ?? "unknown";
-    return settingsRedirect(request, { ig_error: reason });
+    return automationsRedirect(request, { ig_error: reason });
   }
 
   // CSRF validation
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     !stateCookie ||
     !timingSafeCompare(stateParam, stateCookie)
   ) {
-    return settingsRedirect(request, { ig_error: "csrf" });
+    return automationsRedirect(request, { ig_error: "csrf" });
   }
 
   // Session validation via Better Auth
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
   let code = searchParams.get("code");
   if (!code) {
-    return settingsRedirect(request, { ig_error: "no_code" });
+    return automationsRedirect(request, { ig_error: "no_code" });
   }
 
   code = code.replace(/#_$/, "");
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     if (!shortLivedRes.ok) {
       const error = await shortLivedRes.text();
       console.error("Short-lived token exchange failed:", error);
-      return settingsRedirect(request, { ig_error: "token_exchange" });
+      return automationsRedirect(request, { ig_error: "token_exchange" });
     }
 
     const shortLivedData = (await shortLivedRes.json()) as {
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
     if (!longLivedRes.ok) {
       const error = await longLivedRes.text();
       console.error("Long-lived token exchange failed:", error);
-      return settingsRedirect(request, { ig_error: "token_exchange" });
+      return automationsRedirect(request, { ig_error: "token_exchange" });
     }
 
     const longLivedData = (await longLivedRes.json()) as {
@@ -180,9 +180,20 @@ export async function GET(request: NextRequest) {
       subscribed: webhookSubscribed,
     });
 
-    return settingsRedirect(request, { ig_connected: "true" });
+    if (!webhookSubscribed) {
+      try {
+        await fetchAuthMutation(api.integrations.markError, {
+          provider: "instagram",
+          errorMessage: "Webhook subscription failed",
+        });
+      } catch (markErr) {
+        console.error("Failed to mark integration error:", markErr);
+      }
+    }
+
+    return automationsRedirect(request, { ig_connected: "true" });
   } catch (error) {
     console.error("Instagram OAuth callback error:", error);
-    return settingsRedirect(request, { ig_error: "server" });
+    return automationsRedirect(request, { ig_error: "server" });
   }
 }
