@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useIntegration } from "@/features/integrations/hooks/useIntegrations";
 
 export type InstagramStatus =
   | "loading"
@@ -20,40 +21,84 @@ export type InstagramConnection = {
   isUsable: boolean;
 };
 
-function computeStatus(
+function mapIntegrationStatus(
+  integration:
+    | {
+        computedStatus: string;
+        displayName?: string;
+        externalId?: string;
+        tokenExpiresAt?: number;
+      }
+    | undefined,
   config: { tokenExpiresAt: number } | null | undefined,
+): InstagramConnection {
+  if (config === undefined) {
+    return emptyConnection("loading");
+  }
+
+  if (integration) {
+    const status = integrationStatusToLegacy(integration.computedStatus);
+    return {
+      status,
+      instagramUsername: integration.displayName,
+      instagramAccountId: integration.externalId,
+      tokenExpiresAt: integration.tokenExpiresAt,
+      isConnected: status !== "not_connected" && status !== "loading",
+      isUsable: status === "connected" || status === "expiring_soon",
+    };
+  }
+
+  if (!config) return emptyConnection("not_connected");
+
+  if (config.tokenExpiresAt < Date.now()) return emptyConnection("expired");
+  if (config.tokenExpiresAt < Date.now() + 7 * 24 * 60 * 60 * 1000) {
+    return emptyConnection("expiring_soon");
+  }
+
+  return emptyConnection("not_connected");
+}
+
+function integrationStatusToLegacy(
+  status: string,
 ): InstagramStatus {
-  if (config === undefined) return "loading";
-  if (!config) return "not_connected";
+  switch (status) {
+    case "connected":
+      return "connected";
+    case "expiring_soon":
+      return "expiring_soon";
+    case "expired":
+      return "expired";
+    case "error":
+      return "not_connected";
+    case "disconnected":
+      return "not_connected";
+    default:
+      return "not_connected";
+  }
+}
 
-  const now = Date.now();
-  const sevenDays = 7 * 24 * 60 * 60 * 1000;
-
-  if (config.tokenExpiresAt < now) return "expired";
-  if (config.tokenExpiresAt < now + sevenDays) return "expiring_soon";
-  return "connected";
+function emptyConnection(status: InstagramStatus): InstagramConnection {
+  return {
+    status,
+    instagramUsername: undefined,
+    instagramAccountId: undefined,
+    tokenExpiresAt: undefined,
+    isConnected: status !== "not_connected" && status !== "loading",
+    isUsable: status === "connected" || status === "expiring_soon",
+  };
 }
 
 export function useInstagramConnection(): InstagramConnection {
+  const integration = useIntegration("instagram");
   const config = useQuery(api.instagram.getConfigPublic);
 
-  const [status, setStatus] = useState<InstagramStatus>(() =>
-    computeStatus(config),
+  const [connection, setConnection] = useState<InstagramConnection>(() =>
+    mapIntegrationStatus(integration, config),
   );
 
   useEffect(() => {
-    setStatus(computeStatus(config));
-  }, [config]);
+    setConnection(mapIntegrationStatus(integration, config));
+  }, [integration, config]);
 
-  return {
-    status,
-    instagramUsername: config?.instagramUsername ?? undefined,
-    instagramAccountId: config?.instagramAccountId ?? undefined,
-    tokenExpiresAt: config?.tokenExpiresAt,
-    isConnected:
-      status === "connected" ||
-      status === "expiring_soon" ||
-      status === "expired",
-    isUsable: status === "connected" || status === "expiring_soon",
-  };
+  return connection;
 }

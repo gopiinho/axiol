@@ -44,25 +44,25 @@ export const list = query({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
-    return await Promise.all(
-      rows.map(async (row) => {
-        let computedStatus: IntegrationStatus = row.status;
+    const config = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
 
-        if (row.provider === "instagram") {
-          const config = await ctx.db
-            .query("instagramConfig")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+    return rows.map((row) => {
+      let computedStatus: IntegrationStatus = row.status;
+      let tokenExpiresAt: number | undefined;
 
-          computedStatus = computeInstagramStatus(
-            computedStatus,
-            config?.tokenExpiresAt,
-          );
-        }
+      if (row.provider === "instagram") {
+        computedStatus = computeInstagramStatus(
+          computedStatus,
+          config?.tokenExpiresAt,
+        );
+        tokenExpiresAt = config?.tokenExpiresAt;
+      }
 
-        return { ...row, computedStatus };
-      }),
-    );
+      return { ...row, computedStatus, tokenExpiresAt };
+    });
   },
 });
 
@@ -86,6 +86,7 @@ export const getByProvider = query({
     if (!row) return null;
 
     let computedStatus: IntegrationStatus = row.status;
+    let tokenExpiresAt: number | undefined;
 
     if (row.provider === "instagram") {
       const config = await ctx.db
@@ -97,9 +98,10 @@ export const getByProvider = query({
         computedStatus,
         config?.tokenExpiresAt,
       );
+      tokenExpiresAt = config?.tokenExpiresAt;
     }
 
-    return { ...row, computedStatus };
+    return { ...row, computedStatus, tokenExpiresAt };
   },
 });
 
@@ -187,9 +189,8 @@ export const disconnect = mutation({
   },
 });
 
-export const markError = internalMutation({
+export const markError = mutation({
   args: {
-    userId: v.id("users"),
     provider: v.union(
       v.literal("instagram"),
       v.literal("google_calendar"),
@@ -197,10 +198,12 @@ export const markError = internalMutation({
     errorMessage: v.string(),
   },
   handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+
     const existing = await ctx.db
       .query("integrations")
       .withIndex("by_user_provider", (q) =>
-        q.eq("userId", args.userId).eq("provider", args.provider),
+        q.eq("userId", userId).eq("provider", args.provider),
       )
       .first();
 
@@ -208,7 +211,7 @@ export const markError = internalMutation({
 
     if (!existing) {
       return await ctx.db.insert("integrations", {
-        userId: args.userId,
+        userId,
         provider: args.provider,
         status: "error" as const,
         errorMessage: args.errorMessage,

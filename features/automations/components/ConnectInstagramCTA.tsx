@@ -24,6 +24,7 @@ export default function ConnectInstagramCTA({
   }
 
   const isExpired = status === "expired";
+  const isNotConnected = status === "not_connected";
 
   return (
     <div
@@ -31,18 +32,24 @@ export default function ConnectInstagramCTA({
     >
       <div className="space-y-1 text-center">
         <h3 className="text-lg font-semibold">
-          {isExpired ? "Instagram Disconnected" : "Connect Instagram"}
+          {isExpired
+            ? "Instagram Disconnected"
+            : isNotConnected
+              ? "Connect Instagram"
+              : "Instagram Connection Issue"}
         </h3>
         <p className="max-w-sm text-sm text-muted-foreground">
           {isExpired
             ? "Your Instagram session expired. Reconnect to keep auto-DMs running."
-            : "Link your Instagram to pull in your reels and start sending auto-DMs."}
+            : isNotConnected
+              ? "Link your Instagram to pull in your reels and start sending auto-DMs."
+              : "Your Instagram connection needs attention."}
         </p>
       </div>
 
       <Button
         asChild
-        className="gap-2 bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737] text-white hover:opacity-90"
+        className="gap-2 bg-linear-to-r from-[#833AB4] via-[#E1306C] to-[#F77737] text-white hover:opacity-90"
       >
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full redirect */}
         <a href="/api/auth/instagram">

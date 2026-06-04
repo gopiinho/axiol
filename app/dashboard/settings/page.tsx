@@ -2,19 +2,11 @@
 
 import { useState } from "react";
 import {
-  Instagram,
-  CheckCircle2,
-  AlertTriangle,
-  RefreshCw,
-  Shield,
-  Clock,
   Trash2,
   Loader2,
   AlertCircle,
 } from "lucide-react";
 import { useUser } from "@/features/auth/client/UserContext";
-import { useInstagramConnection } from "@/features/automations/hooks/useInstagramConnection";
-import ConnectInstagramCTA from "@/features/automations/components/ConnectInstagramCTA";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,10 +20,32 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useIntegrations } from "@/features/integrations/hooks/useIntegrations";
+import IntegrationCard from "@/features/integrations/components/IntegrationCard";
+import type { IntegrationDefinition } from "@/features/integrations/types";
+
+const INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
+  {
+    provider: "instagram",
+    name: "Instagram",
+    description: "Automate DM replies to reel comments",
+    icon: "/icons/instagram-icon.svg",
+    connectUrl: "/api/auth/instagram",
+    brandColor: "from-[#833AB4] via-[#E1306C] to-[#F77737]",
+  },
+  {
+    provider: "google_calendar",
+    name: "Google Calendar",
+    description: "Sync bookings and appointments",
+    icon: "/icons/google-calendar.svg",
+    connectUrl: "#",
+    brandColor: "from-blue-500 to-blue-600",
+  },
+];
 
 export default function SettingsPage() {
   const { user: profile } = useUser();
-  const ig = useInstagramConnection();
+  const { integrations } = useIntegrations();
 
   const subscriptionLabel =
     profile?.subscriptionStatus === "trial" && profile?.trialEndsAt
@@ -84,7 +98,7 @@ export default function SettingsPage() {
             </TabsContent>
 
             <TabsContent value="integrations" className="pt-6">
-              <IntegrationsTab ig={ig} />
+              <IntegrationsTab integrations={integrations} />
             </TabsContent>
 
             <TabsContent value="advanced" className="pt-6">
@@ -131,107 +145,25 @@ function GeneralTab({
 }
 
 function IntegrationsTab({
-  ig,
+  integrations,
 }: {
-  ig: ReturnType<typeof useInstagramConnection>;
+  integrations: ReturnType<typeof useIntegrations>["integrations"];
 }) {
   return (
     <div className="space-y-5">
       <SectionHeader
         title="Connected Services"
-        description="Manage your connected social accounts."
+        description="Manage your connected accounts and integrations."
       />
 
-      <div className="app-panel p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#833AB4] via-[#E1306C] to-[#F77737]">
-            <Instagram className="h-5 w-5 text-white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Instagram</p>
-            <p className="text-xs text-muted-foreground">
-              Automate DM replies to reel comments
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 border-t border-border/50 pt-4">
-          {(ig.status === "not_connected" ||
-            ig.status === "expired" ||
-            ig.status === "loading") && (
-            <ConnectInstagramCTA status={ig.status} className="py-4" />
-          )}
-
-          {ig.status === "connected" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center justify-center gap-1">
-                  <p className="text-sm font-medium text-foreground">
-                    {ig.instagramUsername
-                      ? `@${ig.instagramUsername}`
-                      : `Account ${ig.instagramAccountId}`}
-                  </p>
-                  <Badge className="tone-ok shrink-0 border-0">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Connected
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5 shrink-0" />
-                  <span>
-                    Token expires{" "}
-                    {ig.tokenExpiresAt
-                      ? new Date(ig.tokenExpiresAt).toLocaleDateString()
-                      : "N/A"}
-                  </span>
-                </div>
-              </div>
-
-              <Button variant="outline" size="sm" asChild className="gap-1.5">
-                {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full redirect */}
-                <a href="/api/auth/instagram">
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  Reconnect
-                </a>
-              </Button>
-            </div>
-          )}
-
-          {ig.status === "expiring_soon" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-foreground">
-                  {ig.instagramUsername
-                    ? `@${ig.instagramUsername}`
-                    : `Account ${ig.instagramAccountId}`}
-                </p>
-                <Badge className="tone-warn shrink-0 border-0">
-                  <AlertTriangle className="h-3 w-3" />
-                  Expiring Soon
-                </Badge>
-              </div>
-
-              <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium tone-warn">
-                <Shield className="h-3.5 w-3.5 shrink-0" />
-                <span>
-                  Token expires{" "}
-                  {ig.tokenExpiresAt
-                    ? new Date(ig.tokenExpiresAt).toLocaleDateString()
-                    : "soon"}{" "}
-                  — reconnect to avoid interruptions
-                </span>
-              </div>
-
-              <Button size="sm" asChild className="gap-1.5">
-                {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full redirect */}
-                <a href="/api/auth/instagram">
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  Reconnect Now
-                </a>
-              </Button>
-            </div>
-          )}
-        </div>
+      <div className="grid gap-4">
+        {INTEGRATION_DEFINITIONS.map((def) => (
+          <IntegrationCard
+            key={def.provider}
+            definition={def}
+            integration={integrations.find((i) => i.provider === def.provider)}
+          />
+        ))}
       </div>
     </div>
   );
