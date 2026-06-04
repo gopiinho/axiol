@@ -2,11 +2,13 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 export function useReelMappings() {
   const raw = useQuery(api.instagram.listReelMappings);
+  const cached = useCachedQueryResult("reelMappings", raw);
   return {
-    mappings: raw ?? [],
-    isLoading: raw === undefined,
+    mappings: cached ?? [],
+    isLoading: raw === undefined && cached === undefined,
   };
 }
 

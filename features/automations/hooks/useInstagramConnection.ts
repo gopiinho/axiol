@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useIntegration } from "@/features/integrations/hooks/useIntegrations";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export type InstagramStatus =
   | "loading"
@@ -52,10 +53,24 @@ function mapIntegrationStatus(
 
   if (config.tokenExpiresAt < Date.now()) return emptyConnection("expired");
   if (config.tokenExpiresAt < Date.now() + 7 * 24 * 60 * 60 * 1000) {
-    return emptyConnection("expiring_soon");
+    return {
+      status: "expiring_soon",
+      instagramUsername: undefined,
+      instagramAccountId: undefined,
+      tokenExpiresAt: config.tokenExpiresAt,
+      isConnected: true,
+      isUsable: true,
+    };
   }
 
-  return emptyConnection("not_connected");
+  return {
+    status: "connected",
+    instagramUsername: undefined,
+    instagramAccountId: undefined,
+    tokenExpiresAt: config.tokenExpiresAt,
+    isConnected: true,
+    isUsable: true,
+  };
 }
 
 function integrationStatusToLegacy(
@@ -92,13 +107,15 @@ export function useInstagramConnection(): InstagramConnection {
   const integration = useIntegration("instagram");
   const config = useQuery(api.instagram.getConfigPublic);
 
-  const [connection, setConnection] = useState<InstagramConnection>(() =>
-    mapIntegrationStatus(integration, config),
+  const connection = useMemo(
+    () => mapIntegrationStatus(integration, config),
+    [integration, config],
   );
 
-  useEffect(() => {
-    setConnection(mapIntegrationStatus(integration, config));
-  }, [integration, config]);
-
-  return connection;
+  return (
+    useCachedQueryResult(
+      "instagramConnection",
+      connection.status !== "loading" ? connection : undefined,
+    ) ?? connection
+  );
 }

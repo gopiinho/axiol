@@ -419,26 +419,30 @@ export const getQueueStats = query({
 
     const pending = await ctx.db
       .query("dmJobs")
-      .withIndex("by_owner", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("status"), "pending"))
+      .withIndex("by_owner_status", (q) =>
+        q.eq("userId", userId).eq("status", "pending"),
+      )
       .collect();
 
     const processing = await ctx.db
       .query("dmJobs")
-      .withIndex("by_owner", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("status"), "processing"))
+      .withIndex("by_owner_status", (q) =>
+        q.eq("userId", userId).eq("status", "processing"),
+      )
       .collect();
 
     const sent = await ctx.db
       .query("dmJobs")
-      .withIndex("by_owner", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("status"), "sent"))
+      .withIndex("by_owner_status", (q) =>
+        q.eq("userId", userId).eq("status", "sent"),
+      )
       .collect();
 
     const failed = await ctx.db
       .query("dmJobs")
-      .withIndex("by_owner", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("status"), "failed"))
+      .withIndex("by_owner_status", (q) =>
+        q.eq("userId", userId).eq("status", "failed"),
+      )
       .collect();
 
     const state = await getRateLimitState(ctx, userId);

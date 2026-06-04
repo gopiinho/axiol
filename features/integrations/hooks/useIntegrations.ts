@@ -3,10 +3,12 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { IntegrationProvider, Integration } from "@/features/integrations/types";
+import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 export function useIntegrations() {
   const raw = useQuery(api.integrations.list);
-  const integrations: Integration[] = (raw ?? []).map((row) => ({
+  const cached = useCachedQueryResult("integrations", raw);
+  const integrations: Integration[] = (cached ?? []).map((row) => ({
     _id: row._id,
     provider: row.provider as IntegrationProvider,
     status: row.computedStatus as Integration["status"],
@@ -21,7 +23,7 @@ export function useIntegrations() {
 
   return {
     integrations,
-    isLoading: raw === undefined,
+    isLoading: raw === undefined && cached === undefined,
   };
 }
 

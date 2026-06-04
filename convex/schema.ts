@@ -150,6 +150,7 @@ export default defineSchema({
     .index("by_user_reel", ["instagramUserId", "reelId"])
     .index("by_scheduled", ["scheduledFor"])
     .index("by_owner", ["userId"])
+    .index("by_owner_status", ["userId", "status"])
     .index("by_product", ["productId"]),
 
   dmRateLimitState: defineTable({
