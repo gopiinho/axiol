@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FadeIn } from "@/components/motion/FadeIn";
 import AutomationsList from "@/features/automations/components/AutomationsList";
 import InstagramConnectOverlay from "@/features/automations/components/InstagramConnectOverlay";
 import { useInstagramConnection } from "@/features/automations/hooks/useInstagramConnection";
@@ -54,13 +53,10 @@ export default function AutomationsPage() {
   return (
     <div>
       {showSuccess && (
-        <FadeIn>
-          <SuccessBanner onDismiss={() => setShowSuccess(false)} />
-        </FadeIn>
+        <SuccessBanner onDismiss={() => setShowSuccess(false)} />
       )}
 
-      <FadeIn>
-        <section className="p-5 sm:p-8 border-b">
+      <section className="p-5 sm:p-8 border-b">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="app-title">Automations</h1>
@@ -75,7 +71,6 @@ export default function AutomationsPage() {
             </Link>
           </div>
         </section>
-      </FadeIn>
 
       <AutomationsList />
     </div>

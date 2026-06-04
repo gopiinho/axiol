@@ -1,7 +1,5 @@
 "use client";
 
-import { FadeIn } from "@/components/motion/FadeIn";
-import { motion } from "motion/react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,8 +15,6 @@ interface CreateFlowHeaderProps {
   onGoToStep: (step: number) => void;
 }
 
-const easeOutQuart: [number, number, number, number] = [0.25, 1, 0.5, 1];
-
 export default function CreateFlowHeader({
   currentStep,
   stepMeta,
@@ -29,18 +25,14 @@ export default function CreateFlowHeader({
   const isCompleted = (stepId: number) => currentStep > stepId;
   const totalSteps = stepMeta.length;
   const interval = 100 / totalSteps;
-  const progressScale = (currentStep - 1) / (totalSteps - 1) || 0;
 
   return (
     <div className="px-5 lg:px-6">
-      <FadeIn>
-        <section className="py-6 lg:py-8">
-          <h1 className="app-title">New Automation</h1>
-        </section>
-      </FadeIn>
+      <section className="py-6 lg:py-8">
+        <h1 className="app-title">New Automation</h1>
+      </section>
 
-      <FadeIn delay={0.08}>
-        <nav aria-label="Create flow steps" className="pb-6 lg:pb-8">
+      <nav aria-label="Create flow steps" className="pb-6 lg:pb-8">
           <div className="relative flex justify-between">
             <div
               className="absolute h-px bg-border"
@@ -51,15 +43,13 @@ export default function CreateFlowHeader({
               }}
             />
 
-            <motion.div
+            <div
               className="absolute h-px bg-primary origin-left"
               style={{
                 left: `calc(${interval / 2}%)`,
                 width: `calc(${100 - interval}%)`,
                 top: "1.25rem",
               }}
-              animate={{ scaleX: progressScale }}
-              transition={{ duration: 0.5, ease: easeOutQuart }}
             />
 
             {stepMeta.map((step) => {
@@ -83,7 +73,7 @@ export default function CreateFlowHeader({
                         : "",
                   )}
                 >
-                  <motion.div
+                  <div
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors duration-300",
                       active
@@ -92,21 +82,15 @@ export default function CreateFlowHeader({
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-muted-foreground",
                     )}
-                    animate={{ scale: active ? 1.08 : 1 }}
-                    transition={{ duration: 0.3, ease: easeOutQuart }}
                   >
                     {completed ? (
-                      <motion.span
-                        initial={{ scale: 0, rotate: -90 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ duration: 0.35, ease: easeOutQuart }}
-                      >
+                      <span>
                         <Check className="h-4 w-4" strokeWidth={3} />
-                      </motion.span>
+                      </span>
                     ) : (
                       <span>{step.id}</span>
                     )}
-                  </motion.div>
+                  </div>
 
                   <span
                     className={cn(
@@ -125,7 +109,6 @@ export default function CreateFlowHeader({
             })}
           </div>
         </nav>
-      </FadeIn>
     </div>
   );
 }

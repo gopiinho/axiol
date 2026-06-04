@@ -5,7 +5,6 @@ import { useAction, useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Id } from "@/convex/_generated/dataModel";
-import { AnimatePresence, motion } from "motion/react";
 import {
   Dialog,
   DialogContent,
@@ -69,7 +68,6 @@ function CreateAutomationWizard() {
   const [reelsError, setReelsError] = useState<string | null>(null);
   const [reels, setReels] = useState<Reel[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [direction, setDirection] = useState(1);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -157,7 +155,6 @@ function CreateAutomationWizard() {
 
   const goToStep = (nextStep: number) => {
     if (nextStep < 1 || nextStep > TOTAL_STEPS) return;
-    setDirection(nextStep > currentStep ? 1 : -1);
     setCurrentStep(nextStep);
   };
 
@@ -384,17 +381,9 @@ function CreateAutomationWizard() {
         />
 
         <div className="min-h-135 mb-20 px-5 py-4 lg:px-6">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={`step-${currentStep}`}
-              initial={{ opacity: 0, x: direction > 0 ? 24 : -24, filter: "blur(4px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, x: direction > 0 ? -24 : 24, filter: "blur(4px)" }}
-              transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-            >
-              {renderStepContent()}
-            </motion.div>
-          </AnimatePresence>
+          <div>
+            {renderStepContent()}
+          </div>
         </div>
       </div>
 

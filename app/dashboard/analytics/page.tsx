@@ -20,7 +20,6 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@/features/auth/client/UserContext";
 import { KpiRow, StatTile } from "@/features/dm-queue/components/Stats";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
-import { FadeIn } from "@/components/motion/FadeIn";
 
 export default function AnalyticsPage() {
   useUser();
@@ -50,17 +49,14 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      <FadeIn>
-        <section className="p-5 sm:p-8 border-b">
-          <h1 className="app-title">Analytics</h1>
-          <p className="app-subtitle mt-1">
-            See how your auto-DMs are performing
-          </p>
-        </section>
-      </FadeIn>
+      <section className="p-5 sm:p-8 border-b">
+        <h1 className="app-title">Analytics</h1>
+        <p className="app-subtitle mt-1">
+          See how your auto-DMs are performing
+        </p>
+      </section>
 
-      <FadeIn delay={0.08}>
-        <section className="grid p-5 sm:p-8 xl:grid-cols-[1.3fr_1fr]">
+      <section className="grid p-5 sm:p-8 xl:grid-cols-[1.3fr_1fr]">
           <Card className="overflow-hidden">
             <CardHeader className="border-b border-border/70">
               <div className="flex items-start justify-between gap-4">
@@ -173,7 +169,6 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </section>
-      </FadeIn>
     </div>
   );
 }

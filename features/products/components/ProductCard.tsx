@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 import { Package } from "lucide-react";
 import { ProductTypeIcon } from "./ProductTypeIcon";
 
@@ -78,15 +77,7 @@ export function ProductCard({
   const href = username ? `/${username}/p/${product.productUrl}` : undefined;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.45,
-        delay: index * 0.08,
-        ease: [0.25, 1, 0.5, 1],
-      }}
-    >
+    <div>
       {interactive && href ? (
         <Link href={href} className="block">
           {card}
@@ -94,6 +85,6 @@ export function ProductCard({
       ) : (
         card
       )}
-    </motion.div>
+    </div>
   );
 }
