@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AffiliateItemLink from "@/features/analytics/components/AffiliateItemLink";
 import { getServerConvexClient } from "@/server/convex/client";
+import { getProductTypeLabel } from "@/features/products/components/ProductTypeIcon";
+import { CheckoutForm } from "@/features/products/components/CheckoutForm";
 
 const platformLogos: Record<string, StaticImageData> = {
   amazon: icons.amazonLogo,
@@ -67,6 +69,12 @@ export default async function ProductDetailPage({
         )}
 
         <div className="mb-10">
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="secondary" className="text-xs font-medium">
+              {getProductTypeLabel(product.type)}
+            </Badge>
+          </div>
+
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-3">
             {product.name}
           </h1>
@@ -84,106 +92,114 @@ export default async function ProductDetailPage({
           )}
         </div>
 
-        {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/10 py-20 text-center">
-            <Package className="mb-3 h-10 w-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">
-              No items in this product yet.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map(
-              (item: {
-                _id: string;
-                affiliateLink: string;
-                title?: string | null;
-                platform?: string | null;
-                price?: string | null;
-                imageUrl?: string | null;
-              }) => (
-                <AffiliateItemLink
-                  key={item._id}
-                  href={item.affiliateLink}
-                  itemId={item._id}
-                  itemTitle={item.title ?? undefined}
-                  platform={item.platform ?? ""}
-                  price={item.price ?? undefined}
-                  productId={product._id}
-                  productName={product.name}
-                  className="group relative"
-                >
-                  <div className="overflow-hidden rounded-xl border border-border/60 bg-white transition-all duration-300 hover:shadow-lg hover:border-border/80">
-                    <div className="absolute top-3 right-3 z-10">
-                      {item.platform && platformLogos[item.platform] ? (
-                        <div className="rounded-lg border border-border/40 bg-white p-2 shadow-sm">
-                          <Image
-                            src={platformLogos[item.platform]}
-                            alt={platformNames[item.platform]}
-                            width={36}
-                            height={22}
-                            className="object-contain"
-                          />
+        {product.type === "affiliate" ? (
+          <>
+            {items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/10 py-20 text-center">
+                <Package className="mb-3 h-10 w-10 text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">
+                  No items in this product yet.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map(
+                  (item: {
+                    _id: string;
+                    affiliateLink: string;
+                    title?: string | null;
+                    platform?: string | null;
+                    price?: string | null;
+                    imageUrl?: string | null;
+                  }) => (
+                    <AffiliateItemLink
+                      key={item._id}
+                      href={item.affiliateLink}
+                      itemId={item._id}
+                      itemTitle={item.title ?? undefined}
+                      platform={item.platform ?? ""}
+                      price={item.price ?? undefined}
+                      productId={product._id}
+                      productName={product.name}
+                      className="group relative"
+                    >
+                      <div className="overflow-hidden rounded-xl border border-border/60 bg-white transition-all duration-300 hover:shadow-lg hover:border-border/80">
+                        <div className="absolute top-3 right-3 z-10">
+                          {item.platform && platformLogos[item.platform] ? (
+                            <div className="rounded-lg border border-border/40 bg-white p-2 shadow-sm">
+                              <Image
+                                src={platformLogos[item.platform]}
+                                alt={platformNames[item.platform]}
+                                width={36}
+                                height={22}
+                                className="object-contain"
+                              />
+                            </div>
+                          ) : (
+                            <Badge
+                              variant="secondary"
+                              className="border border-border/40 bg-white/90 text-xs font-medium shadow-sm backdrop-blur-sm"
+                            >
+                              {item.platform
+                                ? platformNames[item.platform]
+                                : "Shop"}
+                            </Badge>
+                          )}
                         </div>
-                      ) : (
-                        <Badge
-                          variant="secondary"
-                          className="border border-border/40 bg-white/90 text-xs font-medium shadow-sm backdrop-blur-sm"
-                        >
-                          {item.platform
-                            ? platformNames[item.platform]
-                            : "Shop"}
-                        </Badge>
-                      )}
-                    </div>
 
-                    {item.imageUrl && (
-                      <div className="aspect-[4/3] overflow-hidden bg-secondary/10">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={item.imageUrl}
-                          alt={item.title || "Product image"}
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                        />
+                        {item.imageUrl && (
+                          <div className="aspect-[4/3] overflow-hidden bg-secondary/10">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={item.imageUrl}
+                              alt={item.title || "Product image"}
+                              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                            />
+                          </div>
+                        )}
+
+                        <div className="p-4">
+                          <h2 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 mb-2 transition-colors group-hover:text-primary">
+                            {item.title || "View Deal"}
+                          </h2>
+
+                          {item.price && (
+                            <p className="text-xs font-medium text-muted-foreground mb-3">
+                              {item.price}
+                            </p>
+                          )}
+
+                          <div className="flex items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-secondary/20 px-3 py-2 text-xs font-medium text-foreground transition group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary">
+                            View Deal
+                            <ExternalLink className="h-3 w-3" />
+                          </div>
+                        </div>
                       </div>
-                    )}
-
-                    <div className="p-4">
-                      <h2 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 mb-2 transition-colors group-hover:text-primary">
-                        {item.title || "View Deal"}
-                      </h2>
-
-                      {item.price && (
-                        <p className="text-xs font-medium text-muted-foreground mb-3">
-                          {item.price}
-                        </p>
-                      )}
-
-                      <div className="flex items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-secondary/20 px-3 py-2 text-xs font-medium text-foreground transition group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary">
-                        View Deal
-                        <ExternalLink className="h-3 w-3" />
-                      </div>
-                    </div>
-                  </div>
-                </AffiliateItemLink>
-              ),
+                    </AffiliateItemLink>
+                  ),
+                )}
+              </div>
             )}
-          </div>
-        )}
 
-        <div className="mt-12 border-t border-border/60 pt-6">
-          <p className="text-center text-[0.65rem] text-muted-foreground leading-relaxed">
-            If you purchase from any of these links, I may receive a small
-            commission. Thank you for the support{" "}
-            <Image
-              src={heartPixel.src}
-              alt="heart"
-              width={5}
-              height={5}
-              className="inline-block w-2 h-2"
-            />
-          </p>
-        </div>
+            <div className="mt-12 border-t border-border/60 pt-6">
+              <p className="text-center text-[0.65rem] text-muted-foreground leading-relaxed">
+                If you purchase from any of these links, I may receive a small
+                commission. Thank you for the support{" "}
+                <Image
+                  src={heartPixel.src}
+                  alt="heart"
+                  width={5}
+                  height={5}
+                  className="inline-block w-2 h-2"
+                />
+              </p>
+            </div>
+          </>
+        ) : product.type === "digital" ? (
+          <div className="max-w-lg">
+            <CheckoutForm product={product} />
+          </div>
+        ) : null}
       </div>
     </main>
   );
