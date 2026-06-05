@@ -1,5 +1,9 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import {
+  productTypeValidator,
+  productConfigValidator,
+} from "./productConfig";
 
 const accountTypes = v.union(v.literal("creator"), v.literal("admin"));
 
@@ -42,12 +46,16 @@ export default defineSchema({
     description: v.optional(v.string()),
     coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
-    type: v.union(v.literal("affiliate")),
+    type: productTypeValidator,
     status: v.union(
       v.literal("draft"),
       v.literal("published"),
       v.literal("archived"),
     ),
+    priceCents: v.optional(v.number()),
+    currency: v.optional(v.string()),
+    config: productConfigValidator,
+    createdAt: v.number(),
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
     automationEnabled: v.boolean(),
@@ -64,6 +72,104 @@ export default defineSchema({
     title: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     order: v.number(),
+  }).index("by_product", ["productId"]),
+
+  availabilitySchedules: defineTable({
+    ownerId: v.id("users"),
+    name: v.string(),
+    timezone: v.string(),
+    weeklyRules: v.array(
+      v.object({
+        weekday: v.union(
+          v.literal("monday"),
+          v.literal("tuesday"),
+          v.literal("wednesday"),
+          v.literal("thursday"),
+          v.literal("friday"),
+          v.literal("saturday"),
+          v.literal("sunday"),
+        ),
+        enabled: v.boolean(),
+        windows: v.array(
+          v.object({
+            from: v.string(),
+            to: v.string(),
+          }),
+        ),
+      }),
+    ),
+    blockedDates: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_owner", ["ownerId"]),
+
+  orders: defineTable({
+    productId: v.id("products"),
+    sellerId: v.id("users"),
+    buyerEmail: v.string(),
+    buyerName: v.string(),
+    buyerPhone: v.optional(v.string()),
+    amountCents: v.number(),
+    currency: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("paid"),
+      v.literal("failed"),
+      v.literal("refunded"),
+    ),
+    paymentProvider: v.optional(v.string()),
+    paymentReference: v.optional(v.string()),
+    createdAt: v.number(),
+    paidAt: v.optional(v.number()),
+  })
+    .index("by_product", ["productId"])
+    .index("by_seller", ["sellerId"]),
+
+  bookings: defineTable({
+    productId: v.id("products"),
+    orderId: v.optional(v.id("orders")),
+    sellerId: v.id("users"),
+    buyerName: v.string(),
+    buyerEmail: v.string(),
+    startsAt: v.number(),
+    endsAt: v.number(),
+    timezone: v.string(),
+    status: v.union(
+      v.literal("reserved"),
+      v.literal("confirmed"),
+      v.literal("cancelled"),
+      v.literal("completed"),
+    ),
+    meetingLocation: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_product", ["productId"])
+    .index("by_seller", ["sellerId"]),
+
+  formSubmissions: defineTable({
+    productId: v.id("products"),
+    sellerId: v.id("users"),
+    values: v.array(
+      v.object({
+        fieldId: v.string(),
+        value: v.string(),
+      }),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_product", ["productId"])
+    .index("by_seller", ["sellerId"]),
+
+  deliveries: defineTable({
+    productId: v.id("products"),
+    orderId: v.optional(v.id("orders")),
+    submissionId: v.optional(v.id("formSubmissions")),
+    recipientEmail: v.string(),
+    deliveryType: v.union(v.literal("email"), v.literal("redirect"), v.literal("download_link")),
+    status: v.union(v.literal("pending"), v.literal("sent"), v.literal("failed")),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+    sentAt: v.optional(v.number()),
   }).index("by_product", ["productId"]),
 
   instagramConfig: defineTable({
