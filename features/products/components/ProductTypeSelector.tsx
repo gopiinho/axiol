@@ -23,7 +23,6 @@ const TYPES: ProductTypeOption[] = [
     label: "Digital Product",
     description: "Sell PDFs, templates, and downloads",
     icon: <FileText className="h-5 w-5" />,
-    comingSoon: true,
   },
   {
     value: "course",
