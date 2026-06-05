@@ -73,3 +73,35 @@ export function useSaveProductCoverImage() {
 export function useRemoveProductCoverImage() {
   return useMutation(api.storage.removeProductCoverImage);
 }
+
+export function useUpdateThumbnailConfig() {
+  return useMutation(api.products.updateThumbnailConfig);
+}
+
+export function useUpdateCheckoutConfig() {
+  return useMutation(api.products.updateCheckoutConfig);
+}
+
+export function useUpdateContentConfig() {
+  return useMutation(api.products.updateContentConfig);
+}
+
+export function useSaveThumbnailImage() {
+  return useMutation(api.storage.saveThumbnailImage);
+}
+
+export function useRemoveThumbnailImage() {
+  return useMutation(api.storage.removeThumbnailImage);
+}
+
+export function useGenerateContentUploadUrl() {
+  return useMutation(api.storage.generateContentUploadUrl);
+}
+
+export function useSaveContentFile() {
+  return useMutation(api.storage.saveContentFile);
+}
+
+export function useRemoveContentFile() {
+  return useMutation(api.storage.removeContentFile);
+}
