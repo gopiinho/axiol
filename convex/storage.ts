@@ -4,9 +4,9 @@ import { requireSession } from "./security";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-const MAX_PROFILE_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
-const MAX_COVER_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
-const MAX_PRODUCT_COVER_SIZE = 2 * 1024 * 1024; // 2 MB
+const MAX_PROFILE_IMAGE_SIZE = 2 * 1024 * 1024;
+const MAX_COVER_IMAGE_SIZE = 2 * 1024 * 1024;
+const MAX_PRODUCT_COVER_SIZE = 2 * 1024 * 1024;
 
 export const generateUploadUrl = mutation({
   args: {},
@@ -33,9 +33,7 @@ export const saveProfileImage = mutation({
     if (!metadata) throw new Error("File not found");
     if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
       await ctx.storage.delete(args.storageId);
-      throw new Error(
-        "Invalid file type. Please upload a JPEG, PNG, or WebP image.",
-      );
+      throw new Error("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
     }
     if (metadata.size > MAX_PROFILE_IMAGE_SIZE) {
       await ctx.storage.delete(args.storageId);
@@ -59,9 +57,7 @@ export const saveCoverImage = mutation({
     if (!metadata) throw new Error("File not found");
     if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
       await ctx.storage.delete(args.storageId);
-      throw new Error(
-        "Invalid file type. Please upload a JPEG, PNG, or WebP image.",
-      );
+      throw new Error("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
     }
     if (metadata.size > MAX_COVER_IMAGE_SIZE) {
       await ctx.storage.delete(args.storageId);
@@ -90,9 +86,7 @@ export const saveProductCoverImage = mutation({
     if (!metadata) throw new Error("File not found");
     if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
       await ctx.storage.delete(args.storageId);
-      throw new Error(
-        "Invalid file type. Please upload a JPEG, PNG, or WebP image.",
-      );
+      throw new Error("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
     }
     if (metadata.size > MAX_PRODUCT_COVER_SIZE) {
       await ctx.storage.delete(args.storageId);
@@ -120,6 +114,120 @@ export const removeProductCoverImage = mutation({
     if (product.coverImageId) {
       await ctx.storage.delete(product.coverImageId);
       await ctx.db.patch(args.productId, { coverImageId: undefined });
+    }
+  },
+});
+
+export const saveThumbnailImage = mutation({
+  args: { productId: v.id("products"), storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found");
+    }
+    const metadata = await ctx.storage.getMetadata(args.storageId);
+    if (!metadata) throw new Error("File not found");
+    if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
+    }
+    if (metadata.size > MAX_PRODUCT_COVER_SIZE) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error("File too large. Thumbnail image must be under 2 MB.");
+    }
+
+    const { thumbnail: prev } = product.config;
+    if (prev?.imageId) {
+      await ctx.storage.delete(prev.imageId);
+    }
+
+    await ctx.db.patch(args.productId, {
+      config: {
+        ...product.config,
+        thumbnail: {
+          style: prev?.style ?? "preview",
+          title: prev?.title ?? "",
+          subtitle: prev?.subtitle,
+          buttonText: prev?.buttonText ?? "Download Now",
+          imageId: args.storageId,
+        },
+      },
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const removeThumbnailImage = mutation({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found");
+    }
+
+    const { thumbnail: prev } = product.config;
+    if (prev?.imageId) {
+      await ctx.storage.delete(prev.imageId);
+      await ctx.db.patch(args.productId, {
+        config: {
+          ...product.config,
+          thumbnail: { ...prev, imageId: undefined },
+        },
+        updatedAt: Date.now(),
+      });
+    }
+  },
+});
+
+export const generateContentUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireSession(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const saveContentFile = mutation({
+  args: { productId: v.id("products"), storageId: v.id("_storage"), fileName: v.string() },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found");
+    }
+    const metadata = await ctx.storage.getMetadata(args.storageId);
+    if (!metadata) throw new Error("File not found");
+    await ctx.db.patch(args.productId, {
+      config: {
+        ...product.config,
+        content: { mode: "upload" as const, storageId: args.storageId, fileName: args.fileName },
+      },
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const removeContentFile = mutation({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found");
+    }
+
+    const content = product.config?.content;
+    if (content?.mode === "upload" && content.storageId) {
+      await ctx.storage.delete(content.storageId);
+      await ctx.db.patch(args.productId, {
+        config: {
+          ...product.config,
+          content: { mode: "upload" as const, storageId: undefined, fileName: undefined },
+        },
+        updatedAt: Date.now(),
+      });
     }
   },
 });
