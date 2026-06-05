@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { ProductTypeIcon, getProductTypeLabel } from "./ProductTypeIcon";
 
 interface ProductRowProps {
-  product: Doc<"products"> & { itemCount: number };
+  product: Doc<"products"> & { itemCount: number; coverImageUrl?: string | null; thumbnailImageUrl?: string | null };
   onPublish: (id: Id<"products">) => void;
   onArchive: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
@@ -62,10 +62,10 @@ export function ProductRow({
       >
         <td className="py-3.5 px-4">
           <div className="flex items-center gap-3">
-            {product.coverImageId ? (
+            {product.thumbnailImageUrl || product.coverImageUrl ? (
               <div className="h-10 w-10 rounded-xs bg-muted overflow-hidden shrink-0">
                 <img
-                  src={product.coverImageId}
+                  src={product.thumbnailImageUrl ?? product.coverImageUrl ?? ""}
                   alt=""
                   className="h-full w-full object-cover"
                 />

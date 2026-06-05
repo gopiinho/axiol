@@ -12,6 +12,7 @@ interface ProductCardProps {
     type?: string;
     price?: string | null;
     coverImageUrl?: string | null;
+    thumbnailImageUrl?: string | null;
     itemCount: number;
   };
   username?: string;
@@ -25,13 +26,15 @@ export function ProductCard({
   index = 0,
   interactive = true,
 }: ProductCardProps) {
+  const previewUrl = product.thumbnailImageUrl || product.coverImageUrl;
+
   const card = (
     <div className="group relative w-full overflow-hidden rounded-sm border border-border/60 bg-white transition-all duration-300 cursor-pointer hover:border-border">
       <div className="aspect-4/3 overflow-hidden bg-secondary/20">
-        {product.coverImageUrl ? (
+        {previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={product.coverImageUrl}
+            src={previewUrl}
             alt={product.name}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
           />

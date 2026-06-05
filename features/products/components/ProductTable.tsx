@@ -42,7 +42,7 @@ function ProductMobileCard({
   onArchive,
   onDelete,
 }: {
-  product: Doc<"products"> & { itemCount: number };
+  product: Doc<"products"> & { itemCount: number; coverImageUrl?: string | null; thumbnailImageUrl?: string | null };
   onPublish: (id: Id<"products">) => void;
   onArchive: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
@@ -59,10 +59,10 @@ function ProductMobileCard({
         onClick={() => router.push(`/dashboard/products/${product._id}/edit`)}
       >
         <div className="flex items-start gap-3">
-          {product.coverImageId ? (
+          {product.thumbnailImageUrl || product.coverImageUrl ? (
             <div className="h-10 w-10 rounded-xs bg-muted overflow-hidden shrink-0">
               <img
-                src={product.coverImageId}
+                src={product.thumbnailImageUrl ?? product.coverImageUrl ?? ""}
                 alt=""
                 className="h-full w-full object-cover"
               />
