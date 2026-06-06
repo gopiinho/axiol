@@ -31,6 +31,7 @@ export const contentConfigValidator = v.union(
   v.object({
     mode: v.literal("external_link"),
     url: v.optional(v.string()),
+    productName: v.optional(v.string()),
   }),
   v.object({
     mode: v.literal("none"),

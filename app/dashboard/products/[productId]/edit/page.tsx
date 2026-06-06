@@ -46,12 +46,19 @@ export default function EditProduct({
   const needsItems =
     product?.type === "affiliate" && (items?.length ?? 0) === 0;
 
-  const definition = product ? getProductTypeDefinition(product.type as ProductTypeKey) : null;
-  const isLastStep = definition ? currentStepIndex === definition.steps.length - 1 : false;
+  const definition = product
+    ? getProductTypeDefinition(product.type as ProductTypeKey)
+    : null;
+  const isLastStep = definition
+    ? currentStepIndex === definition.steps.length - 1
+    : false;
 
-  const handleRegisterSave = useCallback((stepIndex: number, fn: () => Promise<void>) => {
-    saveFnsRef.current.set(stepIndex, fn);
-  }, []);
+  const handleRegisterSave = useCallback(
+    (stepIndex: number, fn: () => Promise<void>) => {
+      saveFnsRef.current.set(stepIndex, fn);
+    },
+    [],
+  );
 
   const handleNext = async () => {
     if (!definition || saving) return;
@@ -63,11 +70,14 @@ export default function EditProduct({
         try {
           await publishProduct({ id: productId });
           router.push("/dashboard/products");
-        } catch {} finally {
+        } catch {
+        } finally {
           setPublishing(false);
         }
       } else {
-        setCurrentStepIndex((prev) => Math.min(prev + 1, definition.steps.length - 1));
+        setCurrentStepIndex((prev) =>
+          Math.min(prev + 1, definition.steps.length - 1),
+        );
       }
     } catch {
     } finally {
@@ -95,59 +105,61 @@ export default function EditProduct({
   return (
     <div>
       <section className="p-5 sm:p-8 border-b">
-          <div className="flex items-center justify-between">
-            <div className="sm:flex items-center gap-3 hidden">
-              <h1 className="app-title">
-                {isLoading
-                  ? "Loading..."
-                  : (product?.name ?? "Product not found")}
-              </h1>
-              {product && (
-                <ProductTypeIcon
-                  type={product.type}
-                  className="h-5 w-5 text-muted-foreground"
-                />
-              )}
-            </div>
+        <div className="flex items-center justify-between">
+          <div className="sm:flex items-center gap-3 hidden">
+            <h1 className="app-title">
+              {isLoading
+                ? "Loading..."
+                : (product?.name ?? "Product not found")}
+            </h1>
             {product && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  <Save className="h-4 w-4 mr-1.5" />
-                  {saving ? "Saving..." : "Save"}
-                </Button>
-
-                {(product.status === "draft" ||
-                  product.status === "archived") && (
-                  <Button
-                    variant="default"
-                    onClick={handleNext}
-                    disabled={saving || publishing || needsItems}
-                    title={
-                      needsItems
-                        ? "Add at least one item before publishing"
-                        : undefined
-                    }
-                  >
-                    {isLastStep
-                      ? (publishing ? "Publishing..." : "Publish")
-                      : (saving ? "Saving..." : "Next")}
-                    {!isLastStep && !saving && <ArrowRight className="h-4 w-4 ml-1.5" />}
-                  </Button>
-                )}
-
-                {product.status === "published" && (
-                  <Button variant="secondary" onClick={handleArchive}>
-                    Archive
-                  </Button>
-                )}
-              </div>
+              <ProductTypeIcon
+                type={product.type}
+                className="h-5 w-5 text-muted-foreground"
+              />
             )}
           </div>
-        </section>
+          {product && (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleSave} disabled={saving}>
+                <Save className="h-4 w-4 mr-1.5" />
+                {saving ? "Saving..." : "Save"}
+              </Button>
+
+              {(product.status === "draft" ||
+                product.status === "archived") && (
+                <Button
+                  variant="default"
+                  onClick={handleNext}
+                  disabled={saving || publishing || needsItems}
+                  title={
+                    needsItems
+                      ? "Add at least one item before publishing"
+                      : undefined
+                  }
+                >
+                  {isLastStep
+                    ? publishing
+                      ? "Publishing..."
+                      : "Publish"
+                    : saving
+                      ? "Saving..."
+                      : "Next"}
+                  {!isLastStep && !saving && (
+                    <ArrowRight className="h-4 w-4 ml-1.5" />
+                  )}
+                </Button>
+              )}
+
+              {product.status === "published" && (
+                <Button variant="secondary" onClick={handleArchive}>
+                  Archive
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
 
       <div className="p-5 sm:p-8">
         {isLoading ? (
@@ -184,7 +196,10 @@ export default function EditProduct({
               const Step = STEP_COMPONENTS[stepKey];
               if (!Step) return null;
               return (
-                <div key={stepKey} className={index === currentStepIndex ? "" : "hidden"}>
+                <div
+                  key={stepKey}
+                  className={index === currentStepIndex ? "" : "hidden"}
+                >
                   <Step
                     productId={product._id}
                     product={{

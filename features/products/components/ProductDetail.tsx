@@ -53,7 +53,7 @@ export const ProductDetail = forwardRef<
         description: description.trim() || undefined,
         price:
           productType !== "affiliate" ? price.trim() || undefined : undefined,
-        type: productType as "affiliate",
+        type: productType as "affiliate" | "digital",
       });
     } catch (error) {
       setErrorMessage(

@@ -4,12 +4,23 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { useUpdateContentConfig, useGenerateContentUploadUrl, useSaveContentFile, useRemoveContentFile } from "../../hooks/useProduct";
+import {
+  useUpdateContentConfig,
+  useGenerateContentUploadUrl,
+  useSaveContentFile,
+  useRemoveContentFile,
+} from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Loader2, Upload, Link as LinkIcon, X, AlertCircle } from "lucide-react";
-
-type ContentMode = "upload" | "external_link";
+import {
+  Loader2,
+  Upload,
+  X,
+  AlertCircle,
+  Plus,
+  Link,
+  Pencil,
+} from "lucide-react";
 
 function StepNumber({ num }: { num: number }) {
   return (
@@ -29,39 +40,55 @@ interface SavedContent {
   storageId?: string;
   fileName?: string;
   url?: string;
+  productName?: string;
 }
 
+type Mode = "upload" | "url";
+
 function readSaved(product: ProductStepComponentProps["product"]): {
-  mode: ContentMode;
   file: SavedFile | null;
   url: string;
+  mode: Mode;
+  productName: string;
 } {
   const content = product.config?.content as SavedContent | undefined;
-  if (!content) return { mode: "upload", file: null, url: "" };
+  if (!content) return { file: null, url: "", mode: "upload", productName: "" };
 
   if (content.mode === "external_link") {
-    return { mode: "external_link", file: null, url: content.url ?? "" };
+    return {
+      file: null,
+      url: content.url ?? "",
+      mode: "url",
+      productName: content.productName ?? "",
+    };
   }
 
   if (content.mode === "upload" && content.storageId) {
     return {
-      mode: "upload",
       file: { storageId: content.storageId, fileName: content.fileName ?? "" },
       url: "",
+      mode: "upload",
+      productName: "",
     };
   }
 
-  return { mode: "upload", file: null, url: "" };
+  return { file: null, url: "", mode: "upload", productName: "" };
 }
 
-export function ContentStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
+export function ContentStep({
+  productId,
+  product,
+  onRegisterSave,
+}: ProductStepComponentProps) {
   const saved = readSaved(product);
 
-  const [mode, setMode] = useState<ContentMode>(saved.mode);
+  const [mode, setMode] = useState<Mode>(saved.mode);
   const [externalUrl, setExternalUrl] = useState(saved.url);
+  const [productName, setProductName] = useState(saved.productName);
   const [uploading, setUploading] = useState(false);
   const [storedFile, setStoredFile] = useState<SavedFile | null>(saved.file);
   const [showError, setShowError] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const updateContentConfig = useUpdateContentConfig();
@@ -69,11 +96,9 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
   const saveContentFile = useSaveContentFile();
   const removeContentFile = useRemoveContentFile();
 
-  const hasContent = mode === "external_link" ? !!externalUrl.trim() : !!storedFile;
+  const hasContent = !!storedFile || !!externalUrl.trim();
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const uploadFile = async (file: File) => {
     setUploading(true);
     setShowError(false);
     try {
@@ -91,7 +116,6 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
         fileName: file.name,
       });
       setStoredFile({ storageId, fileName: file.name });
-      setMode("upload");
     } catch {
       console.error("Upload failed");
     } finally {
@@ -100,26 +124,50 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
     }
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+  };
+
   const handleRemoveFile = async () => {
     try {
-      await removeContentFile({ productId: productId as unknown as Id<"products"> });
+      await removeContentFile({
+        productId: productId as unknown as Id<"products">,
+      });
       setStoredFile(null);
     } catch {}
   };
 
   const handleSave = useCallback(async () => {
-    if (mode === "upload" && storedFile) {
+    if (storedFile) {
       await updateContentConfig({
         productId: productId as unknown as Id<"products">,
-        config: { mode: "upload", storageId: storedFile.storageId as unknown as Id<"_storage">, fileName: storedFile.fileName || undefined },
+        config: {
+          mode: "upload",
+          storageId: storedFile.storageId as unknown as Id<"_storage">,
+          fileName: storedFile.fileName || undefined,
+        },
       });
-    } else if (mode === "external_link" && externalUrl.trim()) {
+    } else if (externalUrl.trim()) {
       await updateContentConfig({
         productId: productId as unknown as Id<"products">,
-        config: { mode: "external_link", url: externalUrl.trim() },
+        config: {
+          mode: "external_link",
+          url: externalUrl.trim(),
+          productName: productName.trim() || undefined,
+        },
       });
     }
-  }, [mode, externalUrl, storedFile, productId, updateContentConfig]);
+  }, [storedFile, externalUrl, productName, productId, updateContentConfig]);
 
   const saveAndValidate = useCallback(async () => {
     await handleSave();
@@ -135,43 +183,76 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
 
   return (
     <div className="space-y-10">
-
-      <div className="space-y-3">
-        <Label className="flex items-center text-sm font-medium">
+      <div className="space-y-6">
+        <Label className="flex items-center text-base font-bold">
           <StepNumber num={1} />
-          Delivery type
+          Upload your Digital Product
         </Label>
-        <div className="flex gap-2 pl-8">
-          {[
-            { value: "upload" as ContentMode, label: "Upload file" },
-            { value: "external_link" as ContentMode, label: "External link" },
-          ].map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => { setMode(option.value); setShowError(false); }}
-              className={cn(
-                "px-4 py-2 text-sm font-medium rounded-xs border transition-colors",
-                mode === option.value
-                  ? "border-primary bg-primary/5 text-primary"
-                  : "border-border text-foreground hover:border-primary/50",
-              )}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {mode === "upload" && (
-        <div className="space-y-3">
-          <Label className="flex items-center text-sm font-medium">
-            <StepNumber num={2} />
-            Upload file
-          </Label>
-          <div className="pl-8">
-            {storedFile ? (
-              <div className="flex items-center justify-between p-4 border border-border/60 rounded-xs bg-secondary/20">
+        <div className="pl-8 space-y-4">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="space-y-1 min-w-0">
+              <p className="text-sm font-bold">Digital Product *</p>
+              <p className="text-xs text-muted-foreground max-w-sm">
+                {mode === "upload"
+                  ? "Axiol will send these files automatically to your customer upon purchase!"
+                  : "Customers will be redirected to this URL after purchase."}
+              </p>
+            </div>
+
+            <div
+              role="tablist"
+              aria-label="Delivery method"
+              className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/50 p-1 shrink-0"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "upload"}
+                disabled={!!externalUrl.trim() && mode === "url"}
+                onClick={() => {
+                  setMode("upload");
+                  setShowError(false);
+                }}
+                className={cn(
+                  "inline-flex items-center cursor-pointer px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200",
+                  mode === "upload"
+                    ? "bg-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                  !!externalUrl.trim() &&
+                    mode === "url" &&
+                    "opacity-40 cursor-not-allowed",
+                )}
+              >
+                Upload File
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "url"}
+                disabled={!!storedFile && mode === "upload"}
+                onClick={() => {
+                  setMode("url");
+                  setShowError(false);
+                }}
+                className={cn(
+                  "inline-flex items-center cursor-pointer px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200",
+                  mode === "url"
+                    ? "bg-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                  !!storedFile &&
+                    mode === "upload" &&
+                    "opacity-40 cursor-not-allowed",
+                )}
+              >
+                Redirect to URL
+              </button>
+            </div>
+          </div>
+
+          {mode === "upload" ? (
+            storedFile ? (
+              <div className="flex items-center justify-between p-4 border border-border/60 rounded-xs bg-card/50">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-10 h-10 rounded-xs bg-primary/10">
                     <Upload className="h-5 w-5 text-primary" />
@@ -192,68 +273,100 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
               </div>
             ) : (
               <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (!uploading) setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
                 className={cn(
-                  "border-2 border-dashed rounded-xs transition-colors cursor-pointer",
-                  showError
-                    ? "border-destructive/60 bg-destructive/5"
-                    : "border-border/70 bg-secondary/30 hover:border-primary/50 hover:bg-secondary/50",
+                  "flex w-full flex-col items-center justify-center gap-3 rounded-xs",
+                  "border border-dashed border-border/70 bg-card/50 p-5 h-[136px]",
+                  "transition-colors duration-200",
+                  isDragging && "border-primary bg-primary/5",
+                  uploading && "opacity-60",
+                  showError && !hasContent && "border-destructive",
                 )}
-                onClick={() => !uploading && inputRef.current?.click()}
               >
-                <div className="flex flex-col items-center justify-center gap-3 py-10 px-6">
-                  {uploading ? (
+                {uploading ? (
+                  <>
                     <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  ) : showError ? (
-                    <AlertCircle className="h-5 w-5 text-destructive" />
-                  ) : (
-                    <Upload className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <p className={cn("text-sm", showError ? "text-destructive font-medium" : "text-muted-foreground")}>
-                    {uploading ? "Uploading..." : showError ? "A file is required" : "Click to upload a file"}
-                  </p>
-                  {!uploading && !showError && (
-                    <p className="text-xs text-muted-foreground">Any file type supported</p>
-                  )}
-                </div>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
+                    <span className="text-xs text-muted-foreground">
+                      Uploading...
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      onClick={() => !uploading && inputRef.current?.click()}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-xs bg-card px-4 py-2",
+                        "text-sm font-semibold text-foreground shadow-sm border border-border/60",
+                        "transition-all duration-200",
+                        "hover:bg-accent hover:text-accent-foreground",
+                        "cursor-pointer",
+                      )}
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={2} />
+                      Upload
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Drag Your File(s) Here
+                    </span>
+                  </>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {mode === "external_link" && (
-        <div className="space-y-3">
-          <Label className="flex items-center text-sm font-medium">
-            <StepNumber num={2} />
-            External URL
-          </Label>
-          <div className="pl-8">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <LinkIcon className="h-4 w-4 text-muted-foreground" />
+            )
+          ) : (
+            <div className="space-y-4">
+              <div className="relative">
+                <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
+                  id="content-url"
                   value={externalUrl}
-                  onChange={(e) => { setExternalUrl(e.target.value); setShowError(false); }}
-                  placeholder="https://example.com/download"
-                  className={showError && !externalUrl.trim() ? "border-destructive" : ""}
+                  onChange={(e) => {
+                    setExternalUrl(e.target.value);
+                    setShowError(false);
+                  }}
+                  placeholder="https://..."
+                  className={cn(
+                    "pl-9",
+                    showError && !hasContent && "border-destructive",
+                  )}
                 />
               </div>
-              {showError && !externalUrl.trim() && (
-                <p className="text-xs text-destructive flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  A URL is required
-                </p>
-              )}
+              <div className="relative">
+                <Pencil className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  value={productName}
+                  onChange={(e) => {
+                    setProductName(e.target.value);
+                    setShowError(false);
+                  }}
+                  placeholder={'Your Product\'s Name (ex. "Course 101")'}
+                  className="pl-9"
+                />
+              </div>
             </div>
-          </div>
+          )}
+
+          <input
+            ref={inputRef}
+            type="file"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          {showError && !hasContent && (
+            <p className="text-xs text-destructive flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {mode === "upload"
+                ? "Upload a file to continue"
+                : "Provide a URL to continue"}
+            </p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

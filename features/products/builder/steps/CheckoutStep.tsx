@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, X, User, Mail, Phone, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   useUpdateProduct,
@@ -27,13 +27,16 @@ function StepNumber({ num }: { num: number }) {
   );
 }
 
-export function CheckoutStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
+export function CheckoutStep({
+  productId,
+  product,
+  onRegisterSave,
+}: ProductStepComponentProps) {
   const [name, setName] = useState(product.name);
   const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
   const [price, setPrice] = useState(product.price ?? "");
   const [phoneEnabled, setPhoneEnabled] = useState(false);
-  const [phoneRequired, setPhoneRequired] = useState(false);
 
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -81,7 +84,9 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
   const handleRemoveCover = async () => {
     setCoverPreview(null);
     try {
-      await removeProductCoverImage({ productId: productId as unknown as Id<"products"> });
+      await removeProductCoverImage({
+        productId: productId as unknown as Id<"products">,
+      });
     } catch {}
   };
 
@@ -96,9 +101,27 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
     });
 
     const collectFields = [
-      { key: "name", label: "Name", type: "text" as const, required: true, enabled: true },
-      { key: "email", label: "Email", type: "email" as const, required: true, enabled: true },
-      { key: "phone", label: "Phone number", type: "phone" as const, required: phoneRequired, enabled: phoneEnabled },
+      {
+        key: "name",
+        label: "Name",
+        type: "text" as const,
+        required: true,
+        enabled: true,
+      },
+      {
+        key: "email",
+        label: "Email",
+        type: "email" as const,
+        required: true,
+        enabled: true,
+      },
+      {
+        key: "phone",
+        label: "Phone number",
+        type: "phone" as const,
+        required: false,
+        enabled: phoneEnabled,
+      },
     ];
 
     await updateCheckoutConfig({
@@ -108,7 +131,17 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
         collectFields,
       },
     });
-  }, [productId, product.type, name, productUrl, description, price, phoneEnabled, phoneRequired, updateProduct, updateCheckoutConfig]);
+  }, [
+    productId,
+    product.type,
+    name,
+    productUrl,
+    description,
+    price,
+    phoneEnabled,
+    updateProduct,
+    updateCheckoutConfig,
+  ]);
 
   useEffect(() => {
     onRegisterSave?.(handleSave);
@@ -116,69 +149,89 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
 
   return (
     <div className="space-y-10">
-
-      <div className="space-y-3">
-        <Label className="flex items-center text-sm font-medium">
+      <div className="space-y-6">
+        <Label className="flex items-center text-base font-bold">
           <StepNumber num={1} />
-          Select cover
+          Cover
         </Label>
-        <div className="pl-8">
-          <div className={cn(
-            "flex gap-4",
-            displayCoverUrl ? "items-start" : "items-stretch"
-          )}>
-            {displayCoverUrl && (
-              <div className="w-40 shrink-0 rounded-xs border border-border/60 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={displayCoverUrl} alt="Cover" className="w-full h-24 object-cover" />
-              </div>
-            )}
-            <div className="flex-1">
-              {!displayCoverUrl ? (
-                <div
-                  className={cn(
-                    "border-2 border-dashed border-border/70 bg-secondary/30",
-                    "flex flex-col items-center justify-center gap-3 py-12 px-6",
-                    "transition-all duration-200 hover:border-primary/50 hover:bg-secondary/50",
-                    "cursor-pointer",
-                  )}
-                  onClick={() => !coverUploading && inputRef.current?.click()}
-                >
-                  {coverUploading ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                      <p className="text-sm text-muted-foreground">Uploading...</p>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-5 w-5 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Upload cover image</p>
-                      <p className="text-xs text-muted-foreground">Horizontal image, JPEG/PNG/WebP, max 2MB</p>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => inputRef.current?.click()}
-                    disabled={coverUploading}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Replace
-                  </button>
+        <div className="pl-8 space-y-3">
+          {displayCoverUrl ? (
+            <>
+              <div className="flex items-start">
+                <div className="group relative">
+                  <div className="h-20 w-28 overflow-hidden rounded-xs border-2 border-foreground/90 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.25)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={displayCoverUrl}
+                      alt="Cover thumbnail"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={handleRemoveCover}
                     disabled={coverUploading}
-                    className="text-xs text-destructive hover:underline"
+                    className={cn(
+                      "absolute -top-2 -right-2 cursor-pointer flex h-6 w-6 items-center justify-center rounded-full",
+                      "bg-[oklch(0.62_0.22_25)] shadow-md",
+                      "transition-transform duration-200 hover:scale-110",
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                    )}
+                    aria-label="Remove cover image"
                   >
-                    Remove
+                    <X className="h-3.5 w-3.5" strokeWidth={3} />
                   </button>
                 </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-xs border border-border/60 bg-secondary/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={displayCoverUrl}
+                  alt="Cover preview"
+                  className="block w-full h-auto max-h-105 object-cover"
+                />
+              </div>
+            </>
+          ) : (
+            <div
+              className={cn(
+                "flex w-full flex-col items-center justify-center gap-3 rounded-xs",
+                "border border-dashed border-border/70 bg-card/50 p-5 h-34",
+                coverUploading && "opacity-60",
+              )}
+            >
+              {coverUploading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <span className="text-xs text-muted-foreground">
+                    Uploading...
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span
+                    onClick={() => !coverUploading && inputRef.current?.click()}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-xs bg-card px-4 py-2",
+                      "text-sm font-semibold text-foreground shadow-sm border border-border/60",
+                      "transition-all duration-200",
+                      "hover:bg-accent hover:text-accent-foreground",
+                      "cursor-pointer",
+                    )}
+                  >
+                    <Plus className="h-4 w-4" strokeWidth={2} />
+                    Upload photo
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Images should be horizontal, at least 1280x720px, and 72 DPI
+                    (dots per inch).
+                  </span>
+                </>
               )}
             </div>
-          </div>
+          )}
+
           <input
             ref={inputRef}
             type="file"
@@ -189,14 +242,16 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Label className="flex items-center text-sm font-medium">
+      <div className="space-y-6">
+        <Label className="flex items-center text-base font-bold">
           <StepNumber num={2} />
           Product details
         </Label>
         <div className="pl-8 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="checkout-name" className="text-xs">Name</Label>
+            <Label htmlFor="checkout-name" className="text-sm font-bold">
+              Name *
+            </Label>
             <Input
               id="checkout-name"
               value={name}
@@ -205,7 +260,9 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="checkout-description" className="text-xs">Description</Label>
+            <Label htmlFor="checkout-description" className="text-sm font-bold">
+              Description
+            </Label>
             <Textarea
               id="checkout-description"
               value={description}
@@ -216,11 +273,15 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="checkout-url" className="text-xs">URL</Label>
-            <div className={cn(
-              "flex h-10 w-full items-center gap-0 rounded-xs border bg-card/90 px-2 py-2 text-base transition-[color,box-shadow,transform]",
-              "focus-within:border-ring focus-within:ring-ring/40 focus-within:ring-[3px] focus-within:bg-card",
-            )}>
+            <Label htmlFor="checkout-url" className="text-sm font-bold">
+              URL *
+            </Label>
+            <div
+              className={cn(
+                "flex h-10 w-full items-center gap-0 rounded-xs border bg-card/90 px-2 py-5 text-base transition-[color,box-shadow,transform]",
+                "focus-within:border-ring focus-within:ring-ring/40 focus-within:ring-[3px] focus-within:bg-card",
+              )}
+            >
               <span className="border border-primary px-3 bg-primary/20 py-1.5 rounded-full mr-1 shrink-0 select-none whitespace-nowrap text-sm">
                 axiol.store/{product.username ?? "..."}/p/
               </span>
@@ -232,68 +293,81 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
                   setProductUrl(filtered);
                 }}
                 placeholder="my-product-url"
-                className="min-w-0 flex-1 border-none bg-transparent p-0 text-base outline-none placeholder:text-muted-foreground md:text-sm"
+                className="min-w-0 flex-1 border-none font-medium bg-transparent p-0 text-base outline-none placeholder:text-muted-foreground md:text-sm"
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label className="flex items-center text-sm font-medium">
+      <div className="space-y-6">
+        <Label className="flex items-center text-base font-bold">
           <StepNumber num={3} />
-          Product Price
+          Set Price
         </Label>
         <div className="pl-8">
+          <Label htmlFor="checkout-name" className="text-sm font-bold">
+            Price(₹) *
+          </Label>
           <Input
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="e.g., $29, ₹999"
           />
-          <p className="text-xs text-muted-foreground mt-1">Optional. Shown on the product card.</p>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Label className="flex items-center text-sm font-medium">
+      <div className="space-y-6">
+        <Label className="flex items-center text-base font-bold">
           <StepNumber num={4} />
-          Buyer Information
+          Collect Info
         </Label>
-        <div className="pl-8 space-y-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Name</Label>
-            <Input value="Name field" disabled className="opacity-60" />
+        <div className="pl-8 space-y-4">
+          <div>
+            <p className="text-sm font-bold">Fields</p>
+            <p className="text-xs text-muted-foreground">
+              basic fields cannot be edited
+            </p>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Email</Label>
-            <Input value="Email field" disabled className="opacity-60" />
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input value="Name field" disabled className="pl-9 opacity-60" />
           </div>
 
-          <div className="border border-border/60 rounded-xs p-3 space-y-3">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={phoneEnabled}
-                onChange={(e) => setPhoneEnabled(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary"
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input value="Email field" disabled className="pl-9 opacity-60" />
+          </div>
+
+          <hr className="border-border/60" />
+
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Phone number"
+                className={cn("pl-9", !phoneEnabled && "opacity-60")}
+                disabled
               />
-              <div>
-                <p className="text-sm font-medium">Phone number</p>
-                <p className="text-xs text-muted-foreground">Optional field</p>
-              </div>
             </div>
-            {phoneEnabled && (
-              <div className="flex items-center gap-2 pl-7">
-                <input
-                  type="checkbox"
-                  checked={phoneRequired}
-                  onChange={(e) => setPhoneRequired(e.target.checked)}
-                  className="h-3 w-3 rounded"
-                />
-                <span className="text-xs text-muted-foreground">Required</span>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => setPhoneEnabled(!phoneEnabled)}
+              className={cn(
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xs border transition-colors",
+                phoneEnabled
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border/60 text-muted-foreground hover:border-primary/60",
+              )}
+            >
+              <Check
+                className={cn(
+                  "h-4 w-4 transition-opacity",
+                  phoneEnabled ? "opacity-100" : "opacity-0",
+                )}
+              />
+            </button>
           </div>
         </div>
       </div>
