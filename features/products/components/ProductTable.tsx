@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Id, Doc } from "@/convex/_generated/dataModel";
-import { useProducts, usePublishProduct, useArchiveProduct, useDeleteProduct } from "../hooks/useProduct";
+import {
+  useProducts,
+  usePublishProduct,
+  useArchiveProduct,
+  useDeleteProduct,
+} from "../hooks/useProduct";
 import { ProductRow } from "./ProductRow";
 import { ProductTypeIcon, getProductTypeLabel } from "./ProductTypeIcon";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +47,11 @@ function ProductMobileCard({
   onArchive,
   onDelete,
 }: {
-  product: Doc<"products"> & { itemCount: number; coverImageUrl?: string | null; thumbnailImageUrl?: string | null };
+  product: Doc<"products"> & {
+    itemCount: number;
+    coverImageUrl?: string | null;
+    thumbnailImageUrl?: string | null;
+  };
   onPublish: (id: Id<"products">) => void;
   onArchive: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
@@ -78,8 +87,13 @@ function ProductMobileCard({
             <p className="font-semibold text-sm truncate">{product.name}</p>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               <div className="flex items-center gap-1">
-                <ProductTypeIcon type={product.type} className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{getProductTypeLabel(product.type)}</span>
+                <ProductTypeIcon
+                  type={product.type}
+                  className="h-3 w-3 text-muted-foreground"
+                />
+                <span className="text-xs text-muted-foreground">
+                  {getProductTypeLabel(product.type)}
+                </span>
               </div>
               {product.price && (
                 <>
@@ -89,13 +103,21 @@ function ProductMobileCard({
               )}
             </div>
             <div className="flex items-center gap-2 mt-1">
-              <span className={cn("text-[11px] font-semibold", statusStyles[product.status])}>
-                {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+              <span
+                className={cn(
+                  "text-[11px] font-semibold",
+                  statusStyles[product.status],
+                )}
+              >
+                {product.status.charAt(0).toUpperCase() +
+                  product.status.slice(1)}
               </span>
               {product.automationEnabled && (
                 <>
                   <span className="text-muted-foreground/40">·</span>
-                  <Badge variant="default" className="text-[10px] px-1.5 py-0">Auto</Badge>
+                  <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                    Auto
+                  </Badge>
                 </>
               )}
             </div>
@@ -113,7 +135,11 @@ function ProductMobileCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem onClick={() => router.push(`/dashboard/products/${product._id}/edit`)}>
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/dashboard/products/${product._id}/edit`)
+                }
+              >
                 <Edit className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
@@ -138,7 +164,10 @@ function ProductMobileCard({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
                 <Trash2 className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -150,10 +179,12 @@ function ProductMobileCard({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete &ldquo;{product.name}&rdquo;?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this product and all its items.
-              This action cannot be undone.
+              This will permanently delete this product and all its items. This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -181,13 +212,25 @@ export function ProductTable() {
   const deleteProduct = useDeleteProduct();
 
   const handlePublish = async (id: Id<"products">) => {
-    try { await publishProduct({ id }); } catch { /* handled by toast */ }
+    try {
+      await publishProduct({ id });
+    } catch {
+      /* handled by toast */
+    }
   };
   const handleArchive = async (id: Id<"products">) => {
-    try { await archiveProduct({ id }); } catch { /* handled by toast */ }
+    try {
+      await archiveProduct({ id });
+    } catch {
+      /* handled by toast */
+    }
   };
   const handleDelete = async (id: Id<"products">) => {
-    try { await deleteProduct({ id }); } catch { /* handled by toast */ }
+    try {
+      await deleteProduct({ id });
+    } catch {
+      /* handled by toast */
+    }
   };
 
   if (isLoading) {
@@ -214,9 +257,9 @@ export function ProductTable() {
       </div>
 
       {/* Desktop table */}
-      <div className="hidden sm:block app-panel overflow-hidden">
+      <div className="hidden sm:block bg-card rounded-xs overflow-hidden">
         <table className="w-full">
-          <thead>
+          <thead className="bg-muted/50">
             <tr className="border-b border-border/50">
               <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Product

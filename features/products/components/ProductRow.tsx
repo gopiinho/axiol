@@ -27,7 +27,11 @@ import { cn } from "@/lib/utils";
 import { ProductTypeIcon, getProductTypeLabel } from "./ProductTypeIcon";
 
 interface ProductRowProps {
-  product: Doc<"products"> & { itemCount: number; coverImageUrl?: string | null; thumbnailImageUrl?: string | null };
+  product: Doc<"products"> & {
+    itemCount: number;
+    coverImageUrl?: string | null;
+    thumbnailImageUrl?: string | null;
+  };
   onPublish: (id: Id<"products">) => void;
   onArchive: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
@@ -84,7 +88,10 @@ export function ProductRow({
         </td>
         <td className="py-3.5 px-4 hidden sm:table-cell">
           <div className="flex items-center gap-1.5">
-            <ProductTypeIcon type={product.type} className="h-3.5 w-3.5 text-muted-foreground" />
+            <ProductTypeIcon
+              type={product.type}
+              className="h-3.5 w-3.5 text-muted-foreground"
+            />
             <span className="text-xs capitalize text-muted-foreground">
               {getProductTypeLabel(product.type)}
             </span>
@@ -92,13 +99,18 @@ export function ProductRow({
         </td>
         <td className="py-3.5 px-4 hidden md:table-cell">
           {product.price ? (
-            <span className="text-sm font-medium">{product.price}</span>
+            <span className="text-sm font-medium">₹{product.price}</span>
           ) : (
             <span className="text-xs text-muted-foreground">—</span>
           )}
         </td>
         <td className="py-3.5 px-4">
-          <span className={cn("text-[11px] font-semibold", statusStyles[product.status])}>
+          <span
+            className={cn(
+              "text-[11px] font-semibold",
+              statusStyles[product.status],
+            )}
+          >
             {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
           </span>
         </td>
@@ -111,7 +123,10 @@ export function ProductRow({
             <span className="text-xs text-muted-foreground">—</span>
           )}
         </td>
-        <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+        <td
+          className="py-3.5 px-4 text-right"
+          onClick={(e) => e.stopPropagation()}
+        >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -160,10 +175,12 @@ export function ProductRow({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete &ldquo;{product.name}&rdquo;?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this product and all its items.
-              This action cannot be undone.
+              This will permanently delete this product and all its items. This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
