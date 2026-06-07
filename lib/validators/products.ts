@@ -1,9 +1,10 @@
 import { buildProductUrl } from "@/features/products/lib/slugify";
+import type { ProductTypeKey } from "@/features/products/registry/productTypes";
+import { PRODUCT_TYPES } from "@/features/products/registry/productTypes";
 
-const PRODUCT_TYPES = ["affiliate"] as const;
+const PRODUCT_TYPE_KEYS = Object.keys(PRODUCT_TYPES) as ProductTypeKey[];
 const PRODUCT_STATUSES = ["draft", "published", "archived"] as const;
 
-type ProductType = (typeof PRODUCT_TYPES)[number];
 type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
 export interface ProductInput {
@@ -21,7 +22,7 @@ export function validateProductInput(input: ProductInput): {
   productUrl: string;
   description?: string;
   price?: string;
-  type: ProductType;
+  type: ProductTypeKey;
   status: ProductStatus;
   automationEnabled: boolean;
 } {
@@ -33,7 +34,7 @@ export function validateProductInput(input: ProductInput): {
     throw new Error("Product name must be at most 140 characters.");
   }
 
-  if (!PRODUCT_TYPES.includes(input.type as ProductType)) {
+  if (!PRODUCT_TYPE_KEYS.includes(input.type as ProductTypeKey)) {
     throw new Error("Please select a valid product type.");
   }
 
@@ -66,7 +67,7 @@ export function validateProductInput(input: ProductInput): {
     productUrl,
     description,
     price,
-    type: input.type as ProductType,
+    type: input.type as ProductTypeKey,
     status: status as ProductStatus,
     automationEnabled: input.automationEnabled ?? false,
   };

@@ -7,80 +7,125 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ProductTypeSelector } from "./ProductTypeSelector";
 import { useCreateProduct } from "../hooks/useProduct";
+import { PRODUCT_TYPES } from "../registry/productTypes";
+import type { ProductTypeKey } from "../registry/productTypes";
 
 export type CreateProductFlowHandle = {
   submit: () => void;
 };
 
-export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(function CreateProductFlow(_props, ref) {
-  const router = useRouter();
-  const createProduct = useCreateProduct();
+export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(
+  function CreateProductFlow(_props, ref) {
+    const router = useRouter();
+    const createProduct = useCreateProduct();
 
-  const [name, setName] = useState("");
-  const [type, setType] = useState("affiliate");
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [name, setName] = useState("");
+    const [type, setType] = useState("digital");
+    const [price, setPrice] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [errors, setErrors] = useState<{ name?: string; price?: string }>({});
 
-  const handleSubmit = async () => {
-    if (!name.trim() || loading) return;
+    const definition = PRODUCT_TYPES[type as ProductTypeKey];
+    const showPrice = definition?.requiresPrice ?? false;
 
-    setLoading(true);
-    setErrorMessage(null);
+    const handleSubmit = async () => {
+      const newErrors: { name?: string; price?: string } = {};
 
-    try {
-      const productId = await createProduct({
-        name: name.trim(),
-        type: type as "affiliate",
-      });
-      router.push(`/dashboard/products/${productId}/edit`);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Couldn't create this product. Check your connection and try again.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!name.trim()) newErrors.name = "Name is required";
+      if (showPrice && !price.trim()) newErrors.price = "Price is required";
 
-  useImperativeHandle(ref, () => ({
-    submit: handleSubmit,
-  }));
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0 || loading) return;
 
-  return (
-    <div className="space-y-10">
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertTitle>Couldn&apos;t create product</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
+      setLoading(true);
+      setErrorMessage(null);
 
-      <section className="grid gap-1">
-        <Label htmlFor="product-name" className="font-bold">
-          Name
-        </Label>
-        <Input
-          id="product-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., Summer Style Picks"
-          required
-          autoFocus
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-        />
-      </section>
+      try {
+        const productId = await createProduct({
+          name: name.trim(),
+          type: type as "affiliate" | "digital",
+          price: showPrice ? price.trim() || undefined : undefined,
+        });
+        router.push(`/dashboard/products/${productId}/edit`);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Couldn't create this product. Check your connection and try again.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      <section className="grid gap-3">
-        <Label className="font-bold">Products</Label>
-        <ProductTypeSelector value={type} onChange={setType} />
-      </section>
-    </div>
-  );
-});
+    useImperativeHandle(ref, () => ({
+      submit: handleSubmit,
+    }));
+
+    return (
+      <div className="space-y-10">
+        {errorMessage && (
+          <Alert variant="destructive">
+            <AlertTitle>Couldn&apos;t create product</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <section className="grid gap-1">
+          <Label htmlFor="product-name" className="font-bold">
+            Name
+          </Label>
+          <Input
+            id="product-name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setErrors((prev) => ({ ...prev, name: undefined }));
+            }}
+            required
+            autoFocus
+            aria-invalid={!!errors.name}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
+          />
+          {errors.name && (
+            <p className="text-sm text-destructive">{errors.name}</p>
+          )}
+        </section>
+
+        <section className="grid gap-3">
+          <Label className="font-bold">Products</Label>
+          <ProductTypeSelector value={type} onChange={(v) => {
+            setType(v);
+            setErrors((prev) => ({ ...prev, price: undefined }));
+          }} />
+        </section>
+
+        {showPrice && (
+          <section className="grid gap-1">
+            <Label htmlFor="product-price" className="font-bold">
+              Price
+            </Label>
+            <Input
+              id="product-price"
+              value={price}
+              onChange={(e) => {
+                setPrice(e.target.value);
+                setErrors((prev) => ({ ...prev, price: undefined }));
+              }}
+              aria-invalid={!!errors.price}
+            />
+            {errors.price && (
+              <p className="text-sm text-destructive">{errors.price}</p>
+            )}
+          </section>
+        )}
+      </div>
+    );
+  },
+);

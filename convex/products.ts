@@ -3,6 +3,16 @@ import { mutation, query, MutationCtx, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { requireSession } from "./security";
 import { validateProductInput } from "../lib/validators/products";
+import {
+  thumbnailConfigValidator,
+  checkoutConfigValidator,
+  contentConfigValidator,
+  productTypeValidator,
+} from "./productConfig";
+import { PRODUCT_TYPES, getProductTypeDefinition, hasCapability } from "../features/products/registry/productTypes";
+import type { ProductTypeKey } from "../features/products/registry/productTypes";
+import { getDefaultConfig } from "../features/products/registry/defaults";
+import { validateProductForPublish } from "../features/products/registry/publishValidation";
 
 type ProductCtx = MutationCtx | QueryCtx;
 
@@ -35,6 +45,15 @@ async function ensureUniqueProductUrl(
   }
 }
 
+async function requireProductOwner(ctx: MutationCtx | QueryCtx, productId: Id<"products">) {
+  const { userId } = await requireSession(ctx);
+  const product = await ctx.db.get(productId);
+  if (!product || product.createdBy !== userId) {
+    throw new Error("Product not found.");
+  }
+  return { userId, product };
+}
+
 export const listByUser = query({
   args: {},
   handler: async (ctx) => {
@@ -52,7 +71,15 @@ export const listByUser = query({
           .query("productItems")
           .withIndex("by_product", (q) => q.eq("productId", product._id))
           .take(100);
-        return { ...product, itemCount: items.length };
+        const coverImageUrl = product.coverImageId
+          ? await ctx.storage.getUrl(product.coverImageId)
+          : null;
+        const config = product.config;
+        const thumb = config.thumbnail;
+        const thumbnailImageUrl = thumb?.imageId
+          ? await ctx.storage.getUrl(thumb.imageId)
+          : null;
+        return { ...product, itemCount: items.length, coverImageUrl, thumbnailImageUrl };
       }),
     );
 
@@ -74,9 +101,16 @@ export const getById = query({
       ? await ctx.storage.getUrl(product.coverImageId)
       : null;
 
+    const config = product.config;
+    const thumb = config.thumbnail;
+    const thumbnailImageUrl = thumb?.imageId
+      ? await ctx.storage.getUrl(thumb.imageId)
+      : null;
+
     return {
       ...product,
       coverImageUrl,
+      thumbnailImageUrl,
     };
   },
 });
@@ -102,7 +136,7 @@ export const create = mutation({
     description: v.optional(v.string()),
     coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
-    type: v.union(v.literal("affiliate")),
+    type: productTypeValidator,
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -113,7 +147,7 @@ export const create = mutation({
     });
 
     const productUrl = await ensureUniqueProductUrl(ctx, userId, validated.productUrl);
-
+    const defaultConfig = getDefaultConfig(validated.type as ProductTypeKey);
     const now = Date.now();
 
     return await ctx.db.insert("products", {
@@ -123,8 +157,11 @@ export const create = mutation({
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
-      type: validated.type,
+      type: validated.type as "affiliate" | "digital",
       status: "draft",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      config: defaultConfig as any,
+      createdAt: now,
       publishedAt: undefined,
       updatedAt: now,
       automationEnabled: validated.automationEnabled,
@@ -140,7 +177,7 @@ export const update = mutation({
     description: v.optional(v.string()),
     coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
-    type: v.union(v.literal("affiliate")),
+    type: productTypeValidator,
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -164,8 +201,62 @@ export const update = mutation({
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
-      type: validated.type,
+      type: validated.type as "affiliate" | "digital",
       automationEnabled: validated.automationEnabled,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateThumbnailConfig = mutation({
+  args: {
+    productId: v.id("products"),
+    config: thumbnailConfigValidator,
+  },
+  handler: async (ctx, args) => {
+    const { product } = await requireProductOwner(ctx, args.productId);
+    const definition = getProductTypeDefinition(product.type);
+    if (!hasCapability(definition, "thumbnail")) {
+      throw new Error("This product type does not support thumbnail configuration.");
+    }
+    await ctx.db.patch(args.productId, {
+      config: { ...product.config, thumbnail: { ...(product.config.thumbnail ?? {}), ...args.config } },
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateCheckoutConfig = mutation({
+  args: {
+    productId: v.id("products"),
+    config: checkoutConfigValidator,
+  },
+  handler: async (ctx, args) => {
+    const { product } = await requireProductOwner(ctx, args.productId);
+    const definition = getProductTypeDefinition(product.type);
+    if (!hasCapability(definition, "checkout")) {
+      throw new Error("This product type does not support checkout configuration.");
+    }
+    await ctx.db.patch(args.productId, {
+      config: { ...product.config, checkout: { ...(product.config.checkout ?? {}), ...args.config } },
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateContentConfig = mutation({
+  args: {
+    productId: v.id("products"),
+    config: contentConfigValidator,
+  },
+  handler: async (ctx, args) => {
+    const { product } = await requireProductOwner(ctx, args.productId);
+    const definition = getProductTypeDefinition(product.type);
+    if (!hasCapability(definition, "contentDelivery")) {
+      throw new Error("This product type does not support content delivery.");
+    }
+    await ctx.db.patch(args.productId, {
+      config: { ...product.config, content: args.config },
       updatedAt: Date.now(),
     });
   },
@@ -191,12 +282,7 @@ export const archive = mutation({
 export const publish = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
-    const product = await ctx.db.get(args.id);
-
-    if (!product || product.createdBy !== userId) {
-      throw new Error("Product not found.");
-    }
+    const { userId, product } = await requireProductOwner(ctx, args.id);
 
     if (product.type === "affiliate") {
       const items = await ctx.db
@@ -206,6 +292,15 @@ export const publish = mutation({
       if (items.length === 0) {
         throw new Error("Add at least one item before publishing.");
       }
+    }
+
+    const definition = getProductTypeDefinition(product.type);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const validation = validateProductForPublish(product as any, definition);
+    if (!validation.valid) {
+      throw new Error(
+        validation.errors.map((e) => e.message).join("\n"),
+      );
     }
 
     const validated = validateProductInput({
@@ -288,12 +383,31 @@ export const getPublicProduct = query({
       ? await ctx.storage.getUrl(product.coverImageId)
       : null;
 
+    const { thumbnail: thumb } = product.config;
+    const thumbnailUrl = thumb?.imageId
+      ? await ctx.storage.getUrl(thumb.imageId)
+      : null;
+
+    const definition = PRODUCT_TYPES[product.type] ?? null;
+
     return {
       product: {
         ...product,
         coverImageUrl: coverUrl,
+        thumbnailImageUrl: thumbnailUrl,
       },
       items,
+      definition: definition
+        ? {
+            key: definition.key,
+            label: definition.label,
+            description: definition.description,
+            capabilities: definition.capabilities,
+            requiresPrice: definition.requiresPrice,
+            defaultThumbnailStyle: definition.defaultThumbnailStyle,
+            defaultButtonText: definition.defaultButtonText,
+          }
+        : null,
     };
   },
 });

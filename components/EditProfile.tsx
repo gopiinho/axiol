@@ -1,6 +1,8 @@
 "use client";
 
-import { Globe, ImageIcon, Instagram, Youtube, Check } from "lucide-react";
+import { useState, useRef } from "react";
+import { Globe, Instagram, Youtube, Check, Plus, Loader2, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -98,6 +100,46 @@ export function EditProfile({
   const saveCoverImage = useMutation(api.storage.saveCoverImage);
   const removeProfileImage = useMutation(api.storage.removeProfileImage);
   const removeCoverImage = useMutation(api.storage.removeCoverImage);
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+  const handleCoverSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!ALLOWED_TYPES.includes(file.type)) return;
+    if (file.size > 4 * 1024 * 1024) return;
+
+    setCoverUploading(true);
+    setCoverPreview(URL.createObjectURL(file));
+
+    try {
+      const uploadUrl = await generateUploadUrl();
+      const result = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!result.ok) throw new Error("Upload failed");
+      const { storageId } = await result.json();
+      await saveCoverImage({ storageId: storageId as never });
+    } catch {
+      setCoverPreview(null);
+    } finally {
+      setCoverUploading(false);
+      if (coverInputRef.current) coverInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveCover = async () => {
+    setCoverPreview(null);
+    try {
+      await removeCoverImage();
+    } catch {}
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -146,24 +188,85 @@ export function EditProfile({
               <Label className="text-xs text-muted-foreground">
                 Cover photo
               </Label>
-              <ImageUpload
-                currentImageUrl={user?.coverImageUrl}
-                onUploaded={(storageId) =>
-                  saveCoverImage({ storageId: storageId as never })
-                }
-                onRemove={() => removeCoverImage()}
-                maxSizeBytes={4 * 1024 * 1024}
-                maxSizeLabel="4 MB"
-                aspectRatio="3/1"
-                placeholder={
-                  <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                    <ImageIcon className="h-5 w-5 text-primary" />
-                    <span className="text-xs">Add cover photo</span>
-                    <span className="text-[10px] text-muted-foreground/60">
-                      1200x400 recommended
-                    </span>
+              {coverPreview || user?.coverImageUrl ? (
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-14 w-24 rounded-xs overflow-hidden border border-border/60 shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={coverPreview || user?.coverImageUrl || ""}
+                        alt="Cover"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => !coverUploading && coverInputRef.current?.click()}
+                      disabled={coverUploading}
+                      className="inline-flex items-center gap-1.5 rounded-xs border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-50"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      {coverUploading ? "Uploading..." : "Replace"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCover}
+                      disabled={coverUploading}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Remove
+                    </button>
                   </div>
-                }
+                  <div className="relative w-full rounded-xs overflow-hidden border border-border/60">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={coverPreview || user?.coverImageUrl || ""}
+                      alt="Cover preview"
+                      className="w-full h-auto max-h-[200px] object-cover"
+                    />
+                    {coverUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-3 rounded-xs border border-dashed border-border/70 bg-card/50 p-5 h-[136px]">
+                  {coverUploading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                      <span className="text-xs text-muted-foreground">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        onClick={() => !coverUploading && coverInputRef.current?.click()}
+                        className={cn(
+                          "inline-flex items-center gap-2 rounded-xs bg-card px-4 py-2",
+                          "text-sm font-semibold text-foreground shadow-sm border border-border/60",
+                          "transition-all duration-200",
+                          "hover:bg-accent hover:text-accent-foreground",
+                          "cursor-pointer",
+                        )}
+                      >
+                        <Plus className="h-4 w-4" strokeWidth={2} />
+                        Upload photo
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        1200x400 recommended
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleCoverSelect}
+                className="hidden"
               />
             </div>
           </div>
