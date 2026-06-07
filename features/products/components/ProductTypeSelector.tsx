@@ -13,16 +13,17 @@ interface ProductTypeOption {
 
 const TYPES: ProductTypeOption[] = [
   {
-    value: "affiliate",
-    label: "Affiliate",
-    description: "Refer products and earn commissions",
-    icon: <Link className="h-5 w-5" />,
-  },
-  {
     value: "digital",
     label: "Digital Product",
     description: "Sell PDFs, templates, and downloads",
     icon: <FileText className="h-5 w-5" />,
+  },
+  {
+    value: "affiliate",
+    label: "Affiliate",
+    description: "Refer products and earn commissions",
+    icon: <Link className="h-5 w-5" />,
+    comingSoon: true,
   },
   {
     value: "course",
@@ -58,7 +59,7 @@ export function ProductTypeSelector({
               !type.comingSoon &&
                 "cursor-pointer hover:border-primary/50 hover:shadow-xs",
               selected
-                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                ? "bg-foreground text-background "
                 : "bg-card border-border",
             )}
           >
@@ -72,15 +73,20 @@ export function ProductTypeSelector({
               className={cn(
                 "flex items-center justify-center w-9 h-9 rounded-xs",
                 selected
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-foreground"
                   : "bg-muted text-muted-foreground",
               )}
             >
               {type.icon}
             </div>
             <div>
-              <p className="font-semibold text-sm">{type.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="font-bold">{type.label}</p>
+              <p
+                className={cn(
+                  "text-xs mt-0.5",
+                  selected ? "text-card/70" : "text-muted-foreground",
+                )}
+              >
                 {type.description}
               </p>
             </div>
