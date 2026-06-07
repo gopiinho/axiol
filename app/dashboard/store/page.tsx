@@ -383,7 +383,6 @@ export default function MyStorePage() {
               displayName={displayName}
               bio={user?.bio}
               profileImageUrl={user?.profileImageUrl}
-              coverImageUrl={user?.coverImageUrl}
               username={user?.username ?? ""}
               theme={selectedTheme}
               accentColor={selectedAccent}

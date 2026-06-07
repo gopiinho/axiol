@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Globe, Instagram, Youtube, Check, Plus, Loader2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Globe, Instagram, Youtube, Check } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -35,7 +33,6 @@ type EditProfileProps = {
     instagramUrl?: string;
     youtubeUrl?: string;
     websiteUrl?: string;
-    coverImageUrl?: string | null;
     profileImageUrl?: string | null;
     theme?: string;
     accentColor?: string;
@@ -92,49 +89,7 @@ export function EditProfile({
   onAccentChange,
 }: EditProfileProps) {
   const saveProfileImage = useMutation(api.storage.saveProfileImage);
-  const saveCoverImage = useMutation(api.storage.saveCoverImage);
   const removeProfileImage = useMutation(api.storage.removeProfileImage);
-  const removeCoverImage = useMutation(api.storage.removeCoverImage);
-  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const [coverUploading, setCoverUploading] = useState(false);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-
-  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
-  const handleCoverSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!ALLOWED_TYPES.includes(file.type)) return;
-    if (file.size > 4 * 1024 * 1024) return;
-
-    setCoverUploading(true);
-    setCoverPreview(URL.createObjectURL(file));
-
-    try {
-      const uploadUrl = await generateUploadUrl();
-      const result = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      if (!result.ok) throw new Error("Upload failed");
-      const { storageId } = await result.json();
-      await saveCoverImage({ storageId: storageId as never });
-    } catch {
-      setCoverPreview(null);
-    } finally {
-      setCoverUploading(false);
-      if (coverInputRef.current) coverInputRef.current.value = "";
-    }
-  };
-
-  const handleRemoveCover = async () => {
-    setCoverPreview(null);
-    try {
-      await removeCoverImage();
-    } catch {}
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -147,16 +102,15 @@ export function EditProfile({
         </DialogHeader>
 
         <div className="max-h-[70vh] overflow-y-auto lg:max-h-none lg:overflow-visible">
-          <div className="border-border/50 flex flex-row gap-5 border-b px-5 py-5">
-            <div className="flex flex-col items-center gap-3 sm:w-24 sm:gap-2">
-              <Label className="text-muted-foreground text-xs sm:text-center">Profile</Label>
+          <div className="border-border/50 flex flex-row items-center justify-center gap-5 border-b px-5 py-5 sm:justify-start">
+            <div className="flex items-center justify-center sm:w-24 sm:items-start">
               <ImageUpload
                 currentImageUrl={user?.profileImageUrl}
                 onUploaded={(storageId) => saveProfileImage({ storageId: storageId as never })}
                 onRemove={() => removeProfileImage()}
                 maxSizeBytes={2 * 1024 * 1024}
                 maxSizeLabel="2 MB"
-                className="h-20 w-20 shrink-0 sm:h-full sm:w-full"
+                className="h-20 w-20 shrink-0 sm:h-24 sm:w-24"
                 placeholder={
                   <div className="from-primary/20 flex h-full w-full items-center justify-center overflow-hidden bg-linear-to-br to-pink-400/20">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -169,93 +123,11 @@ export function EditProfile({
                 }
               />
             </div>
-
-            <div className="flex-1 space-y-2">
-              <Label className="text-muted-foreground text-xs">Cover photo</Label>
-              {coverPreview || user?.coverImageUrl ? (
-                <div className="flex flex-col items-start gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="border-border/60 relative h-14 w-24 shrink-0 overflow-hidden rounded-xs border">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={coverPreview || user?.coverImageUrl || ""}
-                        alt="Cover"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => !coverUploading && coverInputRef.current?.click()}
-                      disabled={coverUploading}
-                      className="border-border/60 bg-card text-foreground hover:bg-accent inline-flex items-center gap-1.5 rounded-xs border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors disabled:opacity-50"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      {coverUploading ? "Uploading..." : "Replace"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleRemoveCover}
-                      disabled={coverUploading}
-                      className="text-muted-foreground hover:text-destructive inline-flex items-center gap-1 text-xs font-medium transition-colors disabled:opacity-50"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      Remove
-                    </button>
-                  </div>
-                  <div className="border-border/60 relative w-full overflow-hidden rounded-xs border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={coverPreview || user?.coverImageUrl || ""}
-                      alt="Cover preview"
-                      className="h-auto max-h-[200px] w-full object-cover"
-                    />
-                    {coverUploading && (
-                      <div className="bg-background/60 absolute inset-0 flex items-center justify-center backdrop-blur-sm">
-                        <Loader2 className="text-primary h-5 w-5 animate-spin" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="border-border/70 bg-card/50 flex h-[136px] flex-col items-center justify-center gap-3 rounded-xs border border-dashed p-5">
-                  {coverUploading ? (
-                    <>
-                      <Loader2 className="text-primary h-5 w-5 animate-spin" />
-                      <span className="text-muted-foreground text-xs">Uploading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        onClick={() => !coverUploading && coverInputRef.current?.click()}
-                        className={cn(
-                          "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
-                          "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
-                          "transition-all duration-200",
-                          "hover:bg-accent hover:text-accent-foreground",
-                          "cursor-pointer"
-                        )}
-                      >
-                        <Plus className="h-4 w-4" strokeWidth={2} />
-                        Upload photo
-                      </span>
-                      <span className="text-muted-foreground text-xs">1200x400 recommended</span>
-                    </>
-                  )}
-                </div>
-              )}
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleCoverSelect}
-                className="hidden"
-              />
-            </div>
           </div>
 
           <div className="grid gap-5 px-5 py-5 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-store-name" className="text-muted-foreground text-xs">
+              <Label htmlFor="edit-store-name" className="text-foreground text-sm font-semibold">
                 Store name
               </Label>
               <Input
@@ -268,7 +140,7 @@ export function EditProfile({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-name" className="text-muted-foreground text-xs">
+              <Label htmlFor="edit-name" className="text-foreground text-sm font-semibold">
                 Name
               </Label>
               <Input
@@ -280,7 +152,7 @@ export function EditProfile({
             </div>
 
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="edit-bio" className="text-muted-foreground text-xs">
+              <Label htmlFor="edit-bio" className="text-foreground text-sm font-semibold">
                 Bio
               </Label>
               <Textarea
@@ -293,8 +165,8 @@ export function EditProfile({
               />
             </div>
 
-            <div className="border-border/70 space-y-3 rounded-xl border p-4 sm:col-span-2">
-              <p className="text-muted-foreground text-xs font-medium">Social links</p>
+            <div className="space-y-3 sm:col-span-2">
+              <p className="text-foreground text-sm font-semibold">Social links</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label
@@ -363,9 +235,9 @@ export function EditProfile({
               </div>
             </div>
 
-            <div className="flex gap-3 sm:col-span-2 lg:hidden">
-              <div className="border-border/70 flex-1 space-y-3 rounded-xl border p-3">
-                <p className="text-muted-foreground text-xs font-medium">Theme</p>
+            <div className="flex flex-col gap-3 sm:col-span-2 lg:hidden">
+              <div className="flex-1 space-y-3">
+                <p className="text-foreground text-sm font-semibold">Theme</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   {themeKeys.map((key) => {
                     const theme = themes[key];
@@ -407,8 +279,8 @@ export function EditProfile({
                 </div>
               </div>
 
-              <div className="border-border/70 flex-1 space-y-3 rounded-xl border p-3">
-                <p className="text-muted-foreground text-xs font-medium">Accent color</p>
+              <div className="flex-1 space-y-3">
+                <p className="text-foreground text-sm font-semibold">Accent color</p>
                 <div className="grid grid-cols-4 gap-1.5">
                   {ACCENT_PRESETS.map((preset) => {
                     const isSelected = selectedAccent === preset.value;

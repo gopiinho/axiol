@@ -35,8 +35,6 @@ export const getByUsername = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId ? await ctx.storage.getUrl(user.coverImageId) : null;
-
     return {
       _id: user._id,
       username: user.username,
@@ -44,7 +42,6 @@ export const getByUsername = query({
       bio: user.bio,
       avatarUrl: user.avatarUrl,
       profileImageUrl,
-      coverImageUrl,
       theme: user.theme,
       accentColor: user.accentColor,
       storeName: user.storeName,
@@ -68,8 +65,6 @@ export const getPublicStore = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId ? await ctx.storage.getUrl(user.coverImageId) : null;
-
     const products = await ctx.db
       .query("products")
       .withIndex("by_status", (q) => q.eq("createdBy", user._id).eq("status", "published"))
@@ -102,7 +97,6 @@ export const getPublicStore = query({
         bio: user.bio,
         avatarUrl: user.avatarUrl,
         profileImageUrl,
-        coverImageUrl,
         theme: user.theme,
         accentColor: user.accentColor,
         storeName: user.storeName,
@@ -126,8 +120,6 @@ export const getProfile = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId ? await ctx.storage.getUrl(user.coverImageId) : null;
-
     return {
       _id: user._id,
       email: user.email,
@@ -136,7 +128,6 @@ export const getProfile = query({
       bio: user.bio,
       avatarUrl: user.avatarUrl,
       profileImageUrl,
-      coverImageUrl,
       theme: user.theme,
       accentColor: user.accentColor,
       storeName: user.storeName,
@@ -303,10 +294,6 @@ async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
   if (user?.profileImageId) {
     await ctx.storage.delete(user.profileImageId);
   }
-  if (user?.coverImageId) {
-    await ctx.storage.delete(user.coverImageId);
-  }
-
   const igConfigs = await ctx.db
     .query("instagramConfig")
     .withIndex("by_user", (q) => q.eq("userId", userId))

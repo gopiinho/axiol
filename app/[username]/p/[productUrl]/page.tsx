@@ -146,7 +146,7 @@ export default async function ProductDetailPage({
                         </div>
 
                         {item.imageUrl && (
-                          <div className="bg-secondary/10 aspect-[4/3] overflow-hidden">
+                          <div className="bg-secondary/10 aspect-4/3 overflow-hidden">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={item.imageUrl}

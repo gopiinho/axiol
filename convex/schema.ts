@@ -16,7 +16,6 @@ export default defineSchema({
     youtubeUrl: v.optional(v.string()),
     websiteUrl: v.optional(v.string()),
     profileImageId: v.optional(v.id("_storage")),
-    coverImageId: v.optional(v.id("_storage")),
     theme: v.optional(v.string()),
     accentColor: v.optional(v.string()),
     storeName: v.optional(v.string()),

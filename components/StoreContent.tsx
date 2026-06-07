@@ -23,7 +23,6 @@ export type StoreContentProps = {
   displayName: string;
   bio?: string;
   profileImageUrl?: string | null;
-  coverImageUrl?: string | null;
   socialLinks?: SocialLink[];
   products: ProductItem[];
   themeStyle: React.CSSProperties;
@@ -43,7 +42,6 @@ export function StoreContent({
   displayName,
   bio,
   profileImageUrl,
-  coverImageUrl,
   socialLinks,
   products,
   themeStyle,
@@ -77,20 +75,13 @@ export function StoreContent({
           backgroundColor: "color-mix(in oklch, var(--store-accent) 6%, var(--store-bg))",
         }}
       >
-        {coverImageUrl ? (
-          <div className="w-full overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={coverImageUrl} alt="" className="h-32 w-full object-cover" />
-          </div>
-        ) : (
-          <div
-            className="h-32 w-full"
-            style={{
-              backgroundColor: "var(--store-accent, oklch(0.52 0.2 254))",
-              opacity: 0.35,
-            }}
-          />
-        )}
+        <div
+          className="h-32 w-full"
+          style={{
+            backgroundColor: "var(--store-accent, oklch(0.52 0.2 254))",
+            opacity: 0.35,
+          }}
+        />
 
         <div className="relative z-10 -mt-14 px-5">
           <div

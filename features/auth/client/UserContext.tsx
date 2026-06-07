@@ -14,7 +14,6 @@ type UserProfile = {
   bio?: string;
   avatarUrl?: string;
   profileImageUrl?: string | null;
-  coverImageUrl?: string | null;
   theme?: string;
   accentColor?: string;
   storeName?: string;
