@@ -155,7 +155,7 @@ export function ThumbnailStep({
                   "flex flex-col items-center gap-1.5 px-6 py-4 text-sm cursor-pointer font-medium rounded-xs border transition-colors",
                   style === option.value
                     ? "bg-foreground text-background"
-                    : "border-border text-foreground hover:bg-card/30",
+                    : "border-border text-foreground hover:border-primary/50",
                 )}
               >
                 <Icon className="h-4 w-4" />

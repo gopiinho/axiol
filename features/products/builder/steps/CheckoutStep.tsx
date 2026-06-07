@@ -305,7 +305,7 @@ export function CheckoutStep({
           <StepNumber num={3} />
           Set Price
         </Label>
-        <div className="pl-8">
+        <div className="pl-8 space-y-2">
           <Label htmlFor="checkout-name" className="text-sm font-bold">
             Price(₹) *
           </Label>
@@ -326,7 +326,7 @@ export function CheckoutStep({
           <div>
             <p className="text-sm font-bold">Fields</p>
             <p className="text-xs text-muted-foreground">
-              basic fields cannot be edited
+              Basic fields cannot be edited
             </p>
           </div>
 
@@ -355,7 +355,7 @@ export function CheckoutStep({
               type="button"
               onClick={() => setPhoneEnabled(!phoneEnabled)}
               className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xs border transition-colors",
+                "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors",
                 phoneEnabled
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border/60 text-muted-foreground hover:border-primary/60",
