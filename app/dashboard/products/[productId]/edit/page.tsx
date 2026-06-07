@@ -12,10 +12,7 @@ import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon"
 import { ProductItemsManager } from "@/features/products/components/ProductItemsManager";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import { useUser } from "@/features/auth/client/UserContext";
-import {
-  usePublishProduct,
-  useArchiveProduct,
-} from "@/features/products/hooks/useProduct";
+import { usePublishProduct, useArchiveProduct } from "@/features/products/hooks/useProduct";
 import { getProductTypeDefinition } from "@/features/products/registry/productTypes";
 import type { ProductTypeKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
@@ -43,22 +40,14 @@ export default function EditProduct({
   const archiveProduct = useArchiveProduct();
 
   const isLoading = product === undefined || items === undefined;
-  const needsItems =
-    product?.type === "affiliate" && (items?.length ?? 0) === 0;
+  const needsItems = product?.type === "affiliate" && (items?.length ?? 0) === 0;
 
-  const definition = product
-    ? getProductTypeDefinition(product.type as ProductTypeKey)
-    : null;
-  const isLastStep = definition
-    ? currentStepIndex === definition.steps.length - 1
-    : false;
+  const definition = product ? getProductTypeDefinition(product.type as ProductTypeKey) : null;
+  const isLastStep = definition ? currentStepIndex === definition.steps.length - 1 : false;
 
-  const handleRegisterSave = useCallback(
-    (stepIndex: number, fn: () => Promise<void>) => {
-      saveFnsRef.current.set(stepIndex, fn);
-    },
-    [],
-  );
+  const handleRegisterSave = useCallback((stepIndex: number, fn: () => Promise<void>) => {
+    saveFnsRef.current.set(stepIndex, fn);
+  }, []);
 
   const handleNext = async () => {
     if (!definition || saving) return;
@@ -75,9 +64,7 @@ export default function EditProduct({
           setPublishing(false);
         }
       } else {
-        setCurrentStepIndex((prev) =>
-          Math.min(prev + 1, definition.steps.length - 1),
-        );
+        setCurrentStepIndex((prev) => Math.min(prev + 1, definition.steps.length - 1));
       }
     } catch {
     } finally {
@@ -104,39 +91,29 @@ export default function EditProduct({
 
   return (
     <div>
-      <section className="p-5 sm:p-8 border-b">
+      <section className="border-b p-5 sm:p-8">
         <div className="flex items-center justify-between">
-          <div className="sm:flex items-center gap-3 hidden">
+          <div className="hidden items-center gap-3 sm:flex">
             <h1 className="app-title">
-              {isLoading
-                ? "Loading..."
-                : (product?.name ?? "Product not found")}
+              {isLoading ? "Loading..." : (product?.name ?? "Product not found")}
             </h1>
             {product && (
-              <ProductTypeIcon
-                type={product.type}
-                className="h-5 w-5 text-muted-foreground"
-              />
+              <ProductTypeIcon type={product.type} className="text-muted-foreground h-5 w-5" />
             )}
           </div>
           {product && (
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleSave} disabled={saving}>
-                <Save className="h-4 w-4 mr-1.5" />
+                <Save className="mr-1.5 h-4 w-4" />
                 {saving ? "Saving..." : "Save"}
               </Button>
 
-              {(product.status === "draft" ||
-                product.status === "archived") && (
+              {(product.status === "draft" || product.status === "archived") && (
                 <Button
                   variant="default"
                   onClick={handleNext}
                   disabled={saving || publishing || needsItems}
-                  title={
-                    needsItems
-                      ? "Add at least one item before publishing"
-                      : undefined
-                  }
+                  title={needsItems ? "Add at least one item before publishing" : undefined}
                 >
                   {isLastStep
                     ? publishing
@@ -145,9 +122,7 @@ export default function EditProduct({
                     : saving
                       ? "Saving..."
                       : "Next"}
-                  {!isLastStep && !saving && (
-                    <ArrowRight className="h-4 w-4 ml-1.5" />
-                  )}
+                  {!isLastStep && !saving && <ArrowRight className="ml-1.5 h-4 w-4" />}
                 </Button>
               )}
 
@@ -165,7 +140,7 @@ export default function EditProduct({
         {isLoading ? (
           <ProductsSkeleton />
         ) : !product || !definition ? (
-          <div className="text-center py-12">
+          <div className="py-12 text-center">
             <p className="text-muted-foreground">Product not found.</p>
             <Link href="/dashboard/products">
               <Button variant="outline" className="mt-4">
@@ -175,7 +150,7 @@ export default function EditProduct({
           </div>
         ) : product.type === "affiliate" ? (
           <div className="space-y-12">
-            <div className="pt-4 border-t border-border/70">
+            <div className="border-border/70 border-t pt-4">
               <ProductItemsManager
                 productId={productId}
                 items={items ?? []}
@@ -196,10 +171,7 @@ export default function EditProduct({
               const Step = STEP_COMPONENTS[stepKey];
               if (!Step) return null;
               return (
-                <div
-                  key={stepKey}
-                  className={index === currentStepIndex ? "" : "hidden"}
-                >
+                <div key={stepKey} className={index === currentStepIndex ? "" : "hidden"}>
                   <Step
                     productId={product._id}
                     product={{

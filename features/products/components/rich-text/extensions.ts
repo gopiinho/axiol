@@ -7,9 +7,7 @@ export interface RichTextExtensionsOptions {
   placeholder?: string;
 }
 
-export function getRichTextExtensions(
-  options?: RichTextExtensionsOptions,
-): Extensions {
+export function getRichTextExtensions(options?: RichTextExtensionsOptions): Extensions {
   return [
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },

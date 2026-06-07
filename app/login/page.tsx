@@ -45,24 +45,16 @@ export default function LoginPage() {
     } catch (err) {
       console.error("Login error:", err);
 
-      const errorMessage =
-        err instanceof Error ? err.message : "Login failed. Please try again.";
+      const errorMessage = err instanceof Error ? err.message : "Login failed. Please try again.";
 
       if (errorMessage.includes("locked")) {
         setError(errorMessage);
-      } else if (
-        errorMessage.includes("Invalid") ||
-        errorMessage.includes("invalid")
-      ) {
-        setError(
-          "Invalid email or password. Please check your credentials and try again.",
-        );
+      } else if (errorMessage.includes("Invalid") || errorMessage.includes("invalid")) {
+        setError("Invalid email or password. Please check your credentials and try again.");
       } else if (errorMessage.includes("attempt")) {
         setError(errorMessage);
       } else {
-        setError(
-          "Something unexpected happened. Check your connection and try again.",
-        );
+        setError("Something unexpected happened. Check your connection and try again.");
       }
     } finally {
       setLoading(false);
@@ -70,7 +62,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex bg-primary/6 min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+    <div className="bg-primary/6 relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="pointer-events-none absolute inset-0" />
 
       <FadeIn
@@ -82,13 +74,13 @@ export default function LoginPage() {
           <h2 className="font-accent text-3xl font-bold tracking-tight sm:text-4xl">
             Welcome back!
           </h2>
-          <p className="mt-2 text-lg text-muted-foreground sm:text-xl">
+          <p className="text-muted-foreground mt-2 text-lg sm:text-xl">
             Access your creator workspace.
           </p>
         </div>
 
         {error && (
-          <div className="mb-5 border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
+          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 border px-4 py-3">
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
               <p className="text-sm">{error}</p>
@@ -99,7 +91,7 @@ export default function LoginPage() {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <div className="relative">
-              <Mail className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
               <Input
                 id="email"
                 type="email"
@@ -108,14 +100,14 @@ export default function LoginPage() {
                 placeholder="Email or Username"
                 required
                 disabled={loading}
-                className="pl-10 h-12"
+                className="h-12 pl-10"
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="relative">
-              <Lock className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -125,30 +117,21 @@ export default function LoginPage() {
                 required
                 minLength={12}
                 disabled={loading}
-                className="pl-10 pr-10 h-12"
+                className="h-12 pr-10 pl-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3.5 -translate-y-1/2 transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 tabIndex={-1}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
-          <Button
-            type="submit"
-            disabled={loading}
-            size="lg"
-            className="w-full mt-6"
-          >
+          <Button type="submit" disabled={loading} size="lg" className="mt-6 w-full">
             {loading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -160,14 +143,14 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-6 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="font-medium hover:underline">
             Sign up
           </Link>
         </p>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-4 text-center text-xs">
           <Link href="/privacy" className="hover:underline">
             Privacy Policy
           </Link>

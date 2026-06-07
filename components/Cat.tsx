@@ -45,12 +45,12 @@ export default function Cat() {
   };
 
   return (
-    <div className="absolute -top-28 font-secondary sm:-top-40 right-0 flex flex-col items-center gap-1">
+    <div className="font-secondary absolute -top-28 right-0 flex flex-col items-center gap-1 sm:-top-40">
       <div className="relative">
         <Image
           src={pixelCat}
           alt="pixel cat"
-          className="h-20 sm:h-30 w-auto cursor-pointer select-none"
+          className="h-20 w-auto cursor-pointer select-none sm:h-30"
           onClick={handleCatClick}
         />
 
@@ -58,7 +58,7 @@ export default function Cat() {
           {hearts.map((heart) => (
             <motion.span
               key={heart.id}
-              className="absolute left-1/2 top-1/2 pointer-events-none"
+              className="pointer-events-none absolute top-1/2 left-1/2"
               style={{
                 fontSize: heart.size,
                 color: "#CF1662",
@@ -81,9 +81,7 @@ export default function Cat() {
                 delay: heart.delay,
                 ease: "easeOut",
               }}
-              onAnimationComplete={() =>
-                setHearts((h) => h.filter((x) => x.id !== heart.id))
-              }
+              onAnimationComplete={() => setHearts((h) => h.filter((x) => x.id !== heart.id))}
             >
               ❤️
             </motion.span>
@@ -91,26 +89,14 @@ export default function Cat() {
         </AnimatePresence>
       </div>
 
-      <div
-        className="flex gap-0.5 bg-pink-100 p-1   shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.15),0_2px_0_rgba(0,0,0,0.15)]
-          border border-pink-300
-          rounded-[2px]"
-      >
+      <div className="flex gap-0.5 rounded-[2px] border border-pink-300 bg-pink-100 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.15),0_2px_0_rgba(0,0,0,0.15)]">
         {String(catCount ?? 0)
           .padStart(7, "0")
           .split("")
           .map((digit, i) => (
             <div
               key={i}
-              className="
-          relative
-          w-2 h-3 sm:w-3 sm:h-5
-          bg-pink-200
-          flex items-center justify-center
-          font-mono text-xs sm:text-sm text-primary
-
-        
-        "
+              className="text-primary relative flex h-3 w-2 items-center justify-center bg-pink-200 font-mono text-xs sm:h-5 sm:w-3 sm:text-sm"
             >
               <span className="absolute inset-x-0 top-0 h-px bg-white/70" />
               <span className="relative z-10 leading-none">{digit}</span>

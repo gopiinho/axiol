@@ -47,7 +47,7 @@ export function WaitlistForm() {
         transition={{ duration: 0.25 }}
       >
         {/* Icon with particle burst */}
-        <div className="relative shrink-0 h-12 w-12">
+        <div className="relative h-12 w-12 shrink-0">
           {PARTICLES.map((p, i) => (
             <motion.div
               key={i}
@@ -67,7 +67,7 @@ export function WaitlistForm() {
             />
           ))}
           <motion.div
-            className="relative z-10 h-12 w-12 rounded-2xl bg-pink-subtle flex items-center justify-center"
+            className="bg-pink-subtle relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl"
             initial={{ scale: 0.2, rotate: -18 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
@@ -79,7 +79,7 @@ export function WaitlistForm() {
         {/* Text */}
         <div className="space-y-0.5">
           <motion.p
-            className="text-base sm:text-lg font-bold text-foreground leading-snug"
+            className="text-foreground text-base leading-snug font-bold sm:text-lg"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
@@ -87,7 +87,7 @@ export function WaitlistForm() {
             You&apos;re on the list!
           </motion.p>
           <motion.p
-            className="text-sm text-muted-foreground"
+            className="text-muted-foreground text-sm"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
@@ -107,10 +107,10 @@ export function WaitlistForm() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
       >
-        <div className="h-8 w-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+        <div className="bg-secondary flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
           <span className="text-sm select-none">👀</span>
         </div>
-        <p className="text-sm sm:text-base font-medium text-muted-foreground">
+        <p className="text-muted-foreground text-sm font-medium sm:text-base">
           Already on the list — we&apos;ve got you.
         </p>
       </motion.div>
@@ -121,7 +121,7 @@ export function WaitlistForm() {
     <div className="flex flex-col gap-3 pt-2">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+        className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
       >
         <input
           type="email"
@@ -130,7 +130,7 @@ export function WaitlistForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={state === "loading"}
-          className="h-14 border-2 border-primary bg-foreground px-5 text-base sm:text-lg text-background placeholder:text-background focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary disabled:opacity-60 min-w-0 w-full sm:w-72"
+          className="border-primary bg-foreground text-background placeholder:text-background focus:ring-primary/40 focus:border-primary h-14 w-full min-w-0 border-2 px-5 text-base focus:ring-2 focus:outline-none disabled:opacity-60 sm:w-72 sm:text-lg"
         />
         <Button
           type="submit"
@@ -141,9 +141,7 @@ export function WaitlistForm() {
         </Button>
       </form>
       {state === "error" && (
-        <p className="text-sm text-destructive">
-          Something went wrong. Please try again.
-        </p>
+        <p className="text-destructive text-sm">Something went wrong. Please try again.</p>
       )}
     </div>
   );

@@ -1,33 +1,22 @@
 "use client";
 
 import { buildThemeStyle, getTheme } from "@/lib/themes";
-import {
-  StoreContent,
-  type StoreContentProps,
-} from "@/components/StoreContent";
+import { StoreContent, type StoreContentProps } from "@/components/StoreContent";
 
-type StorePreviewProps = Omit<
-  StoreContentProps,
-  "themeStyle" | "showDots" | "interactive"
-> & {
+type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "showDots" | "interactive"> & {
   username: string;
   theme?: string;
   accentColor?: string;
 };
 
-export function StorePreview({
-  username,
-  theme,
-  accentColor,
-  ...contentProps
-}: StorePreviewProps) {
+export function StorePreview({ username, theme, accentColor, ...contentProps }: StorePreviewProps) {
   const themeStyle = buildThemeStyle(theme, accentColor);
   const showDots = getTheme(theme).vars["--store-show-dots"] === "1";
 
   return (
     <div className="flex h-[min(85vh,700px)] w-[min(45vh,340px)] flex-col">
       <div className="relative flex flex-1 flex-col rounded-[3rem] border-[6px] border-gray-900 bg-gray-900 shadow-lg">
-        <div className="absolute left-1/2 top-2 z-20 h-5.5 w-22.5 -translate-x-1/2 rounded-full bg-black" />
+        <div className="absolute top-2 left-1/2 z-20 h-5.5 w-22.5 -translate-x-1/2 rounded-full bg-black" />
 
         <div
           className="flex flex-1 flex-col overflow-hidden rounded-[2.5rem]"
@@ -42,26 +31,18 @@ export function StorePreview({
           >
             <span>9:41</span>
             <div className="flex items-center gap-1">
-              <svg
-                className="h-2.5 w-2.5"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
+              <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M1 9l2 2c5.52-5.52 14.45-5.52 19.97 0l2-2C18.27 2.27 5.74 2.27 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
               </svg>
-              <svg
-                className="h-2.5 w-2.5"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
+              <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.34C7 21.4 7.6 22 8.33 22h7.34c.74 0 1.33-.6 1.33-1.33V5.33C17 4.6 16.4 4 15.67 4z" />
               </svg>
             </div>
           </div>
 
           <div
-            className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <StoreContent
               {...contentProps}
@@ -73,8 +54,8 @@ export function StorePreview({
           </div>
         </div>
 
-        <div className="flex relative justify-center py-1.5">
-          <div className="h-1 w-24 absolute bottom-4 rounded-full bg-gray-600" />
+        <div className="relative flex justify-center py-1.5">
+          <div className="absolute bottom-4 h-1 w-24 rounded-full bg-gray-600" />
         </div>
       </div>
     </div>

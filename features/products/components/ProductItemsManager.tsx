@@ -30,20 +30,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  GripVertical,
-  Plus,
-  Pencil,
-  Trash2,
-  ExternalLink,
-  ShoppingBag,
-} from "lucide-react";
+import { GripVertical, Plus, Pencil, Trash2, ExternalLink, ShoppingBag } from "lucide-react";
 import { CreateProductItemModal } from "./CreateProductItemModal";
 import { EditProductItemModal } from "./EditProductItemModal";
-import {
-  useDeleteProductItem,
-  useReorderProductItems,
-} from "../hooks/useProduct";
+import { useDeleteProductItem, useReorderProductItems } from "../hooks/useProduct";
 import { cn } from "@/lib/utils";
 
 interface ProductItemsManagerProps {
@@ -61,14 +51,9 @@ function SortableItem({
   onEdit: (item: Doc<"productItems">) => void;
   onDelete: (item: Doc<"productItems">) => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item._id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item._id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -80,14 +65,14 @@ function SortableItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex flex-col cursor-pointer rounded-sm border border-border/60 bg-card overflow-hidden transition-all",
-        isDragging && "opacity-50 ring-2 ring-primary/30 scale-[1.02] z-10",
-        "hover:shadow-md hover:border-border",
+        "group border-border/60 bg-card relative flex cursor-pointer flex-col overflow-hidden rounded-sm border transition-all",
+        isDragging && "ring-primary/30 z-10 scale-[1.02] opacity-50 ring-2",
+        "hover:border-border hover:shadow-md"
       )}
     >
       <button
         type="button"
-        className="absolute top-2 left-2 z-10 cursor-grab touch-none text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+        className="text-muted-foreground/40 hover:text-muted-foreground absolute top-2 left-2 z-10 cursor-grab touch-none transition-colors"
         {...attributes}
         {...listeners}
         aria-label="Drag to reorder"
@@ -99,7 +84,7 @@ function SortableItem({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 bg-background/60 backdrop-blur-xs hover:bg-background/90"
+          className="bg-background/60 hover:bg-background/90 h-7 w-7 backdrop-blur-xs"
           onClick={() => window.open(item.affiliateLink, "_blank", "noopener")}
           title="Open link"
         >
@@ -108,7 +93,7 @@ function SortableItem({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 bg-background/60 backdrop-blur-xs hover:bg-background/90"
+          className="bg-background/60 hover:bg-background/90 h-7 w-7 backdrop-blur-xs"
           onClick={() => onEdit(item)}
           title="Edit item"
         >
@@ -117,7 +102,7 @@ function SortableItem({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 bg-background/60 backdrop-blur-xs hover:bg-background/90 text-destructive hover:text-destructive"
+          className="bg-background/60 hover:bg-background/90 text-destructive hover:text-destructive h-7 w-7 backdrop-blur-xs"
           onClick={() => onDelete(item)}
           title="Delete item"
         >
@@ -125,7 +110,7 @@ function SortableItem({
         </Button>
       </div>
 
-      <div className="aspect-4/3 overflow-hidden bg-linear-to-br from-muted to-muted/50">
+      <div className="from-muted to-muted/50 aspect-4/3 overflow-hidden bg-linear-to-br">
         {item.imageUrl ? (
           <img
             src={item.imageUrl}
@@ -134,34 +119,29 @@ function SortableItem({
             className="h-full w-full object-cover transition-transform duration-300"
           />
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <ShoppingBag className="h-7 w-7 text-muted-foreground/25" />
+          <div className="flex h-full items-center justify-center">
+            <ShoppingBag className="text-muted-foreground/25 h-7 w-7" />
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5 p-3 flex-1">
+      <div className="flex flex-1 flex-col gap-1.5 p-3">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
             {item.platform && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] capitalize leading-none py-0.5"
-              >
+              <Badge variant="secondary" className="py-0.5 text-[10px] leading-none capitalize">
                 {item.platform}
               </Badge>
             )}
             {item.price && (
-              <span className="text-xs font-bold text-primary leading-none">
-                {item.price}
-              </span>
+              <span className="text-primary text-xs leading-none font-bold">{item.price}</span>
             )}
           </div>
         </div>
-        <p className="text-sm font-semibold leading-snug line-clamp-2">
+        <p className="line-clamp-2 text-sm leading-snug font-semibold">
           {item.title || "Untitled item"}
         </p>
-        <p className="text-[10px] text-muted-foreground truncate mt-auto leading-none">
+        <p className="text-muted-foreground mt-auto truncate text-[10px] leading-none">
           {item.affiliateLink}
         </p>
       </div>
@@ -169,18 +149,10 @@ function SortableItem({
   );
 }
 
-export function ProductItemsManager({
-  productId,
-  items,
-  productType,
-}: ProductItemsManagerProps) {
+export function ProductItemsManager({ productId, items, productType }: ProductItemsManagerProps) {
   const [createOpen, setCreateOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<Doc<"productItems"> | null>(
-    null,
-  );
-  const [deletingItem, setDeletingItem] = useState<Doc<"productItems"> | null>(
-    null,
-  );
+  const [editingItem, setEditingItem] = useState<Doc<"productItems"> | null>(null);
+  const [deletingItem, setDeletingItem] = useState<Doc<"productItems"> | null>(null);
   const [localItems, setLocalItems] = useState(items);
 
   useEffect(() => {
@@ -194,7 +166,7 @@ export function ProductItemsManager({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const sortedItems = [...localItems].sort((a, b) => a.order - b.order);
@@ -226,7 +198,7 @@ export function ProductItemsManager({
         setLocalItems(items);
       }
     },
-    [sortedItems, reorderItems, items],
+    [sortedItems, reorderItems, items]
   );
 
   const handleDeleteConfirm = async () => {
@@ -249,30 +221,21 @@ export function ProductItemsManager({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Items</h2>
-          <p className="text-sm text-muted-foreground">
-            Affiliate links in this product
-          </p>
+          <p className="text-muted-foreground text-sm">Affiliate links in this product</p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>Add item</Button>
       </div>
 
       {sortedItems.length === 0 ? (
-        <div className="border border-border/70 rounded-xs p-8 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="border-border/70 rounded-xs border p-8 text-center">
+          <p className="text-muted-foreground text-sm">
             No items yet. Add your first affiliate link.
           </p>
         </div>
       ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={sortedItems.map((i) => i._id)}
-            strategy={rectSortingStrategy}
-          >
-            <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+          <SortableContext items={sortedItems.map((i) => i._id)} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-3 gap-3 lg:grid-cols-4 xl:grid-cols-5">
               {sortedItems.map((item) => (
                 <SortableItem
                   key={item._id}
@@ -293,25 +256,18 @@ export function ProductItemsManager({
       />
 
       {editingItem && (
-        <EditProductItemModal
-          item={editingItem}
-          open={true}
-          onClose={() => setEditingItem(null)}
-        />
+        <EditProductItemModal item={editingItem} open={true} onClose={() => setEditingItem(null)} />
       )}
 
-      <AlertDialog
-        open={!!deletingItem}
-        onOpenChange={(open) => !open && setDeletingItem(null)}
-      >
+      <AlertDialog open={!!deletingItem} onOpenChange={(open) => !open && setDeletingItem(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
               Delete &ldquo;{deletingItem?.title || "this item"}&rdquo;?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove this affiliate link from your
-              product. This action cannot be undone.
+              This will permanently remove this affiliate link from your product. This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

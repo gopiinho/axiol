@@ -118,7 +118,7 @@ export const reorder = mutation({
       v.object({
         id: v.id("productItems"),
         order: v.number(),
-      }),
+      })
     ),
   },
   handler: async (ctx, args) => {

@@ -4,16 +4,10 @@ const IV_LENGTH = 12;
 function getKey(): Promise<CryptoKey> {
   const hex = process.env.INSTAGRAM_INTERNAL_SECRET;
   if (!hex || hex.length !== 64) {
-    throw new Error(
-      "INSTAGRAM_INTERNAL_SECRET must be a 64-character hex string",
-    );
+    throw new Error("INSTAGRAM_INTERNAL_SECRET must be a 64-character hex string");
   }
-  const keyBytes = new Uint8Array(
-    hex.match(/.{2}/g)!.map((b) => parseInt(b, 16)),
-  );
-  return crypto.subtle.importKey("raw", keyBytes, ALGORITHM, false, [
-    "encrypt",
-  ]);
+  const keyBytes = new Uint8Array(hex.match(/.{2}/g)!.map((b) => parseInt(b, 16)));
+  return crypto.subtle.importKey("raw", keyBytes, ALGORITHM, false, ["encrypt"]);
 }
 
 function toHex(buffer: ArrayBuffer): string {
@@ -26,10 +20,6 @@ export async function encryptToken(plaintext: string): Promise<string> {
   const key = await getKey();
   const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
   const encoded = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: ALGORITHM, iv },
-    key,
-    encoded,
-  );
+  const ciphertext = await crypto.subtle.encrypt({ name: ALGORITHM, iv }, key, encoded);
   return `${toHex(iv.buffer)}:${toHex(ciphertext)}`;
 }

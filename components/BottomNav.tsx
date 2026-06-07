@@ -43,8 +43,8 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed right-0 bottom-2 left-0 z-50 px-3 safe-area-inset-bottom">
-      <div className="mx-auto max-w-xl rounded-none border border-border/80 bg-card/95 p-1.5 shadow-[0_-4px_24px_-8px_oklch(0.25_0.06_252/0.4)] backdrop-blur-lg">
+    <nav className="safe-area-inset-bottom fixed right-0 bottom-2 left-0 z-50 px-3">
+      <div className="border-border/80 bg-card/95 mx-auto max-w-xl rounded-none border p-1.5 shadow-[0_-4px_24px_-8px_oklch(0.25_0.06_252/0.4)] backdrop-blur-lg">
         <div className="flex items-center justify-around gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;

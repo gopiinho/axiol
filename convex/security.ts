@@ -4,7 +4,7 @@ import { Doc, Id } from "./_generated/dataModel";
 type SessionCtx = MutationCtx | QueryCtx;
 
 export async function requireSession(
-  ctx: SessionCtx,
+  ctx: SessionCtx
 ): Promise<{ userId: Id<"users">; user: Doc<"users"> }> {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
@@ -24,7 +24,7 @@ export async function requireSession(
 }
 
 export async function getSession(
-  ctx: SessionCtx,
+  ctx: SessionCtx
 ): Promise<{ userId: Id<"users">; user: Doc<"users"> } | null> {
   try {
     return await requireSession(ctx);
@@ -34,7 +34,7 @@ export async function getSession(
 }
 
 export async function requireCreatorSession(
-  ctx: SessionCtx,
+  ctx: SessionCtx
 ): Promise<{ userId: Id<"users">; user: Doc<"users"> }> {
   const { userId, user } = await requireSession(ctx);
 
@@ -46,7 +46,7 @@ export async function requireCreatorSession(
 }
 
 export async function requireAdminSession(
-  ctx: SessionCtx,
+  ctx: SessionCtx
 ): Promise<{ userId: Id<"users">; user: Doc<"users"> }> {
   const { userId, user } = await requireSession(ctx);
 

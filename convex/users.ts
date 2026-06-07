@@ -35,9 +35,7 @@ export const getByUsername = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId
-      ? await ctx.storage.getUrl(user.coverImageId)
-      : null;
+    const coverImageUrl = user.coverImageId ? await ctx.storage.getUrl(user.coverImageId) : null;
 
     return {
       _id: user._id,
@@ -70,15 +68,11 @@ export const getPublicStore = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId
-      ? await ctx.storage.getUrl(user.coverImageId)
-      : null;
+    const coverImageUrl = user.coverImageId ? await ctx.storage.getUrl(user.coverImageId) : null;
 
     const products = await ctx.db
       .query("products")
-      .withIndex("by_status", (q) =>
-        q.eq("createdBy", user._id).eq("status", "published"),
-      )
+      .withIndex("by_status", (q) => q.eq("createdBy", user._id).eq("status", "published"))
       .order("desc")
       .collect();
 
@@ -99,7 +93,7 @@ export const getPublicStore = query({
           coverImageUrl: coverUrl,
           items,
         };
-      }),
+      })
     );
 
     return {
@@ -132,9 +126,7 @@ export const getProfile = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId
-      ? await ctx.storage.getUrl(user.coverImageId)
-      : null;
+    const coverImageUrl = user.coverImageId ? await ctx.storage.getUrl(user.coverImageId) : null;
 
     return {
       _id: user._id,
@@ -233,7 +225,7 @@ export const createProfile = mutation({
     const usernameRegex = /^[a-z0-9_]{3,30}$/;
     if (!usernameRegex.test(username)) {
       throw new Error(
-        "Username must be 3-30 characters, lowercase letters, numbers, and underscores only",
+        "Username must be 3-30 characters, lowercase letters, numbers, and underscores only"
       );
     }
 

@@ -39,8 +39,7 @@ export default function MyStorePage() {
   const rawProducts = useQuery(api.products.listByUser);
   const products = useCachedQueryResult("store:products", rawProducts);
 
-  const publishedProducts =
-    products?.filter((p) => p.status === "published") ?? [];
+  const publishedProducts = products?.filter((p) => p.status === "published") ?? [];
 
   const updateProfile = useMutation(api.users.updateProfile);
 
@@ -54,7 +53,7 @@ export default function MyStorePage() {
   const [saving, setSaving] = useState(false);
 
   const [selectedTheme, setSelectedTheme] = useState<ThemeKey>(
-    (user?.theme as ThemeKey) ?? "default",
+    (user?.theme as ThemeKey) ?? "default"
   );
   const [selectedAccent, setSelectedAccent] = useState(user?.accentColor ?? "");
   const [themeDirty, setThemeDirty] = useState(false);
@@ -64,10 +63,7 @@ export default function MyStorePage() {
 
   const currentTheme = (user?.theme as ThemeKey) ?? "default";
   const currentAccent = user?.accentColor ?? "";
-  if (
-    !themeDirty &&
-    (selectedTheme !== currentTheme || selectedAccent !== currentAccent)
-  ) {
+  if (!themeDirty && (selectedTheme !== currentTheme || selectedAccent !== currentAccent)) {
     setSelectedTheme(currentTheme);
     setSelectedAccent(currentAccent);
   }
@@ -133,21 +129,16 @@ export default function MyStorePage() {
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/${user.username}`
     : "";
 
-  const formatDisplayUrl = (url: string) =>
-    url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  const formatDisplayUrl = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
 
   const socialLinks = [
     {
-      url: user?.instagramUrl
-        ? `https://instagram.com/${user.instagramUrl}`
-        : undefined,
+      url: user?.instagramUrl ? `https://instagram.com/${user.instagramUrl}` : undefined,
       icon: Instagram,
       label: "Instagram",
     },
     {
-      url: user?.youtubeUrl
-        ? `https://youtube.com/@${user.youtubeUrl}`
-        : undefined,
+      url: user?.youtubeUrl ? `https://youtube.com/@${user.youtubeUrl}` : undefined,
       icon: Youtube,
       label: "YouTube",
     },
@@ -173,9 +164,7 @@ export default function MyStorePage() {
       : null,
     user?.websiteUrl
       ? {
-          url: user.websiteUrl.startsWith("http")
-            ? user.websiteUrl
-            : `https://${user.websiteUrl}`,
+          url: user.websiteUrl.startsWith("http") ? user.websiteUrl : `https://${user.websiteUrl}`,
           icon: "globe" as const,
           label: "Website",
           display: formatDisplayUrl(user.websiteUrl),
@@ -192,243 +181,223 @@ export default function MyStorePage() {
 
   return (
     <>
-      <div className="flex w-full min-h-screen">
-        <div className="w-full lg:min-w-[60%] lg:border-r border-border/70">
-          <div className="flex max-lg:flex-col lg:flex items-center justify-center lg:items-start gap-4 px-5 lg:px-6 py-6 lg:py-8">
-              <div className="h-24 w-24 overflow-hidden border-2 border-border/25 bg-linear-to-br from-primary/15 to-pink/15 p-0.5">
-                <div className="h-full w-full overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={
-                      profileImageUrl ??
-                      `https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`
-                    }
-                    alt="Avatar"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-
-              <div className="grid lg:flex justify-center lg:justify-between items-center lg:items-start w-full">
-                <div className="flex flex-col items-center justify-center lg:items-start">
-                  <h1 className="font-accent text-xl font-extrabold tracking-tight">
-                    {displayName}
-                  </h1>
-
-                  <p className="text-xs text-muted-foreground">
-                    @{user?.username}
-                  </p>
-
-                  {user?.bio && (
-                    <p className="mt-2 max-w-sm text-center text-sm text-muted-foreground">
-                      {user.bio}
-                    </p>
-                  )}
-
-                  {socialLinks.length > 0 && (
-                    <div className="mt-3 flex items-center gap-3">
-                      {socialLinks.map((link) => {
-                        const Icon = link.icon;
-                        return (
-                          <a
-                            key={link.label}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="rounded-lg p-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                            aria-label={link.label}
-                          >
-                            <Icon className="h-4.5 w-4.5" />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-start justify-center h-full max-lg:mt-8 gap-2">
-                  {publicUrl && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      asChild
-                    >
-                      <Link href={`/${user?.username}`} target="_blank">
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        Visit Store
-                      </Link>
-                    </Button>
-                  )}
-                  <Button size="sm" onClick={openEditModal} className="gap-1.5">
-                    <Pencil className="h-3.5 w-3.5" />
-                    Edit Store
-                  </Button>
-                </div>
+      <div className="flex min-h-screen w-full">
+        <div className="border-border/70 w-full lg:min-w-[60%] lg:border-r">
+          <div className="flex items-center justify-center gap-4 px-5 py-6 max-lg:flex-col lg:flex lg:items-start lg:px-6 lg:py-8">
+            <div className="border-border/25 from-primary/15 to-pink/15 h-24 w-24 overflow-hidden border-2 bg-linear-to-br p-0.5">
+              <div className="h-full w-full overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    profileImageUrl ??
+                    `https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`
+                  }
+                  alt="Avatar"
+                  className="h-full w-full object-cover"
+                />
               </div>
             </div>
 
-          <div className="border-t border-border/70" />
-            {publishedProducts.length > 0 ? (
-              <div className="px-5 py-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-lg font-bold text-foreground">
-                    Your Store
-                  </h2>
-                  <Button variant="ghost" size="sm" className="gap-1.5" asChild>
-                    <Link href="/dashboard/products">
-                      <Settings className="h-3.5 w-3.5" />
-                      Manage
+            <div className="grid w-full items-center justify-center lg:flex lg:items-start lg:justify-between">
+              <div className="flex flex-col items-center justify-center lg:items-start">
+                <h1 className="font-accent text-xl font-extrabold tracking-tight">{displayName}</h1>
+
+                <p className="text-muted-foreground text-xs">@{user?.username}</p>
+
+                {user?.bio && (
+                  <p className="text-muted-foreground mt-2 max-w-sm text-center text-sm">
+                    {user.bio}
+                  </p>
+                )}
+
+                {socialLinks.length > 0 && (
+                  <div className="mt-3 flex items-center gap-3">
+                    {socialLinks.map((link) => {
+                      const Icon = link.icon;
+                      return (
+                        <a
+                          key={link.label}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:bg-secondary hover:text-foreground rounded-lg p-2 transition"
+                          aria-label={link.label}
+                        >
+                          <Icon className="h-4.5 w-4.5" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              <div className="flex h-full items-start justify-center gap-2 max-lg:mt-8">
+                {publicUrl && (
+                  <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                    <Link href={`/${user?.username}`} target="_blank">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Visit Store
                     </Link>
                   </Button>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {publishedProducts.map((product, index) => (
-                    <div key={product._id}>
-                      <ProductCard
-                        product={{
-                          _id: product._id,
-                          name: product.name,
-                          productUrl: product.productUrl,
-                          type: product.type,
-                          price: product.price,
-                          coverImageUrl: null,
-                          itemCount: 0,
-                        }}
-                        index={index}
-                        interactive={true}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
-                <Package className="mx-auto h-10 w-10 text-primary" />
-                <p className="mt-4 text-sm text-muted-foreground">
-                  No published products yet. Publish one to get started.
-                </p>
-                <Button className="mt-5" asChild>
-                  <Link href="/dashboard/products/new">Create a product</Link>
+                )}
+                <Button size="sm" onClick={openEditModal} className="gap-1.5">
+                  <Pencil className="h-3.5 w-3.5" />
+                  Edit Store
                 </Button>
               </div>
-            )}
+            </div>
+          </div>
+
+          <div className="border-border/70 border-t" />
+          {publishedProducts.length > 0 ? (
+            <div className="px-5 py-6">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-foreground text-lg font-bold">Your Store</h2>
+                <Button variant="ghost" size="sm" className="gap-1.5" asChild>
+                  <Link href="/dashboard/products">
+                    <Settings className="h-3.5 w-3.5" />
+                    Manage
+                  </Link>
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                {publishedProducts.map((product, index) => (
+                  <div key={product._id}>
+                    <ProductCard
+                      product={{
+                        _id: product._id,
+                        name: product.name,
+                        productUrl: product.productUrl,
+                        type: product.type,
+                        price: product.price,
+                        coverImageUrl: null,
+                        itemCount: 0,
+                      }}
+                      index={index}
+                      interactive={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
+              <Package className="text-primary mx-auto h-10 w-10" />
+              <p className="text-muted-foreground mt-4 text-sm">
+                No published products yet. Publish one to get started.
+              </p>
+              <Button className="mt-5" asChild>
+                <Link href="/dashboard/products/new">Create a product</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
-        <div className="hidden lg:flex flex-col items-center sticky top-0 w-full h-screen overflow-hidden">
-            <div className="flex flex-col items-center gap-6 py-6 px-6 w-full">
-              <div className="w-full space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <p className="text-xs mb-2 font-semibold text-muted-foreground">
-                      Theme
-                    </p>
-                    <div className="grid grid-cols-5 gap-1.5">
-                      {themeKeys.map((key) => {
-                        const theme = themes[key];
-                        const isSelected = selectedTheme === key;
-                        return (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => handleThemeChange(key)}
-                            className={`relative flex flex-col cursor-pointer items-center gap-1 rounded-lg border p-1.5 transition ${
-                              isSelected
-                                ? "border-primary bg-primary/5"
-                                : "border-border/50 hover:border-border"
-                            }`}
+        <div className="sticky top-0 hidden h-screen w-full flex-col items-center overflow-hidden lg:flex">
+          <div className="flex w-full flex-col items-center gap-6 px-6 py-6">
+            <div className="w-full space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-muted-foreground mb-2 text-xs font-semibold">Theme</p>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {themeKeys.map((key) => {
+                      const theme = themes[key];
+                      const isSelected = selectedTheme === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => handleThemeChange(key)}
+                          className={`relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border p-1.5 transition ${
+                            isSelected
+                              ? "border-primary bg-primary/5"
+                              : "border-border/50 hover:border-border"
+                          }`}
+                        >
+                          <div
+                            className="h-6 w-full rounded-md border"
+                            style={{
+                              backgroundColor: theme.vars["--store-bg"],
+                              borderColor: theme.vars["--store-border"],
+                            }}
                           >
                             <div
-                              className="h-6 w-full rounded-md border"
+                              className="mx-auto mt-1 h-2.5 w-[60%] rounded-sm"
                               style={{
-                                backgroundColor: theme.vars["--store-bg"],
-                                borderColor: theme.vars["--store-border"],
+                                backgroundColor: theme.vars["--store-card-bg"],
                               }}
-                            >
-                              <div
-                                className="mx-auto mt-1 h-2.5 w-[60%] rounded-sm"
-                                style={{
-                                  backgroundColor:
-                                    theme.vars["--store-card-bg"],
-                                }}
-                              />
+                            />
+                          </div>
+                          <span className="text-[9px] font-medium">{theme.label}</span>
+                          {isSelected && (
+                            <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full">
+                              <Check className="h-2 w-2" />
                             </div>
-                            <span className="text-[9px] font-medium">
-                              {theme.label}
-                            </span>
-                            {isSelected && (
-                              <div className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                <Check className="h-2 w-2" />
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-
-                <div className="flex items-end gap-3">
-                  <div className="flex-1">
-                    <p className="text-xs mb-2 font-semibold text-muted-foreground">
-                      Accent color
-                    </p>
-                    <div className="flex gap-2">
-                      {ACCENT_PRESETS.map((preset) => {
-                        const isSelected = selectedAccent === preset.value;
-                        return (
-                          <button
-                            key={preset.label}
-                            type="button"
-                            onClick={() =>
-                              handleAccentChange(isSelected ? "" : preset.value)
-                            }
-                            className={`relative h-7 w-7 shrink-0 rounded-sm border-2 cursor-pointer transition ${
-                              isSelected
-                                ? "border-foreground scale-110"
-                                : "border-transparent hover:scale-105"
-                            }`}
-                            style={{ backgroundColor: preset.value }}
-                            aria-label={preset.label}
-                            title={preset.label}
-                          >
-                            {isSelected && (
-                              <Check className="absolute inset-0 m-auto h-3 w-3 text-white drop-shadow-sm" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={handleThemeSave}
-                    disabled={themeSaving || !themeDirty}
-                    className="shrink-0"
-                  >
-                    {themeSaving ? "Saving..." : "Save theme"}
-                  </Button>
                 </div>
               </div>
 
-              <StorePreview
-                displayName={displayName}
-                bio={user?.bio}
-                profileImageUrl={user?.profileImageUrl}
-                coverImageUrl={user?.coverImageUrl}
-                username={user?.username ?? ""}
-                theme={selectedTheme}
-                accentColor={selectedAccent}
-                products={publishedProducts.map((p) => ({
-                  _id: p._id,
-                  name: p.name,
-                  productUrl: p.productUrl,
-                  price: p.price,
-                  coverImageUrl: null,
-                  itemCount: 0,
-                }))}
-                socialLinks={storeSocialLinks}
-              />
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <p className="text-muted-foreground mb-2 text-xs font-semibold">Accent color</p>
+                  <div className="flex gap-2">
+                    {ACCENT_PRESETS.map((preset) => {
+                      const isSelected = selectedAccent === preset.value;
+                      return (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          onClick={() => handleAccentChange(isSelected ? "" : preset.value)}
+                          className={`relative h-7 w-7 shrink-0 cursor-pointer rounded-sm border-2 transition ${
+                            isSelected
+                              ? "border-foreground scale-110"
+                              : "border-transparent hover:scale-105"
+                          }`}
+                          style={{ backgroundColor: preset.value }}
+                          aria-label={preset.label}
+                          title={preset.label}
+                        >
+                          {isSelected && (
+                            <Check className="absolute inset-0 m-auto h-3 w-3 text-white drop-shadow-sm" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleThemeSave}
+                  disabled={themeSaving || !themeDirty}
+                  className="shrink-0"
+                >
+                  {themeSaving ? "Saving..." : "Save theme"}
+                </Button>
+              </div>
             </div>
+
+            <StorePreview
+              displayName={displayName}
+              bio={user?.bio}
+              profileImageUrl={user?.profileImageUrl}
+              coverImageUrl={user?.coverImageUrl}
+              username={user?.username ?? ""}
+              theme={selectedTheme}
+              accentColor={selectedAccent}
+              products={publishedProducts.map((p) => ({
+                _id: p._id,
+                name: p.name,
+                productUrl: p.productUrl,
+                price: p.price,
+                coverImageUrl: null,
+                itemCount: 0,
+              }))}
+              socialLinks={storeSocialLinks}
+            />
+          </div>
         </div>
       </div>
 

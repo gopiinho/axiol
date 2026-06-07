@@ -14,10 +14,7 @@ function timingSafeCompare(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
-function automationsRedirect(
-  request: NextRequest,
-  params: Record<string, string>,
-) {
+function automationsRedirect(request: NextRequest, params: Record<string, string>) {
   const url = new URL("/dashboard/automations", request.url);
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
@@ -40,11 +37,7 @@ export async function GET(request: NextRequest) {
   const stateParam = searchParams.get("state");
   const stateCookie = request.cookies.get(IG_OAUTH_STATE_COOKIE)?.value;
 
-  if (
-    !stateParam ||
-    !stateCookie ||
-    !timingSafeCompare(stateParam, stateCookie)
-  ) {
+  if (!stateParam || !stateCookie || !timingSafeCompare(stateParam, stateCookie)) {
     return automationsRedirect(request, { ig_error: "csrf" });
   }
 
@@ -65,10 +58,7 @@ export async function GET(request: NextRequest) {
   const clientSecret = process.env.DMHELPER_APP_SECRET!;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!.replace(/\/+$/, "");
   const redirectUri = `${siteUrl}/api/auth/instagram/callback`;
-  console.log(
-    "Instagram OAuth redirect_uri used for token exchange:",
-    redirectUri,
-  );
+  console.log("Instagram OAuth redirect_uri used for token exchange:", redirectUri);
 
   try {
     // 1. Exchange code for short-lived token
@@ -80,10 +70,10 @@ export async function GET(request: NextRequest) {
       code,
     });
 
-    const shortLivedRes = await fetch(
-      "https://api.instagram.com/oauth/access_token",
-      { method: "POST", body: tokenBody },
-    );
+    const shortLivedRes = await fetch("https://api.instagram.com/oauth/access_token", {
+      method: "POST",
+      body: tokenBody,
+    });
 
     if (!shortLivedRes.ok) {
       const error = await shortLivedRes.text();
@@ -152,7 +142,7 @@ export async function GET(request: NextRequest) {
     let webhookSubscribed = false;
     try {
       const subscribeUrl = new URL(
-        `https://graph.instagram.com/v25.0/${instagramAccountId}/subscribed_apps`,
+        `https://graph.instagram.com/v25.0/${instagramAccountId}/subscribed_apps`
       );
       subscribeUrl.searchParams.set("subscribed_fields", "comments,messages");
       subscribeUrl.searchParams.set("access_token", longLivedData.access_token);

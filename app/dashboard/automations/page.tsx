@@ -11,19 +11,15 @@ import { CheckCircle2, X } from "lucide-react";
 
 function SuccessBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
-    <div className="mx-5 mt-4 sm:mx-8 sm:mt-6 flex items-center gap-3 rounded-xl bg-linear-to-r from-[#833AB4]/10 via-[#E1306C]/8 to-[#F77737]/10 border border-pink-subtle/30 px-4 py-3">
-      <CheckCircle2 className="h-5 w-5 shrink-0 text-pink" />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground">
-          Instagram connected
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          You can now create automations.
-        </p>
+    <div className="border-pink-subtle/30 mx-5 mt-4 flex items-center gap-3 rounded-xl border bg-linear-to-r from-[#833AB4]/10 via-[#E1306C]/8 to-[#F77737]/10 px-4 py-3 sm:mx-8 sm:mt-6">
+      <CheckCircle2 className="text-pink h-5 w-5 shrink-0" />
+      <div className="min-w-0 flex-1">
+        <p className="text-foreground text-sm font-semibold">Instagram connected</p>
+        <p className="text-muted-foreground mt-0.5 text-xs">You can now create automations.</p>
       </div>
       <button
         onClick={onDismiss}
-        className="shrink-0 rounded-lg p-1 text-muted-foreground hover:bg-muted transition-colors"
+        className="text-muted-foreground hover:bg-muted shrink-0 rounded-lg p-1 transition-colors"
       >
         <X className="h-4 w-4" />
       </button>
@@ -34,14 +30,12 @@ function SuccessBanner({ onDismiss }: { onDismiss: () => void }) {
 export default function AutomationsPage() {
   const ig = useInstagramConnection();
   const searchParams = useSearchParams();
-  const [showSuccess, setShowSuccess] = useState(
-    () => searchParams.get("ig_connected") === "true",
-  );
+  const [showSuccess, setShowSuccess] = useState(() => searchParams.get("ig_connected") === "true");
 
   if (ig.status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-pink-500" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="border-muted h-8 w-8 animate-spin rounded-full border-4 border-t-pink-500" />
       </div>
     );
   }
@@ -52,25 +46,23 @@ export default function AutomationsPage() {
 
   return (
     <div>
-      {showSuccess && (
-        <SuccessBanner onDismiss={() => setShowSuccess(false)} />
-      )}
+      {showSuccess && <SuccessBanner onDismiss={() => setShowSuccess(false)} />}
 
-      <section className="p-5 sm:p-8 border-b">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="app-title">Automations</h1>
-              <p className="app-subtitle mt-1">
-                Auto-DM product links to your followers and boost your sales.
-              </p>
-            </div>
-            <Link href="/dashboard/automations/new">
-              <Button size="lg" className="gap-2 sm:self-start">
-                New Automation
-              </Button>
-            </Link>
+      <section className="border-b p-5 sm:p-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="app-title">Automations</h1>
+            <p className="app-subtitle mt-1">
+              Auto-DM product links to your followers and boost your sales.
+            </p>
           </div>
-        </section>
+          <Link href="/dashboard/automations/new">
+            <Button size="lg" className="gap-2 sm:self-start">
+              New Automation
+            </Button>
+          </Link>
+        </div>
+      </section>
 
       <AutomationsList />
     </div>

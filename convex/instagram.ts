@@ -106,9 +106,7 @@ export const saveConfig = mutation({
 
     const integrationExisting = await ctx.db
       .query("integrations")
-      .withIndex("by_user_provider", (q) =>
-        q.eq("userId", userId).eq("provider", "instagram"),
-      )
+      .withIndex("by_user_provider", (q) => q.eq("userId", userId).eq("provider", "instagram"))
       .first();
 
     const integrationData = {
@@ -125,9 +123,7 @@ export const saveConfig = mutation({
     if (integrationExisting) {
       await ctx.db.patch(integrationExisting._id, {
         ...integrationData,
-        ...(integrationExisting.connectedAt
-          ? {}
-          : { connectedAt: Date.now() }),
+        ...(integrationExisting.connectedAt ? {} : { connectedAt: Date.now() }),
       });
     } else {
       await ctx.db.insert("integrations", integrationData);
@@ -196,9 +192,7 @@ export const getUserByInstagramAccount = internalQuery({
   handler: async (ctx, args) => {
     const config = await ctx.db
       .query("instagramConfig")
-      .withIndex("by_instagram_account", (q) =>
-        q.eq("instagramAccountId", args.instagramAccountId),
-      )
+      .withIndex("by_instagram_account", (q) => q.eq("instagramAccountId", args.instagramAccountId))
       .first();
 
     if (!config) return null;
@@ -211,9 +205,7 @@ export const getConfigByBetterAuthId = internalQuery({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_betterAuthId", (q) =>
-        q.eq("betterAuthId", args.betterAuthId),
-      )
+      .withIndex("by_betterAuthId", (q) => q.eq("betterAuthId", args.betterAuthId))
       .first();
 
     if (!user) return null;
@@ -230,7 +222,7 @@ export const getConfigByBetterAuthId = internalQuery({
 export const fetchRecentReels = action({
   args: {},
   handler: async (
-    ctx,
+    ctx
   ): Promise<
     Array<{
       id: string;
@@ -260,17 +252,12 @@ export const fetchRecentReels = action({
       error?: { message?: string };
     };
 
-    const config = await ctx.runQuery(
-      internal.instagram.getConfigByBetterAuthId,
-      {
-        betterAuthId: identity.subject,
-      },
-    );
+    const config = await ctx.runQuery(internal.instagram.getConfigByBetterAuthId, {
+      betterAuthId: identity.subject,
+    });
 
     if (!config) {
-      throw new Error(
-        "Instagram not configured. Please add access token first.",
-      );
+      throw new Error("Instagram not configured. Please add access token first.");
     }
 
     if (config.tokenExpiresAt < Date.now()) {
@@ -288,11 +275,7 @@ export const fetchRecentReels = action({
 
     if (!response.ok) {
       const errorData = (await response.json()) as GraphMediaResponse;
-      throw new Error(
-        `Instagram API error: ${
-          errorData.error?.message || response.statusText
-        }`,
-      );
+      throw new Error(`Instagram API error: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = (await response.json()) as GraphMediaResponse;
@@ -306,7 +289,7 @@ export const fetchRecentReels = action({
     }
 
     const reels = data.data.filter(
-      (media) => media.media_type === "VIDEO" || media.media_type === "REELS",
+      (media) => media.media_type === "VIDEO" || media.media_type === "REELS"
     );
 
     return reels.map((reel) => ({
@@ -472,7 +455,7 @@ export const getDraftMappings = query({
           ...draft,
           productName: product?.name || "Unknown Product",
         };
-      }),
+      })
     );
 
     return enriched;
@@ -489,8 +472,7 @@ export const getPublishedMappings = query({
 
     const { userId } = session;
 
-    const limit =
-      args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
+    const limit = args.limit && args.limit > 0 ? Math.min(args.limit, 24) : undefined;
 
     const published = await ctx.db
       .query("reelMappings")
@@ -506,7 +488,7 @@ export const getPublishedMappings = query({
           ...mapping,
           productName: product?.name || "Unknown Product",
         };
-      }),
+      })
     );
 
     return enriched;
@@ -531,7 +513,7 @@ export const listReelMappings = query({
           ...mapping,
           productName: product?.name || "Unknown Product",
         };
-      }),
+      })
     );
 
     return enriched;
@@ -549,7 +531,7 @@ export const generateDMMessage = query({
     const { user } = await requireSession(ctx);
 
     const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
-    const product =     await ctx.db.get(args.productId);
+    const product = await ctx.db.get(args.productId);
     if (!product) throw new Error("Product not found");
 
     const items = await ctx.db
@@ -803,9 +785,7 @@ export const getStats = query({
       totalDMs: dms.length,
       dmsLast24h: recentDMs.length,
       dmSuccessRate:
-        dms.length > 0
-          ? Math.round((dms.filter((d) => d.success).length / dms.length) * 100)
-          : 0,
+        dms.length > 0 ? Math.round((dms.filter((d) => d.success).length / dms.length) * 100) : 0,
       activeMappings: mappings.filter((m) => m.active).length,
       totalMappings: mappings.length,
     };
@@ -835,7 +815,7 @@ export const getRecentActivity = query({
           ...comment,
           productName: product?.name,
         };
-      }),
+      })
     );
 
     return enriched;
@@ -921,8 +901,7 @@ export const refreshExpiring = internalMutation({
 
     const allConfigs = await ctx.db.query("instagramConfig").collect();
     const expiring = allConfigs.filter(
-      (c) =>
-        c.tokenExpiresAt < sevenDaysFromNow && c.tokenExpiresAt > Date.now(),
+      (c) => c.tokenExpiresAt < sevenDaysFromNow && c.tokenExpiresAt > Date.now()
     );
 
     for (const config of expiring) {

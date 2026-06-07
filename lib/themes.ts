@@ -99,7 +99,7 @@ export function getTheme(key?: string | null): ThemeDefinition {
 
 export function buildThemeStyle(
   themeKey?: string | null,
-  accentColor?: string | null,
+  accentColor?: string | null
 ): React.CSSProperties {
   const theme = getTheme(themeKey);
   const vars = { ...theme.vars };

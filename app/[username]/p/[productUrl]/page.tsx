@@ -51,7 +51,7 @@ export default async function ProductDetailPage({
   return (
     <main className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
-        <Link href={`/${username}`} className="inline-block mb-6">
+        <Link href={`/${username}`} className="mb-6 inline-block">
           <Button variant="ghost" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to {username}
@@ -64,33 +64,31 @@ export default async function ProductDetailPage({
             <img
               src={product.coverImageUrl}
               alt={product.name}
-              className="w-full max-h-80 object-cover"
+              className="max-h-80 w-full object-cover"
             />
           </div>
         )}
 
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="mb-2 flex items-center gap-2">
             <Badge variant="secondary" className="text-xs font-medium">
               {getProductTypeLabel(product.type)}
             </Badge>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-3">
+          <h1 className="text-foreground mb-3 text-3xl font-bold tracking-tight sm:text-4xl">
             {product.name}
           </h1>
 
           {product.price && (
-            <p className="text-xl font-semibold text-primary mb-3">
-              {product.price}
-            </p>
+            <p className="text-primary mb-3 text-xl font-semibold">{product.price}</p>
           )}
 
           {product.description && (
             <div className="max-w-2xl">
               <RichTextRenderer
                 html={product.description}
-                className="text-base text-muted-foreground leading-relaxed"
+                className="text-muted-foreground text-base leading-relaxed"
               />
             </div>
           )}
@@ -99,11 +97,9 @@ export default async function ProductDetailPage({
         {product.type === "affiliate" ? (
           <>
             {items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/10 py-20 text-center">
-                <Package className="mb-3 h-10 w-10 text-muted-foreground/40" />
-                <p className="text-sm text-muted-foreground">
-                  No items in this product yet.
-                </p>
+              <div className="border-border bg-secondary/10 flex flex-col items-center justify-center rounded-2xl border border-dashed py-20 text-center">
+                <Package className="text-muted-foreground/40 mb-3 h-10 w-10" />
+                <p className="text-muted-foreground text-sm">No items in this product yet.</p>
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -127,10 +123,10 @@ export default async function ProductDetailPage({
                       productName={product.name}
                       className="group relative"
                     >
-                      <div className="overflow-hidden rounded-xl border border-border/60 bg-white transition-all duration-300 hover:shadow-lg hover:border-border/80">
+                      <div className="border-border/60 hover:border-border/80 overflow-hidden rounded-xl border bg-white transition-all duration-300 hover:shadow-lg">
                         <div className="absolute top-3 right-3 z-10">
                           {item.platform && platformLogos[item.platform] ? (
-                            <div className="rounded-lg border border-border/40 bg-white p-2 shadow-sm">
+                            <div className="border-border/40 rounded-lg border bg-white p-2 shadow-sm">
                               <Image
                                 src={platformLogos[item.platform]}
                                 alt={platformNames[item.platform]}
@@ -142,17 +138,15 @@ export default async function ProductDetailPage({
                           ) : (
                             <Badge
                               variant="secondary"
-                              className="border border-border/40 bg-white/90 text-xs font-medium shadow-sm backdrop-blur-sm"
+                              className="border-border/40 border bg-white/90 text-xs font-medium shadow-sm backdrop-blur-sm"
                             >
-                              {item.platform
-                                ? platformNames[item.platform]
-                                : "Shop"}
+                              {item.platform ? platformNames[item.platform] : "Shop"}
                             </Badge>
                           )}
                         </div>
 
                         {item.imageUrl && (
-                          <div className="aspect-[4/3] overflow-hidden bg-secondary/10">
+                          <div className="bg-secondary/10 aspect-[4/3] overflow-hidden">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={item.imageUrl}
@@ -163,38 +157,38 @@ export default async function ProductDetailPage({
                         )}
 
                         <div className="p-4">
-                          <h2 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 mb-2 transition-colors group-hover:text-primary">
+                          <h2 className="text-foreground group-hover:text-primary mb-2 line-clamp-2 text-sm leading-snug font-semibold transition-colors">
                             {item.title || "View Deal"}
                           </h2>
 
                           {item.price && (
-                            <p className="text-xs font-medium text-muted-foreground mb-3">
+                            <p className="text-muted-foreground mb-3 text-xs font-medium">
                               {item.price}
                             </p>
                           )}
 
-                          <div className="flex items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-secondary/20 px-3 py-2 text-xs font-medium text-foreground transition group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary">
+                          <div className="border-border/60 bg-secondary/20 text-foreground group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition">
                             View Deal
                             <ExternalLink className="h-3 w-3" />
                           </div>
                         </div>
                       </div>
                     </AffiliateItemLink>
-                  ),
+                  )
                 )}
               </div>
             )}
 
-            <div className="mt-12 border-t border-border/60 pt-6">
-              <p className="text-center text-[0.65rem] text-muted-foreground leading-relaxed">
-                If you purchase from any of these links, I may receive a small
-                commission. Thank you for the support{" "}
+            <div className="border-border/60 mt-12 border-t pt-6">
+              <p className="text-muted-foreground text-center text-[0.65rem] leading-relaxed">
+                If you purchase from any of these links, I may receive a small commission. Thank you
+                for the support{" "}
                 <Image
                   src={heartPixel.src}
                   alt="heart"
                   width={5}
                   height={5}
-                  className="inline-block w-2 h-2"
+                  className="inline-block h-2 w-2"
                 />
               </p>
             </div>

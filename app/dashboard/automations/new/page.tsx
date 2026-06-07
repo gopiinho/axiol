@@ -38,8 +38,8 @@ export default function CreateAutomationPage() {
 
   if (ig.status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-pink-500" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="border-muted h-8 w-8 animate-spin rounded-full border-4 border-t-pink-500" />
       </div>
     );
   }
@@ -53,14 +53,10 @@ export default function CreateAutomationPage() {
 
 function CreateAutomationWizard() {
   const router = useRouter();
-  const [selectedProductId, setSelectedProductId] = useState<
-    Id<"products"> | ""
-  >("");
+  const [selectedProductId, setSelectedProductId] = useState<Id<"products"> | "">("");
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
   const [keywordInput, setKeywordInput] = useState("link");
-  const [keywordPresets, setKeywordPresets] = useState<string[]>(
-    DEFAULT_KEYWORD_PRESETS,
-  );
+  const [keywordPresets, setKeywordPresets] = useState<string[]>(DEFAULT_KEYWORD_PRESETS);
   const [maxItemsInDM, setMaxItemsInDM] = useState(10);
   const [includeWebsiteLink, setIncludeWebsiteLink] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -82,14 +78,10 @@ function CreateAutomationWizard() {
   const fetchReels = useAction(api.instagram.fetchRecentReels);
   const createMapping = useMutation(api.instagram.createReelMapping);
 
-  const keywordList = useMemo(
-    () => parseKeywords(keywordInput),
-    [keywordInput],
-  );
+  const keywordList = useMemo(() => parseKeywords(keywordInput), [keywordInput]);
   const keywordNormalized = useMemo(() => keywordList.join(","), [keywordList]);
   const keywordValid = keywordList.length > 0;
-  const maxItemsValid =
-    Number.isInteger(maxItemsInDM) && maxItemsInDM >= 1 && maxItemsInDM <= 20;
+  const maxItemsValid = Number.isInteger(maxItemsInDM) && maxItemsInDM >= 1 && maxItemsInDM <= 20;
   const canPreview = Boolean(selectedProductId) && maxItemsValid;
 
   useEffect(() => {
@@ -120,9 +112,7 @@ function CreateAutomationWizard() {
           if (cancelled) return;
           setGeneratePreview(null);
           setPreviewError(
-            error instanceof Error
-              ? error.message
-              : "Failed to generate message preview.",
+            error instanceof Error ? error.message : "Failed to generate message preview."
           );
         })
         .finally(() => {
@@ -135,13 +125,7 @@ function CreateAutomationWizard() {
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [
-    convex,
-    canPreview,
-    selectedProductId,
-    maxItemsInDM,
-    includeWebsiteLink,
-  ]);
+  }, [convex, canPreview, selectedProductId, maxItemsInDM, includeWebsiteLink]);
 
   const stepMeta = useMemo(
     () => [
@@ -150,7 +134,7 @@ function CreateAutomationWizard() {
       { id: 3, title: "Keywords" },
       { id: 4, title: "Preview" },
     ],
-    [],
+    []
   );
 
   const goToStep = (nextStep: number) => {
@@ -163,19 +147,15 @@ function CreateAutomationWizard() {
       if (step === 1) return true;
       if (step === 2) return Boolean(selectedProductId);
       if (step === 3) return Boolean(selectedProductId) && Boolean(selectedReel);
-      if (step === 4)
-        return Boolean(selectedProductId) && Boolean(selectedReel) && keywordValid;
+      if (step === 4) return Boolean(selectedProductId) && Boolean(selectedReel) && keywordValid;
       return false;
     },
-    [selectedProductId, selectedReel, keywordValid],
+    [selectedProductId, selectedReel, keywordValid]
   );
 
   const persistPresets = useCallback((presets: string[]) => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      KEYWORD_PRESET_STORAGE_KEY,
-      JSON.stringify(presets),
-    );
+    window.localStorage.setItem(KEYWORD_PRESET_STORAGE_KEY, JSON.stringify(presets));
   }, []);
 
   useEffect(() => {
@@ -188,11 +168,7 @@ function CreateAutomationWizard() {
       const parsed = JSON.parse(storedValue) as string[];
       if (Array.isArray(parsed) && parsed.length > 0) {
         setKeywordPresets(
-          Array.from(
-            new Set(
-              parsed.map((value) => value.trim().toLowerCase()).filter(Boolean),
-            ),
-          ),
+          Array.from(new Set(parsed.map((value) => value.trim().toLowerCase()).filter(Boolean)))
         );
       }
     } catch {
@@ -205,14 +181,12 @@ function CreateAutomationWizard() {
       if (keywordsToRemember.length === 0) return;
 
       setKeywordPresets((previous) => {
-        const next = Array.from(
-          new Set([...keywordsToRemember, ...previous]),
-        ).slice(0, 16);
+        const next = Array.from(new Set([...keywordsToRemember, ...previous])).slice(0, 16);
         persistPresets(next);
         return next;
       });
     },
-    [persistPresets],
+    [persistPresets]
   );
 
   const addPresetToInput = (preset: string) => {
@@ -221,9 +195,7 @@ function CreateAutomationWizard() {
   };
 
   const removeKeywordFromInput = (keywordToRemove: string) => {
-    const nextKeywords = keywordList.filter(
-      (value) => value !== keywordToRemove,
-    );
+    const nextKeywords = keywordList.filter((value) => value !== keywordToRemove);
     setKeywordInput(nextKeywords.join(", "));
   };
 
@@ -245,9 +217,7 @@ function CreateAutomationWizard() {
       setReels(fetchedReels);
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch reels. Please try again.";
+        error instanceof Error ? error.message : "Failed to fetch reels. Please try again.";
       setReelsError(message);
     } finally {
       setReelsLoading(false);
@@ -279,13 +249,8 @@ function CreateAutomationWizard() {
       rememberKeywords(keywordList);
       router.push("/dashboard/automations");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to save draft";
-      setSaveError(
-        message === "Unauthorized"
-          ? "Session expired. Please sign in again."
-          : message,
-      );
+      const message = error instanceof Error ? error.message : "Failed to save draft";
+      setSaveError(message === "Unauthorized" ? "Session expired. Please sign in again." : message);
     } finally {
       setIsSaving(false);
     }
@@ -300,8 +265,7 @@ function CreateAutomationWizard() {
     return false;
   }, [currentStep, selectedProductId, selectedReel, keywordValid, maxItemsValid]);
 
-  const primaryActionDisabled =
-    isSaving || !canContinueFromCurrentStep();
+  const primaryActionDisabled = isSaving || !canContinueFromCurrentStep();
 
   const handlePrimaryAction = () => {
     if (currentStep < TOTAL_STEPS) {
@@ -380,10 +344,8 @@ function CreateAutomationWizard() {
           onGoToStep={goToStep}
         />
 
-        <div className="min-h-135 mb-20 px-5 py-4 lg:px-6">
-          <div>
-            {renderStepContent()}
-          </div>
+        <div className="mb-20 min-h-135 px-5 py-4 lg:px-6">
+          <div>{renderStepContent()}</div>
         </div>
       </div>
 
@@ -396,16 +358,11 @@ function CreateAutomationWizard() {
         onPrimaryAction={handlePrimaryAction}
       />
 
-      <Dialog
-        open={Boolean(saveError)}
-        onOpenChange={(open) => !open && setSaveError(null)}
-      >
+      <Dialog open={Boolean(saveError)} onOpenChange={(open) => !open && setSaveError(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Couldn&apos;t save draft</DialogTitle>
-            <DialogDescription>
-              {saveError ?? "Please try again."}
-            </DialogDescription>
+            <DialogDescription>{saveError ?? "Please try again."}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setSaveError(null)}>Close</Button>

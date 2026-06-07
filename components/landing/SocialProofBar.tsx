@@ -41,17 +41,15 @@ const stats = [
 
 export function SocialProofBar() {
   return (
-    <section className="relative px-6 sm:px-16 py-10 sm:py-14 border-t border-border/30">
+    <section className="border-border/30 relative border-t px-6 py-10 sm:px-16 sm:py-14">
       <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16 lg:gap-24">
         {stats.map((stat, i) => (
           <ScrollFadeIn key={stat.label} delay={i * 0.1}>
             <div className="text-center">
-              <p className="text-3xl sm:text-4xl font-extrabold text-primary tracking-tight">
+              <p className="text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
                 <AnimatedNumber value={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {stat.label}
-              </p>
+              <p className="text-muted-foreground mt-1 text-sm">{stat.label}</p>
             </div>
           </ScrollFadeIn>
         ))}

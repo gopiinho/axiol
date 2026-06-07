@@ -11,10 +11,7 @@ interface SuccessCheckmarkProps {
  * Animated checkmark that draws itself on mount.
  * Used for success celebrations (publish, save, connect).
  */
-export function SuccessCheckmark({
-  size = 56,
-  className,
-}: SuccessCheckmarkProps) {
+export function SuccessCheckmark({ size = 56, className }: SuccessCheckmarkProps) {
   const center = size / 2;
   const radius = size * 0.38;
   const strokeWidth = size * 0.07;

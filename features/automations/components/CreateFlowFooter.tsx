@@ -23,7 +23,7 @@ export default function CreateFlowFooter({
   const isLastStep = currentStep === totalSteps;
 
   return (
-    <div className="fixed inset-x-0 bottom-16 z-60 border-t bg-background/95 backdrop-blur md:bottom-0">
+    <div className="bg-background/95 fixed inset-x-0 bottom-16 z-60 border-t backdrop-blur md:bottom-0">
       <div className="mx-auto flex w-full max-w-md gap-2 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:max-w-xl lg:max-w-2xl">
         <Button
           type="button"

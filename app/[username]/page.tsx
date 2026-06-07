@@ -4,11 +4,7 @@ import { getServerConvexClient } from "@/server/convex/client";
 import { buildThemeStyle, getTheme } from "@/lib/themes";
 import { StoreContent } from "@/components/StoreContent";
 
-export default async function UserStorePage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
+export default async function UserStorePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const convex = getServerConvexClient();
 
@@ -19,14 +15,23 @@ export default async function UserStorePage({
   }
 
   const { user, products: rawProducts } = result;
-  const products = rawProducts.map((p: { _id: string; name: string; productUrl: string; price?: string | null; coverImageUrl?: string | null; items?: unknown[] }) => ({
-    _id: p._id,
-    name: p.name,
-    productUrl: p.productUrl,
-    price: p.price,
-    coverImageUrl: p.coverImageUrl,
-    itemCount: p.items?.length ?? 0,
-  }));
+  const products = rawProducts.map(
+    (p: {
+      _id: string;
+      name: string;
+      productUrl: string;
+      price?: string | null;
+      coverImageUrl?: string | null;
+      items?: unknown[];
+    }) => ({
+      _id: p._id,
+      name: p.name,
+      productUrl: p.productUrl,
+      price: p.price,
+      coverImageUrl: p.coverImageUrl,
+      itemCount: p.items?.length ?? 0,
+    })
+  );
   const displayName = user.storeName || user.name;
   const theme = getTheme(user.theme);
   const themeStyle = buildThemeStyle(user.theme, user.accentColor);
@@ -66,9 +71,7 @@ export default async function UserStorePage({
       : null,
     user.websiteUrl
       ? {
-          url: user.websiteUrl.startsWith("http")
-            ? user.websiteUrl
-            : `https://${user.websiteUrl}`,
+          url: user.websiteUrl.startsWith("http") ? user.websiteUrl : `https://${user.websiteUrl}`,
           icon: "globe" as const,
           label: "Website",
           display: formatDisplayUrl(user.websiteUrl),

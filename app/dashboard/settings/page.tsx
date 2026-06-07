@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Trash2,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Trash2, Loader2, AlertCircle } from "lucide-react";
 import { useUser } from "@/features/auth/client/UserContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,53 +51,48 @@ export default function SettingsPage() {
     <div className="px-5 py-6 lg:px-6 lg:py-8">
       <div className="mx-auto max-w-xl">
         <h1 className="app-title">Settings</h1>
-        <p className="app-subtitle mt-1">
-          Your account and connected services.
-        </p>
+        <p className="app-subtitle mt-1">Your account and connected services.</p>
       </div>
 
-      <div className="mx-auto max-w-xl mt-6">
-          <Tabs defaultValue="general">
-            <TabsList
-              variant="line"
-              className="w-full justify-start gap-0 border-b border-border/70 rounded-none p-0"
+      <div className="mx-auto mt-6 max-w-xl">
+        <Tabs defaultValue="general">
+          <TabsList
+            variant="line"
+            className="border-border/70 w-full justify-start gap-0 rounded-none border-b p-0"
+          >
+            <TabsTrigger
+              value="general"
+              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
-              <TabsTrigger
-                value="general"
-                className="rounded-none px-3 sm:px-4 py-2.5 text-sm data-[state=active]:shadow-none"
-              >
-                General
-              </TabsTrigger>
-              <TabsTrigger
-                value="integrations"
-                className="rounded-none px-3 sm:px-4 py-2.5 text-sm data-[state=active]:shadow-none"
-              >
-                Integrations
-              </TabsTrigger>
-              <TabsTrigger
-                value="advanced"
-                className="rounded-none px-3 sm:px-4 py-2.5 text-sm data-[state=active]:shadow-none"
-              >
-                Advanced
-              </TabsTrigger>
-            </TabsList>
+              General
+            </TabsTrigger>
+            <TabsTrigger
+              value="integrations"
+              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+            >
+              Integrations
+            </TabsTrigger>
+            <TabsTrigger
+              value="advanced"
+              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+            >
+              Advanced
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="general" className="pt-6">
-              <GeneralTab
-                profile={profile}
-                subscriptionLabel={subscriptionLabel}
-              />
-            </TabsContent>
+          <TabsContent value="general" className="pt-6">
+            <GeneralTab profile={profile} subscriptionLabel={subscriptionLabel} />
+          </TabsContent>
 
-            <TabsContent value="integrations" className="pt-6">
-              <IntegrationsTab integrations={integrations} />
-            </TabsContent>
+          <TabsContent value="integrations" className="pt-6">
+            <IntegrationsTab integrations={integrations} />
+          </TabsContent>
 
-            <TabsContent value="advanced" className="pt-6">
-              <AdvancedTab username={profile?.username} />
-            </TabsContent>
-          </Tabs>
-        </div>
+          <TabsContent value="advanced" className="pt-6">
+            <AdvancedTab username={profile?.username} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
@@ -115,20 +106,15 @@ function GeneralTab({
 }) {
   return (
     <div className="space-y-5">
-      <SectionHeader
-        title="Account"
-        description="Your account details and subscription status."
-      />
+      <SectionHeader title="Account" description="Your account details and subscription status." />
 
-      <div className="app-panel divide-y divide-border/70">
+      <div className="app-panel divide-border/70 divide-y">
         <SettingsRow label="Username" value={`@${profile?.username ?? ""}`} />
         <SettingsRow label="Email" value={profile?.email ?? ""} />
         <div className="flex items-center justify-between px-4 py-3.5">
           <div>
-            <p className="text-sm font-medium text-foreground">Subscription</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {subscriptionLabel}
-            </p>
+            <p className="text-foreground text-sm font-medium">Subscription</p>
+            <p className="text-muted-foreground mt-0.5 text-xs">{subscriptionLabel}</p>
           </div>
           <Badge variant="secondary" className="capitalize">
             {profile?.subscriptionStatus ?? "N/A"}
@@ -174,21 +160,18 @@ function AdvancedTab({ username }: { username?: string }) {
         description="Irreversible actions that permanently affect your account."
       />
 
-      <div className="rounded-xs border border-destructive/20 bg-destructive/9 p-4">
+      <div className="border-destructive/20 bg-destructive/9 rounded-xs border p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">
-              Delete Account
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Permanently delete your account and all associated data. This
-              cannot be undone.
+          <div className="min-w-0 space-y-1">
+            <p className="text-foreground text-sm font-semibold">Delete Account</p>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Permanently delete your account and all associated data. This cannot be undone.
             </p>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
             disabled
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -197,11 +180,7 @@ function AdvancedTab({ username }: { username?: string }) {
         </div>
       </div>
 
-      <DeleteAccountDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        username={username}
-      />
+      <DeleteAccountDialog open={deleteOpen} onOpenChange={setDeleteOpen} username={username} />
     </div>
   );
 }
@@ -235,8 +214,7 @@ function DeleteAccountDialog({
       }
       window.location.href = "/login";
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Failed to delete account";
+      const msg = err instanceof Error ? err.message : "Failed to delete account";
       setError(msg);
       setIsDeleting(false);
     }
@@ -255,21 +233,21 @@ function DeleteAccountDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent showCloseButton={!isDeleting}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-destructive">
+          <DialogTitle className="text-destructive flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
             Delete Account
           </DialogTitle>
           <DialogDescription className="text-left">
-            This will permanently delete your account and all associated data
-            including collections, items, Instagram configurations, automation
-            mappings, and all logs. This action is irreversible.
+            This will permanently delete your account and all associated data including collections,
+            items, Instagram configurations, automation mappings, and all logs. This action is
+            irreversible.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 pt-1">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             To confirm, type{" "}
-            <span className="font-mono text-xs rounded-md bg-muted px-1.5 py-0.5 text-foreground select-all">
+            <span className="bg-muted text-foreground rounded-md px-1.5 py-0.5 font-mono text-xs select-all">
               {expectedText}
             </span>{" "}
             below:
@@ -286,17 +264,13 @@ function DeleteAccountDialog({
         </div>
 
         {error && (
-          <div className="rounded-xl border border-destructive/25 bg-destructive/8 px-3 py-2 text-sm text-destructive">
+          <div className="border-destructive/25 bg-destructive/8 text-destructive rounded-xl border px-3 py-2 text-sm">
             {error}
           </div>
         )}
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isDeleting}>
             Cancel
           </Button>
           <Button
@@ -322,17 +296,11 @@ function DeleteAccountDialog({
   );
 }
 
-function SectionHeader({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+function SectionHeader({ title, description }: { title: string; description: string }) {
   return (
     <div>
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      <h2 className="text-foreground text-sm font-semibold">{title}</h2>
+      <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
     </div>
   );
 }
@@ -340,8 +308,8 @@ function SectionHeader({
 function SettingsRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-3.5">
-      <p className="text-sm font-medium text-foreground">{label}</p>
-      <p className="text-sm text-muted-foreground truncate ml-4">{value}</p>
+      <p className="text-foreground text-sm font-medium">{label}</p>
+      <p className="text-muted-foreground ml-4 truncate text-sm">{value}</p>
     </div>
   );
 }

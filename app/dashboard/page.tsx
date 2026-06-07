@@ -54,12 +54,10 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="px-5 lg:px-6 py-6 lg:py-8">
+    <div className="px-5 py-6 lg:px-6 lg:py-8">
       <div className="space-y-1">
         <h1 className="heading-playful text-4xl sm:text-5xl">Welcome back!</h1>
-        <p className="text-muted-foreground">
-          What would you like to do today?
-        </p>
+        <p className="text-muted-foreground">What would you like to do today?</p>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-3">
@@ -69,29 +67,20 @@ export default function DashboardPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="group relative overflow-hidden rounded-xs border border-border/70 hover:bg-card/80 bg-card p-5 transition-all duration-200 hover:border-border"
+              className="group border-border/70 hover:bg-card/80 bg-card hover:border-border relative overflow-hidden rounded-xs border p-5 transition-all duration-200"
             >
-              <div
-                className={`absolute inset-0 bg-linear-to-br ${stat.accent} opacity-60`}
-              />
+              <div className={`absolute inset-0 bg-linear-to-br ${stat.accent} opacity-60`} />
               <div className="relative z-10 flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {stat.label}
-                  </p>
+                  <p className="text-muted-foreground text-sm font-medium">{stat.label}</p>
                   {isLoading ? (
-                    <div className="mt-1 h-9 w-16 animate-pulse rounded bg-muted" />
+                    <div className="bg-muted mt-1 h-9 w-16 animate-pulse rounded" />
                   ) : (
-                    <p className="mt-1 text-3xl font-bold tabular-nums">
-                      {stat.value}
-                    </p>
+                    <p className="mt-1 text-3xl font-bold tabular-nums">{stat.value}</p>
                   )}
                 </div>
-                <div className="rounded-xl bg-background/80 p-2.5 backdrop-blur-sm">
-                  <Icon
-                    className="h-5 w-5 text-muted-foreground"
-                    strokeWidth={2}
-                  />
+                <div className="bg-background/80 rounded-xl p-2.5 backdrop-blur-sm">
+                  <Icon className="text-muted-foreground h-5 w-5" strokeWidth={2} />
                 </div>
               </div>
             </Link>
@@ -106,7 +95,7 @@ export default function DashboardPage() {
             <div key={action.href}>
               <Link
                 href={action.href}
-                className="flex flex-col gap-4 rounded-xs border border-border/70 bg-card  p-5 transition-all duration-200 hover:border-border"
+                className="border-border/70 bg-card hover:border-border flex flex-col gap-4 rounded-xs border p-5 transition-all duration-200"
               >
                 <div
                   className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${action.accent} transition-transform duration-200`}
@@ -114,8 +103,8 @@ export default function DashboardPage() {
                   <Icon className="h-5 w-5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">{action.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                  <h3 className="text-lg font-bold">{action.title}</h3>
+                  <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
                     {action.description}
                   </p>
                 </div>
@@ -123,7 +112,7 @@ export default function DashboardPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="px-0 text-primary hover:bg-transparent hover:text-primary"
+                    className="text-primary hover:text-primary px-0 hover:bg-transparent"
                     tabIndex={-1}
                   >
                     Go &rarr;

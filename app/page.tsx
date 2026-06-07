@@ -12,22 +12,20 @@ import { CloudBackground } from "@/components/landing/CloudBackground";
 export default function Home() {
   return (
     <main className="home-font-primary bg-background relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 dot-grid opacity-40" />
+      <div className="dot-grid pointer-events-none absolute inset-0 opacity-40" />
       <HomeNav />
 
-      <section className="relative min-h-screen flex items-end px-6 sm:px-16 lg:px-28 xl:px-32 pb-16 sm:pb-20 lg:pb-28 pt-28 sm:pt-40">
+      <section className="relative flex min-h-screen items-end px-6 pt-28 pb-16 sm:px-16 sm:pt-40 sm:pb-20 lg:px-28 lg:pb-28 xl:px-32">
         <CloudBackground />
-        <div className="w-full max-w-7xl mx-auto relative z-10">
-          <div className="max-w-2xl lg:max-w-3xl space-y-6 sm:space-y-8">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-primary leading-[0.95] text-outline-black">
-              Turn your content into{" "}
-              <span className="marker-stroke">income.</span>
+        <div className="relative z-10 mx-auto w-full max-w-7xl">
+          <div className="max-w-2xl space-y-6 sm:space-y-8 lg:max-w-3xl">
+            <h1 className="text-primary text-outline-black text-5xl leading-[0.95] font-extrabold tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">
+              Turn your content into <span className="marker-stroke">income.</span>
             </h1>
 
-            <p className="text-sm sm:text-lg lg:text-xl max-w-md sm:max-w-lg leading-relaxed">
-              The easiest way to make money online. All of your digital
-              products, affiliate links and bookings — hosted within your
-              link-in-bio.
+            <p className="max-w-md text-sm leading-relaxed sm:max-w-lg sm:text-lg lg:text-xl">
+              The easiest way to make money online. All of your digital products, affiliate links
+              and bookings — hosted within your link-in-bio.
             </p>
 
             <WaitlistForm />

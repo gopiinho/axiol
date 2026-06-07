@@ -12,16 +12,7 @@ import {
 } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { Id } from "@/convex/_generated/dataModel";
-import {
-  Loader2,
-  Folder,
-  Plus,
-  X,
-  Pencil,
-  Square,
-  PanelTop,
-  MonitorPlay,
-} from "lucide-react";
+import { Loader2, Folder, Plus, X, Pencil, Square, PanelTop, MonitorPlay } from "lucide-react";
 
 const STYLE_OPTIONS = [
   { value: "button", label: "Button", icon: Square },
@@ -34,17 +25,13 @@ const MAX_SIZE = 2 * 1024 * 1024;
 
 function StepNumber({ num }: { num: number }) {
   return (
-    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/30 text-foreground text-xs font-bold mr-2 shrink-0">
+    <span className="bg-primary/30 text-foreground mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
       {num}
     </span>
   );
 }
 
-export function ThumbnailStep({
-  productId,
-  product,
-  onRegisterSave,
-}: ProductStepComponentProps) {
+export function ThumbnailStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
   const savedThumbnail = product.config?.thumbnail as
     | { style?: string; title?: string; subtitle?: string; buttonText?: string }
     | undefined;
@@ -54,13 +41,11 @@ export function ThumbnailStep({
       savedThumbnail?.style === "callout" ||
       savedThumbnail?.style === "preview"
       ? savedThumbnail.style
-      : "preview",
+      : "preview"
   );
   const [title, setTitle] = useState(savedThumbnail?.title || product.name);
   const [subtitle, setSubtitle] = useState(savedThumbnail?.subtitle ?? "");
-  const [buttonText, setButtonText] = useState(
-    savedThumbnail?.buttonText ?? "",
-  );
+  const [buttonText, setButtonText] = useState(savedThumbnail?.buttonText ?? "");
   const [uploading, setUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,15 +107,7 @@ export function ThumbnailStep({
         buttonText: buttonText.trim() || "Download Now",
       },
     });
-  }, [
-    productId,
-    product.name,
-    style,
-    title,
-    subtitle,
-    buttonText,
-    updateThumbnailConfig,
-  ]);
+  }, [productId, product.name, style, title, subtitle, buttonText, updateThumbnailConfig]);
 
   useEffect(() => {
     onRegisterSave?.(handleSave);
@@ -152,10 +129,10 @@ export function ThumbnailStep({
                 type="button"
                 onClick={() => setStyle(option.value)}
                 className={cn(
-                  "flex flex-col items-center gap-1.5 px-6 py-4 text-sm cursor-pointer font-medium rounded-xs border transition-colors",
+                  "flex cursor-pointer flex-col items-center gap-1.5 rounded-xs border px-6 py-4 text-sm font-medium transition-colors",
                   style === option.value
                     ? "bg-foreground text-background"
-                    : "border-border text-foreground hover:border-primary/50",
+                    : "border-border text-foreground hover:border-primary/50"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -172,7 +149,7 @@ export function ThumbnailStep({
           Select image
         </Label>
         <div className="pl-8">
-          <div className="flex items-center gap-6 rounded-xs border border-dashed border-border/70 bg-card/50 p-5 h-34">
+          <div className="border-border/70 bg-card/50 flex h-34 items-center gap-6 rounded-xs border border-dashed p-5">
             <button
               type="button"
               onClick={() => !uploading && inputRef.current?.click()}
@@ -182,14 +159,12 @@ export function ThumbnailStep({
                 "flex items-center justify-center",
                 "transition-all duration-200",
                 showImage
-                  ? "border border-border/60"
-                  : "border border-border/40 bg-linear-to-br from-[oklch(0.94_0.06_220)] via-[oklch(0.93_0.07_235)] to-[oklch(0.94_0.05_210)]",
+                  ? "border-border/60 border"
+                  : "border-border/40 border bg-linear-to-br from-[oklch(0.94_0.06_220)] via-[oklch(0.93_0.07_235)] to-[oklch(0.94_0.05_210)]",
                 !uploading && "hover:border-primary/60 cursor-pointer",
-                uploading && "opacity-70 cursor-wait",
+                uploading && "cursor-wait opacity-70"
               )}
-              aria-label={
-                showImage ? "Replace thumbnail image" : "Choose thumbnail image"
-              }
+              aria-label={showImage ? "Replace thumbnail image" : "Choose thumbnail image"}
             >
               {showImage ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
@@ -208,7 +183,7 @@ export function ThumbnailStep({
                 className={cn(
                   "absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full",
                   "bg-primary text-foreground shadow-md",
-                  "transition-transform duration-200 group-hover:scale-110",
+                  "transition-transform duration-200 group-hover:scale-110"
                 )}
                 aria-hidden
               >
@@ -220,16 +195,16 @@ export function ThumbnailStep({
               </span>
             </button>
 
-            <div className="flex flex-1 flex-col items-center justify-center gap-1.5 min-w-0">
+            <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5">
               <span
                 onClick={() => !uploading && inputRef.current?.click()}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-xs bg-card px-4 py-2 mt-1",
-                  "text-sm font-semibold text-foreground shadow-sm border border-border/60 w-fit",
+                  "bg-card mt-1 inline-flex items-center gap-2 rounded-xs px-4 py-2",
+                  "text-foreground border-border/60 w-fit border text-sm font-semibold shadow-sm",
                   "transition-all duration-200",
                   "hover:bg-accent hover:text-accent-foreground",
                   "cursor-pointer",
-                  uploading && "opacity-50 cursor-not-allowed",
+                  uploading && "cursor-not-allowed opacity-50"
                 )}
               >
                 {uploading ? (
@@ -239,9 +214,8 @@ export function ThumbnailStep({
                 )}
                 {uploading ? "Uploading..." : "Upload photo"}
               </span>
-              <span className="text-xs text-muted-foreground">
-                Images should be square, at least 400x400px, and 72 DPI (dots
-                per inch).
+              <span className="text-muted-foreground text-xs">
+                Images should be square, at least 400x400px, and 72 DPI (dots per inch).
               </span>
             </div>
           </div>
@@ -260,7 +234,7 @@ export function ThumbnailStep({
           <StepNumber num={3} />
           Add text
         </Label>
-        <div className="pl-8 space-y-4">
+        <div className="space-y-4 pl-8">
           <div className="space-y-2">
             <Label htmlFor="thumbnail-title" className="text-sm font-bold">
               Title *
@@ -288,10 +262,7 @@ export function ThumbnailStep({
           )}
 
           <div className="space-y-2">
-            <Label
-              htmlFor="thumbnail-button-text"
-              className="text-sm font-bold"
-            >
+            <Label htmlFor="thumbnail-button-text" className="text-sm font-bold">
               Button text
             </Label>
             <Input

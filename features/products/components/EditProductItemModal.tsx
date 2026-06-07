@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Doc } from "@/convex/_generated/dataModel";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,11 +22,7 @@ interface EditProductItemModalProps {
   onClose: () => void;
 }
 
-export function EditProductItemModal({
-  item,
-  open,
-  onClose,
-}: EditProductItemModalProps) {
+export function EditProductItemModal({ item, open, onClose }: EditProductItemModalProps) {
   const [affiliateLink, setAffiliateLink] = useState(item.affiliateLink);
   const [price, setPrice] = useState(item.price ?? "");
   const [platform, setPlatform] = useState(item.platform ?? "amazon");
@@ -70,7 +61,7 @@ export function EditProductItemModal({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Couldn't update this item. Check your connection and try again.",
+          : "Couldn't update this item. Check your connection and try again."
       );
     } finally {
       setLoading(false);
@@ -79,11 +70,8 @@ export function EditProductItemModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent
-        showCloseButton={false}
-        className="sm:max-w-lg gap-0 overflow-hidden p-0"
-      >
-        <DialogHeader className="flex-row items-center justify-between border-b border-border/70 px-5 py-3.5">
+      <DialogContent showCloseButton={false} className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <DialogHeader className="border-border/70 flex-row items-center justify-between border-b px-5 py-3.5">
           <DialogTitle className="text-lg font-semibold">Edit item</DialogTitle>
           <div className="flex items-center gap-2">
             <Button
@@ -107,11 +95,7 @@ export function EditProductItemModal({
           </div>
         </DialogHeader>
 
-        <form
-          id="edit-item-form"
-          onSubmit={handleSubmit}
-          className="space-y-4 px-5 py-5"
-        >
+        <form id="edit-item-form" onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
           {errorMessage && (
             <Alert variant="destructive">
               <AlertTitle>Couldn&apos;t update item</AlertTitle>
@@ -190,9 +174,7 @@ export function EditProductItemModal({
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://example.com/image.jpg"
             />
-            <p className="text-xs text-muted-foreground">
-              Optional: add a product image URL.
-            </p>
+            <p className="text-muted-foreground text-xs">Optional: add a product image URL.</p>
           </div>
         </form>
       </DialogContent>

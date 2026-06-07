@@ -39,9 +39,7 @@ export default function SignupPage() {
 
   const usernameCheck = useQuery(
     api.users.checkUsernameAvailable,
-    !loading && debouncedUsername.length >= 3
-      ? { username: debouncedUsername }
-      : "skip",
+    !loading && debouncedUsername.length >= 3 ? { username: debouncedUsername } : "skip"
   );
 
   useEffect(() => {
@@ -54,8 +52,7 @@ export default function SignupPage() {
         router.push("/dashboard");
       })
       .catch((err: unknown) => {
-        const msg =
-          err instanceof Error ? err.message : "Failed to create profile";
+        const msg = err instanceof Error ? err.message : "Failed to create profile";
         setError(msg);
         setLoading(false);
       });
@@ -94,8 +91,7 @@ export default function SignupPage() {
 
       pendingUsername.current = username.toLowerCase().trim();
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Signup failed. Please try again.";
+      const errorMessage = err instanceof Error ? err.message : "Signup failed. Please try again.";
       setError(errorMessage);
       setLoading(false);
     }
@@ -111,16 +107,16 @@ export default function SignupPage() {
         duration={0.5}
       >
         <div className="mb-10 text-center">
-          <h2 className="font-accent text-3xl flex text-center items-center justify-center font-bold tracking-tight sm:text-4xl">
+          <h2 className="font-accent flex items-center justify-center text-center text-3xl font-bold tracking-tight sm:text-4xl">
             Hey @{username ? username : <p className="capitalize">username</p>}
           </h2>
-          <p className="mt-2 text-lg text-muted-foreground sm:text-xl">
+          <p className="text-muted-foreground mt-2 text-lg sm:text-xl">
             Let&apos;s monetize your following!
           </p>
         </div>
 
         {error && (
-          <div className="mb-5 rounded-xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-destructive animate-shake">
+          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 rounded-xl border px-4 py-3">
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
               <p className="text-sm">{error}</p>
@@ -131,8 +127,8 @@ export default function SignupPage() {
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
             <div className="relative flex items-center justify-center">
-              <AtSign className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <span className="pointer-events-none font-semibold text-base absolute top-1/2 left-10 -translate-y-1/2 select-none whitespace-nowrap text-foreground">
+              <AtSign className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
+              <span className="text-foreground pointer-events-none absolute top-1/2 left-10 -translate-y-1/2 text-base font-semibold whitespace-nowrap select-none">
                 axiol.store/
               </span>
               <Input
@@ -140,38 +136,32 @@ export default function SignupPage() {
                 type="text"
                 value={username}
                 onChange={(e) =>
-                  setUsername(
-                    e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""),
-                  )
+                  setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
                 }
                 placeholder="username"
                 required
                 disabled={loading}
-                className="pl-34 h-12"
+                className="h-12 pl-34"
                 maxLength={30}
               />
               {debouncedUsername.length >= 3 && usernameCheck && (
                 <div className="absolute top-1/2 right-3 -translate-y-1/2">
                   {usernameCheck.available ? (
-                    <CheckCircle2 className="h-4 w-4 text-status-success" />
+                    <CheckCircle2 className="text-status-success h-4 w-4" />
                   ) : (
-                    <XCircle className="h-4 w-4 text-destructive" />
+                    <XCircle className="text-destructive h-4 w-4" />
                   )}
                 </div>
               )}
             </div>
-            {debouncedUsername.length >= 3 &&
-              usernameCheck &&
-              !usernameCheck.available && (
-                <p className="text-xs text-destructive">
-                  {usernameCheck.reason}
-                </p>
-              )}
+            {debouncedUsername.length >= 3 && usernameCheck && !usernameCheck.available && (
+              <p className="text-destructive text-xs">{usernameCheck.reason}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <div className="relative">
-              <User className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <User className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
               <Input
                 id="name"
                 type="text"
@@ -180,14 +170,14 @@ export default function SignupPage() {
                 placeholder="Full name"
                 required
                 disabled={loading}
-                className="pl-10 h-12"
+                className="h-12 pl-10"
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="relative">
-              <Mail className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
               <Input
                 id="email"
                 type="email"
@@ -196,14 +186,14 @@ export default function SignupPage() {
                 placeholder="Email"
                 required
                 disabled={loading}
-                className="pl-10 h-12"
+                className="h-12 pl-10"
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="relative">
-              <Lock className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -213,30 +203,21 @@ export default function SignupPage() {
                 required
                 minLength={12}
                 disabled={loading}
-                className="pl-10 pr-10 h-12"
+                className="h-12 pr-10 pl-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3.5 -translate-y-1/2 transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 tabIndex={-1}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
-          <Button
-            type="submit"
-            disabled={loading}
-            size="lg"
-            className="w-full mt-6"
-          >
+          <Button type="submit" disabled={loading} size="lg" className="mt-6 w-full">
             {loading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -248,20 +229,20 @@ export default function SignupPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-6 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="font-medium hover:underline">
             Login
           </Link>
         </p>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-4 text-center text-xs">
           By signing up, you agree to our{" "}
-          <Link href="/terms" className="underline hover:text-foreground">
+          <Link href="/terms" className="hover:text-foreground underline">
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="underline hover:text-foreground">
+          <Link href="/privacy" className="hover:text-foreground underline">
             Privacy Policy
           </Link>
           .

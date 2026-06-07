@@ -1,9 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import {
-  productTypeValidator,
-  productConfigValidator,
-} from "./productConfig";
+import { productTypeValidator, productConfigValidator } from "./productConfig";
 
 const accountTypes = v.union(v.literal("creator"), v.literal("admin"));
 
@@ -27,12 +24,7 @@ export default defineSchema({
     trialStartedAt: v.optional(v.number()),
     trialEndsAt: v.optional(v.number()),
     subscriptionStatus: v.optional(
-      v.union(
-        v.literal("trial"),
-        v.literal("active"),
-        v.literal("expired"),
-        v.literal("cancelled"),
-      ),
+      v.union(v.literal("trial"), v.literal("active"), v.literal("expired"), v.literal("cancelled"))
     ),
   })
     .index("by_email", ["email"])
@@ -47,11 +39,7 @@ export default defineSchema({
     coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
     type: productTypeValidator,
-    status: v.union(
-      v.literal("draft"),
-      v.literal("published"),
-      v.literal("archived"),
-    ),
+    status: v.union(v.literal("draft"), v.literal("published"), v.literal("archived")),
     priceCents: v.optional(v.number()),
     currency: v.optional(v.string()),
     config: productConfigValidator,
@@ -87,16 +75,16 @@ export default defineSchema({
           v.literal("thursday"),
           v.literal("friday"),
           v.literal("saturday"),
-          v.literal("sunday"),
+          v.literal("sunday")
         ),
         enabled: v.boolean(),
         windows: v.array(
           v.object({
             from: v.string(),
             to: v.string(),
-          }),
+          })
         ),
-      }),
+      })
     ),
     blockedDates: v.array(v.string()),
     createdAt: v.number(),
@@ -115,7 +103,7 @@ export default defineSchema({
       v.literal("pending"),
       v.literal("paid"),
       v.literal("failed"),
-      v.literal("refunded"),
+      v.literal("refunded")
     ),
     paymentProvider: v.optional(v.string()),
     paymentReference: v.optional(v.string()),
@@ -138,7 +126,7 @@ export default defineSchema({
       v.literal("reserved"),
       v.literal("confirmed"),
       v.literal("cancelled"),
-      v.literal("completed"),
+      v.literal("completed")
     ),
     meetingLocation: v.optional(v.string()),
     createdAt: v.number(),
@@ -153,7 +141,7 @@ export default defineSchema({
       v.object({
         fieldId: v.string(),
         value: v.string(),
-      }),
+      })
     ),
     createdAt: v.number(),
   })
@@ -189,16 +177,13 @@ export default defineSchema({
 
   integrations: defineTable({
     userId: v.id("users"),
-    provider: v.union(
-      v.literal("instagram"),
-      v.literal("google_calendar"),
-    ),
+    provider: v.union(v.literal("instagram"), v.literal("google_calendar")),
     status: v.union(
       v.literal("connected"),
       v.literal("disconnected"),
       v.literal("expiring_soon"),
       v.literal("expired"),
-      v.literal("error"),
+      v.literal("error")
     ),
     connectedAt: v.optional(v.number()),
     lastSyncAt: v.optional(v.number()),
@@ -241,7 +226,7 @@ export default defineSchema({
       v.literal("processing"),
       v.literal("sent"),
       v.literal("failed"),
-      v.literal("duplicate"),
+      v.literal("duplicate")
     ),
     scheduledFor: v.optional(v.number()),
     attemptCount: v.number(),

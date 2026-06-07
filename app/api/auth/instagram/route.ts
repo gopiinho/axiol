@@ -12,16 +12,12 @@ export async function GET(request: NextRequest) {
   const clientId = process.env.DMHELPER_APP_ID;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (!clientId || !siteUrl) {
-    return NextResponse.redirect(
-      new URL("/dashboard/settings?ig_error=config", request.url),
-    );
+    return NextResponse.redirect(new URL("/dashboard/settings?ig_error=config", request.url));
   }
 
   const stateBytes = new Uint8Array(32);
   crypto.getRandomValues(stateBytes);
-  const state = Array.from(stateBytes, (b) =>
-    b.toString(16).padStart(2, "0"),
-  ).join("");
+  const state = Array.from(stateBytes, (b) => b.toString(16).padStart(2, "0")).join("");
 
   const redirectUri = `${siteUrl.replace(/\/+$/, "")}/api/auth/instagram/callback`;
   const scope =

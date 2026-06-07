@@ -25,8 +25,8 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
   const displayPrice = product.price
     ? product.price
     : product.priceCents
-    ? `$${(product.priceCents / 100).toFixed(2)}`
-    : "Free";
+      ? `$${(product.priceCents / 100).toFixed(2)}`
+      : "Free";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,17 +38,17 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-lg border border-border/60 bg-card p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="border-border/60 bg-card rounded-lg border p-6">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">{product.name}</h2>
-          <span className="text-2xl font-bold text-primary">{displayPrice}</span>
+          <span className="text-primary text-2xl font-bold">{displayPrice}</span>
         </div>
 
         {product.description && (
           <div className="mb-6">
             <RichTextRenderer
               html={product.description}
-              className="text-sm text-muted-foreground"
+              className="text-muted-foreground text-sm"
             />
           </div>
         )}
@@ -78,27 +78,23 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
           </div>
         </div>
 
-        <Button type="submit" className="w-full mt-6" disabled={loading}>
+        <Button type="submit" className="mt-6 w-full" disabled={loading}>
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processing...
             </>
           ) : (
             <>
-              <Download className="h-4 w-4 mr-2" />
-              {product.priceCents && product.priceCents > 0
-                ? `Pay ${displayPrice}`
-                : "Get Access"}
+              <Download className="mr-2 h-4 w-4" />
+              {product.priceCents && product.priceCents > 0 ? `Pay ${displayPrice}` : "Get Access"}
             </>
           )}
         </Button>
 
-        <div className="flex items-center justify-center gap-1.5 mt-4">
-          <Lock className="h-3 w-3 text-muted-foreground" />
-          <p className="text-xs text-muted-foreground">
-            Secure checkout
-          </p>
+        <div className="mt-4 flex items-center justify-center gap-1.5">
+          <Lock className="text-muted-foreground h-3 w-3" />
+          <p className="text-muted-foreground text-xs">Secure checkout</p>
         </div>
       </div>
     </form>

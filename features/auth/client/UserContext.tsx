@@ -35,12 +35,11 @@ type UserContextValue = {
 const UserContext = createContext<UserContextValue | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated: convexAuthed, isLoading: convexLoading } =
-    useConvexAuth();
+  const { isAuthenticated: convexAuthed, isLoading: convexLoading } = useConvexAuth();
   const router = useRouter();
   const profile = useQuery(
     api.users.getProfile,
-    convexLoading || !convexAuthed ? "skip" : undefined,
+    convexLoading || !convexAuthed ? "skip" : undefined
   );
 
   useEffect(() => {
@@ -65,13 +64,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   if (!isReady) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-linear-to-b from-white to-gray-50">
-        <div className="relative h-16 w-16 animate-logo-flip">
-          <Image
-            src="/axiol-logo.svg"
-            alt="Loading"
-            fill
-            className="object-contain"
-          />
+        <div className="animate-logo-flip relative h-16 w-16">
+          <Image src="/axiol-logo.svg" alt="Loading" fill className="object-contain" />
         </div>
       </div>
     );

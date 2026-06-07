@@ -1,24 +1,15 @@
 import { v } from "convex/values";
-import {
-  query,
-  mutation,
-  internalMutation,
-} from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { requireSession, getSession } from "./security";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 type IntegrationProvider = "instagram" | "google_calendar";
-type IntegrationStatus =
-  | "connected"
-  | "disconnected"
-  | "expiring_soon"
-  | "expired"
-  | "error";
+type IntegrationStatus = "connected" | "disconnected" | "expiring_soon" | "expired" | "error";
 
 function computeInstagramStatus(
   currentStatus: IntegrationStatus,
-  tokenExpiresAt?: number,
+  tokenExpiresAt?: number
 ): IntegrationStatus {
   if (currentStatus === "error") return "error";
   if (!tokenExpiresAt) return currentStatus;
@@ -54,10 +45,7 @@ export const list = query({
       let tokenExpiresAt: number | undefined;
 
       if (row.provider === "instagram") {
-        computedStatus = computeInstagramStatus(
-          computedStatus,
-          config?.tokenExpiresAt,
-        );
+        computedStatus = computeInstagramStatus(computedStatus, config?.tokenExpiresAt);
         tokenExpiresAt = config?.tokenExpiresAt;
       }
 
@@ -68,19 +56,14 @@ export const list = query({
 
 export const getByProvider = query({
   args: {
-    provider: v.union(
-      v.literal("instagram"),
-      v.literal("google_calendar"),
-    ),
+    provider: v.union(v.literal("instagram"), v.literal("google_calendar")),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
 
     const row = await ctx.db
       .query("integrations")
-      .withIndex("by_user_provider", (q) =>
-        q.eq("userId", userId).eq("provider", args.provider),
-      )
+      .withIndex("by_user_provider", (q) => q.eq("userId", userId).eq("provider", args.provider))
       .first();
 
     if (!row) return null;
@@ -94,10 +77,7 @@ export const getByProvider = query({
         .withIndex("by_user", (q) => q.eq("userId", userId))
         .first();
 
-      computedStatus = computeInstagramStatus(
-        computedStatus,
-        config?.tokenExpiresAt,
-      );
+      computedStatus = computeInstagramStatus(computedStatus, config?.tokenExpiresAt);
       tokenExpiresAt = config?.tokenExpiresAt;
     }
 
@@ -108,16 +88,13 @@ export const getByProvider = query({
 export const upsert = internalMutation({
   args: {
     userId: v.id("users"),
-    provider: v.union(
-      v.literal("instagram"),
-      v.literal("google_calendar"),
-    ),
+    provider: v.union(v.literal("instagram"), v.literal("google_calendar")),
     status: v.union(
       v.literal("connected"),
       v.literal("disconnected"),
       v.literal("expiring_soon"),
       v.literal("expired"),
-      v.literal("error"),
+      v.literal("error")
     ),
     displayName: v.optional(v.string()),
     externalId: v.optional(v.string()),
@@ -127,7 +104,7 @@ export const upsert = internalMutation({
     const existing = await ctx.db
       .query("integrations")
       .withIndex("by_user_provider", (q) =>
-        q.eq("userId", args.userId).eq("provider", args.provider),
+        q.eq("userId", args.userId).eq("provider", args.provider)
       )
       .first();
 
@@ -140,9 +117,7 @@ export const upsert = internalMutation({
         externalId: args.externalId,
         errorMessage: args.errorMessage,
         lastSyncAt: now,
-        ...(args.status === "connected" && !existing.connectedAt
-          ? { connectedAt: now }
-          : {}),
+        ...(args.status === "connected" && !existing.connectedAt ? { connectedAt: now } : {}),
       });
       return existing._id;
     }
@@ -162,19 +137,14 @@ export const upsert = internalMutation({
 
 export const disconnect = mutation({
   args: {
-    provider: v.union(
-      v.literal("instagram"),
-      v.literal("google_calendar"),
-    ),
+    provider: v.union(v.literal("instagram"), v.literal("google_calendar")),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
 
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_user_provider", (q) =>
-        q.eq("userId", userId).eq("provider", args.provider),
-      )
+      .withIndex("by_user_provider", (q) => q.eq("userId", userId).eq("provider", args.provider))
       .first();
 
     if (!existing) return null;
@@ -191,10 +161,7 @@ export const disconnect = mutation({
 
 export const markError = mutation({
   args: {
-    provider: v.union(
-      v.literal("instagram"),
-      v.literal("google_calendar"),
-    ),
+    provider: v.union(v.literal("instagram"), v.literal("google_calendar")),
     errorMessage: v.string(),
   },
   handler: async (ctx, args) => {
@@ -202,9 +169,7 @@ export const markError = mutation({
 
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_user_provider", (q) =>
-        q.eq("userId", userId).eq("provider", args.provider),
-      )
+      .withIndex("by_user_provider", (q) => q.eq("userId", userId).eq("provider", args.provider))
       .first();
 
     const now = Date.now();
@@ -231,12 +196,7 @@ export const markError = mutation({
 
 export const syncStatus = mutation({
   args: {
-    provider: v.optional(
-      v.union(
-        v.literal("instagram"),
-        v.literal("google_calendar"),
-      ),
-    ),
+    provider: v.optional(v.union(v.literal("instagram"), v.literal("google_calendar"))),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
@@ -246,9 +206,7 @@ export const syncStatus = mutation({
     if (provider) {
       const row = await ctx.db
         .query("integrations")
-        .withIndex("by_user_provider", (q) =>
-          q.eq("userId", userId).eq("provider", provider),
-        )
+        .withIndex("by_user_provider", (q) => q.eq("userId", userId).eq("provider", provider))
         .first();
 
       if (!row) return null;
@@ -259,10 +217,7 @@ export const syncStatus = mutation({
           .withIndex("by_user", (q) => q.eq("userId", userId))
           .first();
 
-        const computedStatus = computeInstagramStatus(
-          row.status,
-          config?.tokenExpiresAt,
-        );
+        const computedStatus = computeInstagramStatus(row.status, config?.tokenExpiresAt);
 
         if (computedStatus !== row.status) {
           await ctx.db.patch(row._id, {
@@ -287,10 +242,7 @@ export const syncStatus = mutation({
           .withIndex("by_user", (q) => q.eq("userId", userId))
           .first();
 
-        const computedStatus = computeInstagramStatus(
-          row.status,
-          config?.tokenExpiresAt,
-        );
+        const computedStatus = computeInstagramStatus(row.status, config?.tokenExpiresAt);
 
         if (computedStatus !== row.status) {
           await ctx.db.patch(row._id, {
@@ -316,7 +268,7 @@ export const backfillInstagramIntegrations = internalMutation({
       const existing = await ctx.db
         .query("integrations")
         .withIndex("by_user_provider", (q) =>
-          q.eq("userId", config.userId).eq("provider", "instagram"),
+          q.eq("userId", config.userId).eq("provider", "instagram")
         )
         .first();
 

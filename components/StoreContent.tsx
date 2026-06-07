@@ -61,9 +61,7 @@ export function StoreContent({
         color: "var(--store-text)",
       }}
     >
-      {showDots && (
-        <div className="pointer-events-none absolute inset-0 dot-grid opacity-30" />
-      )}
+      {showDots && <div className="dot-grid pointer-events-none absolute inset-0 opacity-30" />}
       <div
         className="pointer-events-none absolute -top-32 right-0 h-100 w-100"
         style={{
@@ -76,18 +74,13 @@ export function StoreContent({
       <div
         className="relative w-full flex-1"
         style={{
-          backgroundColor:
-            "color-mix(in oklch, var(--store-accent) 6%, var(--store-bg))",
+          backgroundColor: "color-mix(in oklch, var(--store-accent) 6%, var(--store-bg))",
         }}
       >
         {coverImageUrl ? (
           <div className="w-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={coverImageUrl}
-              alt=""
-              className="h-32 w-full object-cover"
-            />
+            <img src={coverImageUrl} alt="" className="h-32 w-full object-cover" />
           </div>
         ) : (
           <div
@@ -99,7 +92,7 @@ export function StoreContent({
           />
         )}
 
-        <div className="relative z-10 px-5 -mt-14">
+        <div className="relative z-10 -mt-14 px-5">
           <div
             className="h-24 w-24 overflow-hidden rounded-full border-4"
             style={{
@@ -109,14 +102,10 @@ export function StoreContent({
           >
             {profileImageUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={profileImageUrl}
-                alt={displayName}
-                className="h-full w-full object-cover"
-              />
+              <img src={profileImageUrl} alt={displayName} className="h-full w-full object-cover" />
             ) : (
               <div
-                className="flex h-full z-10 w-full items-center justify-center"
+                className="z-10 flex h-full w-full items-center justify-center"
                 style={{
                   backgroundColor: "var(--store-accent, oklch(0.52 0.2 254))",
                 }}
@@ -130,7 +119,7 @@ export function StoreContent({
 
           <div className="mt-4 space-y-1">
             <h1
-              className="font-accent text-xl font-bold leading-tight"
+              className="font-accent text-xl leading-tight font-bold"
               style={{ color: "var(--store-accent)" }}
             >
               {displayName}
@@ -146,7 +135,7 @@ export function StoreContent({
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-xs transition hover:opacity-70 w-fit"
+                      className="inline-flex w-fit items-center gap-2 text-xs transition hover:opacity-70"
                       style={{ color: "var(--store-text-muted)" }}
                     >
                       <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -159,7 +148,7 @@ export function StoreContent({
 
             {bio && (
               <p
-                className="text-sm max-w-md leading-relaxed"
+                className="max-w-md text-sm leading-relaxed"
                 style={{ color: "var(--store-text-muted)" }}
               >
                 {bio}
@@ -169,23 +158,17 @@ export function StoreContent({
         </div>
 
         <div className="relative p-5 backdrop-blur-sm">
-          <h2
-            className="font-accent text-lg font-bold mb-6"
-            style={{ color: "var(--store-text)" }}
-          >
+          <h2 className="font-accent mb-6 text-lg font-bold" style={{ color: "var(--store-text)" }}>
             My store
           </h2>
 
           {products.length === 0 ? (
-            <div className="text-center py-16">
+            <div className="py-16 text-center">
               <Package
-                className="w-12 h-12 mx-auto mb-3"
+                className="mx-auto mb-3 h-12 w-12"
                 style={{ color: "var(--store-accent)" }}
               />
-              <p
-                style={{ color: "var(--store-text-muted)" }}
-                className="text-base"
-              >
+              <p style={{ color: "var(--store-text-muted)" }} className="text-base">
                 building my store... check back soon!
               </p>
             </div>

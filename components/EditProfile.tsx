@@ -9,12 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ImageUpload } from "@/components/ImageUpload";
 import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
 
@@ -143,36 +138,27 @@ export function EditProfile({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-2xl gap-0 overflow-hidden p-0"
-      >
-        <DialogHeader className="flex-row items-center justify-between border-b border-border/70 px-5 py-3.5">
-          <DialogTitle className="text-lg font-semibold">
-            Edit store
-          </DialogTitle>
+      <DialogContent showCloseButton={false} className="max-w-2xl gap-0 overflow-hidden p-0">
+        <DialogHeader className="border-border/70 flex-row items-center justify-between border-b px-5 py-3.5">
+          <DialogTitle className="text-lg font-semibold">Edit store</DialogTitle>
           <Button size="sm" onClick={onSave} disabled={saving} className="px-5">
             {saving ? "Saving..." : "Save"}
           </Button>
         </DialogHeader>
 
         <div className="max-h-[70vh] overflow-y-auto lg:max-h-none lg:overflow-visible">
-          <div className="flex flex-row gap-5 border-b border-border/50 px-5 py-5">
-            <div className="flex flex-col items-center gap-3 sm:gap-2 sm:w-24">
-              <Label className="text-xs text-muted-foreground sm:text-center">
-                Profile
-              </Label>
+          <div className="border-border/50 flex flex-row gap-5 border-b px-5 py-5">
+            <div className="flex flex-col items-center gap-3 sm:w-24 sm:gap-2">
+              <Label className="text-muted-foreground text-xs sm:text-center">Profile</Label>
               <ImageUpload
                 currentImageUrl={user?.profileImageUrl}
-                onUploaded={(storageId) =>
-                  saveProfileImage({ storageId: storageId as never })
-                }
+                onUploaded={(storageId) => saveProfileImage({ storageId: storageId as never })}
                 onRemove={() => removeProfileImage()}
                 maxSizeBytes={2 * 1024 * 1024}
                 maxSizeLabel="2 MB"
                 className="h-20 w-20 shrink-0 sm:h-full sm:w-full"
                 placeholder={
-                  <div className="flex h-full w-full items-center justify-center overflow-hidden bg-linear-to-br from-primary/20 to-pink-400/20">
+                  <div className="from-primary/20 flex h-full w-full items-center justify-center overflow-hidden bg-linear-to-br to-pink-400/20">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`}
@@ -185,13 +171,11 @@ export function EditProfile({
             </div>
 
             <div className="flex-1 space-y-2">
-              <Label className="text-xs text-muted-foreground">
-                Cover photo
-              </Label>
+              <Label className="text-muted-foreground text-xs">Cover photo</Label>
               {coverPreview || user?.coverImageUrl ? (
                 <div className="flex flex-col items-start gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-14 w-24 rounded-xs overflow-hidden border border-border/60 shrink-0">
+                    <div className="border-border/60 relative h-14 w-24 shrink-0 overflow-hidden rounded-xs border">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={coverPreview || user?.coverImageUrl || ""}
@@ -203,7 +187,7 @@ export function EditProfile({
                       type="button"
                       onClick={() => !coverUploading && coverInputRef.current?.click()}
                       disabled={coverUploading}
-                      className="inline-flex items-center gap-1.5 rounded-xs border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-50"
+                      className="border-border/60 bg-card text-foreground hover:bg-accent inline-flex items-center gap-1.5 rounded-xs border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors disabled:opacity-50"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       {coverUploading ? "Uploading..." : "Replace"}
@@ -212,51 +196,49 @@ export function EditProfile({
                       type="button"
                       onClick={handleRemoveCover}
                       disabled={coverUploading}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+                      className="text-muted-foreground hover:text-destructive inline-flex items-center gap-1 text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       <X className="h-3.5 w-3.5" />
                       Remove
                     </button>
                   </div>
-                  <div className="relative w-full rounded-xs overflow-hidden border border-border/60">
+                  <div className="border-border/60 relative w-full overflow-hidden rounded-xs border">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={coverPreview || user?.coverImageUrl || ""}
                       alt="Cover preview"
-                      className="w-full h-auto max-h-[200px] object-cover"
+                      className="h-auto max-h-[200px] w-full object-cover"
                     />
                     {coverUploading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
-                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                      <div className="bg-background/60 absolute inset-0 flex items-center justify-center backdrop-blur-sm">
+                        <Loader2 className="text-primary h-5 w-5 animate-spin" />
                       </div>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-3 rounded-xs border border-dashed border-border/70 bg-card/50 p-5 h-[136px]">
+                <div className="border-border/70 bg-card/50 flex h-[136px] flex-col items-center justify-center gap-3 rounded-xs border border-dashed p-5">
                   {coverUploading ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                      <span className="text-xs text-muted-foreground">Uploading...</span>
+                      <Loader2 className="text-primary h-5 w-5 animate-spin" />
+                      <span className="text-muted-foreground text-xs">Uploading...</span>
                     </>
                   ) : (
                     <>
                       <span
                         onClick={() => !coverUploading && coverInputRef.current?.click()}
                         className={cn(
-                          "inline-flex items-center gap-2 rounded-xs bg-card px-4 py-2",
-                          "text-sm font-semibold text-foreground shadow-sm border border-border/60",
+                          "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
+                          "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
                           "transition-all duration-200",
                           "hover:bg-accent hover:text-accent-foreground",
-                          "cursor-pointer",
+                          "cursor-pointer"
                         )}
                       >
                         <Plus className="h-4 w-4" strokeWidth={2} />
                         Upload photo
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        1200x400 recommended
-                      </span>
+                      <span className="text-muted-foreground text-xs">1200x400 recommended</span>
                     </>
                   )}
                 </div>
@@ -271,12 +253,9 @@ export function EditProfile({
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-5 px-5 py-5">
+          <div className="grid gap-5 px-5 py-5 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label
-                htmlFor="edit-store-name"
-                className="text-xs text-muted-foreground"
-              >
+              <Label htmlFor="edit-store-name" className="text-muted-foreground text-xs">
                 Store name
               </Label>
               <Input
@@ -285,16 +264,11 @@ export function EditProfile({
                 onChange={(e) => setStoreName(e.target.value)}
                 placeholder={user?.name ?? "Your store name"}
               />
-              <p className="text-[10px] text-muted-foreground/70">
-                Public page display name
-              </p>
+              <p className="text-muted-foreground/70 text-[10px]">Public page display name</p>
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="edit-name"
-                className="text-xs text-muted-foreground"
-              >
+              <Label htmlFor="edit-name" className="text-muted-foreground text-xs">
                 Name
               </Label>
               <Input
@@ -306,10 +280,7 @@ export function EditProfile({
             </div>
 
             <div className="space-y-2 sm:col-span-2">
-              <Label
-                htmlFor="edit-bio"
-                className="text-xs text-muted-foreground"
-              >
+              <Label htmlFor="edit-bio" className="text-muted-foreground text-xs">
                 Bio
               </Label>
               <Textarea
@@ -322,32 +293,26 @@ export function EditProfile({
               />
             </div>
 
-            <div className="space-y-3 rounded-xl border border-border/70 p-4 sm:col-span-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Social links
-              </p>
-              <div className="grid sm:grid-cols-2 gap-3">
+            <div className="border-border/70 space-y-3 rounded-xl border p-4 sm:col-span-2">
+              <p className="text-muted-foreground text-xs font-medium">Social links</p>
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label
                     htmlFor="edit-instagram"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    className="text-muted-foreground flex items-center gap-1.5 text-xs"
                   >
                     <Instagram className="h-3.5 w-3.5" />
                     Instagram username
                   </Label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/60">
+                    <span className="text-muted-foreground/60 pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
                       @
                     </span>
                     <Input
                       id="edit-instagram"
                       value={instagramUrl}
                       onChange={(e) =>
-                        setInstagramUrl(
-                          extractUsername(
-                            e.target.value.replace(/^@/, "").trim(),
-                          ),
-                        )
+                        setInstagramUrl(extractUsername(e.target.value.replace(/^@/, "").trim()))
                       }
                       placeholder="username"
                       className="h-9 pl-7 text-sm"
@@ -358,24 +323,20 @@ export function EditProfile({
                 <div className="space-y-1.5">
                   <Label
                     htmlFor="edit-youtube"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    className="text-muted-foreground flex items-center gap-1.5 text-xs"
                   >
                     <Youtube className="h-3.5 w-3.5" />
                     YouTube username
                   </Label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/60">
+                    <span className="text-muted-foreground/60 pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
                       @
                     </span>
                     <Input
                       id="edit-youtube"
                       value={youtubeUrl}
                       onChange={(e) =>
-                        setYoutubeUrl(
-                          extractUsername(
-                            e.target.value.replace(/^@/, "").trim(),
-                          ),
-                        )
+                        setYoutubeUrl(extractUsername(e.target.value.replace(/^@/, "").trim()))
                       }
                       placeholder="channel"
                       className="h-9 pl-7 text-sm"
@@ -386,7 +347,7 @@ export function EditProfile({
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label
                     htmlFor="edit-website"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    className="text-muted-foreground flex items-center gap-1.5 text-xs"
                   >
                     <Globe className="h-3.5 w-3.5" />
                     Website URL
@@ -403,10 +364,8 @@ export function EditProfile({
             </div>
 
             <div className="flex gap-3 sm:col-span-2 lg:hidden">
-              <div className="flex-1 space-y-3 rounded-xl border border-border/70 p-3">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Theme
-                </p>
+              <div className="border-border/70 flex-1 space-y-3 rounded-xl border p-3">
+                <p className="text-muted-foreground text-xs font-medium">Theme</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   {themeKeys.map((key) => {
                     const theme = themes[key];
@@ -436,11 +395,9 @@ export function EditProfile({
                             }}
                           />
                         </div>
-                        <span className="text-[9px] font-medium">
-                          {theme.label}
-                        </span>
+                        <span className="text-[9px] font-medium">{theme.label}</span>
                         {isSelected && (
-                          <div className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full">
                             <Check className="h-2 w-2" />
                           </div>
                         )}
@@ -450,10 +407,8 @@ export function EditProfile({
                 </div>
               </div>
 
-              <div className="flex-1 space-y-3 rounded-xl border border-border/70 p-3">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Accent color
-                </p>
+              <div className="border-border/70 flex-1 space-y-3 rounded-xl border p-3">
+                <p className="text-muted-foreground text-xs font-medium">Accent color</p>
                 <div className="grid grid-cols-4 gap-1.5">
                   {ACCENT_PRESETS.map((preset) => {
                     const isSelected = selectedAccent === preset.value;
@@ -461,9 +416,7 @@ export function EditProfile({
                       <button
                         key={preset.label}
                         type="button"
-                        onClick={() =>
-                          onAccentChange(isSelected ? "" : preset.value)
-                        }
+                        onClick={() => onAccentChange(isSelected ? "" : preset.value)}
                         className={`relative mx-auto h-7 w-7 rounded-full border-2 transition ${
                           isSelected
                             ? "border-foreground scale-110"
