@@ -3,7 +3,7 @@
 import { THUMBNAIL_CARDS } from "@/features/products/components/cards";
 import type { ThumbnailLiveState } from "@/features/products/components/cards/types";
 
-interface ThumbnailStepPreviewProps extends ThumbnailLiveState {}
+type ThumbnailStepPreviewProps = ThumbnailLiveState;
 
 export function ThumbnailStepPreview({
   style,

@@ -6,7 +6,7 @@ import { ThumbnailImage, CardLink } from "./BaseCard";
 export function ButtonCard({
   product,
   username,
-  index = 0,
+  index: _index = 0,
   interactive = true,
 }: ThumbnailCardProps) {
   const thumbnail = product.config?.thumbnail as
