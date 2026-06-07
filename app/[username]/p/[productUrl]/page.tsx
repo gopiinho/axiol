@@ -12,6 +12,7 @@ import AffiliateItemLink from "@/features/analytics/components/AffiliateItemLink
 import { getServerConvexClient } from "@/server/convex/client";
 import { getProductTypeLabel } from "@/features/products/components/ProductTypeIcon";
 import { CheckoutForm } from "@/features/products/components/CheckoutForm";
+import { RichTextRenderer } from "@/features/products/components/rich-text";
 
 const platformLogos: Record<string, StaticImageData> = {
   amazon: icons.amazonLogo,
@@ -86,9 +87,12 @@ export default async function ProductDetailPage({
           )}
 
           {product.description && (
-            <p className="text-base text-muted-foreground max-w-2xl leading-relaxed">
-              {product.description}
-            </p>
+            <div className="max-w-2xl">
+              <RichTextRenderer
+                html={product.description}
+                className="text-base text-muted-foreground leading-relaxed"
+              />
+            </div>
           )}
         </div>
 

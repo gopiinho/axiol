@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus, X, User, Mail, Phone, Check } from "lucide-react";
+import { RichTextEditor } from "../../components/rich-text";
 import { cn } from "@/lib/utils";
 import {
   useUpdateProduct,
@@ -263,13 +263,10 @@ export function CheckoutStep({
             <Label htmlFor="checkout-description" className="text-sm font-bold">
               Description
             </Label>
-            <Textarea
-              id="checkout-description"
+            <RichTextEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
               placeholder="Describe your product..."
-              rows={3}
-              className="resize-none"
             />
           </div>
           <div className="space-y-2">

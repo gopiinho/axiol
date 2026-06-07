@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Lock, Download } from "lucide-react";
+import { RichTextRenderer } from "./rich-text";
 
 interface CheckoutFormProps {
   product: {
@@ -44,9 +45,12 @@ export function CheckoutForm({ product }: CheckoutFormProps) {
         </div>
 
         {product.description && (
-          <p className="text-sm text-muted-foreground mb-6">
-            {product.description}
-          </p>
+          <div className="mb-6">
+            <RichTextRenderer
+              html={product.description}
+              className="text-sm text-muted-foreground"
+            />
+          </div>
         )}
 
         <div className="space-y-4">
