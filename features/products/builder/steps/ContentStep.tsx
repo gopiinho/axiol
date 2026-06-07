@@ -16,7 +16,6 @@ import {
   Loader2,
   Upload,
   X,
-  AlertCircle,
   Plus,
   Link,
   Pencil,
@@ -87,7 +86,7 @@ export function ContentStep({
   const [productName, setProductName] = useState(saved.productName);
   const [uploading, setUploading] = useState(false);
   const [storedFile, setStoredFile] = useState<SavedFile | null>(saved.file);
-  const [showError, setShowError] = useState(false);
+  const [errors, setErrors] = useState<{ file?: string; url?: string; productName?: string }>({});
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -96,11 +95,9 @@ export function ContentStep({
   const saveContentFile = useSaveContentFile();
   const removeContentFile = useRemoveContentFile();
 
-  const hasContent = !!storedFile || !!externalUrl.trim();
-
   const uploadFile = async (file: File) => {
     setUploading(true);
-    setShowError(false);
+    setErrors((prev) => ({ ...prev, file: undefined }));
     try {
       const uploadUrl = await generateUploadUrl();
       const result = await fetch(uploadUrl, {
@@ -170,12 +167,23 @@ export function ContentStep({
   }, [storedFile, externalUrl, productName, productId, updateContentConfig]);
 
   const saveAndValidate = useCallback(async () => {
-    await handleSave();
-    if (!hasContent) {
-      setShowError(true);
+    const newErrors: { file?: string; url?: string; productName?: string } = {};
+
+    if (mode === "upload" && !storedFile) {
+      newErrors.file = "Upload a file to continue";
+    }
+    if (mode === "url") {
+      if (!externalUrl.trim()) newErrors.url = "URL is required";
+      if (!productName.trim()) newErrors.productName = "Product name is required";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
       throw new Error("Content is required before continuing.");
     }
-  }, [handleSave, hasContent]);
+
+    await handleSave();
+  }, [handleSave, mode, storedFile, externalUrl, productName]);
 
   useEffect(() => {
     onRegisterSave?.(saveAndValidate);
@@ -212,7 +220,7 @@ export function ContentStep({
                 disabled={!!externalUrl.trim() && mode === "url"}
                 onClick={() => {
                   setMode("upload");
-                  setShowError(false);
+                  setErrors({});
                 }}
                 className={cn(
                   "inline-flex items-center cursor-pointer px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200",
@@ -233,7 +241,7 @@ export function ContentStep({
                 disabled={!!storedFile && mode === "upload"}
                 onClick={() => {
                   setMode("url");
-                  setShowError(false);
+                  setErrors({});
                 }}
                 className={cn(
                   "inline-flex items-center cursor-pointer px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200",
@@ -285,7 +293,7 @@ export function ContentStep({
                   "transition-colors duration-200",
                   isDragging && "border-primary bg-primary/5",
                   uploading && "opacity-60",
-                  showError && !hasContent && "border-destructive",
+                  errors.file && "border-destructive",
                 )}
               >
                 {uploading ? (
@@ -326,13 +334,11 @@ export function ContentStep({
                   value={externalUrl}
                   onChange={(e) => {
                     setExternalUrl(e.target.value);
-                    setShowError(false);
+                    setErrors((prev) => ({ ...prev, url: undefined }));
                   }}
                   placeholder="https://..."
-                  className={cn(
-                    "pl-9",
-                    showError && !hasContent && "border-destructive",
-                  )}
+                  className="pl-9"
+                  aria-invalid={!!errors.url}
                 />
               </div>
               <div className="relative">
@@ -341,10 +347,11 @@ export function ContentStep({
                   value={productName}
                   onChange={(e) => {
                     setProductName(e.target.value);
-                    setShowError(false);
+                    setErrors((prev) => ({ ...prev, productName: undefined }));
                   }}
                   placeholder={'Your Product\'s Name (ex. "Course 101")'}
                   className="pl-9"
+                  aria-invalid={!!errors.productName}
                 />
               </div>
             </div>
@@ -357,13 +364,14 @@ export function ContentStep({
             className="hidden"
           />
 
-          {showError && !hasContent && (
-            <p className="text-xs text-destructive flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {mode === "upload"
-                ? "Upload a file to continue"
-                : "Provide a URL to continue"}
-            </p>
+          {errors.file && (
+            <p className="text-sm text-destructive">{errors.file}</p>
+          )}
+          {errors.url && (
+            <p className="text-sm text-destructive">{errors.url}</p>
+          )}
+          {errors.productName && (
+            <p className="text-sm text-destructive">{errors.productName}</p>
           )}
         </div>
       </div>
