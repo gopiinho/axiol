@@ -56,41 +56,48 @@ export default function DashboardPage() {
   return (
     <div className="px-5 lg:px-6 py-6 lg:py-8">
       <div className="space-y-1">
-        <h1 className="heading-playful text-4xl sm:text-5xl">
-          Welcome back!
-        </h1>
+        <h1 className="heading-playful text-4xl sm:text-5xl">Welcome back!</h1>
         <p className="text-muted-foreground">
           What would you like to do today?
         </p>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-3">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Link
-                key={stat.label}
-                href={stat.href}
-                className="group relative overflow-hidden rounded-xs border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.accent} opacity-60`} />
-                <div className="relative z-10 flex items-start justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
-                    {isLoading ? (
-                      <div className="mt-1 h-9 w-16 animate-pulse rounded bg-muted" />
-                    ) : (
-                      <p className="mt-1 text-3xl font-bold tabular-nums">{stat.value}</p>
-                    )}
-                  </div>
-                  <div className="rounded-xl bg-background/80 p-2.5 backdrop-blur-sm">
-                    <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={2} />
-                  </div>
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Link
+              key={stat.label}
+              href={stat.href}
+              className="group relative overflow-hidden rounded-xs border border-border/70 hover:bg-card/80 bg-card p-5 transition-all duration-200 hover:border-border"
+            >
+              <div
+                className={`absolute inset-0 bg-linear-to-br ${stat.accent} opacity-60`}
+              />
+              <div className="relative z-10 flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {stat.label}
+                  </p>
+                  {isLoading ? (
+                    <div className="mt-1 h-9 w-16 animate-pulse rounded bg-muted" />
+                  ) : (
+                    <p className="mt-1 text-3xl font-bold tabular-nums">
+                      {stat.value}
+                    </p>
+                  )}
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+                <div className="rounded-xl bg-background/80 p-2.5 backdrop-blur-sm">
+                  <Icon
+                    className="h-5 w-5 text-muted-foreground"
+                    strokeWidth={2}
+                  />
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         {QUICK_ACTIONS.map((action) => {
@@ -99,10 +106,10 @@ export default function DashboardPage() {
             <div key={action.href}>
               <Link
                 href={action.href}
-                className="group flex flex-col gap-4 rounded-xs border border-border/70 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-16px_oklch(0.25_0.06_252/0.3)] hover:border-border"
+                className="flex flex-col gap-4 rounded-xs border border-border/70 bg-card  p-5 transition-all duration-200 hover:border-border"
               >
                 <div
-                  className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${action.accent} transition-transform duration-200 group-hover:scale-105`}
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${action.accent} transition-transform duration-200`}
                 >
                   <Icon className="h-5 w-5" strokeWidth={2.5} />
                 </div>
