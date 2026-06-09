@@ -7,11 +7,13 @@ export function ThumbnailImage({
   alt,
   className,
   fallbackClassName,
+  style,
 }: {
   url?: string | null;
   alt: string;
   className?: string;
   fallbackClassName?: string;
+  style?: React.CSSProperties;
 }) {
   if (url) {
     return (
@@ -19,6 +21,7 @@ export function ThumbnailImage({
         src={url}
         alt={alt}
         className={cn("object-cover", className)}
+        style={style}
       />
     );
   }
@@ -29,6 +32,7 @@ export function ThumbnailImage({
         className,
         fallbackClassName
       )}
+      style={style}
     >
       <Package className="text-muted-foreground/40 h-8 w-8" />
     </div>
