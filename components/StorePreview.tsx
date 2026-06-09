@@ -1,9 +1,9 @@
 "use client";
 
-import { buildThemeStyle, getTheme } from "@/lib/themes";
+import { buildThemeStyle } from "@/lib/themes";
 import { StoreContent, type StoreContentProps } from "@/components/StoreContent";
 
-type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "showDots" | "interactive"> & {
+type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "interactive"> & {
   username: string;
   theme?: string;
   accentColor?: string;
@@ -11,7 +11,6 @@ type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "showDots" | "in
 
 export function StorePreview({ username, theme, accentColor, ...contentProps }: StorePreviewProps) {
   const themeStyle = buildThemeStyle(theme, accentColor);
-  const showDots = getTheme(theme).vars["--store-show-dots"] === "1";
 
   return (
     <div className="flex h-[min(85vh,700px)] w-[min(45vh,340px)] flex-col">
@@ -48,8 +47,8 @@ export function StorePreview({ username, theme, accentColor, ...contentProps }: 
               {...contentProps}
               username={username}
               themeStyle={themeStyle}
-              showDots={showDots}
               interactive={false}
+              compact
             />
           </div>
         </div>

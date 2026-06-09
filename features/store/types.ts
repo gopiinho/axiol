@@ -1,0 +1,18 @@
+export type SocialLink = {
+  url: string;
+  icon: "instagram" | "youtube" | "globe";
+  label: string;
+  display: string;
+};
+
+export type ProductItem = {
+  _id: string;
+  name: string;
+  productUrl: string;
+  type?: string;
+  price?: string | null;
+  coverImageUrl?: string | null;
+  thumbnailImageUrl?: string | null;
+  config?: Record<string, unknown>;
+  itemCount: number;
+};

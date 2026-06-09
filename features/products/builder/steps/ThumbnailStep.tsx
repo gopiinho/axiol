@@ -11,6 +11,7 @@ import {
   useGenerateProductCoverUploadUrl,
 } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
+import type { ThumbnailLiveState } from "@/features/products/components/cards/types";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Loader2, Folder, Plus, X, Pencil, Square, PanelTop, MonitorPlay } from "lucide-react";
 
@@ -31,7 +32,11 @@ function StepNumber({ num }: { num: number }) {
   );
 }
 
-export function ThumbnailStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
+interface ThumbnailStepProps extends ProductStepComponentProps {
+  onLiveChange?: (state: ThumbnailLiveState) => void;
+}
+
+export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange }: ThumbnailStepProps) {
   const savedThumbnail = product.config?.thumbnail as
     | { style?: string; title?: string; subtitle?: string; buttonText?: string }
     | undefined;
@@ -112,6 +117,31 @@ export function ThumbnailStep({ productId, product, onRegisterSave }: ProductSte
   useEffect(() => {
     onRegisterSave?.(handleSave);
   }, [handleSave, onRegisterSave]);
+
+  useEffect(() => {
+    const liveStyle: "button" | "callout" = style === "preview" ? "button" : style;
+    onLiveChange?.({
+      style: liveStyle,
+      title: title.trim() || product.name,
+      subtitle: subtitle.trim() || undefined,
+      buttonText: buttonText.trim() || "Download Now",
+      imageUrl: showImage
+        ? (thumbnailPreview || persistedThumbUrl)
+        : null,
+      price: product.price,
+    });
+  }, [
+    style,
+    title,
+    subtitle,
+    buttonText,
+    showImage,
+    thumbnailPreview,
+    persistedThumbUrl,
+    product.price,
+    product.name,
+    onLiveChange,
+  ]);
 
   return (
     <div className="space-y-10">

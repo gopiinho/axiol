@@ -19,6 +19,7 @@ interface ProductBuilderLayoutProps {
   totalSteps: number;
   onStepClick: (index: number) => void;
   children: React.ReactNode;
+  preview?: React.ReactNode;
 }
 
 export function ProductBuilderLayout({
@@ -29,6 +30,7 @@ export function ProductBuilderLayout({
   totalSteps: _totalSteps,
   onStepClick,
   children,
+  preview,
 }: ProductBuilderLayoutProps) {
   return (
     <div>
@@ -57,7 +59,14 @@ export function ProductBuilderLayout({
         })}
       </div>
 
-      <div>{children}</div>
+      <div className="lg:flex lg:gap-8 lg:items-start">
+        <div className="lg:flex-1 lg:min-w-0">{children}</div>
+        {preview && (
+          <div className="hidden lg:block lg:w-[380px] lg:shrink-0">
+            <div className="sticky top-8">{preview}</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

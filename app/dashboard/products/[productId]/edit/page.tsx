@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useRef, useCallback } from "react";
+import { use, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
@@ -17,6 +17,8 @@ import { getProductTypeDefinition } from "@/features/products/registry/productTy
 import type { ProductTypeKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
 import { STEP_COMPONENTS } from "@/features/products/builder/steps/StepRegistry";
+import { ProductStepPreview } from "@/features/products/builder/previews/ProductStepPreview";
+import type { ThumbnailLiveState } from "@/features/products/components/cards/types";
 
 export default function EditProduct({
   params,
@@ -34,6 +36,11 @@ export default function EditProduct({
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [thumbnailLiveState, setThumbnailLiveState] = useState<ThumbnailLiveState>({
+    style: "button",
+    title: "",
+    buttonText: "Download Now",
+  });
   const saveFnsRef = useRef<Map<number, () => Promise<void>>>(new Map());
 
   const publishProduct = usePublishProduct();
@@ -44,6 +51,27 @@ export default function EditProduct({
 
   const definition = product ? getProductTypeDefinition(product.type as ProductTypeKey) : null;
   const isLastStep = definition ? currentStepIndex === definition.steps.length - 1 : false;
+
+  useEffect(() => {
+    if (product && definition) {
+      const saved = product.config?.thumbnail as
+        | { style?: string; title?: string; subtitle?: string; buttonText?: string }
+        | undefined;
+      setThumbnailLiveState({
+        style:
+          saved?.style === "button" || saved?.style === "callout"
+            ? saved.style
+            : definition.defaultThumbnailStyle === "preview"
+              ? "button"
+              : (definition.defaultThumbnailStyle as "button" | "callout"),
+        title: saved?.title || product.name,
+        subtitle: saved?.subtitle,
+        buttonText: saved?.buttonText || definition.defaultButtonText,
+        imageUrl: product.thumbnailImageUrl ?? null,
+        price: product.price,
+      });
+    }
+  }, [product, definition]);
 
   const handleRegisterSave = useCallback((stepIndex: number, fn: () => Promise<void>) => {
     saveFnsRef.current.set(stepIndex, fn);
@@ -166,6 +194,12 @@ export default function EditProduct({
             currentStepIndex={currentStepIndex}
             totalSteps={definition.steps.length}
             onStepClick={setCurrentStepIndex}
+            preview={
+              <ProductStepPreview
+                stepKey={definition.steps[currentStepIndex]}
+                liveState={thumbnailLiveState}
+              />
+            }
           >
             {definition.steps.map((stepKey, index) => {
               const Step = STEP_COMPONENTS[stepKey];
@@ -191,6 +225,9 @@ export default function EditProduct({
                     }}
                     onRegisterSave={(fn) => handleRegisterSave(index, fn)}
                     visible={index === currentStepIndex}
+                    {...(stepKey === "thumbnail"
+                      ? ({ onLiveChange: setThumbnailLiveState } as Record<string, unknown>)
+                      : {})}
                   />
                 </div>
               );

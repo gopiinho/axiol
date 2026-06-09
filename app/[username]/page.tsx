@@ -20,22 +20,27 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
       _id: string;
       name: string;
       productUrl: string;
+      type?: string;
       price?: string | null;
       coverImageUrl?: string | null;
+      thumbnailImageUrl?: string | null;
+      config?: Record<string, unknown>;
       items?: unknown[];
     }) => ({
       _id: p._id,
       name: p.name,
       productUrl: p.productUrl,
+      type: p.type,
       price: p.price,
       coverImageUrl: p.coverImageUrl,
+      thumbnailImageUrl: p.thumbnailImageUrl,
+      config: p.config,
       itemCount: p.items?.length ?? 0,
     })
   );
   const displayName = user.storeName || user.name;
   const theme = getTheme(user.theme);
   const themeStyle = buildThemeStyle(user.theme, user.accentColor);
-  const showDots = theme.vars["--store-show-dots"] === "1";
   const profileSrc = user.profileImageUrl ?? user.avatarUrl ?? null;
 
   const formatDisplayUrl = (url: string) => {
@@ -89,17 +94,15 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
       className="flex min-h-screen justify-center"
       style={{ backgroundColor: theme.vars["--store-bg"] }}
     >
-      <div className="w-full max-w-xl">
+      <div className="mx-auto h-full w-full lg:max-w-[90%]">
         <StoreContent
           className="min-h-screen"
           displayName={displayName}
           bio={user.bio}
           profileImageUrl={profileSrc}
-          coverImageUrl={user.coverImageUrl}
           socialLinks={socialLinks}
           products={products}
           themeStyle={themeStyle}
-          showDots={showDots}
           interactive={true}
         />
       </div>
