@@ -181,7 +181,10 @@ export default function MyStorePage() {
 
   return (
     <>
-      <div className="flex min-h-screen w-full" style={{ "--store-accent": selectedAccent } as React.CSSProperties}>
+      <div
+        className="flex min-h-screen w-full"
+        style={{ "--store-accent": selectedAccent } as React.CSSProperties}
+      >
         <div className="border-border/70 w-full lg:min-w-[60%] lg:border-r">
           <div className="flex items-center justify-center gap-4 px-5 py-6 max-lg:flex-col lg:flex lg:items-start lg:px-6 lg:py-8">
             <div className="border-border/25 from-primary/15 to-pink/15 h-24 w-24 overflow-hidden border-2 bg-linear-to-br p-0.5">
@@ -205,7 +208,7 @@ export default function MyStorePage() {
                 <p className="text-muted-foreground text-xs">@{user?.username}</p>
 
                 {user?.bio && (
-                  <p className="text-muted-foreground mt-2 max-w-sm text-center text-sm">
+                  <p className="text-muted-foreground mt-2 max-w-sm text-start text-sm">
                     {user.bio}
                   </p>
                 )}
@@ -220,7 +223,7 @@ export default function MyStorePage() {
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-muted-foreground hover:bg-secondary hover:text-foreground rounded-lg p-2 transition"
+                          className="text-muted-foreground hover:text-primary rounded-lg p-2 transition"
                           aria-label={link.label}
                         >
                           <Icon className="h-4.5 w-4.5" />
