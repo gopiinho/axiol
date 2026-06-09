@@ -54,7 +54,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="px-5 py-6 lg:px-6 lg:py-8">
+    <div className="px-5 pt-6 lg:px-6 lg:pt-8">
       <div className="space-y-1">
         <h1 className="heading-playful text-4xl sm:text-5xl">Welcome back!</h1>
         <p className="text-muted-foreground">What would you like to do today?</p>

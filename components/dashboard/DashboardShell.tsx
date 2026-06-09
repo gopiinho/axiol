@@ -93,7 +93,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </aside>
 
           <section className="min-w-0">
-            <main>{children}</main>
+            <main className="pb-14 md:pb-0">{children}</main>
           </section>
         </div>
       </div>

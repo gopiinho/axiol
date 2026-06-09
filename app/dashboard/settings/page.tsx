@@ -48,7 +48,7 @@ export default function SettingsPage() {
       : (profile?.subscriptionStatus ?? "N/A");
 
   return (
-    <div className="px-5 py-6 lg:px-6 lg:py-8">
+    <div className="px-5 pt-6 lg:px-6 lg:pt-8">
       <div className="mx-auto max-w-xl">
         <h1 className="app-title">Settings</h1>
         <p className="app-subtitle mt-1">Your account and connected services.</p>
