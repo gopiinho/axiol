@@ -16,6 +16,8 @@ type UserProfile = {
   profileImageUrl?: string | null;
   theme?: string;
   accentColor?: string;
+  palette?: Record<string, string>;
+  layout?: Record<string, string>;
   storeName?: string;
   instagramUrl?: string;
   youtubeUrl?: string;

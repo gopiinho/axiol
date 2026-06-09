@@ -13,12 +13,11 @@ import {
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { ThumbnailLiveState } from "@/features/products/components/cards/types";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Loader2, Folder, Plus, X, Pencil, Square, PanelTop, MonitorPlay } from "lucide-react";
+import { Loader2, Folder, Plus, X, Pencil, Square, PanelTop } from "lucide-react";
 
 const STYLE_OPTIONS = [
   { value: "button", label: "Button", icon: Square },
   { value: "callout", label: "Callout", icon: PanelTop },
-  { value: "preview", label: "Preview", icon: MonitorPlay },
 ] as const;
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -41,12 +40,9 @@ export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange
     | { style?: string; title?: string; subtitle?: string; buttonText?: string }
     | undefined;
 
-  const [style, setStyle] = useState<"button" | "callout" | "preview">(
-    savedThumbnail?.style === "button" ||
-      savedThumbnail?.style === "callout" ||
-      savedThumbnail?.style === "preview"
-      ? savedThumbnail.style
-      : "preview"
+  const savedStyle = savedThumbnail?.style === "preview" ? "button" : savedThumbnail?.style;
+  const [style, setStyle] = useState<"button" | "callout">(
+    savedStyle === "button" || savedStyle === "callout" ? savedStyle : "callout"
   );
   const [title, setTitle] = useState(savedThumbnail?.title || product.name);
   const [subtitle, setSubtitle] = useState(savedThumbnail?.subtitle ?? "");
@@ -119,9 +115,8 @@ export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange
   }, [handleSave, onRegisterSave]);
 
   useEffect(() => {
-    const liveStyle: "button" | "callout" = style === "preview" ? "button" : style;
     onLiveChange?.({
-      style: liveStyle,
+      style,
       title: title.trim() || product.name,
       subtitle: subtitle.trim() || undefined,
       buttonText: buttonText.trim() || "Download Now",
@@ -265,17 +260,19 @@ export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange
           Add text
         </Label>
         <div className="space-y-4 pl-8">
-          <div className="space-y-2">
-            <Label htmlFor="thumbnail-title" className="text-sm font-bold">
-              Title *
-            </Label>
-            <Input
-              id="thumbnail-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={product.name}
-            />
-          </div>
+          {style !== "button" && (
+            <div className="space-y-2">
+              <Label htmlFor="thumbnail-title" className="text-sm font-bold">
+                Title *
+              </Label>
+              <Input
+                id="thumbnail-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={product.name}
+              />
+            </div>
+          )}
 
           {style !== "button" && (
             <div className="space-y-2">
