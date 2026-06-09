@@ -83,9 +83,15 @@ export const getPublicStore = query({
           ? await ctx.storage.getUrl(product.coverImageId)
           : null;
 
+        const { thumbnail: thumb } = product.config;
+        const thumbnailImageUrl = thumb?.imageId
+          ? await ctx.storage.getUrl(thumb.imageId)
+          : null;
+
         return {
           ...product,
           coverImageUrl: coverUrl,
+          thumbnailImageUrl,
           items,
         };
       })

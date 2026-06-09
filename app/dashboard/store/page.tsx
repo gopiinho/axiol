@@ -181,7 +181,7 @@ export default function MyStorePage() {
 
   return (
     <>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full" style={{ "--store-accent": selectedAccent } as React.CSSProperties}>
         <div className="border-border/70 w-full lg:min-w-[60%] lg:border-r">
           <div className="flex items-center justify-center gap-4 px-5 py-6 max-lg:flex-col lg:flex lg:items-start lg:px-6 lg:py-8">
             <div className="border-border/25 from-primary/15 to-pink/15 h-24 w-24 overflow-hidden border-2 bg-linear-to-br p-0.5">
@@ -259,9 +259,9 @@ export default function MyStorePage() {
                   </Link>
                 </Button>
               </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              <div className="columns-1 gap-6 sm:columns-2">
                 {publishedProducts.map((product, index) => (
-                  <div key={product._id}>
+                  <div key={product._id} className="mb-6 break-inside-avoid">
                     <ProductCard
                       product={{
                         _id: product._id,
@@ -269,7 +269,9 @@ export default function MyStorePage() {
                         productUrl: product.productUrl,
                         type: product.type,
                         price: product.price,
-                        coverImageUrl: null,
+                        coverImageUrl: product.coverImageUrl ?? null,
+                        thumbnailImageUrl: product.thumbnailImageUrl ?? null,
+                        config: product.config as Record<string, unknown>,
                         itemCount: 0,
                       }}
                       index={index}
@@ -281,7 +283,7 @@ export default function MyStorePage() {
             </div>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
-              <Package className="text-primary mx-auto h-10 w-10" />
+              <Package className="mx-auto h-10 w-10" style={{ color: "var(--store-accent)" }} />
               <p className="text-muted-foreground mt-4 text-sm">
                 No published products yet. Publish one to get started.
               </p>
@@ -390,8 +392,11 @@ export default function MyStorePage() {
                 _id: p._id,
                 name: p.name,
                 productUrl: p.productUrl,
+                type: p.type,
                 price: p.price,
-                coverImageUrl: null,
+                coverImageUrl: p.coverImageUrl ?? null,
+                thumbnailImageUrl: p.thumbnailImageUrl ?? null,
+                config: p.config as Record<string, unknown>,
                 itemCount: 0,
               }))}
               socialLinks={storeSocialLinks}

@@ -48,6 +48,7 @@ export function StorePreview({ username, theme, accentColor, ...contentProps }: 
               username={username}
               themeStyle={themeStyle}
               interactive={false}
+              compact
             />
           </div>
         </div>

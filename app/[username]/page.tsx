@@ -20,15 +20,21 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
       _id: string;
       name: string;
       productUrl: string;
+      type?: string;
       price?: string | null;
       coverImageUrl?: string | null;
+      thumbnailImageUrl?: string | null;
+      config?: Record<string, unknown>;
       items?: unknown[];
     }) => ({
       _id: p._id,
       name: p.name,
       productUrl: p.productUrl,
+      type: p.type,
       price: p.price,
       coverImageUrl: p.coverImageUrl,
+      thumbnailImageUrl: p.thumbnailImageUrl,
+      config: p.config,
       itemCount: p.items?.length ?? 0,
     })
   );

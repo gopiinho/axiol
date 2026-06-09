@@ -1,6 +1,5 @@
 "use client";
 
-import { Package } from "lucide-react";
 import { ProductCard } from "@/features/products/components/ProductCard";
 import type { ProductItem } from "@/features/store/types";
 
@@ -8,9 +7,15 @@ type ProductSectionProps = {
   products: ProductItem[];
   username?: string;
   interactive?: boolean;
+  compact?: boolean;
 };
 
-export function ProductSection({ products, username, interactive = true }: ProductSectionProps) {
+export function ProductSection({
+  products,
+  username,
+  interactive = true,
+  compact,
+}: ProductSectionProps) {
   if (products.length === 0) {
     return (
       <div className="h-full py-16 text-center">
@@ -25,15 +30,18 @@ export function ProductSection({ products, username, interactive = true }: Produ
   }
 
   return (
-    <div className="grid h-full grid-cols-3 gap-5">
+    <div
+      className={`mt-4 columns-1 gap-6 px-4 ${compact ? "" : "md:columns-2 lg:mx-auto lg:max-w-[70%]"}`}
+    >
       {products.map((product, index) => (
-        <ProductCard
-          key={product._id}
-          product={product}
-          username={username}
-          index={index}
-          interactive={interactive}
-        />
+        <div key={product._id} className="mb-6 break-inside-avoid">
+          <ProductCard
+            product={product}
+            username={username}
+            index={index}
+            interactive={interactive}
+          />
+        </div>
       ))}
     </div>
   );

@@ -13,6 +13,7 @@ export type StoreContentProps = {
   interactive?: boolean;
   className?: string;
   username?: string;
+  compact?: boolean;
 };
 
 export function StoreContent({
@@ -25,6 +26,7 @@ export function StoreContent({
   className,
   interactive = true,
   username,
+  compact,
 }: StoreContentProps) {
   return (
     <div
@@ -43,7 +45,7 @@ export function StoreContent({
       />
 
       <div className="h-full">
-        <ProductSection products={products} username={username} interactive={interactive} />
+        <ProductSection products={products} username={username} interactive={interactive} compact={compact} />
       </div>
     </div>
   );
