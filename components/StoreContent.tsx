@@ -2,6 +2,7 @@
 
 import { StoreHeader, ProductSection } from "@/features/store/components";
 import type { SocialLink, ProductItem } from "@/features/store/types";
+import type { HeaderLayoutValue } from "@/lib/themes";
 
 export type StoreContentProps = {
   displayName: string;
@@ -14,6 +15,7 @@ export type StoreContentProps = {
   className?: string;
   username?: string;
   compact?: boolean;
+  headerLayout?: HeaderLayoutValue;
 };
 
 export function StoreContent({
@@ -27,6 +29,7 @@ export function StoreContent({
   interactive = true,
   username,
   compact,
+  headerLayout,
 }: StoreContentProps) {
   return (
     <div
@@ -42,6 +45,7 @@ export function StoreContent({
         profileImageUrl={profileImageUrl}
         bio={bio}
         socialLinks={socialLinks}
+        headerLayout={headerLayout}
       />
 
       <div className="h-full">
