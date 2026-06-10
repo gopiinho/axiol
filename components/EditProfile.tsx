@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, Instagram, Youtube, Check } from "lucide-react";
+import { Globe, Instagram, Youtube } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -9,18 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ImageUpload } from "@/components/ImageUpload";
-import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
 
-const ACCENT_PRESETS = [
-  { label: "Pink", value: "oklch(0.65 0.2 340)" },
-  { label: "Blue", value: "oklch(0.52 0.2 254)" },
-  { label: "Purple", value: "oklch(0.55 0.2 300)" },
-  { label: "Green", value: "oklch(0.6 0.18 155)" },
-  { label: "Orange", value: "oklch(0.65 0.18 50)" },
-  { label: "Red", value: "oklch(0.55 0.22 25)" },
-  { label: "Teal", value: "oklch(0.6 0.15 195)" },
-  { label: "Yellow", value: "oklch(0.8 0.15 90)" },
-];
 
 type EditProfileProps = {
   open: boolean;
@@ -52,11 +41,6 @@ type EditProfileProps = {
   setWebsiteUrl: (v: string) => void;
   saving: boolean;
   onSave: () => void;
-  // Theme state
-  selectedTheme: ThemeKey;
-  selectedAccent: string;
-  onThemeChange: (key: ThemeKey) => void;
-  onAccentChange: (value: string) => void;
 };
 
 const extractUsername = (value: string) =>
@@ -83,10 +67,6 @@ export function EditProfile({
   setWebsiteUrl,
   saving,
   onSave,
-  selectedTheme,
-  selectedAccent,
-  onThemeChange,
-  onAccentChange,
 }: EditProfileProps) {
   const saveProfileImage = useMutation(api.storage.saveProfileImage);
   const removeProfileImage = useMutation(api.storage.removeProfileImage);
@@ -235,78 +215,7 @@ export function EditProfile({
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:col-span-2 lg:hidden">
-              <div className="flex-1 space-y-3">
-                <p className="text-foreground text-sm font-semibold">Theme</p>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {themeKeys.map((key) => {
-                    const theme = themes[key];
-                    const isSelected = selectedTheme === key;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => onThemeChange(key)}
-                        className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-1.5 transition ${
-                          isSelected
-                            ? "border-primary bg-primary/5"
-                            : "border-border/50 hover:border-border"
-                        }`}
-                      >
-                        <div
-                          className="h-6 w-full rounded-md border"
-                          style={{
-                            backgroundColor: theme.vars["--store-bg"],
-                            borderColor: theme.vars["--store-border"],
-                          }}
-                        >
-                          <div
-                            className="mx-auto mt-1 h-2.5 w-[60%] rounded-sm"
-                            style={{
-                              backgroundColor: theme.vars["--store-card-bg"],
-                            }}
-                          />
-                        </div>
-                        <span className="text-[9px] font-medium">{theme.label}</span>
-                        {isSelected && (
-                          <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full">
-                            <Check className="h-2 w-2" />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
 
-              <div className="flex-1 space-y-3">
-                <p className="text-foreground text-sm font-semibold">Accent color</p>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {ACCENT_PRESETS.map((preset) => {
-                    const isSelected = selectedAccent === preset.value;
-                    return (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => onAccentChange(isSelected ? "" : preset.value)}
-                        className={`relative mx-auto h-7 w-7 rounded-full border-2 transition ${
-                          isSelected
-                            ? "border-foreground scale-110"
-                            : "border-transparent hover:scale-105"
-                        }`}
-                        style={{ backgroundColor: preset.value }}
-                        aria-label={preset.label}
-                        title={preset.label}
-                      >
-                        {isSelected && (
-                          <Check className="absolute inset-0 m-auto h-3 w-3 text-white drop-shadow-sm" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </DialogContent>

@@ -35,6 +35,20 @@ export const getByUsername = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
+
+    let palette = user.palette;
+    let layout = user.layout;
+    if (!palette && user.theme) {
+      const { migrateOldTheme } = await import("@/lib/themes");
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        palette = migrated.palette as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        layout = migrated.layout as any;
+      }
+    }
+
     return {
       _id: user._id,
       username: user.username,
@@ -44,6 +58,8 @@ export const getByUsername = query({
       profileImageUrl,
       theme: user.theme,
       accentColor: user.accentColor,
+      palette,
+      layout,
       storeName: user.storeName,
       instagramUrl: user.instagramUrl,
       youtubeUrl: user.youtubeUrl,
@@ -97,6 +113,19 @@ export const getPublicStore = query({
       })
     );
 
+    let palette = user.palette;
+    let layout = user.layout;
+    if (!palette && user.theme) {
+      const { migrateOldTheme } = await import("@/lib/themes");
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        palette = migrated.palette as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        layout = migrated.layout as any;
+      }
+    }
+
     return {
       user: {
         name: user.name,
@@ -105,6 +134,8 @@ export const getPublicStore = query({
         profileImageUrl,
         theme: user.theme,
         accentColor: user.accentColor,
+        palette,
+        layout,
         storeName: user.storeName,
         instagramUrl: user.instagramUrl,
         youtubeUrl: user.youtubeUrl,
@@ -136,6 +167,8 @@ export const getProfile = query({
       profileImageUrl,
       theme: user.theme,
       accentColor: user.accentColor,
+      palette: user.palette,
+      layout: user.layout,
       storeName: user.storeName,
       instagramUrl: user.instagramUrl,
       youtubeUrl: user.youtubeUrl,
@@ -158,11 +191,30 @@ export const updateProfile = mutation({
     theme: v.optional(v.string()),
     accentColor: v.optional(v.string()),
     storeName: v.optional(v.string()),
+    palette: v.optional(v.object({
+      bg: v.string(),
+      accent: v.string(),
+      surface: v.optional(v.string()),
+      border: v.optional(v.string()),
+      text: v.optional(v.string()),
+      textMuted: v.optional(v.string()),
+      cardBg: v.optional(v.string()),
+    })),
+    layout: v.optional(v.object({
+      preset: v.optional(v.string()),
+      borderRadius: v.optional(v.string()),
+      cardStyle: v.optional(v.string()),
+      spacing: v.optional(v.string()),
+      headerLayout: v.optional(v.string()),
+      typeScale: v.optional(v.string()),
+      backgroundPattern: v.optional(v.string()),
+    })),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
 
-    const updates: Record<string, string | undefined> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updates: Record<string, any> = {};
     if (args.name !== undefined) {
       const name = args.name.trim();
       if (name.length < 1) throw new Error("Name is required");
@@ -191,6 +243,12 @@ export const updateProfile = mutation({
     }
     if (args.storeName !== undefined) {
       updates.storeName = args.storeName.trim();
+    }
+    if (args.palette !== undefined) {
+      updates.palette = args.palette;
+    }
+    if (args.layout !== undefined) {
+      updates.layout = args.layout;
     }
 
     await ctx.db.patch(userId, updates);

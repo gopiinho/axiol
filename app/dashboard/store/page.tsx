@@ -1,46 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
-import {
-  Check,
-  ExternalLink,
-  Globe,
-  Instagram,
-  Package,
-  Pencil,
-  Settings,
-  Youtube,
-} from "lucide-react";
+import { ExternalLink, Package, Pencil, Settings, Store, Palette } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
-
 import { StorePreview } from "@/components/StorePreview";
 import { EditProfile } from "@/components/EditProfile";
 import { ProductCard } from "@/features/products/components/ProductCard";
-import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
+import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
+import {
+  buildThemeStyle,
+  migrateOldTheme,
+  type PaletteConfig,
+  type LayoutConfig,
+} from "@/lib/themes";
+import { resolvePalette } from "@/lib/colorUtils";
 
-const ACCENT_PRESETS = [
-  { label: "Pink", value: "oklch(0.65 0.2 340)" },
-  { label: "Blue", value: "oklch(0.52 0.2 254)" },
-  { label: "Purple", value: "oklch(0.55 0.2 300)" },
-  { label: "Green", value: "oklch(0.6 0.18 155)" },
-  { label: "Orange", value: "oklch(0.65 0.18 50)" },
-  { label: "Red", value: "oklch(0.55 0.22 25)" },
-  { label: "Teal", value: "oklch(0.6 0.15 195)" },
-  { label: "Yellow", value: "oklch(0.8 0.15 90)" },
-];
+const DEFAULT_PALETTE: PaletteConfig = resolvePalette({
+  bg: "oklch(0.97 0.015 340)",
+  accent: "oklch(0.65 0.2 340)",
+});
+
+const DEFAULT_LAYOUT: LayoutConfig = {
+  preset: "playful",
+  borderRadius: "pill",
+  cardStyle: "layered",
+  spacing: "loose",
+  headerLayout: "centered",
+  typeScale: "large",
+  backgroundPattern: "dots",
+};
 
 export default function MyStorePage() {
   const { user } = useUser();
+
+  if (!user) return null;
+
   const rawProducts = useQuery(api.products.listByUser);
   const products = useCachedQueryResult("store:products", rawProducts);
-
   const publishedProducts = products?.filter((p) => p.status === "published") ?? [];
-
   const updateProfile = useMutation(api.users.updateProfile);
 
   const [editOpen, setEditOpen] = useState(false);
@@ -50,23 +52,34 @@ export default function MyStorePage() {
   const [instagramUrl, setInstagramUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
 
-  const [selectedTheme, setSelectedTheme] = useState<ThemeKey>(
-    (user?.theme as ThemeKey) ?? "default"
-  );
-  const [selectedAccent, setSelectedAccent] = useState(user?.accentColor ?? "");
+  const [activeTab, setActiveTab] = useState<"store" | "design">("store");
+
+  const [palette, setPalette] = useState<PaletteConfig>(() => {
+    const stored = user.palette as PaletteConfig | undefined;
+    if (stored?.bg && stored?.accent) return resolvePalette(stored);
+    if (user.theme) {
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated) return migrated.palette;
+    }
+    return DEFAULT_PALETTE;
+  });
+
+  const [layout, setLayout] = useState<LayoutConfig>(() => {
+    const stored = user.layout as LayoutConfig | undefined;
+    if (stored) return stored;
+    if (user.theme) {
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated) return migrated.layout;
+    }
+    return DEFAULT_LAYOUT;
+  });
+
   const [themeDirty, setThemeDirty] = useState(false);
   const [themeSaving, setThemeSaving] = useState(false);
 
   const profileImageUrl = user?.profileImageUrl ?? user?.avatarUrl ?? null;
-
-  const currentTheme = (user?.theme as ThemeKey) ?? "default";
-  const currentAccent = user?.accentColor ?? "";
-  if (!themeDirty && (selectedTheme !== currentTheme || selectedAccent !== currentAccent)) {
-    setSelectedTheme(currentTheme);
-    setSelectedAccent(currentAccent);
-  }
 
   const openEditModal = () => {
     setStoreName(user?.storeName ?? "");
@@ -78,8 +91,8 @@ export default function MyStorePage() {
     setEditOpen(true);
   };
 
-  const handleSave = async () => {
-    setSaving(true);
+  const handleProfileSave = async () => {
+    setSavingProfile(true);
     try {
       await updateProfile({
         name,
@@ -88,15 +101,12 @@ export default function MyStorePage() {
         youtubeUrl,
         websiteUrl,
         storeName,
-        theme: selectedTheme,
-        accentColor: selectedAccent,
       });
-      setThemeDirty(false);
       setEditOpen(false);
     } catch (error) {
       console.error("Failed to save profile:", error);
     } finally {
-      setSaving(false);
+      setSavingProfile(false);
     }
   };
 
@@ -104,8 +114,10 @@ export default function MyStorePage() {
     setThemeSaving(true);
     try {
       await updateProfile({
-        theme: selectedTheme,
-        accentColor: selectedAccent,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        palette: palette as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        layout: layout as any,
       });
       setThemeDirty(false);
     } catch (error) {
@@ -115,35 +127,19 @@ export default function MyStorePage() {
     }
   };
 
-  const handleThemeChange = (key: ThemeKey) => {
-    setSelectedTheme(key);
+  const handlePaletteChange = useCallback((p: PaletteConfig) => {
+    setPalette(p);
     setThemeDirty(true);
-  };
+  }, []);
 
-  const handleAccentChange = (value: string) => {
-    setSelectedAccent(value);
+  const handleLayoutChange = useCallback((l: LayoutConfig) => {
+    setLayout(l);
     setThemeDirty(true);
-  };
+  }, []);
 
   const publicUrl = user?.username
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/${user.username}`
     : "";
-
-  const formatDisplayUrl = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
-
-  const socialLinks = [
-    {
-      url: user?.instagramUrl ? `https://instagram.com/${user.instagramUrl}` : undefined,
-      icon: Instagram,
-      label: "Instagram",
-    },
-    {
-      url: user?.youtubeUrl ? `https://youtube.com/@${user.youtubeUrl}` : undefined,
-      icon: Youtube,
-      label: "YouTube",
-    },
-    { url: user?.websiteUrl, icon: Globe, label: "Website" },
-  ].filter((link) => link.url);
 
   const storeSocialLinks = [
     user?.instagramUrl
@@ -167,7 +163,7 @@ export default function MyStorePage() {
           url: user.websiteUrl.startsWith("http") ? user.websiteUrl : `https://${user.websiteUrl}`,
           icon: "globe" as const,
           label: "Website",
-          display: formatDisplayUrl(user.websiteUrl),
+          display: user.websiteUrl.replace(/^https?:\/\//, "").replace(/\/+$/, ""),
         }
       : null,
   ].filter(Boolean) as {
@@ -178,25 +174,28 @@ export default function MyStorePage() {
   }[];
 
   const displayName = user?.storeName || user?.name || "";
+  const fullTheme = buildThemeStyle(palette, layout);
+  const editorTheme = { ...fullTheme };
+  delete (editorTheme as Record<string, unknown>).backgroundImage;
+  delete (editorTheme as Record<string, unknown>).backgroundSize;
 
   return (
     <>
-      <div
-        className="flex min-h-screen w-full"
-        style={{ "--store-accent": selectedAccent } as React.CSSProperties}
-      >
-        <div className="border-border/70 w-full lg:min-w-[60%] lg:border-r">
-          <div className="flex items-center justify-center gap-4 px-5 py-6 max-lg:flex-col lg:flex lg:items-start lg:px-6 lg:py-8">
-            <div className="border-border/25 from-primary/15 to-pink/15 h-24 w-24 overflow-hidden border-2 bg-linear-to-br p-0.5">
+      <div className="flex min-h-screen w-full">
+        <div
+          className="border-border/70 w-full flex-1 lg:border-r"
+          style={editorTheme as React.CSSProperties}
+        >
+          <div className="flex items-center justify-center gap-4 px-5 py-4 max-lg:flex-col max-sm:gap-3 lg:flex lg:items-start lg:px-6 lg:py-8">
+            <div className="h-24 w-24 overflow-hidden rounded-xs border-2 p-0.5 max-sm:h-16 max-sm:w-16">
               <div className="h-full w-full overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={
                     profileImageUrl ??
                     `https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.username ?? "creator"}`
                   }
                   alt="Avatar"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full rounded-xs object-cover"
                 />
               </div>
             </div>
@@ -204,36 +203,14 @@ export default function MyStorePage() {
             <div className="grid w-full items-center justify-center lg:flex lg:items-start lg:justify-between">
               <div className="flex flex-col items-center justify-center lg:items-start">
                 <h1 className="font-accent text-xl font-extrabold tracking-tight">{displayName}</h1>
-
                 <p className="text-muted-foreground text-xs">@{user?.username}</p>
-
                 {user?.bio && (
-                  <p className="text-muted-foreground mt-2 max-w-sm text-start text-sm">
+                  <p className="text-muted-foreground mt-2 max-w-sm text-start text-sm max-sm:text-xs">
                     {user.bio}
                   </p>
                 )}
-
-                {socialLinks.length > 0 && (
-                  <div className="mt-3 flex items-center gap-3">
-                    {socialLinks.map((link) => {
-                      const Icon = link.icon;
-                      return (
-                        <a
-                          key={link.label}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-primary rounded-lg p-2 transition"
-                          aria-label={link.label}
-                        >
-                          <Icon className="h-4.5 w-4.5" />
-                        </a>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
-              <div className="flex h-full items-start justify-center gap-2 max-lg:mt-8">
+              <div className="flex h-full items-start justify-center gap-2 max-lg:mt-6">
                 {publicUrl && (
                   <Button variant="outline" size="sm" className="gap-1.5" asChild>
                     <Link href={`/${user?.username}`} target="_blank">
@@ -251,160 +228,113 @@ export default function MyStorePage() {
           </div>
 
           <div className="border-border/70 border-t" />
-          {publishedProducts.length > 0 ? (
-            <div className="px-5 py-6">
-              <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-foreground text-lg font-bold">Your Store</h2>
-                <Button variant="ghost" size="sm" className="gap-1.5" asChild>
-                  <Link href="/dashboard/products">
-                    <Settings className="h-3.5 w-3.5" />
-                    Manage
-                  </Link>
-                </Button>
-              </div>
-              <div className="columns-1 gap-6 sm:columns-2">
-                {publishedProducts.map((product, index) => (
-                  <div key={product._id} className="mb-6 break-inside-avoid">
-                    <ProductCard
-                      product={{
-                        _id: product._id,
-                        name: product.name,
-                        productUrl: product.productUrl,
-                        type: product.type,
-                        price: product.price,
-                        coverImageUrl: product.coverImageUrl ?? null,
-                        thumbnailImageUrl: product.thumbnailImageUrl ?? null,
-                        config: product.config as Record<string, unknown>,
-                        itemCount: 0,
-                      }}
-                      index={index}
-                      interactive={true}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
-              <Package className="mx-auto h-10 w-10" style={{ color: "var(--store-accent)" }} />
-              <p className="text-muted-foreground mt-4 text-sm">
-                No published products yet. Publish one to get started.
-              </p>
-              <Button className="mt-5" asChild>
-                <Link href="/dashboard/products/new">Create a product</Link>
+
+          <div className="border-border/70 flex items-center gap-2 border-b px-5 py-3">
+            <button
+              type="button"
+              onClick={() => setActiveTab("store")}
+              className={`flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
+                activeTab === "store"
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:bg-card/30"
+              }`}
+            >
+              <Store className="h-4 w-4" />
+              Store
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("design")}
+              className={`flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
+                activeTab === "design"
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:bg-card/30"
+              }`}
+            >
+              <Palette className="h-4 w-4" />
+              Edit Design
+            </button>
+            <div className="flex-1" />
+            {activeTab === "store" && (
+              <Button variant="ghost" size="sm" className="gap-1.5" asChild>
+                <Link href="/dashboard/products">
+                  <Settings className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Manage</span>
+                </Link>
               </Button>
-            </div>
-          )}
+            )}
+          </div>
+
+          <div className="min-h-[50vh] px-5 pt-6 lg:px-6 lg:pt-8">
+            {activeTab === "store" ? (
+              publishedProducts.length > 0 ? (
+                <div className="columns-1 gap-6 sm:columns-2">
+                  {publishedProducts.map((product, index) => (
+                    <div key={product._id} className="mb-6 break-inside-avoid">
+                      <ProductCard
+                        product={{
+                          _id: product._id,
+                          name: product.name,
+                          productUrl: product.productUrl,
+                          type: product.type,
+                          price: product.price,
+                          coverImageUrl: product.coverImageUrl ?? null,
+                          thumbnailImageUrl: product.thumbnailImageUrl ?? null,
+                          config: product.config as Record<string, unknown>,
+                          itemCount: 0,
+                        }}
+                        index={index}
+                        interactive={true}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
+                  <Package className="mx-auto h-10 w-10" style={{ color: "var(--store-accent)" }} />
+                  <p className="text-muted-foreground mt-4 text-sm">
+                    No published products yet. Publish one to get started.
+                  </p>
+                  <Button className="mt-5" asChild>
+                    <Link href="/dashboard/products/new">Create a product</Link>
+                  </Button>
+                </div>
+              )
+            ) : (
+              <ThemeEditor
+                palette={palette}
+                onPaletteChange={handlePaletteChange}
+                layout={layout}
+                onLayoutChange={handleLayoutChange}
+                onSave={handleThemeSave}
+                saving={themeSaving}
+                dirty={themeDirty}
+              />
+            )}
+          </div>
         </div>
 
-        <div className="sticky top-0 hidden h-screen w-full flex-col items-center overflow-hidden lg:flex">
-          <div className="flex w-full flex-col items-center gap-6 px-6 py-6">
-            <div className="w-full space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <p className="text-muted-foreground mb-2 text-xs font-semibold">Theme</p>
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {themeKeys.map((key) => {
-                      const theme = themes[key];
-                      const isSelected = selectedTheme === key;
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => handleThemeChange(key)}
-                          className={`relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border p-1.5 transition ${
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border/50 hover:border-border"
-                          }`}
-                        >
-                          <div
-                            className="h-6 w-full rounded-md border"
-                            style={{
-                              backgroundColor: theme.vars["--store-bg"],
-                              borderColor: theme.vars["--store-border"],
-                            }}
-                          >
-                            <div
-                              className="mx-auto mt-1 h-2.5 w-[60%] rounded-sm"
-                              style={{
-                                backgroundColor: theme.vars["--store-card-bg"],
-                              }}
-                            />
-                          </div>
-                          <span className="text-[9px] font-medium">{theme.label}</span>
-                          {isSelected && (
-                            <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full">
-                              <Check className="h-2 w-2" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <p className="text-muted-foreground mb-2 text-xs font-semibold">Accent color</p>
-                  <div className="flex gap-2">
-                    {ACCENT_PRESETS.map((preset) => {
-                      const isSelected = selectedAccent === preset.value;
-                      return (
-                        <button
-                          key={preset.label}
-                          type="button"
-                          onClick={() => handleAccentChange(isSelected ? "" : preset.value)}
-                          className={`relative h-7 w-7 shrink-0 cursor-pointer rounded-sm border-2 transition ${
-                            isSelected
-                              ? "border-foreground scale-110"
-                              : "border-transparent hover:scale-105"
-                          }`}
-                          style={{ backgroundColor: preset.value }}
-                          aria-label={preset.label}
-                          title={preset.label}
-                        >
-                          {isSelected && (
-                            <Check className="absolute inset-0 m-auto h-3 w-3 text-white drop-shadow-sm" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={handleThemeSave}
-                  disabled={themeSaving || !themeDirty}
-                  className="shrink-0"
-                >
-                  {themeSaving ? "Saving..." : "Save theme"}
-                </Button>
-              </div>
-            </div>
-
-            <StorePreview
-              displayName={displayName}
-              bio={user?.bio}
-              profileImageUrl={user?.profileImageUrl}
-              username={user?.username ?? ""}
-              theme={selectedTheme}
-              accentColor={selectedAccent}
-              products={publishedProducts.map((p) => ({
-                _id: p._id,
-                name: p.name,
-                productUrl: p.productUrl,
-                type: p.type,
-                price: p.price,
-                coverImageUrl: p.coverImageUrl ?? null,
-                thumbnailImageUrl: p.thumbnailImageUrl ?? null,
-                config: p.config as Record<string, unknown>,
-                itemCount: 0,
-              }))}
-              socialLinks={storeSocialLinks}
-            />
-          </div>
+        <div className="sticky top-0 hidden h-screen flex-col items-center justify-center overflow-hidden lg:flex lg:w-[420px]">
+          <StorePreview
+            displayName={displayName}
+            bio={user?.bio}
+            profileImageUrl={user?.profileImageUrl}
+            username={user?.username ?? ""}
+            palette={palette}
+            layout={layout}
+            products={publishedProducts.map((p) => ({
+              _id: p._id,
+              name: p.name,
+              productUrl: p.productUrl,
+              type: p.type,
+              price: p.price,
+              coverImageUrl: p.coverImageUrl ?? null,
+              thumbnailImageUrl: p.thumbnailImageUrl ?? null,
+              config: p.config as Record<string, unknown>,
+              itemCount: 0,
+            }))}
+            socialLinks={storeSocialLinks}
+          />
         </div>
       </div>
 
@@ -424,12 +354,8 @@ export default function MyStorePage() {
         setYoutubeUrl={setYoutubeUrl}
         websiteUrl={websiteUrl}
         setWebsiteUrl={setWebsiteUrl}
-        saving={saving}
-        onSave={handleSave}
-        selectedTheme={selectedTheme}
-        selectedAccent={selectedAccent}
-        onThemeChange={handleThemeChange}
-        onAccentChange={handleAccentChange}
+        saving={savingProfile}
+        onSave={handleProfileSave}
       />
     </>
   );

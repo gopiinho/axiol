@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { getServerConvexClient } from "@/server/convex/client";
-import { buildThemeStyle, getTheme } from "@/lib/themes";
+import { buildThemeStyle, migrateOldTheme, type PaletteConfig, type LayoutConfig } from "@/lib/themes";
+import { resolvePalette } from "@/lib/colorUtils";
 import { StoreContent } from "@/components/StoreContent";
 
 export default async function UserStorePage({ params }: { params: Promise<{ username: string }> }) {
@@ -39,8 +40,23 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
     })
   );
   const displayName = user.storeName || user.name;
-  const theme = getTheme(user.theme);
-  const themeStyle = buildThemeStyle(user.theme, user.accentColor);
+
+  let palette = user.palette as PaletteConfig | undefined;
+  let layout = user.layout as LayoutConfig | undefined;
+  if (!palette && user.theme) {
+    const migrated = migrateOldTheme(user.theme);
+    if (migrated) {
+      palette = migrated.palette;
+      layout = migrated.layout;
+    }
+  }
+  if (palette) {
+    palette = resolvePalette(palette);
+  }
+  const themeStyle = palette
+    ? buildThemeStyle(palette, layout ?? {})
+    : ({} as React.CSSProperties);
+
   const profileSrc = user.profileImageUrl ?? user.avatarUrl ?? null;
 
   const formatDisplayUrl = (url: string) => {
@@ -92,7 +108,7 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
   return (
     <main
       className="flex min-h-screen justify-center"
-      style={{ backgroundColor: theme.vars["--store-bg"] }}
+      style={{ backgroundColor: "var(--store-bg)", ...themeStyle }}
     >
       <div className="mx-auto h-full w-full lg:max-w-[90%]">
         <StoreContent
@@ -104,6 +120,7 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
           products={products}
           themeStyle={themeStyle}
           interactive={true}
+          headerLayout={layout?.headerLayout}
         />
       </div>
     </main>

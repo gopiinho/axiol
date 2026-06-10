@@ -2,6 +2,7 @@
 
 import type { ThumbnailCardProps } from "./types";
 import { ThumbnailImage, CardLink } from "./BaseCard";
+import { cardStyleProps, cardPriceStyle, cardSubtitleStyle, cardCtaStyle } from "./themeStyles";
 
 export function CalloutCard({
   product,
@@ -19,25 +20,29 @@ export function CalloutCard({
   const href = username ? `/${username}/p/${product.productUrl}` : undefined;
 
   const card = (
-    <div className="group border-border/60 hover:border-border flex w-full cursor-pointer flex-col overflow-hidden rounded-md border bg-white transition-all duration-300">
-      <div className="flex items-start gap-4 p-4">
-        <ThumbnailImage url={previewUrl} alt={title} className="h-20 w-20 shrink-0 rounded-md" />
+    <div
+      className="group flex w-full cursor-pointer flex-col overflow-hidden transition-all duration-300 hover:opacity-90"
+      style={cardStyleProps()}
+    >
+      <div className="flex items-start gap-4" style={{ padding: "var(--store-card-padding, 1rem)" }}>
+        <ThumbnailImage url={previewUrl} alt={title} className="h-20 w-20 shrink-0" style={{ borderRadius: "var(--store-radius)" }} />
 
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-          <h3 className="text-foreground line-clamp-1 text-sm font-semibold">{title}</h3>
+          <h3 className="line-clamp-1 font-semibold" style={{ color: "var(--store-text)", fontSize: "var(--store-heading-size, 1.125rem)" }}>{title}</h3>
 
-          {subtitle && <p className="text-muted-foreground line-clamp-2 text-xs">{subtitle}</p>}
+          {subtitle && <p className="line-clamp-2" style={cardSubtitleStyle()}>{subtitle}</p>}
 
-          {product.price && <p className="text-xs font-medium" style={{ color: "var(--store-accent)" }}>₹{product.price}</p>}
+          {product.price && <p className="font-medium" style={cardPriceStyle()}>₹{product.price}</p>}
         </div>
       </div>
 
-      <div className="border-border/60 bg-secondary/10 border-t px-4 py-2.5 text-center">
-        <span className="text-sm font-semibold" style={{ color: "var(--store-accent)" }}>{buttonText}</span>
+      <div className="flex px-[var(--store-card-padding,1rem)] pb-[var(--store-card-padding,1rem)]">
+        <span className="font-semibold transition hover:opacity-90" style={cardCtaStyle()}>
+          {buttonText}
+        </span>
       </div>
     </div>
   );
-
   return (
     <CardLink href={href} interactive={interactive}>
       {card}

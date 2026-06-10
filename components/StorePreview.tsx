@@ -1,16 +1,18 @@
 "use client";
 
-import { buildThemeStyle } from "@/lib/themes";
+import { buildThemeStyle, type PaletteConfig, type LayoutConfig } from "@/lib/themes";
 import { StoreContent, type StoreContentProps } from "@/components/StoreContent";
 
-type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "interactive"> & {
+type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "interactive" | "headerLayout"> & {
   username: string;
-  theme?: string;
-  accentColor?: string;
+  palette?: PaletteConfig;
+  layout?: LayoutConfig;
 };
 
-export function StorePreview({ username, theme, accentColor, ...contentProps }: StorePreviewProps) {
-  const themeStyle = buildThemeStyle(theme, accentColor);
+export function StorePreview({ username, palette, layout, ...contentProps }: StorePreviewProps) {
+  const themeStyle = palette
+    ? buildThemeStyle(palette, layout ?? {})
+    : ({} as React.CSSProperties);
 
   return (
     <div className="flex h-[min(85vh,700px)] w-[min(45vh,340px)] flex-col">
@@ -21,7 +23,7 @@ export function StorePreview({ username, theme, accentColor, ...contentProps }: 
           className="flex flex-1 flex-col overflow-hidden rounded-[2.5rem]"
           style={{
             backgroundColor: "var(--store-bg, white)",
-            ...buildThemeStyle(theme, accentColor),
+            ...themeStyle,
           }}
         >
           <div
@@ -49,6 +51,7 @@ export function StorePreview({ username, theme, accentColor, ...contentProps }: 
               themeStyle={themeStyle}
               interactive={false}
               compact
+              headerLayout={layout?.headerLayout}
             />
           </div>
         </div>

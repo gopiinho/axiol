@@ -2,41 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { StorePreview } from "@/components/StorePreview";
-import { themes, themeKeys, type ThemeKey } from "@/lib/themes";
+import { PALETTE_PRESETS } from "@/lib/themes";
 import { ScrollFadeIn } from "@/components/motion/ScrollFadeIn";
 import { Button } from "@/components/ui/button";
 
-const mockProducts = [
-  {
-    _id: "1",
-    name: "Summer Skincare Essentials",
-    productUrl: "summer-skincare-essentials",
-    price: null,
-    coverImageUrl: null,
-    itemCount: 4,
-  },
-  {
-    _id: "2",
-    name: "Budget Fashion Finds",
-    productUrl: "budget-fashion-finds",
-    price: "Under ₹500",
-    coverImageUrl: null,
-    itemCount: 6,
-  },
-];
-
-const mockSocialLinks = [
-  {
-    url: "https://instagram.com/nemeowww_",
-    icon: "instagram" as const,
-    label: "Instagram",
-    display: "@nemeowww_",
-  },
-];
-
 export function StorefrontShowcase() {
-  const [activeTheme, setActiveTheme] = useState<ThemeKey>("default");
+  const [activePalette, setActivePalette] = useState(0);
 
   return (
     <section className="bg-sidebar relative px-6 py-16 sm:px-12 sm:py-24 lg:px-20 xl:px-28">
@@ -63,33 +34,23 @@ export function StorefrontShowcase() {
                     "radial-gradient(circle, oklch(0.85 0.12 340 / 0.5), transparent 70%)",
                 }}
               />
-              {/* <StorePreview
-                publicUrl="axiol.com/nemeowww"
-                username="nemeowww"
-                displayName="Nemeowww"
-                bio="why are you here?"
-                socialLinks={mockSocialLinks}
-                products={mockProducts}
-                theme={activeTheme}
-              /> */}
             </div>
             <div className="mt-6 grid gap-4">
               <div className="mt-6 flex items-center gap-3">
-                {themeKeys.map((key) => {
-                  const t = themes[key];
-                  const isActive = key === activeTheme;
+                {PALETTE_PRESETS.map((p, i) => {
+                  const isActive = i === activePalette;
                   return (
                     <button
-                      key={key}
-                      onClick={() => setActiveTheme(key)}
-                      aria-label={t.label}
+                      key={p.key}
+                      onClick={() => setActivePalette(i)}
+                      aria-label={p.label}
                       className={`h-11 w-11 rounded-full border-2 transition-all duration-200 ${
                         isActive
                           ? "border-primary scale-110 shadow-md"
                           : "border-border/60 hover:scale-105"
                       }`}
                       style={{
-                        backgroundColor: t.vars["--store-accent"],
+                        backgroundColor: p.accent,
                       }}
                     />
                   );

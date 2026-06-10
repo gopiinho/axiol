@@ -7,7 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Save, ArrowRight } from "lucide-react";
+import { Save, ArrowRight, Archive, Upload } from "lucide-react";
 import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon";
 import { ProductItemsManager } from "@/features/products/components/ProductItemsManager";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
@@ -131,33 +131,44 @@ export default function EditProduct({
           </div>
           {product && (
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleSave} disabled={saving}>
-                <Save className="mr-1.5 h-4 w-4" />
-                {saving ? "Saving..." : "Save"}
-              </Button>
-
               {(product.status === "draft" || product.status === "archived") && (
-                <Button
-                  variant="default"
-                  onClick={handleNext}
-                  disabled={saving || publishing || needsItems}
-                  title={needsItems ? "Add at least one item before publishing" : undefined}
-                >
+                <>
+                  <Button variant="outline" onClick={handleSave} disabled={saving}>
+                    <Save className="mr-1.5 h-4 w-4" />
+                    {saving ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={handleNext}
+                    disabled={saving || publishing || needsItems}
+                    title={needsItems ? "Add at least one item before publishing" : undefined}
+                  >
                   {isLastStep
                     ? publishing
                       ? "Publishing..."
-                      : "Publish"
+                      : <>
+                          <Upload className="mr-1.5 h-4 w-4" />
+                          Publish
+                        </>
                     : saving
                       ? "Saving..."
                       : "Next"}
                   {!isLastStep && !saving && <ArrowRight className="ml-1.5 h-4 w-4" />}
-                </Button>
+                  </Button>
+                </>
               )}
 
               {product.status === "published" && (
-                <Button variant="secondary" onClick={handleArchive}>
-                  Archive
-                </Button>
+                <>
+                  <Button variant="outline" onClick={handleArchive}>
+                    <Archive className="mr-1.5 h-4 w-4" />
+                    Archive
+                  </Button>
+                  <Button variant="default" onClick={handleSave} disabled={saving}>
+                    <Save className="mr-1.5 h-4 w-4" />
+                    {saving ? "Saving..." : "Save"}
+                  </Button>
+                </>
               )}
             </div>
           )}
