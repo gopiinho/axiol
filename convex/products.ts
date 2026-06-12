@@ -175,7 +175,6 @@ export const update = mutation({
     name: v.string(),
     productUrl: v.optional(v.string()),
     description: v.optional(v.string()),
-    coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
     type: productTypeValidator,
     automationEnabled: v.optional(v.boolean()),
@@ -199,7 +198,6 @@ export const update = mutation({
       name: validated.name,
       productUrl,
       description: validated.description,
-      coverImageId: args.coverImageId,
       price: validated.price,
       type: validated.type as "affiliate" | "digital",
       automationEnabled: validated.automationEnabled,
@@ -385,16 +383,36 @@ export const getPublicProduct = query({
 
     const coverUrl = product.coverImageId ? await ctx.storage.getUrl(product.coverImageId) : null;
 
+    const checkoutCoverId = product.config.checkout?.coverImageId;
+    const checkoutCoverUrl = checkoutCoverId ? await ctx.storage.getUrl(checkoutCoverId) : null;
+
     const { thumbnail: thumb } = product.config;
     const thumbnailUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
+
+    const profileImageUrl = user.profileImageId
+      ? await ctx.storage.getUrl(user.profileImageId)
+      : null;
 
     const definition = PRODUCT_TYPES[product.type] ?? null;
 
     return {
       product: {
         ...product,
-        coverImageUrl: coverUrl,
+        coverImageUrl: checkoutCoverUrl || coverUrl,
         thumbnailImageUrl: thumbnailUrl,
+      },
+      creator: {
+        name: user.name,
+        storeName: user.storeName,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        profileImageUrl,
+        palette: user.palette,
+        layout: user.layout,
+        theme: user.theme,
+        instagramUrl: user.instagramUrl,
+        youtubeUrl: user.youtubeUrl,
+        websiteUrl: user.websiteUrl,
       },
       items,
       definition: definition
