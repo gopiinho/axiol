@@ -120,6 +120,7 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
           products={products}
           themeStyle={themeStyle}
           interactive={true}
+          username={username}
           headerLayout={layout?.headerLayout}
         />
       </div>
