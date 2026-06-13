@@ -86,7 +86,7 @@ export default async function ProductDetailPage({
         "--store-section-gap": "1.5rem",
         "--store-card-gap": "1rem",
         "--store-card-padding": "1rem",
-        "--store-heading-size": "1.375rem",
+        "--store-heading-size": "1.625rem",
         "--store-body-size": "0.875rem",
         "--store-price-size": "0.9375rem",
       } as React.CSSProperties);
@@ -170,7 +170,7 @@ export default async function ProductDetailPage({
               className="min-w-0 transition-colors hover:opacity-70"
               style={{
                 color: "var(--store-text)",
-                fontSize: "var(--store-body-size, 0.875rem)",
+                fontSize: "var(--store-heading-size, 1.5rem)",
               }}
             >
               <p className="truncate font-semibold">{displayName}</p>

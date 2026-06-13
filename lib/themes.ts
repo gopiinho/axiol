@@ -78,9 +78,9 @@ const SPACING_MAP: Record<string, { sectionGap: string; cardGap: string; cardPad
 };
 
 const TYPE_SCALE_MAP: Record<string, { heading: string; body: string; price: string }> = {
-  small: { heading: "1.125rem", body: "0.8125rem", price: "0.8125rem" },
-  medium: { heading: "1.375rem", body: "0.875rem", price: "0.9375rem" },
-  large: { heading: "1.75rem", body: "1rem", price: "1.125rem" },
+  small: { heading: "1.25rem", body: "0.8125rem", price: "0.8125rem" },
+  medium: { heading: "1.625rem", body: "0.875rem", price: "0.9375rem" },
+  large: { heading: "2rem", body: "1rem", price: "1.125rem" },
 };
 
 function lerp(a: number, b: number, t: number): number {
