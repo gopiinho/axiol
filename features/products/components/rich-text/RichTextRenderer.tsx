@@ -39,16 +39,18 @@ const SANITIZE_CONFIG: sanitizeHtml.IOptions = {
 interface RichTextRendererProps {
   html: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function RichTextRenderer({ html, className }: RichTextRendererProps) {
+export function RichTextRenderer({ html, className, style }: RichTextRendererProps) {
   const clean = sanitizeHtml(html, SANITIZE_CONFIG);
 
   if (!clean || clean === "<p></p>") return null;
 
   return (
     <div
-      className={cn("prose prose-sm max-w-none", className)}
+      className={cn("max-w-none space-y-3 leading-relaxed", className)}
+      style={style}
       dangerouslySetInnerHTML={{ __html: clean }}
     />
   );
