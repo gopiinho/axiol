@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Globe, Instagram, Package, Youtube } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { icons } from "@/lib/icons";
-import heartPixel from "@/public/icons/heart.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AffiliateItemLink from "@/features/analytics/components/AffiliateItemLink";
@@ -45,6 +44,7 @@ export default async function ProductDetailPage({
   params: Promise<{ username: string; productUrl: string }>;
 }) {
   const { username, productUrl } = await params;
+
   const convex = getServerConvexClient();
 
   const data = await convex.query(api.products.getPublicProduct, {

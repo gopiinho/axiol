@@ -47,9 +47,7 @@ export function CheckoutContent({
         : null
       : null;
 
-  const displayPrice = rawPrice
-    ? /^[₹$€£]/.test(rawPrice) ? rawPrice : `₹ ${rawPrice}`
-    : "Free";
+  const displayPrice = rawPrice ? (/^[₹$€£]/.test(rawPrice) ? rawPrice : `₹ ${rawPrice}`) : "Free";
 
   const ctaText = definition?.defaultButtonText ?? "Get Access";
   const isSimplifiedForm = ["collect_emails", "applications"].includes(product.type);
@@ -96,7 +94,7 @@ export function CheckoutContent({
       )}
 
       <h1
-        className="font-accent mb-2 font-bold leading-tight tracking-tight"
+        className="font-accent mb-2 leading-tight font-bold tracking-tight"
         style={{
           color: "var(--store-text)",
           fontSize: "var(--store-heading-size, 1.375rem)",
@@ -112,7 +110,7 @@ export function CheckoutContent({
           fontSize: "var(--store-price-size, 0.9375rem)",
         }}
       >
-        ₹ {displayPrice}
+        {displayPrice}
       </p>
 
       {product.description && (
@@ -122,17 +120,11 @@ export function CheckoutContent({
             fontSize: "var(--store-body-size, 0.875rem)",
           }}
         >
-          <RichTextRenderer
-            html={product.description}
-            style={{ color: "var(--store-text)" }}
-          />
+          <RichTextRenderer html={product.description} style={{ color: "var(--store-text)" }} />
         </div>
       )}
 
-      <div
-        className="mb-4 border-t"
-        style={{ borderColor: "var(--store-border)" }}
-      >
+      <div className="mb-4 border-t" style={{ borderColor: "var(--store-border)" }}>
         <h2
           className="font-semibold tracking-wide uppercase"
           style={{
@@ -145,12 +137,7 @@ export function CheckoutContent({
           Contact Information
         </h2>
 
-        <CheckoutFields
-          name={name}
-          email={email}
-          onNameChange={setName}
-          onEmailChange={setEmail}
-        />
+        <CheckoutFields name={name} email={email} onNameChange={setName} onEmailChange={setEmail} />
 
         {isSimplifiedForm && (
           <Button
