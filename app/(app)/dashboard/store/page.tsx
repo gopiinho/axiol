@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { ExternalLink, Package, Pencil, Settings, Store, Palette } from "lucide-react";
@@ -38,8 +38,6 @@ const DEFAULT_LAYOUT: LayoutConfig = {
 export default function MyStorePage() {
   const { user } = useUser();
 
-  if (!user) return null;
-
   const rawProducts = useQuery(api.products.listByUser);
   const products = useCachedQueryResult("store:products", rawProducts);
   const publishedProducts = products?.filter((p) => p.status === "published") ?? [];
@@ -56,28 +54,46 @@ export default function MyStorePage() {
 
   const [activeTab, setActiveTab] = useState<"store" | "design">("store");
 
-  const [palette, setPalette] = useState<PaletteConfig>(() => {
-    const stored = user.palette as PaletteConfig | undefined;
-    if (stored?.bg && stored?.accent) return resolvePalette(stored);
-    if (user.theme) {
-      const migrated = migrateOldTheme(user.theme);
-      if (migrated) return migrated.palette;
-    }
-    return DEFAULT_PALETTE;
-  });
+  const [palette, setPalette] = useState<PaletteConfig>(DEFAULT_PALETTE);
+  const [layout, setLayout] = useState<LayoutConfig>(DEFAULT_LAYOUT);
 
-  const [layout, setLayout] = useState<LayoutConfig>(() => {
-    const stored = user.layout as LayoutConfig | undefined;
-    if (stored) return stored;
-    if (user.theme) {
+  const themeInitialized = useRef(false);
+
+  useEffect(() => {
+    if (!user || themeInitialized.current) return;
+    themeInitialized.current = true;
+
+    const storedPalette = user.palette as PaletteConfig | undefined;
+    if (storedPalette?.bg && storedPalette?.accent) {
+      setPalette(resolvePalette(storedPalette));
+    } else if (user.theme) {
       const migrated = migrateOldTheme(user.theme);
-      if (migrated) return migrated.layout;
+      if (migrated) setPalette(migrated.palette);
     }
-    return DEFAULT_LAYOUT;
-  });
+
+    const storedLayout = user.layout as LayoutConfig | undefined;
+    if (storedLayout) {
+      setLayout(storedLayout);
+    } else if (user.theme) {
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated) setLayout(migrated.layout);
+    }
+  }, [user]);
 
   const [themeDirty, setThemeDirty] = useState(false);
   const [themeSaving, setThemeSaving] = useState(false);
+
+  const handlePaletteChange = useCallback((p: PaletteConfig) => {
+    setPalette(p);
+    setThemeDirty(true);
+  }, []);
+
+  const handleLayoutChange = useCallback((l: LayoutConfig) => {
+    setLayout(l);
+    setThemeDirty(true);
+  }, []);
+
+  if (!user) return null;
 
   const profileImageUrl = user?.profileImageUrl ?? user?.avatarUrl ?? null;
 
@@ -126,16 +142,6 @@ export default function MyStorePage() {
       setThemeSaving(false);
     }
   };
-
-  const handlePaletteChange = useCallback((p: PaletteConfig) => {
-    setPalette(p);
-    setThemeDirty(true);
-  }, []);
-
-  const handleLayoutChange = useCallback((l: LayoutConfig) => {
-    setLayout(l);
-    setThemeDirty(true);
-  }, []);
 
   const publicUrl = user?.username
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/${user.username}`
