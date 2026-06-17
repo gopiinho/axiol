@@ -21,17 +21,13 @@ const MAX_SIZE = 2 * 1024 * 1024;
 
 function StepNumber({ num }: { num: number }) {
   return (
-    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/30 text-foreground text-xs font-bold mr-2 shrink-0">
+    <span className="bg-primary/30 text-foreground mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
       {num}
     </span>
   );
 }
 
-export function CheckoutStep({
-  productId,
-  product,
-  onRegisterSave,
-}: ProductStepComponentProps) {
+export function CheckoutStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
   const [name, setName] = useState(product.name);
   const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
@@ -154,12 +150,12 @@ export function CheckoutStep({
           <StepNumber num={1} />
           Cover
         </Label>
-        <div className="pl-8 space-y-3">
+        <div className="space-y-3 pl-8">
           {displayCoverUrl ? (
             <>
               <div className="flex items-start">
                 <div className="group relative">
-                  <div className="h-20 w-28 overflow-hidden rounded-xs border-2 border-foreground/90 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.25)]">
+                  <div className="border-foreground/90 h-20 w-28 overflow-hidden rounded-xs border-2 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.25)]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={displayCoverUrl}
@@ -172,10 +168,10 @@ export function CheckoutStep({
                     onClick={handleRemoveCover}
                     disabled={coverUploading}
                     className={cn(
-                      "absolute -top-2 -right-2 cursor-pointer flex h-6 w-6 items-center justify-center rounded-full",
+                      "absolute -top-2 -right-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full",
                       "bg-[oklch(0.62_0.22_25)] shadow-md",
                       "transition-transform duration-200 hover:scale-110",
-                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "disabled:cursor-not-allowed disabled:opacity-50"
                     )}
                     aria-label="Remove cover image"
                   >
@@ -184,12 +180,12 @@ export function CheckoutStep({
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-xs border border-border/60 bg-secondary/20">
+              <div className="border-border/60 bg-secondary/20 relative overflow-hidden rounded-xs border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={displayCoverUrl}
                   alt="Cover preview"
-                  className="block w-full h-auto max-h-105 object-cover"
+                  className="block h-auto max-h-105 w-full object-cover"
                 />
               </div>
             </>
@@ -197,35 +193,32 @@ export function CheckoutStep({
             <div
               className={cn(
                 "flex w-full flex-col items-center justify-center gap-3 rounded-xs",
-                "border border-dashed border-border/70 bg-card/50 p-5 h-34",
-                coverUploading && "opacity-60",
+                "border-border/70 bg-card/50 h-34 border border-dashed p-5",
+                coverUploading && "opacity-60"
               )}
             >
               {coverUploading ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  <span className="text-xs text-muted-foreground">
-                    Uploading...
-                  </span>
+                  <Loader2 className="text-primary h-5 w-5 animate-spin" />
+                  <span className="text-muted-foreground text-xs">Uploading...</span>
                 </>
               ) : (
                 <>
                   <span
                     onClick={() => !coverUploading && inputRef.current?.click()}
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-xs bg-card px-4 py-2",
-                      "text-sm font-semibold text-foreground shadow-sm border border-border/60",
+                      "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
+                      "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
                       "transition-all duration-200",
                       "hover:bg-accent hover:text-accent-foreground",
-                      "cursor-pointer",
+                      "cursor-pointer"
                     )}
                   >
                     <Plus className="h-4 w-4" strokeWidth={2} />
                     Upload photo
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    Images should be horizontal, at least 1280x720px, and 72 DPI
-                    (dots per inch).
+                  <span className="text-muted-foreground text-xs">
+                    Images should be horizontal, at least 1280x720px, and 72 DPI (dots per inch).
                   </span>
                 </>
               )}
@@ -247,7 +240,7 @@ export function CheckoutStep({
           <StepNumber num={2} />
           Product details
         </Label>
-        <div className="pl-8 space-y-4">
+        <div className="space-y-4 pl-8">
           <div className="space-y-2">
             <Label htmlFor="checkout-name" className="text-sm font-bold">
               Name *
@@ -275,11 +268,11 @@ export function CheckoutStep({
             </Label>
             <div
               className={cn(
-                "flex h-10 w-full items-center gap-0 rounded-xs border bg-card/90 px-2 py-5 text-base transition-[color,box-shadow,transform]",
-                "focus-within:border-ring focus-within:ring-ring/40 focus-within:ring-[3px] focus-within:bg-card",
+                "bg-card/90 flex h-10 w-full items-center gap-0 rounded-xs border px-2 py-5 text-base transition-[color,box-shadow,transform]",
+                "focus-within:border-ring focus-within:ring-ring/40 focus-within:bg-card focus-within:ring-[3px]"
               )}
             >
-              <span className="border border-primary px-3 bg-primary/20 py-1.5 rounded-full mr-1 shrink-0 select-none whitespace-nowrap text-sm">
+              <span className="border-primary bg-primary/20 mr-1 shrink-0 rounded-full border px-3 py-1.5 text-sm whitespace-nowrap select-none">
                 axiol.store/{product.username ?? "..."}/p/
               </span>
               <input
@@ -290,7 +283,7 @@ export function CheckoutStep({
                   setProductUrl(filtered);
                 }}
                 placeholder="my-product-url"
-                className="min-w-0 flex-1 border-none font-medium bg-transparent p-0 text-base outline-none placeholder:text-muted-foreground md:text-sm"
+                className="placeholder:text-muted-foreground min-w-0 flex-1 border-none bg-transparent p-0 text-base font-medium outline-none md:text-sm"
               />
             </div>
           </div>
@@ -302,7 +295,7 @@ export function CheckoutStep({
           <StepNumber num={3} />
           Set Price
         </Label>
-        <div className="pl-8 space-y-2">
+        <div className="space-y-2 pl-8">
           <Label htmlFor="checkout-name" className="text-sm font-bold">
             Price(₹) *
           </Label>
@@ -319,21 +312,19 @@ export function CheckoutStep({
           <StepNumber num={4} />
           Collect Info
         </Label>
-        <div className="pl-8 space-y-4">
+        <div className="space-y-4 pl-8">
           <div>
             <p className="text-sm font-bold">Fields</p>
-            <p className="text-xs text-muted-foreground">
-              Basic fields cannot be edited
-            </p>
+            <p className="text-muted-foreground text-xs">Basic fields cannot be edited</p>
           </div>
 
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <User className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input value="Name field" disabled className="pl-9 opacity-60" />
           </div>
 
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input value="Email field" disabled className="pl-9 opacity-60" />
           </div>
 
@@ -341,7 +332,7 @@ export function CheckoutStep({
 
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Phone className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder="Phone number"
                 className={cn("pl-9", !phoneEnabled && "opacity-60")}
@@ -355,13 +346,13 @@ export function CheckoutStep({
                 "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors",
                 phoneEnabled
                   ? "border-primary bg-primary/10 text-primary"
-                  : "border-border/60 text-muted-foreground hover:border-primary/60",
+                  : "border-border/60 text-muted-foreground hover:border-primary/60"
               )}
             >
               <Check
                 className={cn(
                   "h-4 w-4 transition-opacity",
-                  phoneEnabled ? "opacity-100" : "opacity-0",
+                  phoneEnabled ? "opacity-100" : "opacity-0"
                 )}
               />
             </button>

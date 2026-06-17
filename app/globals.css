@@ -164,17 +164,17 @@
   }
 
   .app-subtitle {
-    @apply text-sm text-muted-foreground;
+    @apply text-muted-foreground text-sm;
   }
 
   .app-panel {
     background: var(--surface-1);
-    @apply rounded-xs border border-border/70;
+    @apply border-border/70 rounded-xs border;
   }
 
   .app-panel-soft {
     background: var(--surface-2);
-    @apply rounded-2xl border border-border/70;
+    @apply border-border/70 rounded-2xl border;
   }
 
   /* Status badges — solid */
@@ -325,10 +325,7 @@
 
   /* Decorative dot grid — subtle background texture */
   .dot-grid {
-    background-image: radial-gradient(
-      oklch(0.85 0.03 250 / 0.4) 1px,
-      transparent 1px
-    );
+    background-image: radial-gradient(oklch(0.85 0.03 250 / 0.4) 1px, transparent 1px);
     background-size: 20px 20px;
   }
 

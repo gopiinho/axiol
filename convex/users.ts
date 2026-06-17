@@ -35,9 +35,19 @@ export const getByUsername = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId
-      ? await ctx.storage.getUrl(user.coverImageId)
-      : null;
+
+    let palette = user.palette;
+    let layout = user.layout;
+    if (!palette && user.theme) {
+      const { migrateOldTheme } = await import("@/lib/themes");
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        palette = migrated.palette as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        layout = migrated.layout as any;
+      }
+    }
 
     return {
       _id: user._id,
@@ -46,9 +56,10 @@ export const getByUsername = query({
       bio: user.bio,
       avatarUrl: user.avatarUrl,
       profileImageUrl,
-      coverImageUrl,
       theme: user.theme,
       accentColor: user.accentColor,
+      palette,
+      layout,
       storeName: user.storeName,
       instagramUrl: user.instagramUrl,
       youtubeUrl: user.youtubeUrl,
@@ -70,15 +81,9 @@ export const getPublicStore = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId
-      ? await ctx.storage.getUrl(user.coverImageId)
-      : null;
-
     const products = await ctx.db
       .query("products")
-      .withIndex("by_status", (q) =>
-        q.eq("createdBy", user._id).eq("status", "published"),
-      )
+      .withIndex("by_status", (q) => q.eq("createdBy", user._id).eq("status", "published"))
       .order("desc")
       .collect();
 
@@ -94,13 +99,32 @@ export const getPublicStore = query({
           ? await ctx.storage.getUrl(product.coverImageId)
           : null;
 
+        const { thumbnail: thumb } = product.config;
+        const thumbnailImageUrl = thumb?.imageId
+          ? await ctx.storage.getUrl(thumb.imageId)
+          : null;
+
         return {
           ...product,
           coverImageUrl: coverUrl,
+          thumbnailImageUrl,
           items,
         };
-      }),
+      })
     );
+
+    let palette = user.palette;
+    let layout = user.layout;
+    if (!palette && user.theme) {
+      const { migrateOldTheme } = await import("@/lib/themes");
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        palette = migrated.palette as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        layout = migrated.layout as any;
+      }
+    }
 
     return {
       user: {
@@ -108,9 +132,10 @@ export const getPublicStore = query({
         bio: user.bio,
         avatarUrl: user.avatarUrl,
         profileImageUrl,
-        coverImageUrl,
         theme: user.theme,
         accentColor: user.accentColor,
+        palette,
+        layout,
         storeName: user.storeName,
         instagramUrl: user.instagramUrl,
         youtubeUrl: user.youtubeUrl,
@@ -132,10 +157,6 @@ export const getProfile = query({
     const profileImageUrl = user.profileImageId
       ? await ctx.storage.getUrl(user.profileImageId)
       : null;
-    const coverImageUrl = user.coverImageId
-      ? await ctx.storage.getUrl(user.coverImageId)
-      : null;
-
     return {
       _id: user._id,
       email: user.email,
@@ -144,9 +165,10 @@ export const getProfile = query({
       bio: user.bio,
       avatarUrl: user.avatarUrl,
       profileImageUrl,
-      coverImageUrl,
       theme: user.theme,
       accentColor: user.accentColor,
+      palette: user.palette,
+      layout: user.layout,
       storeName: user.storeName,
       instagramUrl: user.instagramUrl,
       youtubeUrl: user.youtubeUrl,
@@ -169,11 +191,30 @@ export const updateProfile = mutation({
     theme: v.optional(v.string()),
     accentColor: v.optional(v.string()),
     storeName: v.optional(v.string()),
+    palette: v.optional(v.object({
+      bg: v.string(),
+      accent: v.string(),
+      surface: v.optional(v.string()),
+      border: v.optional(v.string()),
+      text: v.optional(v.string()),
+      textMuted: v.optional(v.string()),
+      cardBg: v.optional(v.string()),
+    })),
+    layout: v.optional(v.object({
+      preset: v.optional(v.string()),
+      borderRadius: v.optional(v.string()),
+      cardStyle: v.optional(v.string()),
+      spacing: v.optional(v.string()),
+      headerLayout: v.optional(v.string()),
+      typeScale: v.optional(v.string()),
+      backgroundPattern: v.optional(v.string()),
+    })),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
 
-    const updates: Record<string, string | undefined> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updates: Record<string, any> = {};
     if (args.name !== undefined) {
       const name = args.name.trim();
       if (name.length < 1) throw new Error("Name is required");
@@ -202,6 +243,12 @@ export const updateProfile = mutation({
     }
     if (args.storeName !== undefined) {
       updates.storeName = args.storeName.trim();
+    }
+    if (args.palette !== undefined) {
+      updates.palette = args.palette;
+    }
+    if (args.layout !== undefined) {
+      updates.layout = args.layout;
     }
 
     await ctx.db.patch(userId, updates);
@@ -233,7 +280,7 @@ export const createProfile = mutation({
     const usernameRegex = /^[a-z0-9_]{3,30}$/;
     if (!usernameRegex.test(username)) {
       throw new Error(
-        "Username must be 3-30 characters, lowercase letters, numbers, and underscores only",
+        "Username must be 3-30 characters, lowercase letters, numbers, and underscores only"
       );
     }
 
@@ -311,10 +358,6 @@ async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
   if (user?.profileImageId) {
     await ctx.storage.delete(user.profileImageId);
   }
-  if (user?.coverImageId) {
-    await ctx.storage.delete(user.coverImageId);
-  }
-
   const igConfigs = await ctx.db
     .query("instagramConfig")
     .withIndex("by_user", (q) => q.eq("userId", userId))

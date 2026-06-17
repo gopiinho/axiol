@@ -54,21 +54,18 @@ function CommentBubble({
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay, ease: [0.25, 1, 0.5, 1] }}
     >
-      <div className="h-7 w-7 shrink-0 rounded-full bg-linear-to-br from-pink to-primary" />
+      <div className="from-pink to-primary h-7 w-7 shrink-0 rounded-full bg-linear-to-br" />
       <div className="min-w-0">
-        <span className="text-xs font-bold text-foreground">{user}</span>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <span className="text-foreground text-xs font-bold">{user}</span>
+        <p className="text-muted-foreground mt-0.5 text-xs">
           {parts.map((part, i) =>
             part.toLowerCase() === keyword.toLowerCase() ? (
-              <span
-                key={i}
-                className="bg-pink-subtle text-pink font-semibold px-1 rounded"
-              >
+              <span key={i} className="bg-pink-subtle text-pink rounded px-1 font-semibold">
                 {part}
               </span>
             ) : (
               <span key={i}>{part}</span>
-            ),
+            )
           )}
         </p>
       </div>
@@ -79,25 +76,20 @@ function CommentBubble({
 function DmPreview() {
   return (
     <motion.div
-      className="rounded-2xl border border-primary/20 bg-primary/5 p-3.5 space-y-2"
+      className="border-primary/20 bg-primary/5 space-y-2 rounded-2xl border p-3.5"
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: 0.8, ease: [0.25, 1, 0.5, 1] }}
     >
-      <p className="text-[11px] font-semibold text-primary">
-        Auto-DM sent instantly
-      </p>
+      <p className="text-primary text-[11px] font-semibold">Auto-DM sent instantly</p>
       <div className="space-y-1.5">
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-muted-foreground text-[11px]">
           Hi! Here are my top picks from &quot;Summer Skincare&quot;:
         </p>
         <div className="space-y-1">
           {["Vitamin C Serum — ₹499", "SPF 50 Sunscreen — ₹349"].map((item) => (
-            <div
-              key={item}
-              className="text-[10px] text-primary/80 flex items-center gap-1"
-            >
+            <div key={item} className="text-primary/80 flex items-center gap-1 text-[10px]">
               <span>🔗</span> {item}
             </div>
           ))}
@@ -109,33 +101,33 @@ function DmPreview() {
 
 export function AutoDmShowcase() {
   return (
-    <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24">
-      <div className="w-full max-w-7xl mx-auto">
-        <div className="rounded-3xl border-2 border-border/80 bg-card/80 p-6 sm:p-8 lg:p-12 backdrop-blur-sm">
+    <section className="relative px-6 py-16 sm:px-12 sm:py-24 lg:px-20 xl:px-28">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="border-border/80 bg-card/80 rounded-3xl border-2 p-6 backdrop-blur-sm sm:p-8 lg:p-12">
           <ScrollFadeIn>
-            <div className="text-center space-y-2 mb-10 sm:mb-14">
-              <h2 className="heading-playful text-3xl sm:text-4xl lg:text-5xl text-primary">
+            <div className="mb-10 space-y-2 text-center sm:mb-14">
+              <h2 className="heading-playful text-primary text-3xl sm:text-4xl lg:text-5xl">
                 Turn Comments into Sales
               </h2>
-              <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto">
-                When followers comment a keyword on your reel, they instantly
-                get a DM with your product links. Zero manual work.
+              <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
+                When followers comment a keyword on your reel, they instantly get a DM with your
+                product links. Zero manual work.
               </p>
             </div>
           </ScrollFadeIn>
 
-          <div className="grid gap-10 lg:gap-16 lg:grid-cols-2 items-center">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
             {/* Left — Comment → DM simulation */}
-            <div className="space-y-4 max-w-sm mx-auto lg:mx-0 w-full">
+            <div className="mx-auto w-full max-w-sm space-y-4 lg:mx-0">
               {/* Instagram-style comment section */}
-              <div className="rounded-2xl border border-border bg-card/90 overflow-hidden">
-                <div className="px-3 py-2 border-b border-border/60 flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-pink" />
+              <div className="border-border bg-card/90 overflow-hidden rounded-2xl border">
+                <div className="border-border/60 flex items-center gap-2 border-b px-3 py-2">
+                  <div className="bg-pink h-2 w-2 rounded-full" />
                   <span className="text-[11px] font-semibold text-gray-500">
                     Comments on your reel
                   </span>
                 </div>
-                <div className="divide-y divide-border/40">
+                <div className="divide-border/40 divide-y">
                   {comments.map((c, i) => (
                     <CommentBubble key={c.user} {...c} delay={0.2 + i * 0.15} />
                   ))}
@@ -144,7 +136,7 @@ export function AutoDmShowcase() {
 
               {/* Arrow */}
               <motion.div
-                className="flex justify-center text-primary"
+                className="text-primary flex justify-center"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
@@ -163,15 +155,13 @@ export function AutoDmShowcase() {
                 <ScrollFadeIn key={b.title} delay={0.1 + i * 0.1} offset={12}>
                   <div className="flex items-start gap-4">
                     <div
-                      className={`inline-flex items-center justify-center h-11 w-11 shrink-0 rounded-xl ${b.bg} ${b.color}`}
+                      className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${b.bg} ${b.color}`}
                     >
                       <b.icon className="h-5 w-5" strokeWidth={2.5} />
                     </div>
                     <div>
                       <h3 className="text-base font-bold">{b.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        {b.desc}
-                      </p>
+                      <p className="text-muted-foreground mt-0.5 text-sm">{b.desc}</p>
                     </div>
                   </div>
                 </ScrollFadeIn>

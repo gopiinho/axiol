@@ -3,16 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  BarChart3,
-  Home,
-  LogOut,
-  Box,
-  Settings,
-  Store,
-  Zap,
-  ChevronLeft,
-} from "lucide-react";
+import { BarChart3, Home, LogOut, Box, Settings, Store, Zap, ChevronLeft } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useUser } from "@/features/auth/client/UserContext";
 import BottomNav from "@/components/BottomNav";
@@ -39,11 +30,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-export default function DashboardShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useUser();
@@ -55,8 +42,7 @@ export default function DashboardShell({
   useEffect(() => {
     const handleOpenLogout = () => setLogoutOpen(true);
     window.addEventListener("open-logout-dialog", handleOpenLogout);
-    return () =>
-      window.removeEventListener("open-logout-dialog", handleOpenLogout);
+    return () => window.removeEventListener("open-logout-dialog", handleOpenLogout);
   }, []);
 
   const handleLogout = async () => {
@@ -74,8 +60,8 @@ export default function DashboardShell({
   return (
     <div className="min-h-screen min-w-full">
       <div className="w-full">
-        <div className="grid lg:grid-cols-[260px_minmax(0,1fr)] w-full">
-          <aside className="sticky top-0 h-screen bg-sidebar border-r border-border/70 hidden lg:flex lg:flex-col overflow-y-auto">
+        <div className="grid w-full lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="bg-sidebar border-border/70 sticky top-0 hidden h-screen overflow-y-auto border-r lg:flex lg:flex-col">
             <UserProfile />
 
             <nav className="flex-1 border-0">
@@ -94,8 +80,8 @@ export default function DashboardShell({
                     className={cn(
                       "flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
                       active
-                        ? "border-l-5 border-primary bg-foreground text-primary"
-                        : "border-transparent text-foreground hover:bg-card",
+                        ? "border-primary bg-foreground text-primary border-l-5"
+                        : "text-foreground hover:bg-card border-transparent"
                     )}
                   >
                     <Icon className={cn("h-4 w-4", active && "stroke-[2.5]")} />
@@ -107,7 +93,7 @@ export default function DashboardShell({
           </aside>
 
           <section className="min-w-0">
-            <main>{children}</main>
+            <main className="pb-14 md:pb-0">{children}</main>
           </section>
         </div>
       </div>
@@ -125,9 +111,7 @@ export default function DashboardShell({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoggingOut}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
               {isLoggingOut ? "Logging out..." : "Log out"}
             </AlertDialogAction>

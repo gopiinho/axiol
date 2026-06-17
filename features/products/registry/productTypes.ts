@@ -107,7 +107,7 @@ export function getProductTypeDefinition(type: ProductTypeKey): ProductTypeDefin
 
 export function hasCapability(
   definition: ProductTypeDefinition,
-  capability: ProductCapabilityKey,
+  capability: ProductCapabilityKey
 ): boolean {
   return definition.capabilities.includes(capability);
 }

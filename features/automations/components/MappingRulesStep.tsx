@@ -30,9 +30,9 @@ export default function MappingRulesStep({
     <div className="space-y-6">
       <div>
         <h2 className="text-base font-semibold">Trigger Keywords</h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          When someone comments any of these words on your reel, they get a DM.
-          Separate with commas.
+        <p className="text-muted-foreground mt-0.5 text-sm">
+          When someone comments any of these words on your reel, they get a DM. Separate with
+          commas.
         </p>
       </div>
 
@@ -41,18 +41,14 @@ export default function MappingRulesStep({
         <Input
           id="keywords"
           value={keywordInput}
-          onChange={(event) =>
-            onKeywordInputChange(event.target.value.toLowerCase())
-          }
+          onChange={(event) => onKeywordInputChange(event.target.value.toLowerCase())}
           placeholder="link, dm, details"
         />
       </div>
 
       {keywordPresets.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">
-            Saved presets
-          </p>
+          <p className="text-muted-foreground text-xs font-medium">Saved presets</p>
           <div className="flex flex-wrap gap-2">
             {keywordPresets.map((preset) => {
               const isActive = keywordList.includes(preset);
@@ -75,21 +71,17 @@ export default function MappingRulesStep({
 
       {keywordList.length > 0 && (
         <div className="app-panel-soft p-3.5">
-          <p className="mb-2.5 text-xs font-medium text-muted-foreground">
+          <p className="text-muted-foreground mb-2.5 text-xs font-medium">
             Active keywords ({keywordList.length})
           </p>
           <div className="flex flex-wrap gap-2">
             {keywordList.map((value) => (
-              <Badge
-                key={value}
-                variant="secondary"
-                className="gap-1 rounded-full px-2.5 py-1"
-              >
+              <Badge key={value} variant="secondary" className="gap-1 rounded-full px-2.5 py-1">
                 {value}
                 <button
                   type="button"
                   onClick={() => onRemoveKeyword(value)}
-                  className="ml-0.5 rounded-full p-0.5 transition hover:bg-foreground/10"
+                  className="hover:bg-foreground/10 ml-0.5 rounded-full p-0.5 transition"
                 >
                   <X className="h-3 w-3" />
                 </button>

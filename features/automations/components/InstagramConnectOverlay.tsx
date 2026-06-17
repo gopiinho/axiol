@@ -5,15 +5,14 @@ import { Button } from "@/components/ui/button";
 
 export default function InstagramConnectOverlay() {
   return (
-    <div className="flex min-h-screen flex-col items-start justify-start px-5 py-16 lg:flex-row lg:py-28 lg:px-28">
-      <div className="flex flex-col items-center text-center lg:items-start lg:text-left lg:max-w-md">
-        <h1 className="font-(family-name:--font-space-grotesk) text-5xl font-bold tracking-tight text-foreground sm:text-7xl">
+    <div className="flex min-h-screen flex-col items-start justify-start px-5 py-16 lg:flex-row lg:px-28 lg:py-28">
+      <div className="flex flex-col items-center text-center lg:max-w-md lg:items-start lg:text-left">
+        <h1 className="text-foreground font-(family-name:--font-space-grotesk) text-5xl font-bold tracking-tight sm:text-7xl">
           Create an IG Auto-Reply
         </h1>
-        <p className="my-6 text-muted-foreground leading-relaxed max-w-md">
-          Set your engagement on autopilot! Just pick a keyword, craft your
-          message, and watch as everyone who comments your magic word gets a
-          personalized response instantly!
+        <p className="text-muted-foreground my-6 max-w-md leading-relaxed">
+          Set your engagement on autopilot! Just pick a keyword, craft your message, and watch as
+          everyone who comments your magic word gets a personalized response instantly!
         </p>
 
         <Button asChild size="lg" className="mt-8 gap-2">

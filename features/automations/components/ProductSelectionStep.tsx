@@ -30,7 +30,7 @@ export default function ProductSelectionStep({
     <div className="space-y-6">
       <div>
         <h2 className="text-base font-semibold">Choose a Product</h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-0.5 text-sm">
           Which product should followers receive in the DM?
         </p>
       </div>
@@ -39,9 +39,7 @@ export default function ProductSelectionStep({
         <Label htmlFor="product">Product</Label>
         <Select
           value={selectedProductId}
-          onValueChange={(value) =>
-            onSelectProduct(value as Id<"products">)
-          }
+          onValueChange={(value) => onSelectProduct(value as Id<"products">)}
         >
           <SelectTrigger id="product">
             <SelectValue placeholder="Choose product..." />

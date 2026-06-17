@@ -19,19 +19,17 @@ export function UserProfile() {
   const isTrial = user?.subscriptionStatus === "trial";
 
   return (
-    <div className="border-b border-border/10">
+    <div className="border-border/10 border-b">
       <DropdownMenu onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "w-full flex items-center cursor-pointer justify-between p-2 transition-all duration-300 group outline-none relative border border-transparent",
-              open
-                ? "bg-foreground border-b-transparent z-51"
-                : "bg-foreground",
+              "group relative flex w-full cursor-pointer items-center justify-between border border-transparent p-2 transition-all duration-300 outline-none",
+              open ? "bg-foreground z-51 border-b-transparent" : "bg-foreground"
             )}
           >
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="h-10 w-10 bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 border border-primary/20 overflow-hidden">
+              <div className="from-primary/20 to-primary/5 border-primary/20 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden border bg-linear-to-br">
                 {user?.profileImageUrl ? (
                   <img
                     src={user.profileImageUrl}
@@ -39,22 +37,22 @@ export function UserProfile() {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <User className="h-5 w-5 text-primary" />
+                  <User className="text-primary h-5 w-5" />
                 )}
               </div>
-              <div className="flex flex-col items-start min-w-0">
-                <span className="text-sm font-bold text-background truncate tracking-tight">
+              <div className="flex min-w-0 flex-col items-start">
+                <span className="text-background truncate text-sm font-bold tracking-tight">
                   {user?.username || "User"}
                 </span>
-                <span className="text-[10px] text-muted/80 truncate font-medium tracking-wider">
+                <span className="text-muted/80 truncate text-[10px] font-medium tracking-wider">
                   {user?.email}
                 </span>
               </div>
             </div>
             <Settings
               className={cn(
-                "h-4 w-4 text-muted-foreground transition-all duration-500 ease-in-out",
-                open ? "rotate-180 text-primary" : "group-hover:rotate-90",
+                "text-muted-foreground h-4 w-4 transition-all duration-500 ease-in-out",
+                open ? "text-primary rotate-180" : "group-hover:rotate-90"
               )}
             />
           </button>
@@ -63,22 +61,19 @@ export function UserProfile() {
         <DropdownMenuContent
           align="start"
           sideOffset={0}
-          className="w-65 p-0 bg-sidebar text-foreground shadow-xl rounded-none overflow-hidden border border-border"
+          className="bg-sidebar text-foreground border-border w-65 overflow-hidden rounded-none border p-0 shadow-xl"
         >
           <div>
-            <DropdownMenuItem
-              asChild
-              className="focus:bg-card p-0 rounded-none"
-            >
+            <DropdownMenuItem asChild className="focus:bg-card rounded-none p-0">
               <Link
                 href="/dashboard/help"
-                className="flex items-center justify-between px-3 text-foreground py-2 text-sm font-bold transition-all group cursor-pointer hover:bg-card"
+                className="text-foreground group hover:bg-card flex cursor-pointer items-center justify-between px-3 py-2 text-sm font-bold transition-all"
               >
                 <div className="flex items-center gap-2.5">
-                  <HelpCircle className="h-4 w-4 text-foreground" />
+                  <HelpCircle className="text-foreground h-4 w-4" />
                   Help Center
                 </div>
-                <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all" />
+                <ChevronRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100" />
               </Link>
             </DropdownMenuItem>
 
@@ -86,23 +81,22 @@ export function UserProfile() {
               onClick={() => {
                 window.dispatchEvent(new CustomEvent("open-logout-dialog"));
               }}
-              className="flex items-center justify-between px-3 py-2 text-sm font-bold text-foreground transition-all group cursor-pointer outline-none rounded-none hover:bg-card focus:bg-card"
+              className="text-foreground group hover:bg-card focus:bg-card flex cursor-pointer items-center justify-between rounded-none px-3 py-2 text-sm font-bold transition-all outline-none"
             >
               <div className="flex items-center gap-2.5">
-                <LogOut className="h-4 w-4 text-foreground" />
+                <LogOut className="text-foreground h-4 w-4" />
                 Log Out
               </div>
-              <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all" />
+              <ChevronRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100" />
             </DropdownMenuItem>
 
-            <div className="p-2 border-t border-border">
+            <div className="border-border border-t p-2">
               <Button
                 variant={isTrial ? "secondary" : "default"}
                 className={cn(
-                  "w-full h-11 text-[10px] font-semibold transition-all duration-200 rounded-none shadow-none",
-                  !isTrial &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90 border-none",
-                  isTrial && "border border-border hover:bg-muted",
+                  "h-11 w-full rounded-none text-[10px] font-semibold shadow-none transition-all duration-200",
+                  !isTrial && "bg-primary text-primary-foreground hover:bg-primary/90 border-none",
+                  isTrial && "border-border hover:bg-muted border"
                 )}
               >
                 {isTrial ? "Trial Status: Active" : "Upgrade to Pro"}

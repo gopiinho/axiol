@@ -2,16 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
-import {
-  Bold,
-  Italic,
-  Strikethrough,
-  Link,
-  List,
-  ListOrdered,
-  Check,
-  X,
-} from "lucide-react";
+import { Bold, Italic, Strikethrough, Link, List, ListOrdered, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -42,7 +33,7 @@ function ToolbarButton({ onClick, active, label, children }: ToolbarButtonProps)
         "flex h-7 w-7 items-center justify-center rounded-xs transition-colors",
         active
           ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
       )}
     >
       {children}
@@ -70,8 +61,7 @@ export function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class:
-          "prose prose-sm max-w-none min-h-[80px] px-3 py-2 outline-none",
+        class: "prose prose-sm max-w-none min-h-[80px] px-3 py-2 outline-none",
       },
     },
     immediatelyRender: false,
@@ -131,7 +121,7 @@ export function RichTextEditor({
         cancelInput();
       }
     },
-    [saveLink, cancelInput],
+    [saveLink, cancelInput]
   );
 
   if (!editor) {
@@ -141,12 +131,12 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xs border border-border/60 bg-card/90 transition-[color,box-shadow,transform]",
-        "focus-within:border-ring focus-within:ring-ring/40 focus-within:ring-[3px] focus-within:bg-card",
-        className,
+        "border-border/60 bg-card/90 overflow-hidden rounded-xs border transition-[color,box-shadow,transform]",
+        "focus-within:border-ring focus-within:ring-ring/40 focus-within:bg-card focus-within:ring-[3px]",
+        className
       )}
     >
-      <div className="flex items-center gap-0.5 border-b border-border/60 px-2 py-1.5">
+      <div className="border-border/60 flex items-center gap-0.5 border-b px-2 py-1.5">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive("bold")}
@@ -171,7 +161,7 @@ export function RichTextEditor({
           <Strikethrough className="h-3.5 w-3.5" />
         </ToolbarButton>
 
-        <div className="mx-0.5 h-4 w-px bg-border/60" />
+        <div className="bg-border/60 mx-0.5 h-4 w-px" />
 
         <ToolbarButton
           onClick={openLinkInput}
@@ -199,10 +189,8 @@ export function RichTextEditor({
       </div>
 
       {activeInput && (
-        <div className="flex items-center gap-2 border-b border-border/60 px-3 py-2">
-          <Label className="shrink-0 text-xs font-semibold text-muted-foreground">
-            Link URL
-          </Label>
+        <div className="border-border/60 flex items-center gap-2 border-b px-3 py-2">
+          <Label className="text-muted-foreground shrink-0 text-xs font-semibold">Link URL</Label>
           <Input
             ref={inputRef}
             value={inputValue}
@@ -214,7 +202,7 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={saveLink}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xs bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            className="bg-primary/10 text-primary hover:bg-primary/20 flex h-7 w-7 shrink-0 items-center justify-center rounded-xs transition-colors"
             aria-label="Save"
           >
             <Check className="h-3.5 w-3.5" />
@@ -222,7 +210,7 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={cancelInput}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-xs transition-colors"
             aria-label="Cancel"
           >
             <X className="h-3.5 w-3.5" />

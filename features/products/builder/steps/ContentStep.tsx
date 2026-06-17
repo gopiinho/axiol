@@ -12,18 +12,11 @@ import {
 } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { Id } from "@/convex/_generated/dataModel";
-import {
-  Loader2,
-  Upload,
-  X,
-  Plus,
-  Link,
-  Pencil,
-} from "lucide-react";
+import { Loader2, Upload, X, Plus, Link, Pencil } from "lucide-react";
 
 function StepNumber({ num }: { num: number }) {
   return (
-    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/30 text-foreground text-xs font-bold mr-2 shrink-0">
+    <span className="bg-primary/30 text-foreground mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
       {num}
     </span>
   );
@@ -74,11 +67,7 @@ function readSaved(product: ProductStepComponentProps["product"]): {
   return { file: null, url: "", mode: "upload", productName: "" };
 }
 
-export function ContentStep({
-  productId,
-  product,
-  onRegisterSave,
-}: ProductStepComponentProps) {
+export function ContentStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
   const saved = readSaved(product);
 
   const [mode, setMode] = useState<Mode>(saved.mode);
@@ -197,11 +186,11 @@ export function ContentStep({
           Upload your Digital Product
         </Label>
 
-        <div className="pl-8 space-y-4">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="space-y-1 min-w-0">
+        <div className="space-y-4 pl-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 space-y-1">
               <p className="text-sm font-bold">Digital Product *</p>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <p className="text-muted-foreground max-w-sm text-xs">
                 {mode === "upload"
                   ? "Axiol will send these files automatically to your customer upon purchase!"
                   : "Customers will be redirected to this URL after purchase."}
@@ -211,7 +200,7 @@ export function ContentStep({
             <div
               role="tablist"
               aria-label="Delivery method"
-              className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/50 p-1 shrink-0"
+              className="border-border/60 bg-card/50 inline-flex shrink-0 items-center gap-1 rounded-full border p-1"
             >
               <button
                 type="button"
@@ -223,13 +212,11 @@ export function ContentStep({
                   setErrors({});
                 }}
                 className={cn(
-                  "inline-flex items-center cursor-pointer px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200",
+                  "inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
                   mode === "upload"
                     ? "bg-primary text-foreground"
                     : "text-muted-foreground hover:text-foreground",
-                  !!externalUrl.trim() &&
-                    mode === "url" &&
-                    "opacity-40 cursor-not-allowed",
+                  !!externalUrl.trim() && mode === "url" && "cursor-not-allowed opacity-40"
                 )}
               >
                 Upload File
@@ -244,13 +231,11 @@ export function ContentStep({
                   setErrors({});
                 }}
                 className={cn(
-                  "inline-flex items-center cursor-pointer px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200",
+                  "inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
                   mode === "url"
                     ? "bg-primary text-foreground"
                     : "text-muted-foreground hover:text-foreground",
-                  !!storedFile &&
-                    mode === "upload" &&
-                    "opacity-40 cursor-not-allowed",
+                  !!storedFile && mode === "upload" && "cursor-not-allowed opacity-40"
                 )}
               >
                 Redirect to URL
@@ -260,20 +245,20 @@ export function ContentStep({
 
           {mode === "upload" ? (
             storedFile ? (
-              <div className="flex items-center justify-between p-4 border border-border/60 rounded-xs bg-card/50">
+              <div className="border-border/60 bg-card/50 flex items-center justify-between rounded-xs border p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xs bg-primary/10">
-                    <Upload className="h-5 w-5 text-primary" />
+                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-xs">
+                    <Upload className="text-primary h-5 w-5" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">{storedFile.fileName}</p>
-                    <p className="text-xs text-muted-foreground">Uploaded</p>
+                    <p className="text-muted-foreground text-xs">Uploaded</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={handleRemoveFile}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-xs transition-colors"
+                  className="text-destructive hover:bg-destructive/10 flex items-center gap-1 rounded-xs px-3 py-1.5 text-xs font-medium transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                   Remove
@@ -289,38 +274,34 @@ export function ContentStep({
                 onDrop={handleDrop}
                 className={cn(
                   "flex w-full flex-col items-center justify-center gap-3 rounded-xs",
-                  "border border-dashed border-border/70 bg-card/50 p-5 h-[136px]",
+                  "border-border/70 bg-card/50 h-[136px] border border-dashed p-5",
                   "transition-colors duration-200",
                   isDragging && "border-primary bg-primary/5",
                   uploading && "opacity-60",
-                  errors.file && "border-destructive",
+                  errors.file && "border-destructive"
                 )}
               >
                 {uploading ? (
                   <>
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                    <span className="text-xs text-muted-foreground">
-                      Uploading...
-                    </span>
+                    <Loader2 className="text-primary h-5 w-5 animate-spin" />
+                    <span className="text-muted-foreground text-xs">Uploading...</span>
                   </>
                 ) : (
                   <>
                     <span
                       onClick={() => !uploading && inputRef.current?.click()}
                       className={cn(
-                        "inline-flex items-center gap-2 rounded-xs bg-card px-4 py-2",
-                        "text-sm font-semibold text-foreground shadow-sm border border-border/60",
+                        "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
+                        "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
                         "transition-all duration-200",
                         "hover:bg-accent hover:text-accent-foreground",
-                        "cursor-pointer",
+                        "cursor-pointer"
                       )}
                     >
                       <Plus className="h-4 w-4" strokeWidth={2} />
                       Upload
                     </span>
-                    <span className="text-xs text-muted-foreground">
-                      Drag Your File(s) Here
-                    </span>
+                    <span className="text-muted-foreground text-xs">Drag Your File(s) Here</span>
                   </>
                 )}
               </div>
@@ -328,7 +309,7 @@ export function ContentStep({
           ) : (
             <div className="space-y-4">
               <div className="relative">
-                <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Link className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   id="content-url"
                   value={externalUrl}
@@ -342,7 +323,7 @@ export function ContentStep({
                 />
               </div>
               <div className="relative">
-                <Pencil className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Pencil className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   value={productName}
                   onChange={(e) => {
@@ -357,22 +338,11 @@ export function ContentStep({
             </div>
           )}
 
-          <input
-            ref={inputRef}
-            type="file"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
+          <input ref={inputRef} type="file" onChange={handleFileSelect} className="hidden" />
 
-          {errors.file && (
-            <p className="text-sm text-destructive">{errors.file}</p>
-          )}
-          {errors.url && (
-            <p className="text-sm text-destructive">{errors.url}</p>
-          )}
-          {errors.productName && (
-            <p className="text-sm text-destructive">{errors.productName}</p>
-          )}
+          {errors.file && <p className="text-destructive text-sm">{errors.file}</p>}
+          {errors.url && <p className="text-destructive text-sm">{errors.url}</p>}
+          {errors.productName && <p className="text-destructive text-sm">{errors.productName}</p>}
         </div>
       </div>
     </div>

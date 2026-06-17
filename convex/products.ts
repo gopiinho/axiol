@@ -9,7 +9,11 @@ import {
   contentConfigValidator,
   productTypeValidator,
 } from "./productConfig";
-import { PRODUCT_TYPES, getProductTypeDefinition, hasCapability } from "../features/products/registry/productTypes";
+import {
+  PRODUCT_TYPES,
+  getProductTypeDefinition,
+  hasCapability,
+} from "../features/products/registry/productTypes";
 import type { ProductTypeKey } from "../features/products/registry/productTypes";
 import { getDefaultConfig } from "../features/products/registry/defaults";
 import { validateProductForPublish } from "../features/products/registry/publishValidation";
@@ -20,7 +24,7 @@ async function ensureUniqueProductUrl(
   ctx: ProductCtx,
   userId: Id<"users">,
   productUrl: string,
-  excludeProductId?: Id<"products">,
+  excludeProductId?: Id<"products">
 ): Promise<string> {
   const existing = await ctx.db
     .query("products")
@@ -76,11 +80,9 @@ export const listByUser = query({
           : null;
         const config = product.config;
         const thumb = config.thumbnail;
-        const thumbnailImageUrl = thumb?.imageId
-          ? await ctx.storage.getUrl(thumb.imageId)
-          : null;
+        const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
         return { ...product, itemCount: items.length, coverImageUrl, thumbnailImageUrl };
-      }),
+      })
     );
 
     return withItemCounts;
@@ -103,9 +105,7 @@ export const getById = query({
 
     const config = product.config;
     const thumb = config.thumbnail;
-    const thumbnailImageUrl = thumb?.imageId
-      ? await ctx.storage.getUrl(thumb.imageId)
-      : null;
+    const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
 
     return {
       ...product,
@@ -123,7 +123,7 @@ export const getByProductUrl = query({
     return await ctx.db
       .query("products")
       .withIndex("by_productUrl", (q) =>
-        q.eq("productUrl", args.productUrl).eq("createdBy", userId),
+        q.eq("productUrl", args.productUrl).eq("createdBy", userId)
       )
       .first();
   },
@@ -175,7 +175,6 @@ export const update = mutation({
     name: v.string(),
     productUrl: v.optional(v.string()),
     description: v.optional(v.string()),
-    coverImageId: v.optional(v.id("_storage")),
     price: v.optional(v.string()),
     type: productTypeValidator,
     automationEnabled: v.optional(v.boolean()),
@@ -199,7 +198,6 @@ export const update = mutation({
       name: validated.name,
       productUrl,
       description: validated.description,
-      coverImageId: args.coverImageId,
       price: validated.price,
       type: validated.type as "affiliate" | "digital",
       automationEnabled: validated.automationEnabled,
@@ -220,7 +218,10 @@ export const updateThumbnailConfig = mutation({
       throw new Error("This product type does not support thumbnail configuration.");
     }
     await ctx.db.patch(args.productId, {
-      config: { ...product.config, thumbnail: { ...(product.config.thumbnail ?? {}), ...args.config } },
+      config: {
+        ...product.config,
+        thumbnail: { ...(product.config.thumbnail ?? {}), ...args.config },
+      },
       updatedAt: Date.now(),
     });
   },
@@ -238,7 +239,10 @@ export const updateCheckoutConfig = mutation({
       throw new Error("This product type does not support checkout configuration.");
     }
     await ctx.db.patch(args.productId, {
-      config: { ...product.config, checkout: { ...(product.config.checkout ?? {}), ...args.config } },
+      config: {
+        ...product.config,
+        checkout: { ...(product.config.checkout ?? {}), ...args.config },
+      },
       updatedAt: Date.now(),
     });
   },
@@ -298,9 +302,7 @@ export const publish = mutation({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const validation = validateProductForPublish(product as any, definition);
     if (!validation.valid) {
-      throw new Error(
-        validation.errors.map((e) => e.message).join("\n"),
-      );
+      throw new Error(validation.errors.map((e) => e.message).join("\n"));
     }
 
     const validated = validateProductInput({
@@ -367,7 +369,7 @@ export const getPublicProduct = query({
     const product = await ctx.db
       .query("products")
       .withIndex("by_productUrl", (q) =>
-        q.eq("productUrl", args.productUrl).eq("createdBy", user._id),
+        q.eq("productUrl", args.productUrl).eq("createdBy", user._id)
       )
       .first();
 
@@ -379,13 +381,16 @@ export const getPublicProduct = query({
       .order("asc")
       .collect();
 
-    const coverUrl = product.coverImageId
-      ? await ctx.storage.getUrl(product.coverImageId)
-      : null;
+    const coverUrl = product.coverImageId ? await ctx.storage.getUrl(product.coverImageId) : null;
+
+    const checkoutCoverId = product.config.checkout?.coverImageId;
+    const checkoutCoverUrl = checkoutCoverId ? await ctx.storage.getUrl(checkoutCoverId) : null;
 
     const { thumbnail: thumb } = product.config;
-    const thumbnailUrl = thumb?.imageId
-      ? await ctx.storage.getUrl(thumb.imageId)
+    const thumbnailUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
+
+    const profileImageUrl = user.profileImageId
+      ? await ctx.storage.getUrl(user.profileImageId)
       : null;
 
     const definition = PRODUCT_TYPES[product.type] ?? null;
@@ -393,8 +398,21 @@ export const getPublicProduct = query({
     return {
       product: {
         ...product,
-        coverImageUrl: coverUrl,
+        coverImageUrl: checkoutCoverUrl || coverUrl,
         thumbnailImageUrl: thumbnailUrl,
+      },
+      creator: {
+        name: user.name,
+        storeName: user.storeName,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        profileImageUrl,
+        palette: user.palette,
+        layout: user.layout,
+        theme: user.theme,
+        instagramUrl: user.instagramUrl,
+        youtubeUrl: user.youtubeUrl,
+        websiteUrl: user.websiteUrl,
       },
       items,
       definition: definition

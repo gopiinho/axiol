@@ -64,12 +64,12 @@ function ProductMobileCard({
   return (
     <>
       <div
-        className="app-panel p-4 cursor-pointer active:bg-muted/30"
+        className="app-panel active:bg-muted/30 cursor-pointer p-4"
         onClick={() => router.push(`/dashboard/products/${product._id}/edit`)}
       >
         <div className="flex items-start gap-3">
           {product.thumbnailImageUrl || product.coverImageUrl ? (
-            <div className="h-10 w-10 rounded-xs bg-muted overflow-hidden shrink-0">
+            <div className="bg-muted h-10 w-10 shrink-0 overflow-hidden rounded-xs">
               <img
                 src={product.thumbnailImageUrl ?? product.coverImageUrl ?? ""}
                 alt=""
@@ -77,21 +77,18 @@ function ProductMobileCard({
               />
             </div>
           ) : (
-            <div className="h-10 w-10 rounded-xs bg-muted flex items-center justify-center shrink-0">
-              <span className="text-xs text-muted-foreground font-medium">
+            <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-xs">
+              <span className="text-muted-foreground text-xs font-medium">
                 {product.name.charAt(0).toUpperCase()}
               </span>
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate">{product.name}</p>
-            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{product.name}</p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-1">
-                <ProductTypeIcon
-                  type={product.type}
-                  className="h-3 w-3 text-muted-foreground"
-                />
-                <span className="text-xs text-muted-foreground">
+                <ProductTypeIcon type={product.type} className="text-muted-foreground h-3 w-3" />
+                <span className="text-muted-foreground text-xs">
                   {getProductTypeLabel(product.type)}
                 </span>
               </div>
@@ -102,20 +99,14 @@ function ProductMobileCard({
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-1">
-              <span
-                className={cn(
-                  "text-[11px] font-semibold",
-                  statusStyles[product.status],
-                )}
-              >
-                {product.status.charAt(0).toUpperCase() +
-                  product.status.slice(1)}
+            <div className="mt-1 flex items-center gap-2">
+              <span className={cn("text-[11px] font-semibold", statusStyles[product.status])}>
+                {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
               </span>
               {product.automationEnabled && (
                 <>
                   <span className="text-muted-foreground/40">·</span>
-                  <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                  <Badge variant="default" className="px-1.5 py-0 text-[10px]">
                     Auto
                   </Badge>
                 </>
@@ -127,7 +118,7 @@ function ProductMobileCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 shrink-0 -mr-1"
+                className="-mr-1 h-8 w-8 shrink-0"
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreHorizontal className="h-4 w-4" />
@@ -136,9 +127,7 @@ function ProductMobileCard({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
               <DropdownMenuItem
-                onClick={() =>
-                  router.push(`/dashboard/products/${product._id}/edit`)
-                }
+                onClick={() => router.push(`/dashboard/products/${product._id}/edit`)}
               >
                 <Edit className="h-4 w-4" />
                 Edit
@@ -147,11 +136,7 @@ function ProductMobileCard({
                 <DropdownMenuItem
                   onClick={() => onPublish(product._id)}
                   disabled={needsItems}
-                  title={
-                    needsItems
-                      ? "Add at least one item before publishing"
-                      : undefined
-                  }
+                  title={needsItems ? "Add at least one item before publishing" : undefined}
                 >
                   <Send className="h-4 w-4" />
                   Publish
@@ -164,10 +149,7 @@ function ProductMobileCard({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setDeleteOpen(true)}
-              >
+              <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
                 <Trash2 className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -179,12 +161,10 @@ function ProductMobileCard({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Delete &ldquo;{product.name}&rdquo;?
-            </AlertDialogTitle>
+            <AlertDialogTitle>Delete &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this product and all its items. This
-              action cannot be undone.
+              This will permanently delete this product and all its items. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -244,7 +224,7 @@ export function ProductTable() {
   return (
     <div className="p-5 sm:p-8">
       {/* Mobile cards */}
-      <div className="sm:hidden flex flex-col gap-3">
+      <div className="flex flex-col gap-3 sm:hidden">
         {products.map((product) => (
           <ProductMobileCard
             key={product._id}
@@ -257,26 +237,26 @@ export function ProductTable() {
       </div>
 
       {/* Desktop table */}
-      <div className="hidden sm:block bg-card rounded-xs overflow-hidden">
+      <div className="bg-card hidden overflow-hidden rounded-xs sm:block">
         <table className="w-full">
           <thead className="bg-muted/50">
-            <tr className="border-b border-border/50">
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <tr className="border-border/50 border-b">
+              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
                 Product
               </th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">
+              <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:table-cell">
                 Type
               </th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
+              <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase md:table-cell">
                 Price
               </th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
                 Status
               </th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
+              <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase lg:table-cell">
                 Automation
               </th>
-              <th className="py-3 px-4 w-10" />
+              <th className="w-10 px-4 py-3" />
             </tr>
           </thead>
           <tbody>

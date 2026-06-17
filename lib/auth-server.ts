@@ -15,7 +15,6 @@ export const {
   convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL!,
   jwtCache: {
     enabled: true,
-    isAuthError: (error) =>
-      error instanceof Error && (error as { status?: number }).status === 401,
+    isAuthError: (error) => error instanceof Error && (error as { status?: number }).status === 401,
   },
 });

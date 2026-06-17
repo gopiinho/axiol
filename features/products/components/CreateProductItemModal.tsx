@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import type { Id } from "@/convex/_generated/dataModel";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,11 +22,7 @@ interface CreateProductItemModalProps {
   onClose: () => void;
 }
 
-export function CreateProductItemModal({
-  productId,
-  open,
-  onClose,
-}: CreateProductItemModalProps) {
+export function CreateProductItemModal({ productId, open, onClose }: CreateProductItemModalProps) {
   const [affiliateLink, setAffiliateLink] = useState("");
   const [price, setPrice] = useState("");
   const [platform, setPlatform] = useState("amazon");
@@ -67,7 +58,7 @@ export function CreateProductItemModal({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Couldn't add this item. Check your connection and try again.",
+          : "Couldn't add this item. Check your connection and try again."
       );
     } finally {
       setLoading(false);
@@ -76,11 +67,8 @@ export function CreateProductItemModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent
-        showCloseButton={false}
-        className="sm:max-w-lg gap-0 overflow-hidden p-0"
-      >
-        <DialogHeader className="flex-row items-center justify-between border-b border-border/70 px-5 py-3.5">
+      <DialogContent showCloseButton={false} className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <DialogHeader className="border-border/70 flex-row items-center justify-between border-b px-5 py-3.5">
           <DialogTitle className="text-lg font-semibold">Add item</DialogTitle>
           <div className="flex items-center gap-2">
             <Button
@@ -104,11 +92,7 @@ export function CreateProductItemModal({
           </div>
         </DialogHeader>
 
-        <form
-          id="add-item-form"
-          onSubmit={handleSubmit}
-          className="space-y-4 px-5 py-5"
-        >
+        <form id="add-item-form" onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
           {errorMessage && (
             <Alert variant="destructive">
               <AlertTitle>Couldn&apos;t add item</AlertTitle>
@@ -187,9 +171,7 @@ export function CreateProductItemModal({
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://example.com/image.jpg"
             />
-            <p className="text-xs text-muted-foreground">
-              Optional: add a product image URL.
-            </p>
+            <p className="text-muted-foreground text-xs">Optional: add a product image URL.</p>
           </div>
         </form>
       </DialogContent>

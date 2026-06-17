@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Id } from "@/convex/_generated/dataModel";
-import { useReelMappings, useToggleMapping, useDeleteMapping } from "@/features/automations/hooks/useAutomations";
+import {
+  useReelMappings,
+  useToggleMapping,
+  useDeleteMapping,
+} from "@/features/automations/hooks/useAutomations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +29,14 @@ function KeywordBadges({ keyword }: { keyword: string }) {
   return (
     <div className="flex flex-wrap gap-1">
       {shown.map((kw) => (
-        <Badge key={kw} variant="secondary" className="text-[10px]">{kw.trim()}</Badge>
+        <Badge key={kw} variant="secondary" className="text-[10px]">
+          {kw.trim()}
+        </Badge>
       ))}
       {remaining > 0 && (
-        <Badge variant="outline" className="text-[10px]">+{remaining}</Badge>
+        <Badge variant="outline" className="text-[10px]">
+          +{remaining}
+        </Badge>
       )}
     </div>
   );
@@ -59,13 +67,13 @@ export default function AutomationsList() {
           alt="Reel"
           width={40}
           height={40}
-          className="h-10 w-10 rounded object-cover shrink-0"
+          className="h-10 w-10 shrink-0 rounded object-cover"
         />
       );
     }
     return (
-      <div className="h-10 w-10 rounded bg-muted flex items-center justify-center shrink-0">
-        <span className="text-xs text-muted-foreground font-medium">
+      <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded">
+        <span className="text-muted-foreground text-xs font-medium">
           {(mapping.caption ?? "R").charAt(0).toUpperCase()}
         </span>
       </div>
@@ -76,49 +84,63 @@ export default function AutomationsList() {
     return (
       <div className="p-5 sm:p-8">
         {/* Mobile skeleton */}
-        <div className="sm:hidden flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:hidden">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="app-panel p-4">
               <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded bg-muted animate-pulse shrink-0" />
+                <div className="bg-muted h-10 w-10 shrink-0 animate-pulse rounded" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-32 rounded bg-muted animate-pulse" />
-                  <div className="h-3 w-24 rounded bg-muted animate-pulse" />
+                  <div className="bg-muted h-4 w-32 animate-pulse rounded" />
+                  <div className="bg-muted h-3 w-24 animate-pulse rounded" />
                   <div className="flex gap-1">
-                    <div className="h-4 w-12 rounded bg-muted animate-pulse" />
-                    <div className="h-4 w-12 rounded bg-muted animate-pulse" />
+                    <div className="bg-muted h-4 w-12 animate-pulse rounded" />
+                    <div className="bg-muted h-4 w-12 animate-pulse rounded" />
                   </div>
                 </div>
-                <div className="h-8 w-8 rounded bg-muted animate-pulse shrink-0" />
+                <div className="bg-muted h-8 w-8 shrink-0 animate-pulse rounded" />
               </div>
             </div>
           ))}
         </div>
         {/* Desktop skeleton */}
-        <div className="hidden sm:block app-panel overflow-hidden">
+        <div className="app-panel hidden overflow-hidden sm:block">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border/50">
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Reel</th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Product</th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Keywords</th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="py-3 px-4 w-10" />
+              <tr className="border-border/50 border-b">
+                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                  Reel
+                </th>
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:table-cell">
+                  Product
+                </th>
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase md:table-cell">
+                  Keywords
+                </th>
+                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                  Status
+                </th>
+                <th className="w-10 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {Array.from({ length: 3 }).map((_, i) => (
-                <tr key={i} className="border-b border-border/50">
-                  <td className="py-3.5 px-4">
+                <tr key={i} className="border-border/50 border-b">
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded bg-muted animate-pulse" />
-                      <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+                      <div className="bg-muted h-10 w-10 animate-pulse rounded" />
+                      <div className="bg-muted h-4 w-32 animate-pulse rounded" />
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 hidden sm:table-cell"><div className="h-4 w-24 rounded bg-muted animate-pulse" /></td>
-                  <td className="py-3.5 px-4 hidden md:table-cell"><div className="h-4 w-20 rounded bg-muted animate-pulse" /></td>
-                  <td className="py-3.5 px-4"><div className="h-5 w-14 rounded bg-muted animate-pulse" /></td>
-                  <td className="py-3.5 px-4" />
+                  <td className="hidden px-4 py-3.5 sm:table-cell">
+                    <div className="bg-muted h-4 w-24 animate-pulse rounded" />
+                  </td>
+                  <td className="hidden px-4 py-3.5 md:table-cell">
+                    <div className="bg-muted h-4 w-20 animate-pulse rounded" />
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="bg-muted h-5 w-14 animate-pulse rounded" />
+                  </td>
+                  <td className="px-4 py-3.5" />
                 </tr>
               ))}
             </tbody>
@@ -132,9 +154,9 @@ export default function AutomationsList() {
     return (
       <div className="p-5 sm:p-8">
         <div className="app-panel flex flex-col items-center py-20 text-center">
-          <MessageSquareQuote className="h-10 w-10 text-muted-foreground/30" />
+          <MessageSquareQuote className="text-muted-foreground/30 h-10 w-10" />
           <p className="mt-4 text-sm font-medium">No automations yet</p>
-          <p className="mt-1 max-w-xs text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-1 max-w-xs text-xs">
             Create your first automation to auto-DM followers who comment on your reels.
           </p>
         </div>
@@ -146,55 +168,61 @@ export default function AutomationsList() {
     <>
       <div className="p-5 sm:p-8">
         {/* Mobile cards */}
-        <div className="sm:hidden flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:hidden">
           {mappings.map((mapping) => {
             const keywords = mapping.keyword.split(",");
             return (
               <div key={mapping._id} className="app-panel p-4">
                 <div className="flex items-start gap-3">
                   {reelThumbnail(mapping)}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
                       {mapping.caption ?? "Untitled reel"}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {mapping.productName}
-                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">{mapping.productName}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {keywords.slice(0, 3).map((kw) => (
-                        <Badge key={kw} variant="secondary" className="text-[10px]">{kw.trim()}</Badge>
+                        <Badge key={kw} variant="secondary" className="text-[10px]">
+                          {kw.trim()}
+                        </Badge>
                       ))}
                       {keywords.length > 3 && (
-                        <Badge variant="outline" className="text-[10px]">+{keywords.length - 3}</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          +{keywords.length - 3}
+                        </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="mt-2 flex items-center gap-2">
                       <Badge
                         variant={mapping.active ? "default" : "outline"}
                         className="text-[11px] font-semibold"
                       >
                         {mapping.active ? "Active" : "Draft"}
                       </Badge>
-                      <div className="flex items-center gap-0.5 ml-auto">
+                      <div className="ml-auto flex items-center gap-0.5">
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
                           title={mapping.active ? "Deactivate" : "Activate"}
                           onClick={async () => {
-                            try { await toggleMapping({ id: mapping._id }); } catch { /* silent */ }
+                            try {
+                              await toggleMapping({ id: mapping._id });
+                            } catch {
+                              /* silent */
+                            }
                           }}
                         >
                           {mapping.active ? (
-                            <ToggleRight className="h-4 w-4 text-primary" />
+                            <ToggleRight className="text-primary h-4 w-4" />
                           ) : (
-                            <ToggleLeft className="h-4 w-4 text-muted-foreground" />
+                            <ToggleLeft className="text-muted-foreground h-4 w-4" />
                           )}
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          className="text-muted-foreground hover:text-destructive h-7 w-7"
                           title="Delete"
                           onClick={() => setDeleteTarget(mapping._id)}
                         >
@@ -210,42 +238,48 @@ export default function AutomationsList() {
         </div>
 
         {/* Desktop table */}
-        <div className="hidden sm:block app-panel overflow-hidden">
+        <div className="app-panel hidden overflow-hidden sm:block">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border/50">
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Reel</th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Product</th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Keywords</th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="py-3 px-4 w-10" />
+              <tr className="border-border/50 border-b">
+                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                  Reel
+                </th>
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:table-cell">
+                  Product
+                </th>
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase md:table-cell">
+                  Keywords
+                </th>
+                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                  Status
+                </th>
+                <th className="w-10 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {mappings.map((mapping) => (
                 <tr
                   key={mapping._id}
-                  className="border-b border-border/50 transition-colors hover:bg-muted/30"
+                  className="border-border/50 hover:bg-muted/30 border-b transition-colors"
                 >
-                  <td className="py-3.5 px-4">
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
                       {reelThumbnail(mapping)}
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate max-w-40">
+                        <p className="max-w-40 truncate text-sm font-medium">
                           {mapping.caption ?? "Untitled reel"}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 hidden sm:table-cell">
-                    <span className="text-sm text-muted-foreground">
-                      {mapping.productName}
-                    </span>
+                  <td className="hidden px-4 py-3.5 sm:table-cell">
+                    <span className="text-muted-foreground text-sm">{mapping.productName}</span>
                   </td>
-                  <td className="py-3.5 px-4 hidden md:table-cell">
+                  <td className="hidden px-4 py-3.5 md:table-cell">
                     <KeywordBadges keyword={mapping.keyword} />
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="px-4 py-3.5">
                     <Badge
                       variant={mapping.active ? "default" : "outline"}
                       className="text-[11px] font-semibold"
@@ -253,7 +287,7 @@ export default function AutomationsList() {
                       {mapping.active ? "Active" : "Draft"}
                     </Badge>
                   </td>
-                  <td className="py-3.5 px-4 text-right">
+                  <td className="px-4 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button
                         variant="ghost"
@@ -261,19 +295,23 @@ export default function AutomationsList() {
                         className="h-8 w-8"
                         title={mapping.active ? "Deactivate" : "Activate"}
                         onClick={async () => {
-                          try { await toggleMapping({ id: mapping._id }); } catch { /* silent */ }
+                          try {
+                            await toggleMapping({ id: mapping._id });
+                          } catch {
+                            /* silent */
+                          }
                         }}
                       >
                         {mapping.active ? (
-                          <ToggleRight className="h-4 w-4 text-primary" />
+                          <ToggleRight className="text-primary h-4 w-4" />
                         ) : (
-                          <ToggleLeft className="h-4 w-4 text-muted-foreground" />
+                          <ToggleLeft className="text-muted-foreground h-4 w-4" />
                         )}
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive h-8 w-8"
                         title="Delete"
                         onClick={() => setDeleteTarget(mapping._id)}
                       >

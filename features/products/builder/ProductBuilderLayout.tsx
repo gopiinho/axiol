@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-  ProductTypeDefinition,
-  ProductStepKey,
-} from "../registry/productTypes";
+import type { ProductTypeDefinition, ProductStepKey } from "../registry/productTypes";
 import { STEP_LABELS } from "../registry/steps";
 import { Rows2, RectangleHorizontal, SlidersVertical, FileUp } from "lucide-react";
 
@@ -22,6 +19,7 @@ interface ProductBuilderLayoutProps {
   totalSteps: number;
   onStepClick: (index: number) => void;
   children: React.ReactNode;
+  preview?: React.ReactNode;
 }
 
 export function ProductBuilderLayout({
@@ -32,10 +30,11 @@ export function ProductBuilderLayout({
   totalSteps: _totalSteps,
   onStepClick,
   children,
+  preview,
 }: ProductBuilderLayoutProps) {
   return (
     <div>
-      <div className="flex items-center gap-4 mb-6 overflow-x-auto pb-2">
+      <div className="mb-6 flex items-center gap-4 overflow-x-auto pb-2">
         {definition.steps.map((stepKey, index) => {
           const isActive = index === currentStepIndex;
           const isCompleted = index < currentStepIndex;
@@ -45,7 +44,7 @@ export function ProductBuilderLayout({
               key={stepKey}
               type="button"
               onClick={() => onStepClick(index)}
-              className={`flex items-center gap-2 px-3 py-3 text-xs font-medium cursor-pointer rounded-full whitespace-nowrap transition-colors ${
+              className={`flex cursor-pointer items-center gap-2 rounded-full px-3 py-3 text-xs font-medium whitespace-nowrap transition-colors ${
                 isActive
                   ? "bg-foreground text-background"
                   : isCompleted
@@ -60,7 +59,14 @@ export function ProductBuilderLayout({
         })}
       </div>
 
-      <div>{children}</div>
+      <div className="lg:flex lg:gap-8 lg:items-start">
+        <div className="lg:flex-1 lg:min-w-0">{children}</div>
+        {preview && (
+          <div className="hidden lg:block lg:w-[380px] lg:shrink-0">
+            <div className="sticky top-8">{preview}</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

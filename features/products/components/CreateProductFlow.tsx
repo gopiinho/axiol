@@ -52,7 +52,7 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : "Couldn't create this product. Check your connection and try again.",
+            : "Couldn't create this product. Check your connection and try again."
         );
       } finally {
         setLoading(false);
@@ -93,17 +93,18 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(
               }
             }}
           />
-          {errors.name && (
-            <p className="text-sm text-destructive">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
         </section>
 
         <section className="grid gap-3">
           <Label className="font-bold">Products</Label>
-          <ProductTypeSelector value={type} onChange={(v) => {
-            setType(v);
-            setErrors((prev) => ({ ...prev, price: undefined }));
-          }} />
+          <ProductTypeSelector
+            value={type}
+            onChange={(v) => {
+              setType(v);
+              setErrors((prev) => ({ ...prev, price: undefined }));
+            }}
+          />
         </section>
 
         {showPrice && (
@@ -120,12 +121,10 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(
               }}
               aria-invalid={!!errors.price}
             />
-            {errors.price && (
-              <p className="text-sm text-destructive">{errors.price}</p>
-            )}
+            {errors.price && <p className="text-destructive text-sm">{errors.price}</p>}
           </section>
         )}
       </div>
     );
-  },
+  }
 );

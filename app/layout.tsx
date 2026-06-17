@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 
 const manrope = Manrope({
   weight: ["400", "500", "600", "700", "800"],
@@ -34,9 +33,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} antialiased relative w-full min-h-screen`}
+        className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} relative min-h-screen w-full antialiased`}
       >
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        {children}
       </body>
     </html>
   );

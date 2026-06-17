@@ -1,9 +1,5 @@
 import type { Doc } from "@/convex/_generated/dataModel";
-import type {
-  ProductTypeDefinition,
-  ProductCapabilityKey,
-  ProductStepKey,
-} from "./productTypes";
+import type { ProductTypeDefinition, ProductCapabilityKey, ProductStepKey } from "./productTypes";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -19,7 +15,7 @@ export type PublishValidationResult =
 
 type PublishValidator = (
   product: Doc<"products">,
-  definition: ProductTypeDefinition,
+  definition: ProductTypeDefinition
 ) => Array<{ step: ProductStepKey; message: string }>;
 
 const thumbnailValidator: PublishValidator = (product) => {
@@ -145,7 +141,7 @@ const PUBLISH_VALIDATORS: Partial<Record<ProductCapabilityKey, PublishValidator>
 
 export function validateProductForPublish(
   product: Doc<"products">,
-  definition: ProductTypeDefinition,
+  definition: ProductTypeDefinition
 ): PublishValidationResult {
   const errors: Array<{ step: ProductStepKey; message: string }> = [];
 
@@ -156,9 +152,7 @@ export function validateProductForPublish(
     }
   }
 
-  return errors.length === 0
-    ? { valid: true }
-    : { valid: false, errors };
+  return errors.length === 0 ? { valid: true } : { valid: false, errors };
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */

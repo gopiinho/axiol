@@ -18,7 +18,7 @@ export const checkoutConfigValidator = v.object({
       type: v.union(v.literal("text"), v.literal("email"), v.literal("phone")),
       required: v.boolean(),
       enabled: v.boolean(),
-    }),
+    })
   ),
 });
 
@@ -35,17 +35,13 @@ export const contentConfigValidator = v.union(
   }),
   v.object({
     mode: v.literal("none"),
-  }),
+  })
 );
 
 export const availabilityConfigValidator = v.object({
   scheduleId: v.optional(v.id("availabilitySchedules")),
   durationMinutes: v.number(),
-  meetingLocationType: v.union(
-    v.literal("google_meet"),
-    v.literal("zoom"),
-    v.literal("custom"),
-  ),
+  meetingLocationType: v.union(v.literal("google_meet"), v.literal("zoom"), v.literal("custom")),
   customLocation: v.optional(v.string()),
   maxAttendees: v.number(),
   bookWithinDays: v.number(),
@@ -64,11 +60,11 @@ export const formConfigValidator = v.object({
         v.literal("phone"),
         v.literal("textarea"),
         v.literal("file"),
-        v.literal("url"),
+        v.literal("url")
       ),
       required: v.boolean(),
       order: v.number(),
-    }),
+    })
   ),
 });
 
@@ -80,7 +76,4 @@ export const productConfigValidator = v.object({
   form: v.optional(formConfigValidator),
 });
 
-export const productTypeValidator = v.union(
-  v.literal("affiliate"),
-  v.literal("digital"),
-);
+export const productTypeValidator = v.union(v.literal("affiliate"), v.literal("digital"));

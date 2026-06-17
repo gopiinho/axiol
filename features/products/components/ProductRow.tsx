@@ -43,12 +43,7 @@ const statusStyles: Record<string, string> = {
   archived: "text-slate-500",
 };
 
-export function ProductRow({
-  product,
-  onPublish,
-  onArchive,
-  onDelete,
-}: ProductRowProps) {
+export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductRowProps) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -61,13 +56,13 @@ export function ProductRow({
   return (
     <>
       <tr
-        className="group border-b border-border/50 transition-colors hover:bg-muted/30 cursor-pointer"
+        className="group border-border/50 hover:bg-muted/30 cursor-pointer border-b transition-colors"
         onClick={handleClick}
       >
-        <td className="py-3.5 px-4">
+        <td className="px-4 py-3.5">
           <div className="flex items-center gap-3">
             {product.thumbnailImageUrl || product.coverImageUrl ? (
-              <div className="h-10 w-10 rounded-xs bg-muted overflow-hidden shrink-0">
+              <div className="bg-muted h-10 w-10 shrink-0 overflow-hidden rounded-xs">
                 <img
                   src={product.thumbnailImageUrl ?? product.coverImageUrl ?? ""}
                   alt=""
@@ -75,58 +70,47 @@ export function ProductRow({
                 />
               </div>
             ) : (
-              <div className="h-10 w-10 rounded-xs bg-muted flex items-center justify-center shrink-0">
-                <span className="text-xs text-muted-foreground font-medium">
+              <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-xs">
+                <span className="text-muted-foreground text-xs font-medium">
                   {product.name.charAt(0).toUpperCase()}
                 </span>
               </div>
             )}
             <div>
-              <p className="font-semibold text-sm">{product.name}</p>
+              <p className="text-sm font-semibold">{product.name}</p>
             </div>
           </div>
         </td>
-        <td className="py-3.5 px-4 hidden sm:table-cell">
+        <td className="hidden px-4 py-3.5 sm:table-cell">
           <div className="flex items-center gap-1.5">
-            <ProductTypeIcon
-              type={product.type}
-              className="h-3.5 w-3.5 text-muted-foreground"
-            />
-            <span className="text-xs capitalize text-muted-foreground">
+            <ProductTypeIcon type={product.type} className="text-muted-foreground h-3.5 w-3.5" />
+            <span className="text-muted-foreground text-xs capitalize">
               {getProductTypeLabel(product.type)}
             </span>
           </div>
         </td>
-        <td className="py-3.5 px-4 hidden md:table-cell">
+        <td className="hidden px-4 py-3.5 md:table-cell">
           {product.price ? (
             <span className="text-sm font-medium">₹{product.price}</span>
           ) : (
-            <span className="text-xs text-muted-foreground">—</span>
+            <span className="text-muted-foreground text-xs">—</span>
           )}
         </td>
-        <td className="py-3.5 px-4">
-          <span
-            className={cn(
-              "text-[11px] font-semibold",
-              statusStyles[product.status],
-            )}
-          >
+        <td className="px-4 py-3.5">
+          <span className={cn("text-[11px] font-semibold", statusStyles[product.status])}>
             {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
           </span>
         </td>
-        <td className="py-3.5 px-4 hidden lg:table-cell">
+        <td className="hidden px-4 py-3.5 lg:table-cell">
           {product.automationEnabled ? (
             <Badge variant="default" className="text-[11px]">
               Auto
             </Badge>
           ) : (
-            <span className="text-xs text-muted-foreground">—</span>
+            <span className="text-muted-foreground text-xs">—</span>
           )}
         </td>
-        <td
-          className="py-3.5 px-4 text-right"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <td className="px-4 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -143,11 +127,7 @@ export function ProductRow({
                 <DropdownMenuItem
                   onClick={() => onPublish(product._id)}
                   disabled={needsItems}
-                  title={
-                    needsItems
-                      ? "Add at least one item before publishing"
-                      : undefined
-                  }
+                  title={needsItems ? "Add at least one item before publishing" : undefined}
                 >
                   <Send className="h-4 w-4" />
                   Publish
@@ -160,10 +140,7 @@ export function ProductRow({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setDeleteOpen(true)}
-              >
+              <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
                 <Trash2 className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -175,12 +152,10 @@ export function ProductRow({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Delete &ldquo;{product.name}&rdquo;?
-            </AlertDialogTitle>
+            <AlertDialogTitle>Delete &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this product and all its items. This
-              action cannot be undone.
+              This will permanently delete this product and all its items. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

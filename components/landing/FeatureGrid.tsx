@@ -1,14 +1,7 @@
 "use client";
 
 import { ScrollFadeIn } from "@/components/motion/ScrollFadeIn";
-import {
-  BarChart3,
-  Palette,
-  Shield,
-  Smartphone,
-  Timer,
-  Hash,
-} from "lucide-react";
+import { BarChart3, Palette, Shield, Smartphone, Timer, Hash } from "lucide-react";
 
 const features = [
   {
@@ -57,14 +50,14 @@ const features = [
 
 export function FeatureGrid() {
   return (
-    <section className="relative px-6 sm:px-12 lg:px-20 xl:px-28 py-16 sm:py-24">
-      <div className="w-full max-w-7xl mx-auto">
+    <section className="relative px-6 py-16 sm:px-12 sm:py-24 lg:px-20 xl:px-28">
+      <div className="mx-auto w-full max-w-7xl">
         <ScrollFadeIn>
-          <div className="text-center space-y-2 mb-10 sm:mb-14">
-            <h2 className="heading-playful text-3xl sm:text-4xl text-primary">
+          <div className="mb-10 space-y-2 text-center sm:mb-14">
+            <h2 className="heading-playful text-primary text-3xl sm:text-4xl">
               Everything you need to grow
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Built for creators who want to monetize smarter
             </p>
           </div>
@@ -73,16 +66,14 @@ export function FeatureGrid() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => (
             <ScrollFadeIn key={f.title} delay={i * 0.08} offset={12}>
-              <div className="rounded-2xl border border-border/80 bg-card/80 backdrop-blur-sm p-5 sm:p-6 space-y-3">
+              <div className="border-border/80 bg-card/80 space-y-3 rounded-2xl border p-5 backdrop-blur-sm sm:p-6">
                 <div
-                  className={`inline-flex items-center justify-center h-11 w-11 rounded-xl ${f.bg} ${f.color}`}
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${f.bg} ${f.color}`}
                 >
                   <f.icon className="h-5 w-5" strokeWidth={2.5} />
                 </div>
                 <h3 className="text-base font-bold">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {f.desc}
-                </p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
               </div>
             </ScrollFadeIn>
           ))}

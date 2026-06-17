@@ -81,12 +81,11 @@ export function ImageUpload({
   const displayUrl = preview ?? currentImageUrl;
 
   return (
-    <div className={cn("relative group", className)}>
+    <div className={cn("group relative", className)}>
       <div
         className={cn(
-          "relative overflow-hidden border-2 border-dashed border-border/70 bg-secondary/30 cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg active:scale-[0.98]",
-          displayUrl &&
-            "border-solid border-transparent hover:border-primary/30",
+          "border-border/70 bg-secondary/30 hover:border-primary/50 relative cursor-pointer overflow-hidden border-2 border-dashed transition-all duration-300 hover:shadow-lg active:scale-[0.98]",
+          displayUrl && "hover:border-primary/30 border-solid border-transparent"
         )}
         style={{ aspectRatio }}
         onClick={() => !uploading && inputRef.current?.click()}
@@ -109,7 +108,7 @@ export function ImageUpload({
               className="h-full w-full object-cover transition-transform duration-300"
             />
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-muted-foreground bg-secondary/20">
+            <div className="text-muted-foreground bg-secondary/20 flex h-full w-full flex-col items-center justify-center gap-1.5">
               {placeholder ?? (
                 <>
                   <Upload className="h-5 w-5" />
@@ -123,7 +122,7 @@ export function ImageUpload({
         {/* Hover Overlay */}
         {!uploading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/50">
-            <div className="flex flex-col items-center gap-2 opacity-0 transition-all duration-500 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0">
+            <div className="flex translate-y-4 flex-col items-center gap-2 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
               <div className="flex h-12 w-12 items-center justify-center text-white transition-transform duration-200 active:scale-95">
                 <Upload className="h-6 w-6" />
               </div>
@@ -132,15 +131,15 @@ export function ImageUpload({
         )}
 
         {uploading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-md transition-all duration-300">
+          <div className="bg-background/60 absolute inset-0 z-20 flex items-center justify-center backdrop-blur-md transition-all duration-300">
             <div className="flex flex-col items-center gap-3">
               <div className="relative">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Loader2 className="text-primary h-8 w-8 animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
+                  <div className="bg-primary h-1.5 w-1.5 animate-ping rounded-full" />
                 </div>
               </div>
-              <span className="text-xs font-semibold text-foreground animate-pulse tracking-wide">
+              <span className="text-foreground animate-pulse text-xs font-semibold tracking-wide">
                 Uploading...
               </span>
             </div>
@@ -156,18 +155,14 @@ export function ImageUpload({
             setPreview(null);
             onRemove();
           }}
-          className="absolute -right-2 -top-2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-background border border-border text-muted-foreground shadow-md backdrop-blur-md transition-all hover:bg-destructive hover:text-white hover:border-destructive active:scale-90"
+          className="bg-background border-border text-muted-foreground hover:bg-destructive hover:border-destructive absolute -top-2 -right-2 z-30 flex h-7 w-7 items-center justify-center rounded-full border shadow-md backdrop-blur-md transition-all hover:text-white active:scale-90"
           aria-label="Remove image"
         >
           <X className="h-4 w-4" />
         </button>
       )}
 
-      {error && (
-        <p className="mt-2 text-xs font-medium text-destructive text-center">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-destructive mt-2 text-center text-xs font-medium">{error}</p>}
 
       <input
         ref={inputRef}

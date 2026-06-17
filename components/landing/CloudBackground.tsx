@@ -13,11 +13,7 @@ interface CloudConfig {
 }
 
 const CloudIcon = () => (
-  <svg
-    viewBox="0 0 600 320"
-    className="w-full h-full"
-    preserveAspectRatio="xMidYMid meet"
-  >
+  <svg viewBox="0 0 600 320" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
     <path
       d="
         M 120 260 
@@ -95,7 +91,7 @@ export const CloudBackground = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
       {clouds.map((cloud) => (
         <motion.div
           key={cloud.id}

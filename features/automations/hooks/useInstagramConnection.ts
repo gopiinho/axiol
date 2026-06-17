@@ -31,7 +31,7 @@ function mapIntegrationStatus(
         tokenExpiresAt?: number;
       }
     | undefined,
-  config: { tokenExpiresAt: number } | null | undefined,
+  config: { tokenExpiresAt: number } | null | undefined
 ): InstagramConnection {
   if (config === undefined) {
     return emptyConnection("loading");
@@ -73,9 +73,7 @@ function mapIntegrationStatus(
   };
 }
 
-function integrationStatusToLegacy(
-  status: string,
-): InstagramStatus {
+function integrationStatusToLegacy(status: string): InstagramStatus {
   switch (status) {
     case "connected":
       return "connected";
@@ -109,13 +107,13 @@ export function useInstagramConnection(): InstagramConnection {
 
   const connection = useMemo(
     () => mapIntegrationStatus(integration, config),
-    [integration, config],
+    [integration, config]
   );
 
   return (
     useCachedQueryResult(
       "instagramConnection",
-      connection.status !== "loading" ? connection : undefined,
+      connection.status !== "loading" ? connection : undefined
     ) ?? connection
   );
 }

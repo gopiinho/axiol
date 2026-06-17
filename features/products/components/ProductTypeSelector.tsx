@@ -39,10 +39,7 @@ interface ProductTypeSelectorProps {
   onChange: (value: string) => void;
 }
 
-export function ProductTypeSelector({
-  value,
-  onChange,
-}: ProductTypeSelectorProps) {
+export function ProductTypeSelector({ value, onChange }: ProductTypeSelectorProps) {
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       {TYPES.map((type) => {
@@ -54,27 +51,22 @@ export function ProductTypeSelector({
             disabled={type.comingSoon}
             onClick={() => onChange(type.value)}
             className={cn(
-              "relative flex flex-col gap-2 p-4 border rounded-xs text-left transition-all duration-200",
-              type.comingSoon && "opacity-40 cursor-not-allowed",
-              !type.comingSoon &&
-                "cursor-pointer hover:border-primary/50 hover:shadow-xs",
-              selected
-                ? "bg-foreground text-background "
-                : "bg-card border-border",
+              "relative flex flex-col gap-2 rounded-xs border p-4 text-left transition-all duration-200",
+              type.comingSoon && "cursor-not-allowed opacity-40",
+              !type.comingSoon && "hover:border-primary/50 cursor-pointer hover:shadow-xs",
+              selected ? "bg-foreground text-background" : "bg-card border-border"
             )}
           >
             {type.comingSoon && (
-              <span className="absolute top-2 right-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="text-muted-foreground absolute top-2 right-2 flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase">
                 <Lock className="h-3 w-3" />
                 Soon
               </span>
             )}
             <div
               className={cn(
-                "flex items-center justify-center w-9 h-9 rounded-xs",
-                selected
-                  ? "bg-primary text-foreground"
-                  : "bg-muted text-muted-foreground",
+                "flex h-9 w-9 items-center justify-center rounded-xs",
+                selected ? "bg-primary text-foreground" : "bg-muted text-muted-foreground"
               )}
             >
               {type.icon}
@@ -83,8 +75,8 @@ export function ProductTypeSelector({
               <p className="font-bold">{type.label}</p>
               <p
                 className={cn(
-                  "text-xs mt-0.5",
-                  selected ? "text-card/70" : "text-muted-foreground",
+                  "mt-0.5 text-xs",
+                  selected ? "text-card/70" : "text-muted-foreground"
                 )}
               >
                 {type.description}

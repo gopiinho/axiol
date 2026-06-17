@@ -6,7 +6,7 @@ const crons = cronJobs();
 crons.daily(
   "refresh expiring instagram tokens",
   { hourUTC: 3, minuteUTC: 0 },
-  internal.instagram.refreshExpiring,
+  internal.instagram.refreshExpiring
 );
 
 export default crons;

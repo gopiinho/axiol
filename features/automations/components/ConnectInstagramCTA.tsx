@@ -9,16 +9,11 @@ interface ConnectInstagramCTAProps {
   className?: string;
 }
 
-export default function ConnectInstagramCTA({
-  status,
-  className,
-}: ConnectInstagramCTAProps) {
+export default function ConnectInstagramCTA({ status, className }: ConnectInstagramCTAProps) {
   if (status === "loading") {
     return (
-      <div
-        className={`flex items-center justify-center py-12 ${className ?? ""}`}
-      >
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-pink-500" />
+      <div className={`flex items-center justify-center py-12 ${className ?? ""}`}>
+        <div className="border-muted h-8 w-8 animate-spin rounded-full border-4 border-t-pink-500" />
       </div>
     );
   }
@@ -27,9 +22,7 @@ export default function ConnectInstagramCTA({
   const isNotConnected = status === "not_connected";
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-4 py-16 ${className ?? ""}`}
-    >
+    <div className={`flex flex-col items-center justify-center gap-4 py-16 ${className ?? ""}`}>
       <div className="space-y-1 text-center">
         <h3 className="text-lg font-semibold">
           {isExpired
@@ -38,7 +31,7 @@ export default function ConnectInstagramCTA({
               ? "Connect Instagram"
               : "Instagram Connection Issue"}
         </h3>
-        <p className="max-w-sm text-sm text-muted-foreground">
+        <p className="text-muted-foreground max-w-sm text-sm">
           {isExpired
             ? "Your Instagram session expired. Reconnect to keep auto-DMs running."
             : isNotConnected
