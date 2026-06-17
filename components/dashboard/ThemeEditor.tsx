@@ -12,6 +12,7 @@ type ThemeEditorProps = {
   layout: LayoutConfig;
   onLayoutChange: (l: LayoutConfig) => void;
   onSave: () => void;
+  onCancel?: () => void;
   saving: boolean;
   dirty: boolean;
 };
@@ -22,6 +23,7 @@ export function ThemeEditor({
   layout,
   onLayoutChange,
   onSave,
+  onCancel,
   saving,
   dirty,
 }: ThemeEditorProps) {
@@ -36,9 +38,14 @@ export function ThemeEditor({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Edit Design</h2>
-        <Button size="sm" onClick={onSave} disabled={saving || !dirty}>
-          {saving ? "Saving..." : "Save Theme"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={onCancel} disabled={!dirty}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={onSave} disabled={saving || !dirty}>
+            {saving ? "Saving..." : "Save Theme"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-0 lg:grid-cols-2 lg:divide-x lg:divide-border/60">

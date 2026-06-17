@@ -54,8 +54,27 @@ export default function MyStorePage() {
 
   const [activeTab, setActiveTab] = useState<"store" | "design">("store");
 
-  const [palette, setPalette] = useState<PaletteConfig>(DEFAULT_PALETTE);
-  const [layout, setLayout] = useState<LayoutConfig>(DEFAULT_LAYOUT);
+  const [palette, setPalette] = useState<PaletteConfig>(() => {
+    if (user?.palette && typeof user.palette === "object") {
+      const p = user.palette as unknown as PaletteConfig;
+      if (p.bg && p.accent) return resolvePalette(p);
+    }
+    if (user?.theme) {
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated?.palette) return migrated.palette;
+    }
+    return DEFAULT_PALETTE;
+  });
+
+  const [layout, setLayout] = useState<LayoutConfig>(() => {
+    const storedLayout = user?.layout as LayoutConfig | undefined;
+    if (storedLayout) return storedLayout;
+    if (user?.theme) {
+      const migrated = migrateOldTheme(user.theme);
+      if (migrated?.layout) return migrated.layout;
+    }
+    return DEFAULT_LAYOUT;
+  });
 
   const themeInitialized = useRef(false);
 
@@ -92,6 +111,24 @@ export default function MyStorePage() {
     setLayout(l);
     setThemeDirty(true);
   }, []);
+
+  const handleThemeCancel = useCallback(() => {
+    const storedPalette = user?.palette as PaletteConfig | undefined;
+    if (storedPalette?.bg && storedPalette?.accent) {
+      setPalette(resolvePalette(storedPalette));
+    } else {
+      setPalette(DEFAULT_PALETTE);
+    }
+
+    const storedLayout = user?.layout as LayoutConfig | undefined;
+    if (storedLayout) {
+      setLayout(storedLayout);
+    } else {
+      setLayout(DEFAULT_LAYOUT);
+    }
+
+    setThemeDirty(false);
+  }, [user]);
 
   if (!user) return null;
 
@@ -313,6 +350,7 @@ export default function MyStorePage() {
                 layout={layout}
                 onLayoutChange={handleLayoutChange}
                 onSave={handleThemeSave}
+                onCancel={handleThemeCancel}
                 saving={themeSaving}
                 dirty={themeDirty}
               />
