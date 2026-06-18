@@ -57,8 +57,6 @@ function CreateAutomationWizard() {
   const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
   const [keywordInput, setKeywordInput] = useState("link");
   const [keywordPresets, setKeywordPresets] = useState<string[]>(DEFAULT_KEYWORD_PRESETS);
-  const [maxItemsInDM, setMaxItemsInDM] = useState(10);
-  const [includeWebsiteLink, setIncludeWebsiteLink] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [reelsLoading, setReelsLoading] = useState(true);
   const [reelsError, setReelsError] = useState<string | null>(null);
@@ -81,8 +79,7 @@ function CreateAutomationWizard() {
   const keywordList = useMemo(() => parseKeywords(keywordInput), [keywordInput]);
   const keywordNormalized = useMemo(() => keywordList.join(","), [keywordList]);
   const keywordValid = keywordList.length > 0;
-  const maxItemsValid = Number.isInteger(maxItemsInDM) && maxItemsInDM >= 1 && maxItemsInDM <= 20;
-  const canPreview = Boolean(selectedProductId) && maxItemsValid;
+  const canPreview = Boolean(selectedProductId);
 
   useEffect(() => {
     if (!canPreview) {
@@ -100,8 +97,6 @@ function CreateAutomationWizard() {
       void convex
         .query(api.instagram.generateDMMessage, {
           productId: selectedProductId as Id<"products">,
-          maxItems: maxItemsInDM,
-          includeWebsiteLink,
           triggerType: "comment",
         })
         .then((result) => {
@@ -125,7 +120,7 @@ function CreateAutomationWizard() {
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [convex, canPreview, selectedProductId, maxItemsInDM, includeWebsiteLink]);
+  }, [convex, canPreview, selectedProductId]);
 
   const stepMeta = useMemo(
     () => [
@@ -229,7 +224,7 @@ function CreateAutomationWizard() {
   }, [loadReels]);
 
   const handleSave = async () => {
-    if (!selectedReel || !selectedProductId || !keywordValid || !maxItemsValid) {
+    if (!selectedReel || !selectedProductId || !keywordValid) {
       return;
     }
 
@@ -242,8 +237,6 @@ function CreateAutomationWizard() {
         caption: selectedReel.caption,
         productId: selectedProductId,
         keyword: keywordNormalized,
-        maxItemsInDM,
-        includeWebsiteLink,
       });
 
       rememberKeywords(keywordList);
@@ -261,9 +254,9 @@ function CreateAutomationWizard() {
     if (currentStep === 2) return Boolean(selectedReel);
     if (currentStep === 3) return keywordValid;
     if (currentStep === 4)
-      return Boolean(selectedReel) && Boolean(selectedProductId) && keywordValid && maxItemsValid;
+      return Boolean(selectedReel) && Boolean(selectedProductId) && keywordValid;
     return false;
-  }, [currentStep, selectedProductId, selectedReel, keywordValid, maxItemsValid]);
+  }, [currentStep, selectedProductId, selectedReel, keywordValid]);
 
   const primaryActionDisabled = isSaving || !canContinueFromCurrentStep();
 
@@ -318,15 +311,11 @@ function CreateAutomationWizard() {
       case 4:
         return (
           <DmPreviewStep
-            maxItemsInDM={maxItemsInDM}
-            includeWebsiteLink={includeWebsiteLink}
-            maxItemsValid={maxItemsValid}
             canPreview={canPreview}
             previewLoading={previewLoading}
             previewError={previewError}
-            generatePreview={generatePreview ?? undefined}
-            onMaxItemsChange={setMaxItemsInDM}
-            onIncludeWebsiteLinkChange={setIncludeWebsiteLink}
+            previewMessage={generatePreview?.message}
+            characterCount={generatePreview?.characterCount}
           />
         );
       default:

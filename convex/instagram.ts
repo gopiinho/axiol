@@ -22,27 +22,37 @@ function assertWebhookSourceSecret(sourceSecret: string) {
 }
 
 function buildDmMessage({
+  productType,
   productName,
+  productUrl,
   items,
   maxItems,
   includeWebsiteLink,
-  productUrl,
   triggerType,
 }: {
+  productType: string;
   productName: string;
-  items: Array<{ title?: string; price?: string; affiliateLink: string }>;
-  maxItems: number;
-  includeWebsiteLink: boolean;
   productUrl: string;
-  triggerType: "comment" | "dm";
+  items?: Array<{ title?: string; price?: string; affiliateLink: string }>;
+  maxItems?: number;
+  includeWebsiteLink?: boolean;
+  triggerType?: "comment" | "dm";
 }) {
+  if (productType !== "affiliate") {
+    const message = `Hi,\n\nThanks for showing interest in "${productName}"\n\nHere is the link: ${productUrl}\n\nThank you`;
+    return { message, itemCount: 0, characterCount: message.length };
+  }
+
+  const safeItems = items ?? [];
+  const clamped = Math.min(Math.max(maxItems ?? 10, 1), 20);
+
   let message = `Hi! Check out "${productName}":\n\n`;
 
-  if (includeWebsiteLink) {
+  if (includeWebsiteLink !== false) {
     message += `🔗 View full details: ${productUrl}\n\n`;
   }
 
-  items.slice(0, maxItems).forEach((item, index) => {
+  safeItems.slice(0, clamped).forEach((item, index) => {
     message += `${index + 1}. ${item.title || "Product"}`;
     if (item.price) {
       message += ` - ₹${item.price}`;
@@ -50,10 +60,10 @@ function buildDmMessage({
     message += `\n👉 ${item.affiliateLink}\n\n`;
   });
 
-  if (items.length <= maxItems) {
-    message += `(Showing all ${items.length} items)\n\n`;
+  if (safeItems.length <= clamped) {
+    message += `(Showing all ${safeItems.length} items)\n\n`;
   } else {
-    message += `(Showing top ${maxItems} items — visit link for more)\n\n`;
+    message += `(Showing top ${clamped} items — visit link for more)\n\n`;
   }
 
   message += `💕 Thank you for your support! xoxo`;
@@ -64,7 +74,7 @@ function buildDmMessage({
 
   return {
     message,
-    itemCount: Math.min(items.length, maxItems),
+    itemCount: Math.min(safeItems.length, clamped),
     characterCount: message.length,
   };
 }
@@ -367,8 +377,6 @@ export const createReelMapping = mutation({
     caption: v.optional(v.string()),
     productId: v.id("products"),
     keyword: v.string(),
-    maxItemsInDM: v.optional(v.number()),
-    includeWebsiteLink: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
@@ -378,8 +386,6 @@ export const createReelMapping = mutation({
       thumbnailUrl: args.thumbnailUrl,
       caption: args.caption,
       keyword: args.keyword,
-      maxItemsInDM: args.maxItemsInDM,
-      includeWebsiteLink: args.includeWebsiteLink,
     });
 
     const product = await ctx.db.get(args.productId);
@@ -400,8 +406,6 @@ export const createReelMapping = mutation({
       reelUrl: validated.reelUrl,
       thumbnailUrl: validated.thumbnailUrl,
       caption: validated.caption,
-      maxItemsInDM: validated.maxItemsInDM,
-      includeWebsiteLink: validated.includeWebsiteLink,
     };
 
     if (existing) {
@@ -523,31 +527,32 @@ export const listReelMappings = query({
 export const generateDMMessage = query({
   args: {
     productId: v.id("products"),
-    maxItems: v.number(),
-    includeWebsiteLink: v.boolean(),
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
     const { user } = await requireSession(ctx);
 
-    const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
     const product = await ctx.db.get(args.productId);
     if (!product) throw new Error("Product not found");
 
-    const items = await ctx.db
-      .query("productItems")
-      .withIndex("by_product", (q) => q.eq("productId", args.productId))
-      .order("asc")
-      .take(normalizedMaxItems);
-
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+    const siteUrl = process.env.SITE_URL!;
     const productUrl = `${siteUrl}/${user.username}/p/${product.productUrl}`;
+
+    let items: Array<{ title?: string; price?: string; affiliateLink: string }> = [];
+
+    if (product.type === "affiliate") {
+      items = await ctx.db
+        .query("productItems")
+        .withIndex("by_product", (q) => q.eq("productId", args.productId))
+        .order("asc")
+        .take(10);
+    }
+
     return buildDmMessage({
+      productType: product.type,
       productName: product.name,
-      items,
-      maxItems: normalizedMaxItems,
-      includeWebsiteLink: args.includeWebsiteLink,
       productUrl,
+      items,
       triggerType: args.triggerType,
     });
   },
@@ -556,32 +561,33 @@ export const generateDMMessage = query({
 export const generateDMMessageForJob = internalQuery({
   args: {
     productId: v.id("products"),
-    maxItems: v.number(),
-    includeWebsiteLink: v.boolean(),
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
-    const normalizedMaxItems = Math.min(Math.max(args.maxItems, 1), 20);
     const product = await ctx.db.get(args.productId);
     if (!product) throw new Error("Product not found");
 
     const user = await ctx.db.get(product.createdBy);
     if (!user) throw new Error("User not found");
 
-    const items = await ctx.db
-      .query("productItems")
-      .withIndex("by_product", (q) => q.eq("productId", args.productId))
-      .order("asc")
-      .take(normalizedMaxItems);
-
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+    const siteUrl = process.env.SITE_URL!;
     const productUrl = `${siteUrl}/${user.username}/p/${product.productUrl}`;
+
+    let items: Array<{ title?: string; price?: string; affiliateLink: string }> = [];
+
+    if (product.type === "affiliate") {
+      items = await ctx.db
+        .query("productItems")
+        .withIndex("by_product", (q) => q.eq("productId", args.productId))
+        .order("asc")
+        .take(10);
+    }
+
     return buildDmMessage({
+      productType: product.type,
       productName: product.name,
-      items,
-      maxItems: normalizedMaxItems,
-      includeWebsiteLink: args.includeWebsiteLink,
       productUrl,
+      items,
       triggerType: args.triggerType,
     });
   },

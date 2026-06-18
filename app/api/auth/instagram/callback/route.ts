@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
   const clientId = process.env.DMHELPER_APP_ID!;
   const clientSecret = process.env.DMHELPER_APP_SECRET!;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!.replace(/\/+$/, "");
+  const siteUrl = process.env.SITE_URL!.replace(/\/+$/, "");
   const redirectUri = `${siteUrl}/api/auth/instagram/callback`;
   console.log("Instagram OAuth redirect_uri used for token exchange:", redirectUri);
 

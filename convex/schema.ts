@@ -221,8 +221,6 @@ export default defineSchema({
     productId: v.id("products"),
     keyword: v.string(),
     active: v.boolean(),
-    maxItemsInDM: v.number(),
-    includeWebsiteLink: v.boolean(),
     publishedAt: v.optional(v.number()),
   })
     .index("by_reel", ["reelId"])
@@ -236,8 +234,6 @@ export default defineSchema({
     username: v.string(),
     productId: v.id("products"),
     reelId: v.string(),
-    maxItemsInDM: v.number(),
-    includeWebsiteLink: v.boolean(),
     status: v.union(
       v.literal("pending"),
       v.literal("processing"),

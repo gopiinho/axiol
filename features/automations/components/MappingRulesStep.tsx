@@ -1,11 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Hash, X } from "lucide-react";
 
 interface MappingRulesStepProps {
   keywordInput: string;
@@ -36,33 +31,36 @@ export default function MappingRulesStep({
         </p>
       </div>
 
-      <div className="space-y-2.5">
-        <Label htmlFor="keywords">Keywords</Label>
-        <Input
+      <div className="relative">
+        <Hash className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+        <input
           id="keywords"
           value={keywordInput}
           onChange={(event) => onKeywordInputChange(event.target.value.toLowerCase())}
           placeholder="link, dm, details"
+          className="border-border bg-card w-full rounded-xs border py-2.5 pr-3 pl-9 text-sm outline-none transition focus:border-foreground/40"
         />
       </div>
 
       {keywordPresets.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-muted-foreground text-xs font-medium">Saved presets</p>
-          <div className="flex flex-wrap gap-2">
+        <div>
+          <p className="text-muted-foreground mb-2 text-sm font-semibold">Presets</p>
+          <div className="flex flex-wrap gap-1.5">
             {keywordPresets.map((preset) => {
               const isActive = keywordList.includes(preset);
               return (
-                <Button
+                <button
                   key={preset}
                   type="button"
-                  variant={isActive ? "default" : "outline"}
-                  size="sm"
                   onClick={() => onTogglePreset(preset)}
-                  className="h-7 rounded-full px-3 text-xs"
+                  className={`rounded-xs border px-3 py-1.5 text-sm font-medium cursor-pointer transition-all duration-200 ${
+                    isActive
+                      ? "bg-foreground text-background"
+                      : "hover:border-border border-border text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  {preset}
-                </Button>
+                  {preset.charAt(0).toUpperCase() + preset.slice(1)}
+                </button>
               );
             })}
           </div>
@@ -70,32 +68,39 @@ export default function MappingRulesStep({
       )}
 
       {keywordList.length > 0 && (
-        <div className="app-panel-soft p-3.5">
-          <p className="text-muted-foreground mb-2.5 text-xs font-medium">
+        <div>
+          <p className="text-muted-foreground mb-2 text-sm font-semibold">
             Active keywords ({keywordList.length})
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {keywordList.map((value) => (
-              <Badge key={value} variant="secondary" className="gap-1 rounded-full px-2.5 py-1">
-                {value}
+              <span
+                key={value}
+                className="bg-foreground/5 text-foreground border-border inline-flex items-center gap-2 rounded-xs border px-3 py-2 text-sm font-medium"
+              >
+                <span className="flex-1">{value.charAt(0).toUpperCase() + value.slice(1)}</span>
                 <button
                   type="button"
                   onClick={() => onRemoveKeyword(value)}
-                  className="hover:bg-foreground/10 ml-0.5 rounded-full p-0.5 transition"
+                  className="hover:bg-foreground/10 cursor-pointer rounded-xs p-0.5 transition"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-3.5 w-3.5" />
                 </button>
-              </Badge>
+              </span>
             ))}
           </div>
         </div>
       )}
 
       {!keywordValid && (
-        <Alert variant="destructive">
-          <AlertTitle>At least one keyword is required</AlertTitle>
-          <AlertDescription>Add a keyword to continue.</AlertDescription>
-        </Alert>
+        <div>
+          <p className="text-destructive mb-2 text-sm font-semibold">Warning</p>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="text-destructive inline-flex items-center text-sm font-medium">
+              At least one keyword is required!
+            </span>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -441,10 +441,21 @@ export const listForSelect = query({
       .order("desc")
       .collect();
 
-    return products.map((p) => ({
-      _id: p._id,
-      name: p.name,
-      productUrl: p.productUrl,
-    }));
+    const withImages = await Promise.all(
+      products.map(async (p) => {
+        const config = p.config;
+        const thumb = config.thumbnail;
+        const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
+        return {
+          _id: p._id,
+          name: p.name,
+          price: p.price ?? null,
+          thumbnailImageUrl,
+          productUrl: p.productUrl,
+        };
+      })
+    );
+
+    return withImages;
   },
 });

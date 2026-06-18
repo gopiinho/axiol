@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   const clientId = process.env.DMHELPER_APP_ID;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const siteUrl = process.env.SITE_URL;
   if (!clientId || !siteUrl) {
     return NextResponse.redirect(new URL("/dashboard/settings?ig_error=config", request.url));
   }
