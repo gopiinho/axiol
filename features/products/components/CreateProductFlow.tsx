@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,10 +12,11 @@ import type { ProductTypeKey } from "../registry/productTypes";
 
 export type CreateProductFlowHandle = {
   submit: () => void;
+  loading: boolean;
 };
 
-export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(
-  function CreateProductFlow(_props, ref) {
+export const CreateProductFlow = forwardRef<CreateProductFlowHandle, { onLoadingChange?: (loading: boolean) => void }>(
+  function CreateProductFlow({ onLoadingChange }, ref) {
     const router = useRouter();
     const createProduct = useCreateProduct();
 
@@ -61,7 +62,14 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(
 
     useImperativeHandle(ref, () => ({
       submit: handleSubmit,
+      get loading() {
+        return loading;
+      },
     }));
+
+    useEffect(() => {
+      onLoadingChange?.(loading);
+    }, [loading, onLoadingChange]);
 
     return (
       <div className="space-y-10">
@@ -114,9 +122,13 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle>(
             </Label>
             <Input
               id="product-price"
+              type="text"
+              inputMode="decimal"
               value={price}
               onChange={(e) => {
-                setPrice(e.target.value);
+                const val = e.target.value.replace(/[^0-9.]/g, "");
+                const formatted = val.replace(/(\..*)\./g, "$1");
+                setPrice(formatted);
                 setErrors((prev) => ({ ...prev, price: undefined }));
               }}
               aria-invalid={!!errors.price}
