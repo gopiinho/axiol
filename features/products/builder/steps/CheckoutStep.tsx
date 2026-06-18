@@ -14,6 +14,9 @@ import {
   useRemoveProductCoverImage,
 } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
+import type { CheckoutLiveState } from "@/features/products/components/cards/types";
+import { getProductTypeDefinition } from "../../registry/productTypes";
+import type { ProductTypeKey } from "../../registry/productTypes";
 import type { Id } from "@/convex/_generated/dataModel";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -27,7 +30,16 @@ function StepNumber({ num }: { num: number }) {
   );
 }
 
-export function CheckoutStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
+interface CheckoutStepProps extends ProductStepComponentProps {
+  onLiveChange?: (state: CheckoutLiveState) => void;
+}
+
+export function CheckoutStep({
+  productId,
+  product,
+  onRegisterSave,
+  onLiveChange,
+}: CheckoutStepProps) {
   const [name, setName] = useState(product.name);
   const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
@@ -142,6 +154,21 @@ export function CheckoutStep({ productId, product, onRegisterSave }: ProductStep
   useEffect(() => {
     onRegisterSave?.(handleSave);
   }, [handleSave, onRegisterSave]);
+
+  useEffect(() => {
+    const thumbConfig = product.config?.thumbnail as { buttonText?: string } | undefined;
+    const typeDef = getProductTypeDefinition(product.type as ProductTypeKey);
+    onLiveChange?.({
+      name: name.trim() || product.name,
+      description: description.trim(),
+      price: price.trim(),
+      coverImageUrl: displayCoverUrl,
+      phoneEnabled,
+      username: product.username ?? "",
+      type: product.type,
+      defaultButtonText: thumbConfig?.buttonText || typeDef.defaultButtonText,
+    });
+  }, [name, description, price, displayCoverUrl, phoneEnabled, product.name, product.username, product.type, product.config, onLiveChange]);
 
   return (
     <div className="space-y-10">

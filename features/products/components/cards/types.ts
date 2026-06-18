@@ -25,3 +25,14 @@ export type ThumbnailCardProps = {
 };
 
 export type ThumbnailStyle = "button" | "callout";
+
+export type CheckoutLiveState = {
+  name: string;
+  description: string;
+  price: string;
+  coverImageUrl: string | null;
+  phoneEnabled: boolean;
+  username: string;
+  type: string;
+  defaultButtonText: string;
+};

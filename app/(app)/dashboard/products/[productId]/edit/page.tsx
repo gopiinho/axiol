@@ -18,7 +18,7 @@ import type { ProductTypeKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
 import { STEP_COMPONENTS } from "@/features/products/builder/steps/StepRegistry";
 import { ProductStepPreview } from "@/features/products/builder/previews/ProductStepPreview";
-import type { ThumbnailLiveState } from "@/features/products/components/cards/types";
+import type { ThumbnailLiveState, CheckoutLiveState } from "@/features/products/components/cards/types";
 
 export default function EditProduct({
   params,
@@ -40,6 +40,16 @@ export default function EditProduct({
     style: "button",
     title: "",
     buttonText: "Download Now",
+  });
+  const [checkoutLiveState, setCheckoutLiveState] = useState<CheckoutLiveState>({
+    name: "",
+    description: "",
+    price: "",
+    coverImageUrl: null,
+    phoneEnabled: false,
+    username: "",
+    type: "",
+    defaultButtonText: "Get Access",
   });
   const saveFnsRef = useRef<Map<number, () => Promise<void>>>(new Map());
 
@@ -70,8 +80,25 @@ export default function EditProduct({
         imageUrl: product.thumbnailImageUrl ?? null,
         price: product.price,
       });
+      setCheckoutLiveState({
+        name: product.name,
+        description: product.description || "",
+        price: product.price || "",
+        coverImageUrl: product.coverImageUrl ?? null,
+        phoneEnabled: false,
+        username: user?.username || "",
+        type: product.type,
+        defaultButtonText: saved?.buttonText || definition.defaultButtonText,
+      });
     }
-  }, [product, definition]);
+  }, [product, definition, user?.username]);
+
+  useEffect(() => {
+    setCheckoutLiveState((prev) => ({
+      ...prev,
+      defaultButtonText: thumbnailLiveState.buttonText,
+    }));
+  }, [thumbnailLiveState.buttonText]);
 
   const handleRegisterSave = useCallback((stepIndex: number, fn: () => Promise<void>) => {
     saveFnsRef.current.set(stepIndex, fn);
@@ -208,7 +235,11 @@ export default function EditProduct({
             preview={
               <ProductStepPreview
                 stepKey={definition.steps[currentStepIndex]}
-                liveState={thumbnailLiveState}
+                liveState={
+                  definition.steps[currentStepIndex] === "checkout"
+                    ? checkoutLiveState
+                    : thumbnailLiveState
+                }
               />
             }
           >
@@ -238,7 +269,9 @@ export default function EditProduct({
                     visible={index === currentStepIndex}
                     {...(stepKey === "thumbnail"
                       ? ({ onLiveChange: setThumbnailLiveState } as Record<string, unknown>)
-                      : {})}
+                      : stepKey === "checkout"
+                        ? ({ onLiveChange: setCheckoutLiveState } as Record<string, unknown>)
+                        : {})}
                   />
                 </div>
               );
