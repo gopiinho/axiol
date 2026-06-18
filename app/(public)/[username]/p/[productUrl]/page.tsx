@@ -235,7 +235,7 @@ export default async function ProductDetailPage({
                 {product.description && (
                   <div className="max-w-2xl">
                     <div
-                      className="prose prose-sm max-w-none"
+                      className="prose prose-sm max-w-none product-description"
                       style={{ color: "var(--store-text)" }}
                       dangerouslySetInnerHTML={{ __html: product.description }}
                     />

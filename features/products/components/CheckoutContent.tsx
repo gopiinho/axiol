@@ -120,7 +120,11 @@ export function CheckoutContent({
             fontSize: "var(--store-body-size, 0.875rem)",
           }}
         >
-          <RichTextRenderer html={product.description} style={{ color: "var(--store-text)" }} />
+          <RichTextRenderer
+            html={product.description}
+            className="product-description"
+            style={{ color: "var(--store-text)" }}
+          />
         </div>
       )}
 
@@ -156,27 +160,6 @@ export function CheckoutContent({
           >
             {loading ? "Submitting..." : ctaText}
           </Button>
-        )}
-
-        {isSimplifiedForm && (
-          <div className="border-border/60 mt-12 border-t pt-6">
-            <p
-              className="text-center leading-relaxed"
-              style={{
-                color: "var(--store-text-muted)",
-                fontSize: "var(--store-body-size, 0.8125rem)",
-              }}
-            >
-              Powered by Axiol{" "}
-              <Image
-                src={heartPixel.src}
-                alt="heart"
-                width={5}
-                height={5}
-                className="inline-block h-2 w-2"
-              />
-            </p>
-          </div>
         )}
       </div>
 

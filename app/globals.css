@@ -143,6 +143,9 @@
   a {
     @apply text-foreground;
   }
+  .product-description a {
+    color: var(--store-accent);
+  }
 }
 
 @layer components {

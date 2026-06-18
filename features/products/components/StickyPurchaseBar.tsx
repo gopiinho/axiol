@@ -29,7 +29,7 @@ export function PurchaseBar({
       }}
     >
       <div
-        className="mx-auto flex w-full items-center gap-4 px-4 py-3 lg:max-w-[50%]"
+        className="mx-auto flex w-full items-center gap-4 px-4 py-3 lg:max-w-[30%]"
         style={{ padding: "var(--store-card-padding, 1rem)" }}
       >
         <div className="flex flex-col">
