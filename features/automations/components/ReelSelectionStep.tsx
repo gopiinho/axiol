@@ -93,10 +93,10 @@ export default function ReelSelectionStep({
                 type="button"
                 key={reel.id}
                 onClick={() => onSelectReel(reel)}
-                className={`group overflow-hidden rounded-2xl border-2 text-left transition-all duration-200 ${
+                className={`group overflow-hidden rounded-xs cursor-pointer border text-left transition-all duration-200 ${
                   isSelected
-                    ? "border-primary bg-primary/4 shadow-md"
-                    : "bg-card hover:border-border border-transparent hover:shadow-sm"
+                    ? "bg-foreground text-background"
+                    : "bg-card hover:border-border border-transparent"
                 }`}
               >
                 <div className="bg-muted relative aspect-4/5 overflow-hidden">
@@ -115,7 +115,7 @@ export default function ReelSelectionStep({
                   )}
                   {isSelected && (
                     <div className="bg-primary/10 absolute inset-0 flex items-center justify-center">
-                      <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full shadow">
+                      <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full">
                         <svg
                           className="h-4 w-4"
                           fill="none"
@@ -130,7 +130,7 @@ export default function ReelSelectionStep({
                   )}
                 </div>
                 <div className="space-y-1.5 p-2.5">
-                  <p className="line-clamp-2 text-xs leading-snug font-medium">{reel.caption}</p>
+                  <p className="line-clamp-2 text-xs leading-snug font-semibold">{reel.caption}</p>
                   <a
                     href={reel.url}
                     target="_blank"
@@ -138,7 +138,7 @@ export default function ReelSelectionStep({
                     className="text-primary inline-flex items-center gap-1 text-xs hover:underline"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    Open reel
+                    View reel
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>

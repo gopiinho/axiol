@@ -44,7 +44,7 @@ export default function CreateFlowHeader({
           />
 
           <div
-            className="bg-primary absolute h-px origin-left"
+            className="bg-muted-foreground/50 absolute h-px origin-left"
             style={{
               left: `calc(${interval / 2}%)`,
               width: `calc(${100 - interval}%)`,
@@ -71,11 +71,11 @@ export default function CreateFlowHeader({
               >
                 <div
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors duration-300",
+                    "flex h-10 w-10 items-center justify-center rounded-xs border text-sm font-bold transition-colors duration-300",
                     active
-                      ? "border-primary bg-primary text-primary-foreground shadow-[0_4px_14px_-3px_oklch(0.5_0.22_254/0.45)]"
+                      ? "bg-foreground text-background"
                       : completed
-                        ? "border-primary bg-primary text-primary-foreground"
+                        ? "border-primary bg-primary text-foreground"
                         : "border-border bg-background text-muted-foreground"
                   )}
                 >
