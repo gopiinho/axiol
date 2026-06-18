@@ -28,8 +28,6 @@ export const createDmJob = mutation({
     reelId: v.string(),
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
     triggerId: v.string(),
-    maxItemsInDM: v.number(),
-    includeWebsiteLink: v.boolean(),
   },
   handler: async (ctx, args) => {
     const expectedSecret = process.env.INSTAGRAM_INTERNAL_SECRET;
@@ -62,8 +60,6 @@ export const createDmJob = mutation({
       username: args.username,
       productId: args.productId,
       reelId: args.reelId,
-      maxItemsInDM: args.maxItemsInDM,
-      includeWebsiteLink: args.includeWebsiteLink,
       status: "pending",
       attemptCount: 0,
       triggerType: args.triggerType,
@@ -269,8 +265,6 @@ async function sendDM(
 
     const messageData = await ctx.runQuery(internal.instagram.generateDMMessageForJob, {
       productId: job.productId,
-      maxItems: job.maxItemsInDM,
-      includeWebsiteLink: job.includeWebsiteLink,
       triggerType: job.triggerType,
     });
 
