@@ -81,6 +81,15 @@ export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange
         productId: productId as unknown as Id<"products">,
         storageId: storageId as unknown as Id<"_storage">,
       });
+      await updateThumbnailConfig({
+        productId: productId as unknown as Id<"products">,
+        config: {
+          style,
+          title: title.trim() || product.name,
+          subtitle: subtitle.trim() || undefined,
+          buttonText: buttonText.trim() || "Download Now",
+        },
+      });
     } catch {
       setThumbnailPreview(null);
     } finally {
