@@ -217,8 +217,6 @@ async function handleCommentEvent(rawComment: unknown, webhookSecret: string) {
       reelId: mediaId,
       triggerType: "comment",
       triggerId: commentId,
-      maxItemsInDM: fullMapping?.maxItemsInDM ?? 10,
-      includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
     });
 
     await getServerConvexClient().mutation(api.instagram.logComment, {
@@ -301,8 +299,6 @@ async function handleDMEvent(rawMessage: unknown, webhookSecret: string) {
       reelId,
       triggerType: "dm",
       triggerId: messageId,
-      maxItemsInDM: fullMapping?.maxItemsInDM ?? 10,
-      includeWebsiteLink: fullMapping?.includeWebsiteLink ?? true,
     });
 
     if (jobId) {

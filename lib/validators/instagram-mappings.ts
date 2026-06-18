@@ -4,8 +4,6 @@ export interface ReelMappingInput {
   thumbnailUrl?: string;
   caption?: string;
   keyword: string;
-  maxItemsInDM?: number;
-  includeWebsiteLink?: boolean;
 }
 
 function assertHttpUrl(value: string, fieldLabel: string) {
@@ -57,18 +55,11 @@ export function validateReelMappingInput(input: ReelMappingInput) {
   const caption = input.caption?.trim() || undefined;
   const keyword = normalizeKeywordString(input.keyword);
 
-  const rawMaxItems = input.maxItemsInDM ?? 10;
-  if (!Number.isInteger(rawMaxItems) || rawMaxItems < 1 || rawMaxItems > 20) {
-    throw new Error("Max items in DM must be a whole number between 1 and 20.");
-  }
-
   return {
     reelId,
     reelUrl,
     thumbnailUrl,
     caption,
     keyword,
-    maxItemsInDM: rawMaxItems,
-    includeWebsiteLink: input.includeWebsiteLink ?? true,
   };
 }
