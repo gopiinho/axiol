@@ -85,7 +85,7 @@ export default function ReelSelectionStep({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
           {reels.map((reel) => {
             const isSelected = selectedReelId === reel.id;
             return (
@@ -93,7 +93,7 @@ export default function ReelSelectionStep({
                 type="button"
                 key={reel.id}
                 onClick={() => onSelectReel(reel)}
-                className={`group overflow-hidden rounded-xs cursor-pointer border text-left transition-all duration-200 ${
+                className={`group cursor-pointer overflow-hidden rounded-xs border text-left transition-all duration-200 ${
                   isSelected
                     ? "bg-foreground text-background"
                     : "bg-card hover:border-border border-transparent"

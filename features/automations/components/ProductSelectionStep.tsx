@@ -54,7 +54,7 @@ export default function ProductSelectionStep({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
           {products.map((product) => {
             const isSelected = selectedProductId === product._id;
             return (
@@ -62,7 +62,7 @@ export default function ProductSelectionStep({
                 type="button"
                 key={product._id}
                 onClick={() => onSelectProduct(product._id)}
-                className={`group overflow-hidden rounded-xs cursor-pointer border text-left transition-all duration-200 ${
+                className={`group cursor-pointer overflow-hidden rounded-xs border text-left transition-all duration-200 ${
                   isSelected
                     ? "bg-foreground text-background"
                     : "bg-card hover:border-border border-transparent"
@@ -73,8 +73,8 @@ export default function ProductSelectionStep({
                     <Image
                       src={product.thumbnailImageUrl}
                       alt={product.name}
-                      width={420}
-                      height={520}
+                      width={320}
+                      height={420}
                       className="h-full w-full object-cover transition duration-300"
                     />
                   ) : (
