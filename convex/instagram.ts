@@ -10,7 +10,7 @@ import {
 import { internal } from "./_generated/api";
 import { getSession } from "./security";
 import { requireSession } from "./security";
-import { validateReelMappingInput } from "../lib/validators/instagram-mappings";
+import { validateReelMappingInput, normalizeKeywordString } from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
 
 const WEBHOOK_SECRET = process.env.INSTAGRAM_INTERNAL_SECRET;
@@ -622,6 +622,22 @@ export const toggleReelMapping = mutation({
     await ctx.db.patch(args.id, {
       active: !mapping.active,
     });
+  },
+});
+
+export const updateReelMapping = mutation({
+  args: {
+    id: v.id("reelMappings"),
+    keyword: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const mapping = await ctx.db.get(args.id);
+    if (!mapping || mapping.userId !== userId) {
+      throw new Error("Mapping not found");
+    }
+    const normalized = normalizeKeywordString(args.keyword);
+    await ctx.db.patch(args.id, { keyword: normalized });
   },
 });
 
