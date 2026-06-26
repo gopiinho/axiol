@@ -20,7 +20,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, ToggleLeft, ToggleRight, MessageSquareQuote } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Trash2, Edit, Send, MoreHorizontal, MessageSquareQuote, ExternalLink } from "lucide-react";
+import EditAutomationDialog from "./EditAutomationDialog";
 
 function KeywordBadges({ keyword }: { keyword: string }) {
   const keywords = keyword.split(",");
@@ -48,6 +56,7 @@ export default function AutomationsList() {
   const deleteMapping = useDeleteMapping();
   const [deleteTarget, setDeleteTarget] = useState<Id<"reelMappings"> | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [editTarget, setEditTarget] = useState<Id<"reelMappings"> | null>(null);
 
   const handleDelete = async (id: Id<"reelMappings">) => {
     try {
@@ -56,6 +65,14 @@ export default function AutomationsList() {
     } finally {
       setDeleteTarget(null);
       setDeleteLoading(false);
+    }
+  };
+
+  const handleToggle = async (id: Id<"reelMappings">) => {
+    try {
+      await toggleMapping({ id });
+    } catch {
+      /* silent */
     }
   };
 
@@ -103,9 +120,9 @@ export default function AutomationsList() {
           ))}
         </div>
         {/* Desktop skeleton */}
-        <div className="app-panel hidden overflow-hidden sm:block">
+        <div className="bg-card hidden overflow-hidden rounded-xs sm:block">
           <table className="w-full">
-            <thead>
+            <thead className="bg-muted/50">
               <tr className="border-border/50 border-b">
                 <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
                   Reel
@@ -153,7 +170,7 @@ export default function AutomationsList() {
   if (mappings.length === 0) {
     return (
       <div className="p-5 sm:p-8">
-        <div className="app-panel flex flex-col items-center py-20 text-center">
+        <div className="bg-card rounded-xs border flex flex-col items-center py-20 text-center">
           <MessageSquareQuote className="text-muted-foreground/30 h-10 w-10" />
           <p className="mt-4 text-sm font-medium">No automations yet</p>
           <p className="text-muted-foreground mt-1 max-w-xs text-xs">
@@ -164,6 +181,8 @@ export default function AutomationsList() {
     );
   }
 
+  const resolvedMapping = mappings.find((m) => m._id === editTarget) ?? null;
+
   return (
     <>
       <div className="p-5 sm:p-8">
@@ -172,14 +191,29 @@ export default function AutomationsList() {
           {mappings.map((mapping) => {
             const keywords = mapping.keyword.split(",");
             return (
-              <div key={mapping._id} className="app-panel p-4">
+              <div
+                key={mapping._id}
+                className="app-panel cursor-pointer p-4 transition-colors hover:bg-muted/30"
+                onClick={() => setEditTarget(mapping._id)}
+              >
                 <div className="flex items-start gap-3">
                   {reelThumbnail(mapping)}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
+                    <a
+                      href={mapping.reelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-primary truncate text-sm font-medium hover:underline"
+                    >
                       {mapping.caption ?? "Untitled reel"}
-                    </p>
-                    <p className="text-muted-foreground mt-0.5 text-xs">{mapping.productName}</p>
+                      <ExternalLink className="ml-1 inline h-3 w-3" />
+                    </a>
+                    <a
+                      href={`/dashboard/products/${mapping.productId}/edit`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-muted-foreground mt-0.5 block text-xs hover:underline"
+                    >{mapping.productName}</a>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {keywords.slice(0, 3).map((kw) => (
                         <Badge key={kw} variant="secondary" className="text-[10px]">
@@ -199,35 +233,51 @@ export default function AutomationsList() {
                       >
                         {mapping.active ? "Active" : "Draft"}
                       </Badge>
-                      <div className="ml-auto flex items-center gap-0.5">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          title={mapping.active ? "Deactivate" : "Activate"}
-                          onClick={async () => {
-                            try {
-                              await toggleMapping({ id: mapping._id });
-                            } catch {
-                              /* silent */
-                            }
-                          }}
-                        >
-                          {mapping.active ? (
-                            <ToggleRight className="text-primary h-4 w-4" />
-                          ) : (
-                            <ToggleLeft className="text-muted-foreground h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive h-7 w-7"
-                          title="Delete"
-                          onClick={() => setDeleteTarget(mapping._id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <div className="ml-auto">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Actions</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditTarget(mapping._id);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggle(mapping._id);
+                              }}
+                            >
+                              <Send className="h-4 w-4" />
+                              {mapping.active ? "Unpublish" : "Publish"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteTarget(mapping._id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
@@ -238,9 +288,9 @@ export default function AutomationsList() {
         </div>
 
         {/* Desktop table */}
-        <div className="app-panel hidden overflow-hidden sm:block">
+        <div className="bg-card hidden overflow-hidden rounded-xs sm:block">
           <table className="w-full">
-            <thead>
+            <thead className="bg-muted/50">
               <tr className="border-border/50 border-b">
                 <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
                   Reel
@@ -261,20 +311,34 @@ export default function AutomationsList() {
               {mappings.map((mapping) => (
                 <tr
                   key={mapping._id}
-                  className="border-border/50 hover:bg-muted/30 border-b transition-colors"
+                  className="border-border/50 hover:bg-muted/30 cursor-pointer border-b transition-colors"
+                  onClick={() => setEditTarget(mapping._id)}
                 >
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
                       {reelThumbnail(mapping)}
                       <div className="min-w-0">
-                        <p className="max-w-40 truncate text-sm font-medium">
+                        <a
+                          href={mapping.reelUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-primary max-w-40 truncate text-sm font-medium hover:underline"
+                        >
                           {mapping.caption ?? "Untitled reel"}
-                        </p>
+                          <ExternalLink className="ml-1 inline h-3 w-3" />
+                        </a>
                       </div>
                     </div>
                   </td>
                   <td className="hidden px-4 py-3.5 sm:table-cell">
-                    <span className="text-muted-foreground text-sm">{mapping.productName}</span>
+                    <a
+                      href={`/dashboard/products/${mapping.productId}/edit`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-muted-foreground text-sm hover:underline"
+                    >
+                      {mapping.productName}
+                    </a>
                   </td>
                   <td className="hidden px-4 py-3.5 md:table-cell">
                     <KeywordBadges keyword={mapping.keyword} />
@@ -288,36 +352,50 @@ export default function AutomationsList() {
                     </Badge>
                   </td>
                   <td className="px-4 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        title={mapping.active ? "Deactivate" : "Activate"}
-                        onClick={async () => {
-                          try {
-                            await toggleMapping({ id: mapping._id });
-                          } catch {
-                            /* silent */
-                          }
-                        }}
-                      >
-                        {mapping.active ? (
-                          <ToggleRight className="text-primary h-4 w-4" />
-                        ) : (
-                          <ToggleLeft className="text-muted-foreground h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive h-8 w-8"
-                        title="Delete"
-                        onClick={() => setDeleteTarget(mapping._id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditTarget(mapping._id);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggle(mapping._id);
+                          }}
+                        >
+                          <Send className="h-4 w-4" />
+                          {mapping.active ? "Unpublish" : "Publish"}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(mapping._id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
@@ -349,6 +427,12 @@ export default function AutomationsList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EditAutomationDialog
+        mapping={resolvedMapping}
+        open={editTarget !== null}
+        onOpenChange={(open) => !open && setEditTarget(null)}
+      />
     </>
   );
 }
