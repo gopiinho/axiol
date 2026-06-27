@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -121,9 +120,10 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
         </td>
         <td className="hidden px-4 py-3.5 lg:table-cell">
           {product.automationEnabled ? (
-            <Badge variant="default" className="text-[11px]">
-              Auto
-            </Badge>
+            <span className="inline-flex items-center gap-1.5">
+              <img src="/icons/instagram-icon.svg" alt="" className="size-3.5" />
+              <span className="text-status-success-fg text-[11px] font-semibold">Active</span>
+            </span>
           ) : (
             <span className="text-muted-foreground text-xs">—</span>
           )}

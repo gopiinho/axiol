@@ -11,7 +11,6 @@ import {
 } from "../hooks/useProduct";
 import { ProductRow } from "./ProductRow";
 import { ProductTypeIcon, getProductTypeLabel } from "./ProductTypeIcon";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -124,9 +123,10 @@ function ProductMobileCard({
               {product.automationEnabled && (
                 <>
                   <span className="text-muted-foreground/40">·</span>
-                  <Badge variant="default" className="px-1.5 py-0 text-[10px]">
-                    Auto
-                  </Badge>
+                  <span className="inline-flex items-center gap-1">
+                    <img src="/icons/instagram-icon.svg" alt="" className="size-3" />
+                    <span className="text-status-success-fg text-[10px] font-semibold">Active</span>
+                  </span>
                 </>
               )}
             </div>

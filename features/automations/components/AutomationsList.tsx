@@ -205,7 +205,7 @@ export default function AutomationsList() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-primary truncate text-sm font-medium hover:underline"
+                      className="text-primary max-w-52 truncate block text-sm font-medium hover:underline"
                     >
                       {mapping.caption ?? "Untitled reel"}
                       <ExternalLink className="ml-1 inline h-3 w-3" />
@@ -324,7 +324,7 @@ export default function AutomationsList() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="text-primary max-w-40 truncate text-sm font-medium hover:underline"
+                          className="text-primary max-w-40 truncate block text-sm font-medium hover:underline"
                         >
                           {mapping.caption ?? "Untitled reel"}
                           <ExternalLink className="ml-1 inline h-3 w-3" />
