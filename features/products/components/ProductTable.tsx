@@ -41,6 +41,12 @@ const statusStyles: Record<string, string> = {
   archived: "text-slate-500",
 };
 
+const statusLabels: Record<string, string> = {
+  draft: "Unpublished",
+  published: "Published",
+  archived: "Archived",
+};
+
 function ProductMobileCard({
   product,
   onPublish,
@@ -51,6 +57,7 @@ function ProductMobileCard({
     itemCount: number;
     coverImageUrl?: string | null;
     thumbnailImageUrl?: string | null;
+    username?: string;
   };
   onPublish: (id: Id<"products">) => void;
   onArchive: (id: Id<"products">) => void;
@@ -85,6 +92,17 @@ function ProductMobileCard({
           )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{product.name}</p>
+            {product.username && product.status !== "draft" && (
+              <a
+                href={`${typeof window !== "undefined" ? window.location.origin : ""}/${product.username}/p/${product.productUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-primary truncate block text-[10px] mt-0.5 hover:underline"
+              >
+                {typeof window !== "undefined" ? window.location.host : ""}/{product.username}/p/{product.productUrl}
+              </a>
+            )}
             <div className="mt-0.5 flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-1">
                 <ProductTypeIcon type={product.type} className="text-muted-foreground h-3 w-3" />
@@ -101,7 +119,7 @@ function ProductMobileCard({
             </div>
             <div className="mt-1 flex items-center gap-2">
               <span className={cn("text-[11px] font-semibold", statusStyles[product.status])}>
-                {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                {statusLabels[product.status]}
               </span>
               {product.automationEnabled && (
                 <>

@@ -31,6 +31,7 @@ interface ProductRowProps {
     itemCount: number;
     coverImageUrl?: string | null;
     thumbnailImageUrl?: string | null;
+    username?: string;
   };
   onPublish: (id: Id<"products">) => void;
   onArchive: (id: Id<"products">) => void;
@@ -41,6 +42,12 @@ const statusStyles: Record<string, string> = {
   draft: "text-amber-700",
   published: "text-emerald-700",
   archived: "text-slate-500",
+};
+
+const statusLabels: Record<string, string> = {
+  draft: "Unpublished",
+  published: "Published",
+  archived: "Archived",
 };
 
 export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductRowProps) {
@@ -76,8 +83,19 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
                 </span>
               </div>
             )}
-            <div>
-              <p className="text-sm font-semibold">{product.name}</p>
+            <div className="min-w-0">
+              <p className="max-w-56 truncate text-sm font-semibold">{product.name}</p>
+              {product.username && product.status !== "draft" && (
+                <a
+                  href={`${typeof window !== "undefined" ? window.location.origin : ""}/${product.username}/p/${product.productUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-primary max-w-56 truncate block text-[11px] hover:underline"
+                >
+                  {typeof window !== "undefined" ? window.location.host : ""}/{product.username}/p/{product.productUrl}
+                </a>
+              )}
             </div>
           </div>
         </td>
@@ -98,7 +116,7 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
         </td>
         <td className="px-4 py-3.5">
           <span className={cn("text-[11px] font-semibold", statusStyles[product.status])}>
-            {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+            {statusLabels[product.status]}
           </span>
         </td>
         <td className="hidden px-4 py-3.5 lg:table-cell">

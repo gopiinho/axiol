@@ -61,7 +61,7 @@ async function requireProductOwner(ctx: MutationCtx | QueryCtx, productId: Id<"p
 export const listByUser = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId, user } = await requireSession(ctx);
 
     const products = await ctx.db
       .query("products")
@@ -81,7 +81,7 @@ export const listByUser = query({
         const config = product.config;
         const thumb = config.thumbnail;
         const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
-        return { ...product, itemCount: items.length, coverImageUrl, thumbnailImageUrl };
+        return { ...product, itemCount: items.length, coverImageUrl, thumbnailImageUrl, username: user.username };
       })
     );
 

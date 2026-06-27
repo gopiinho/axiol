@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Circle } from "lucide-react";
 import KeywordEditor from "./KeywordEditor";
 
 interface MappingData {
@@ -161,6 +162,26 @@ export default function EditAutomationDialog({
         </DialogHeader>
 
         <div className="px-5 py-5">
+          <div className={mapping.active
+            ? "border-l-emerald-500 bg-emerald-500/5 flex items-center gap-2.5 rounded-r-xs border-l-2 px-4 py-3 mb-5"
+            : "border-l-amber-500 bg-amber-500/5 flex items-center gap-2.5 rounded-r-xs border-l-2 px-4 py-3 mb-5"
+          }>
+            <Circle className={mapping.active
+              ? "fill-emerald-500 text-emerald-500 h-2.5 w-2.5"
+              : "fill-amber-500 text-amber-500 h-2.5 w-2.5"
+            } />
+            <div>
+              <p className="text-sm font-semibold">
+                {mapping.active ? "Active" : "Draft"}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {mapping.active
+                  ? "Auto-DM is enabled and responding to comments on this reel."
+                  : "Not sending DMs yet. Toggle the switch to activate."}
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <Label className="text-foreground text-sm font-semibold">Trigger Keywords</Label>
             <p className="text-muted-foreground text-xs">

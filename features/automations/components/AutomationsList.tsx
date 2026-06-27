@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Trash2, Edit, Send, MoreHorizontal, MessageSquareQuote, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 import EditAutomationDialog from "./EditAutomationDialog";
 
 function KeywordBadges({ keyword }: { keyword: string }) {
@@ -212,7 +213,7 @@ export default function AutomationsList() {
                     <a
                       href={`/dashboard/products/${mapping.productId}/edit`}
                       onClick={(e) => e.stopPropagation()}
-                      className="text-muted-foreground mt-0.5 block text-xs hover:underline"
+                      className="text-muted-foreground truncate mt-0.5 block text-xs hover:underline"
                     >{mapping.productName}</a>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {keywords.slice(0, 3).map((kw) => (
@@ -227,12 +228,12 @@ export default function AutomationsList() {
                       )}
                     </div>
                     <div className="mt-2 flex items-center gap-2">
-                      <Badge
-                        variant={mapping.active ? "default" : "outline"}
-                        className="text-[11px] font-semibold"
-                      >
+                      <span className={cn(
+                        "text-[11px] font-semibold",
+                        mapping.active ? "text-emerald-700" : "text-amber-700"
+                      )}>
                         {mapping.active ? "Active" : "Draft"}
-                      </Badge>
+                      </span>
                       <div className="ml-auto">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -332,24 +333,26 @@ export default function AutomationsList() {
                     </div>
                   </td>
                   <td className="hidden px-4 py-3.5 sm:table-cell">
-                    <a
-                      href={`/dashboard/products/${mapping.productId}/edit`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-muted-foreground text-sm hover:underline"
-                    >
-                      {mapping.productName}
-                    </a>
+                    <div className="max-w-[140px]">
+                      <a
+                        href={`/dashboard/products/${mapping.productId}/edit`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-muted-foreground truncate block text-sm hover:underline"
+                      >
+                        {mapping.productName}
+                      </a>
+                    </div>
                   </td>
                   <td className="hidden px-4 py-3.5 md:table-cell">
                     <KeywordBadges keyword={mapping.keyword} />
                   </td>
                   <td className="px-4 py-3.5">
-                    <Badge
-                      variant={mapping.active ? "default" : "outline"}
-                      className="text-[11px] font-semibold"
-                    >
+                    <span className={cn(
+                      "text-[11px] font-semibold",
+                      mapping.active ? "text-emerald-700" : "text-amber-700"
+                    )}>
                       {mapping.active ? "Active" : "Draft"}
-                    </Badge>
+                    </span>
                   </td>
                   <td className="px-4 py-3.5 text-right">
                     <DropdownMenu>
