@@ -4,7 +4,6 @@ import { createContext, useContext, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Image from "next/image";
 
 type UserProfile = {
   _id: string;
@@ -64,10 +63,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   if (!isReady) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-linear-to-b from-white to-gray-50">
-        <div className="animate-logo-flip relative h-16 w-16">
-          <Image src="/axiol-logo.svg" alt="Loading" fill className="object-contain" />
+      <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-8">
+        <div className="animate-spin-slow flex items-center justify-center">
+          <svg
+            viewBox="0 0 100 100"
+            className="text-pink h-[clamp(2.4rem,7.2vw,6rem)] w-[clamp(2.4rem,7.2vw,6rem)]"
+          >
+            <g stroke="currentColor" strokeWidth={8} strokeLinecap="round" fill="none">
+              <line x1={50} y1={6} x2={50} y2={94} />
+              <line x1={50} y1={6} x2={50} y2={94} transform="rotate(60 50 50)" />
+              <line x1={50} y1={6} x2={50} y2={94} transform="rotate(120 50 50)" />
+            </g>
+          </svg>
         </div>
+        <span className="text-foreground text-6xl font-extrabold select-none">LOADING...</span>
       </div>
     );
   }
