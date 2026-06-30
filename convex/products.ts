@@ -3,6 +3,7 @@ import { mutation, query, MutationCtx, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { requireSession } from "./security";
 import { validateProductInput } from "../lib/validators/products";
+import { parsePriceRupees } from "../lib/validators/price";
 import {
   thumbnailConfigValidator,
   checkoutConfigValidator,
@@ -157,6 +158,7 @@ export const create = mutation({
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
+      priceCents: parsePriceRupees(validated.price),
       type: validated.type as "affiliate" | "digital",
       status: "draft",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -199,6 +201,7 @@ export const update = mutation({
       productUrl,
       description: validated.description,
       price: validated.price,
+      priceCents: parsePriceRupees(validated.price),
       type: validated.type as "affiliate" | "digital",
       automationEnabled: validated.automationEnabled,
       updatedAt: Date.now(),
