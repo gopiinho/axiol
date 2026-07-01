@@ -56,7 +56,12 @@ export function CheckoutContent({
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const cashfreeRef = useRef<CashfreeInstance | null>(null);
 
-  const collectFields = (product.config?.checkout as { collectFields?: Array<{ key: string; enabled: boolean; required: boolean }> } | undefined)?.collectFields ?? [];
+  const collectFields =
+    (
+      product.config?.checkout as
+        | { collectFields?: Array<{ key: string; enabled: boolean; required: boolean }> }
+        | undefined
+    )?.collectFields ?? [];
   const phoneField = collectFields.find((f) => f.key === "phone");
   const showPhone = phoneField?.enabled ?? false;
   const phoneRequired = phoneField?.required ?? false;
@@ -150,7 +155,17 @@ export function CheckoutContent({
     } finally {
       setLoading(false);
     }
-  }, [name, email, phone, loading, showPhone, phoneRequired, product._id, product.productUrl, username]);
+  }, [
+    name,
+    email,
+    phone,
+    loading,
+    showPhone,
+    phoneRequired,
+    product._id,
+    product.productUrl,
+    username,
+  ]);
 
   if (status === "success") {
     return (
@@ -158,16 +173,16 @@ export function CheckoutContent({
         className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center text-center"
         style={{ padding: "2rem" }}
       >
-        <CheckCircle2 className="mb-4 h-16 w-16" style={{ color: "var(--store-accent, #22c55e)" }} />
-        <h1
-          className="mb-2 text-2xl font-bold"
-          style={{ color: "var(--store-text)" }}
-        >
+        <CheckCircle2
+          className="mb-4 h-16 w-16"
+          style={{ color: "var(--store-accent, #22c55e)" }}
+        />
+        <h1 className="mb-2 text-2xl font-bold" style={{ color: "var(--store-text)" }}>
           Payment Successful!
         </h1>
         <p className="mb-6" style={{ color: "var(--store-text-muted)" }}>
-          Thank you for your purchase of <strong>{product.name}</strong>.
-          You&apos;ll receive a confirmation at {email}.
+          Thank you for your purchase of <strong>{product.name}</strong>. You&apos;ll receive a
+          confirmation at {email}.
         </p>
         <Link href={`/${username}`}>
           <Button
@@ -185,10 +200,7 @@ export function CheckoutContent({
   }
 
   return (
-    <div
-      className="mx-auto flex min-h-screen w-full flex-col"
-      style={{ padding: "2rem 0" }}
-    >
+    <div className="mx-auto flex min-h-screen w-full flex-col px-3 py-4">
       <Link
         href={`/${username}`}
         className="inline-flex items-center gap-1.5 py-3 transition-colors hover:opacity-70"
@@ -211,12 +223,13 @@ export function CheckoutContent({
                 marginBottom: "var(--store-section-gap, 1.5rem)",
               }}
             >
-              <img
-                src={product.coverImageUrl}
-                alt={product.name}
-                className="w-full object-cover"
-                style={{ maxHeight: "24rem" }}
-              />
+              <div className="aspect-3/1">
+                <img
+                  src={product.coverImageUrl}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
+              </div>
             </div>
           )}
 
@@ -267,9 +280,18 @@ export function CheckoutContent({
             name={name}
             email={email}
             phone={phone}
-            onNameChange={(v) => { setName(v); setErrors((prev) => ({ ...prev, name: false })); }}
-            onEmailChange={(v) => { setEmail(v); setErrors((prev) => ({ ...prev, email: false })); }}
-            onPhoneChange={(v) => { setPhone(v); setErrors((prev) => ({ ...prev, phone: false })); }}
+            onNameChange={(v) => {
+              setName(v);
+              setErrors((prev) => ({ ...prev, name: false }));
+            }}
+            onEmailChange={(v) => {
+              setEmail(v);
+              setErrors((prev) => ({ ...prev, email: false }));
+            }}
+            onPhoneChange={(v) => {
+              setPhone(v);
+              setErrors((prev) => ({ ...prev, phone: false }));
+            }}
             onSubmit={handleSubmit}
             showPrice={hasStickyBar}
             showPhone={showPhone}

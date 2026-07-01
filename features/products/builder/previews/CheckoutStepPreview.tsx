@@ -187,8 +187,10 @@ export function CheckoutStepPreview({
                     marginBottom: "var(--store-section-gap, 1.5rem)",
                   }}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={coverImageUrl} alt={name || "Cover"} className="w-full object-cover" style={{ maxHeight: "24rem" }} />
+                  <div className="aspect-[2/1]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={coverImageUrl} alt={name || "Cover"} className="h-full w-full object-cover" />
+                  </div>
                 </div>
               )}
 

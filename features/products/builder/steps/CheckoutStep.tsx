@@ -374,8 +374,8 @@ export function CheckoutStep({
               className={cn(
                 "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors",
                 phoneEnabled
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border/60 text-muted-foreground hover:border-primary/60"
+                  ? "border-primary bg-card/90 text-primary"
+                  : "border-input bg-card/90 text-muted-foreground hover:border-primary/60"
               )}
             >
               <Check
@@ -388,6 +388,8 @@ export function CheckoutStep({
           </div>
         </div>
       </div>
+
+      <div className="pb-8" />
     </div>
   );
 }
