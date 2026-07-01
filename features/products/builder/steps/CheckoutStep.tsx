@@ -44,8 +44,11 @@ export function CheckoutStep({
   const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
   const [price, setPrice] = useState(product.price ?? "");
-  const savedCheckoutConfig = product.config?.checkout as { collectFields?: Array<{ key: string; enabled: boolean }> } | undefined;
-  const savedPhoneEnabled = savedCheckoutConfig?.collectFields?.find((f) => f.key === "phone")?.enabled ?? false;
+  const savedCheckoutConfig = product.config?.checkout as
+    | { collectFields?: Array<{ key: string; enabled: boolean }> }
+    | undefined;
+  const savedPhoneEnabled =
+    savedCheckoutConfig?.collectFields?.find((f) => f.key === "phone")?.enabled ?? false;
   const [phoneEnabled, setPhoneEnabled] = useState(savedPhoneEnabled);
 
   const [coverUploading, setCoverUploading] = useState(false);
@@ -170,7 +173,18 @@ export function CheckoutStep({
       type: product.type,
       defaultButtonText: thumbConfig?.buttonText || typeDef.defaultButtonText,
     });
-  }, [name, description, price, displayCoverUrl, phoneEnabled, product.name, product.username, product.type, product.config, onLiveChange]);
+  }, [
+    name,
+    description,
+    price,
+    displayCoverUrl,
+    phoneEnabled,
+    product.name,
+    product.username,
+    product.type,
+    product.config,
+    onLiveChange,
+  ]);
 
   return (
     <div className="space-y-10">
@@ -214,7 +228,7 @@ export function CheckoutStep({
                 <img
                   src={displayCoverUrl}
                   alt="Cover preview"
-                  className="block h-auto max-h-105 w-full object-cover"
+                  className="block aspect-3/1 h-auto w-full object-cover"
                 />
               </div>
             </>
