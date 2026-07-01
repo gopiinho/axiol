@@ -8,6 +8,7 @@ import { icons } from "@/lib/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AffiliateItemLink from "@/features/analytics/components/AffiliateItemLink";
+import { TrackProductClick } from "@/features/analytics/components/TrackProductClick";
 import { getServerConvexClient } from "@/server/convex/client";
 import { getProductTypeLabel } from "@/features/products/components/ProductTypeIcon";
 import { CheckoutContent } from "@/features/products/components/CheckoutContent";
@@ -135,6 +136,7 @@ export default async function ProductDetailPage({
         ...themeStyle,
       }}
     >
+      <TrackProductClick productId={product._id} sellerId={product.createdBy} />
       <div className="mx-auto h-full w-full">
         <div className="mx-auto h-full w-full lg:max-w-[80%]">
           <div
