@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       sellerId: product.createdBy,
       buyerEmail: buyerEmail.trim(),
       buyerName: buyerName.trim(),
+      buyerPhone: buyerPhone?.trim() || undefined,
       amountCents,
       currency: "INR",
       paymentProvider: "cashfree",

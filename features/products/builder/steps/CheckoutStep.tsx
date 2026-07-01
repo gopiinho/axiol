@@ -44,7 +44,9 @@ export function CheckoutStep({
   const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
   const [price, setPrice] = useState(product.price ?? "");
-  const [phoneEnabled, setPhoneEnabled] = useState(false);
+  const savedCheckoutConfig = product.config?.checkout as { collectFields?: Array<{ key: string; enabled: boolean }> } | undefined;
+  const savedPhoneEnabled = savedCheckoutConfig?.collectFields?.find((f) => f.key === "phone")?.enabled ?? false;
+  const [phoneEnabled, setPhoneEnabled] = useState(savedPhoneEnabled);
 
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -127,7 +129,7 @@ export function CheckoutStep({
         key: "phone",
         label: "Phone number",
         type: "phone" as const,
-        required: false,
+        required: phoneEnabled,
         enabled: phoneEnabled,
       },
     ];

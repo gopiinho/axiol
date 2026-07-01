@@ -80,12 +80,14 @@ export default function EditProduct({
         imageUrl: product.thumbnailImageUrl ?? null,
         price: product.price,
       });
+      const checkoutConfig = product.config?.checkout as { collectFields?: Array<{ key: string; enabled: boolean }> } | undefined;
+      const phoneField = checkoutConfig?.collectFields?.find((f) => f.key === "phone");
       setCheckoutLiveState({
         name: product.name,
         description: product.description || "",
         price: product.price || "",
         coverImageUrl: product.coverImageUrl ?? null,
-        phoneEnabled: false,
+        phoneEnabled: phoneField?.enabled ?? false,
         username: user?.username || "",
         type: product.type,
         defaultButtonText: saved?.buttonText || definition.defaultButtonText,

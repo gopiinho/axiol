@@ -2,11 +2,10 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CheckoutFields } from "@/features/products/components/CheckoutForm";
 import { RichTextRenderer } from "@/features/products/components/rich-text";
-import { PurchaseBar } from "@/features/products/components/StickyPurchaseBar";
+import { CheckoutSidebar } from "@/features/products/components/StickyPurchaseBar";
 
 interface CheckoutContentProps {
   username: string;
@@ -19,6 +18,7 @@ interface CheckoutContentProps {
     priceCents?: number | null;
     description?: string | null;
     coverImageUrl?: string | null;
+    config?: Record<string, unknown>;
   };
   definition: {
     key: string;
@@ -49,10 +49,17 @@ export function CheckoutContent({
 }: CheckoutContentProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
   const cashfreeRef = useRef<CashfreeInstance | null>(null);
+
+  const collectFields = (product.config?.checkout as { collectFields?: Array<{ key: string; enabled: boolean; required: boolean }> } | undefined)?.collectFields ?? [];
+  const phoneField = collectFields.find((f) => f.key === "phone");
+  const showPhone = phoneField?.enabled ?? false;
+  const phoneRequired = phoneField?.required ?? false;
 
   useEffect(() => {
     loadCashfreeScript().then(() => {
@@ -73,10 +80,20 @@ export function CheckoutContent({
   const displayPrice = rawPrice ? (/^[₹$€£]/.test(rawPrice) ? rawPrice : `₹ ${rawPrice}`) : "Free";
 
   const ctaText = definition?.defaultButtonText ?? "Get Access";
-  const isSimplifiedForm = ["collect_emails", "applications"].includes(product.type);
 
   const handleSubmit = useCallback(async () => {
-    if (!name.trim() || !email.trim() || loading) return;
+    const newErrors: Record<string, boolean> = {};
+    if (!name.trim()) newErrors.name = true;
+    if (!email.trim()) newErrors.email = true;
+    if (showPhone && !phone.trim()) newErrors.phone = true;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    if (loading) return;
+
+    setErrors({});
     setLoading(true);
     setMessage("");
 
@@ -90,6 +107,7 @@ export function CheckoutContent({
           productUrl: product.productUrl,
           buyerName: name.trim(),
           buyerEmail: email.trim(),
+          buyerPhone: phone.trim() || undefined,
         }),
       });
 
@@ -132,7 +150,7 @@ export function CheckoutContent({
     } finally {
       setLoading(false);
     }
-  }, [name, email, loading, product._id, product.productUrl, username]);
+  }, [name, email, phone, loading, showPhone, phoneRequired, product._id, product.productUrl, username]);
 
   if (status === "success") {
     return (
@@ -169,7 +187,7 @@ export function CheckoutContent({
   return (
     <div
       className="mx-auto flex min-h-screen w-full flex-col"
-      style={{ paddingBottom: hasStickyBar ? "5.5rem" : "2rem" }}
+      style={{ padding: "2rem 0" }}
     >
       <Link
         href={`/${username}`}
@@ -183,115 +201,83 @@ export function CheckoutContent({
         Back
       </Link>
 
-      {product.coverImageUrl && (
-        <div
-          className="mb-6 overflow-hidden"
-          style={{
-            borderRadius: "var(--store-radius, 0.5rem)",
-            marginBottom: "var(--store-section-gap, 1.5rem)",
-          }}
-        >
-          <img
-            src={product.coverImageUrl}
-            alt={product.name}
-            className="w-full object-cover"
-            style={{ maxHeight: "24rem" }}
-          />
-        </div>
-      )}
+      <div className="flex flex-col md:grid md:grid-cols-[1fr_340px] md:items-start md:gap-8 lg:grid-cols-[1fr_380px] lg:gap-12">
+        <div>
+          {product.coverImageUrl && (
+            <div
+              className="overflow-hidden"
+              style={{
+                borderRadius: "var(--store-radius, 0.5rem)",
+                marginBottom: "var(--store-section-gap, 1.5rem)",
+              }}
+            >
+              <img
+                src={product.coverImageUrl}
+                alt={product.name}
+                className="w-full object-cover"
+                style={{ maxHeight: "24rem" }}
+              />
+            </div>
+          )}
 
-      <h1
-        className="font-accent mb-2 leading-tight font-bold tracking-tight"
-        style={{
-          color: "var(--store-text)",
-          fontSize: "var(--store-heading-size, 1.375rem)",
-        }}
-      >
-        {product.name}
-      </h1>
-
-      <p
-        className="mb-6 font-semibold"
-        style={{
-          color: "var(--store-accent)",
-          fontSize: "var(--store-price-size, 0.9375rem)",
-        }}
-      >
-        {displayPrice}
-      </p>
-
-      {product.description && (
-        <div
-          style={{
-            marginBottom: "var(--store-section-gap, 1.5rem)",
-            fontSize: "var(--store-body-size, 0.875rem)",
-          }}
-        >
-          <RichTextRenderer
-            html={product.description}
-            className="product-description"
-            style={{ color: "var(--store-text)" }}
-          />
-        </div>
-      )}
-
-      {message && (
-        <div
-          className="mb-4 flex items-center gap-2 rounded-lg p-3 text-sm"
-          style={{
-            backgroundColor: "oklch(0.93 0.03 20 / 0.15)",
-            color: "oklch(0.5 0.15 20)",
-            border: "1px solid oklch(0.8 0.08 20 / 0.3)",
-          }}
-        >
-          <XCircle className="h-4 w-4 shrink-0" />
-          {message}
-        </div>
-      )}
-
-      <div className="mb-4 border-t" style={{ borderColor: "var(--store-border)" }}>
-        <h2
-          className="font-semibold tracking-wide uppercase"
-          style={{
-            color: "var(--store-text)",
-            fontSize: "var(--store-body-size, 0.8125rem)",
-            marginTop: "var(--store-section-gap, 1.5rem)",
-            marginBottom: "var(--store-card-gap, 1rem)",
-          }}
-        >
-          Contact Information
-        </h2>
-
-        <CheckoutFields name={name} email={email} onNameChange={setName} onEmailChange={setEmail} />
-
-        {isSimplifiedForm && (
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading}
-            className="mt-6 w-full font-semibold"
-            size="lg"
+          <h1
+            className="mb-2 leading-tight font-bold tracking-tight"
             style={{
-              backgroundColor: "var(--store-accent)",
-              borderColor: "var(--store-accent)",
-              color: "white",
-              borderRadius: "var(--store-radius, 0.5rem)",
-              fontSize: "var(--store-body-size, 0.875rem)",
+              color: "var(--store-text)",
+              fontSize: "var(--store-heading-size, 1.375rem)",
             }}
           >
-            {loading ? "Submitting..." : ctaText}
-          </Button>
-        )}
-      </div>
+            {product.name}
+          </h1>
 
-      {hasStickyBar && (
-        <PurchaseBar
-          price={displayPrice}
-          buttonText={ctaText}
-          loading={loading}
-          onSubmit={handleSubmit}
-        />
-      )}
+          {!hasStickyBar && (
+            <p
+              className="mb-6 font-semibold"
+              style={{
+                color: "var(--store-accent)",
+                fontSize: "var(--store-price-size, 0.9375rem)",
+              }}
+            >
+              {displayPrice}
+            </p>
+          )}
+
+          {product.description && (
+            <div
+              style={{
+                marginBottom: "var(--store-section-gap, 1.5rem)",
+                fontSize: "var(--store-body-size, 0.875rem)",
+              }}
+            >
+              <RichTextRenderer
+                html={product.description}
+                className="product-description"
+                style={{ color: "var(--store-text)" }}
+              />
+            </div>
+          )}
+        </div>
+
+        <div>
+          <CheckoutSidebar
+            price={displayPrice}
+            ctaText={ctaText}
+            loading={loading}
+            message={message}
+            name={name}
+            email={email}
+            phone={phone}
+            onNameChange={(v) => { setName(v); setErrors((prev) => ({ ...prev, name: false })); }}
+            onEmailChange={(v) => { setEmail(v); setErrors((prev) => ({ ...prev, email: false })); }}
+            onPhoneChange={(v) => { setPhone(v); setErrors((prev) => ({ ...prev, phone: false })); }}
+            onSubmit={handleSubmit}
+            showPrice={hasStickyBar}
+            showPhone={showPhone}
+            phoneRequired={phoneRequired}
+            errors={errors}
+          />
+        </div>
+      </div>
     </div>
   );
 }
