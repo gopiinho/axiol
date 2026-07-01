@@ -45,7 +45,7 @@ export function CheckoutStepPreview({
   coverImageUrl,
   phoneEnabled,
   type,
-  defaultButtonText,
+  checkoutButtonText,
 }: CheckoutStepPreviewProps) {
   const { user } = useUser();
 
@@ -291,7 +291,7 @@ export function CheckoutStepPreview({
                         fontSize: "var(--store-body-size, 0.875rem)",
                       }}
                     >
-                      {defaultButtonText}
+                      {checkoutButtonText}
                     </Button>
                   )}
 
@@ -335,13 +335,13 @@ export function CheckoutStepPreview({
                       borderRadius: "var(--store-radius, 0.5rem)",
                       fontSize: "var(--store-body-size, 0.875rem)",
                     }}
-                  >
-                    {defaultButtonText}
-                  </Button>
+                    >
+                      {checkoutButtonText}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
           <div className="relative flex justify-center py-1.5">
             <div className="absolute bottom-4 h-1 w-24 rounded-full bg-gray-600" />

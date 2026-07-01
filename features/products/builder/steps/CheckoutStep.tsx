@@ -15,8 +15,6 @@ import {
 } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { CheckoutLiveState } from "@/features/products/components/cards/types";
-import { getProductTypeDefinition } from "../../registry/productTypes";
-import type { ProductTypeKey } from "../../registry/productTypes";
 import type { Id } from "@/convex/_generated/dataModel";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -45,11 +43,14 @@ export function CheckoutStep({
   const [description, setDescription] = useState(product.description ?? "");
   const [price, setPrice] = useState(product.price ?? "");
   const savedCheckoutConfig = product.config?.checkout as
-    | { collectFields?: Array<{ key: string; enabled: boolean }> }
+    | { collectFields?: Array<{ key: string; enabled: boolean }>; buttonText?: string }
     | undefined;
   const savedPhoneEnabled =
     savedCheckoutConfig?.collectFields?.find((f) => f.key === "phone")?.enabled ?? false;
   const [phoneEnabled, setPhoneEnabled] = useState(savedPhoneEnabled);
+  const [ctaButtonText, setCtaButtonText] = useState(
+    savedCheckoutConfig?.buttonText || "Buy Now"
+  );
 
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -141,6 +142,7 @@ export function CheckoutStep({
       productId: productId as unknown as Id<"products">,
       config: {
         descriptionJson: description.trim() || undefined,
+        buttonText: ctaButtonText.trim(),
         collectFields,
       },
     });
@@ -151,6 +153,7 @@ export function CheckoutStep({
     productUrl,
     description,
     price,
+    ctaButtonText,
     phoneEnabled,
     updateProduct,
     updateCheckoutConfig,
@@ -161,8 +164,6 @@ export function CheckoutStep({
   }, [handleSave, onRegisterSave]);
 
   useEffect(() => {
-    const thumbConfig = product.config?.thumbnail as { buttonText?: string } | undefined;
-    const typeDef = getProductTypeDefinition(product.type as ProductTypeKey);
     onLiveChange?.({
       name: name.trim() || product.name,
       description: description.trim(),
@@ -171,7 +172,7 @@ export function CheckoutStep({
       phoneEnabled,
       username: product.username ?? "",
       type: product.type,
-      defaultButtonText: thumbConfig?.buttonText || typeDef.defaultButtonText,
+      checkoutButtonText: ctaButtonText.trim() || "Buy Now",
     });
   }, [
     name,
@@ -179,10 +180,10 @@ export function CheckoutStep({
     price,
     displayCoverUrl,
     phoneEnabled,
+    ctaButtonText,
     product.name,
     product.username,
     product.type,
-    product.config,
     onLiveChange,
   ]);
 
@@ -303,6 +304,17 @@ export function CheckoutStep({
               value={description}
               onChange={setDescription}
               placeholder="Describe your product..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="checkout-cta" className="text-sm font-bold">
+              Call to Action Button *
+            </Label>
+            <Input
+              id="checkout-cta"
+              value={ctaButtonText}
+              onChange={(e) => setCtaButtonText(e.target.value)}
+              placeholder="Buy Now"
             />
           </div>
           <div className="space-y-2">

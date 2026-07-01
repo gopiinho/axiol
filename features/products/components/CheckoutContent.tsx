@@ -56,12 +56,11 @@ export function CheckoutContent({
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const cashfreeRef = useRef<CashfreeInstance | null>(null);
 
-  const collectFields =
-    (
-      product.config?.checkout as
-        | { collectFields?: Array<{ key: string; enabled: boolean; required: boolean }> }
-        | undefined
-    )?.collectFields ?? [];
+  const checkoutConfig = product.config?.checkout as
+    | { buttonText?: string; collectFields?: Array<{ key: string; enabled: boolean; required: boolean }> }
+    | undefined;
+
+  const collectFields = checkoutConfig?.collectFields ?? [];
   const phoneField = collectFields.find((f) => f.key === "phone");
   const showPhone = phoneField?.enabled ?? false;
   const phoneRequired = phoneField?.required ?? false;
@@ -84,7 +83,7 @@ export function CheckoutContent({
 
   const displayPrice = rawPrice ? (/^[₹$€£]/.test(rawPrice) ? rawPrice : `₹ ${rawPrice}`) : "Free";
 
-  const ctaText = definition?.defaultButtonText ?? "Get Access";
+  const ctaText = checkoutConfig?.buttonText || (definition?.defaultButtonText ?? "Get Access");
 
   const handleSubmit = useCallback(async () => {
     const newErrors: Record<string, boolean> = {};

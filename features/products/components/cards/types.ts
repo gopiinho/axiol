@@ -34,5 +34,5 @@ export type CheckoutLiveState = {
   phoneEnabled: boolean;
   username: string;
   type: string;
-  defaultButtonText: string;
+  checkoutButtonText: string;
 };
