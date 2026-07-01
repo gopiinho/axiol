@@ -38,7 +38,7 @@ function KeywordBadges({ keyword }: { keyword: string }) {
   return (
     <div className="flex flex-wrap gap-1">
       {shown.map((kw) => (
-        <Badge key={kw} variant="secondary" className="text-[10px]">
+        <Badge key={kw} className="bg-foreground text-background rounded-xs">
           {kw.trim()}
         </Badge>
       ))}
@@ -125,16 +125,16 @@ export default function AutomationsList() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr className="border-border/50 border-b">
-                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                <th className="text-muted-foreground px-4 py-3 text-left text-sm font-black">
                   Reel
                 </th>
-                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:table-cell">
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-sm font-black sm:table-cell">
                   Product
                 </th>
-                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase md:table-cell">
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-sm font-black md:table-cell">
                   Keywords
                 </th>
-                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                <th className="text-muted-foreground px-4 py-3 text-left text-sm font-black">
                   Status
                 </th>
                 <th className="w-10 px-4 py-3" />
@@ -171,7 +171,7 @@ export default function AutomationsList() {
   if (mappings.length === 0) {
     return (
       <div className="p-5 sm:p-8">
-        <div className="bg-card rounded-xs border flex flex-col items-center py-20 text-center">
+        <div className="bg-card flex flex-col items-center rounded-xs border py-20 text-center">
           <MessageSquareQuote className="text-muted-foreground/30 h-10 w-10" />
           <p className="mt-4 text-sm font-medium">No automations yet</p>
           <p className="text-muted-foreground mt-1 max-w-xs text-xs">
@@ -194,7 +194,7 @@ export default function AutomationsList() {
             return (
               <div
                 key={mapping._id}
-                className="app-panel cursor-pointer p-4 transition-colors hover:bg-muted/30"
+                className="app-panel hover:bg-muted/30 cursor-pointer p-4 transition-colors"
                 onClick={() => setEditTarget(mapping._id)}
               >
                 <div className="flex items-start gap-3">
@@ -205,7 +205,7 @@ export default function AutomationsList() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-primary max-w-52 truncate block text-sm font-medium hover:underline"
+                      className="text-primary block max-w-52 truncate text-sm font-medium hover:underline"
                     >
                       {mapping.caption ?? "Untitled reel"}
                       <ExternalLink className="ml-1 inline h-3 w-3" />
@@ -213,8 +213,10 @@ export default function AutomationsList() {
                     <a
                       href={`/dashboard/products/${mapping.productId}/edit`}
                       onClick={(e) => e.stopPropagation()}
-                      className="text-muted-foreground truncate mt-0.5 block text-xs hover:underline"
-                    >{mapping.productName}</a>
+                      className="text-muted-foreground mt-0.5 block truncate text-xs hover:underline"
+                    >
+                      {mapping.productName}
+                    </a>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {keywords.slice(0, 3).map((kw) => (
                         <Badge key={kw} variant="secondary" className="text-[10px]">
@@ -228,10 +230,12 @@ export default function AutomationsList() {
                       )}
                     </div>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className={cn(
-                        "text-[11px] font-semibold",
-                        mapping.active ? "text-emerald-700" : "text-amber-700"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-[11px] font-semibold",
+                          mapping.active ? "text-emerald-700" : "text-amber-700"
+                        )}
+                      >
                         {mapping.active ? "Active" : "Draft"}
                       </span>
                       <div className="ml-auto">
@@ -293,16 +297,16 @@ export default function AutomationsList() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr className="border-border/50 border-b">
-                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                <th className="text-muted-foreground px-4 py-3 text-left text-sm font-black">
                   Reel
                 </th>
-                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:table-cell">
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-sm font-black sm:table-cell">
                   Product
                 </th>
-                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase md:table-cell">
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-sm font-black md:table-cell">
                   Keywords
                 </th>
-                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase">
+                <th className="text-muted-foreground px-4 py-3 text-left text-sm font-black">
                   Status
                 </th>
                 <th className="w-10 px-4 py-3" />
@@ -312,7 +316,7 @@ export default function AutomationsList() {
               {mappings.map((mapping) => (
                 <tr
                   key={mapping._id}
-                  className="border-border/50 hover:bg-muted/30 cursor-pointer border-b transition-colors"
+                  className="group border-border/50 hover:bg-muted/30 cursor-pointer border-b transition-colors"
                   onClick={() => setEditTarget(mapping._id)}
                 >
                   <td className="px-4 py-3.5">
@@ -324,7 +328,7 @@ export default function AutomationsList() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="text-primary max-w-40 truncate block text-sm font-medium hover:underline"
+                          className="text-primary block max-w-40 truncate text-sm font-medium hover:underline"
                         >
                           {mapping.caption ?? "Untitled reel"}
                           <ExternalLink className="ml-1 inline h-3 w-3" />
@@ -333,11 +337,11 @@ export default function AutomationsList() {
                     </div>
                   </td>
                   <td className="hidden px-4 py-3.5 sm:table-cell">
-                    <div className="max-w-[140px]">
+                    <div className="max-w-35">
                       <a
                         href={`/dashboard/products/${mapping.productId}/edit`}
                         onClick={(e) => e.stopPropagation()}
-                        className="text-muted-foreground truncate block text-sm hover:underline"
+                        className="block truncate text-sm hover:underline"
                       >
                         {mapping.productName}
                       </a>
@@ -347,10 +351,12 @@ export default function AutomationsList() {
                     <KeywordBadges keyword={mapping.keyword} />
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className={cn(
-                      "text-[11px] font-semibold",
-                      mapping.active ? "text-emerald-700" : "text-amber-700"
-                    )}>
+                    <span
+                      className={cn(
+                        "text-sm font-medium",
+                        mapping.active ? "text-emerald-700" : "text-amber-700"
+                      )}
+                    >
                       {mapping.active ? "Active" : "Draft"}
                     </span>
                   </td>
