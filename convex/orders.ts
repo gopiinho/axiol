@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { requireSession } from "./security";
 
 export const create = mutation({
   args: {
@@ -67,5 +68,44 @@ export const getByPaymentReference = query({
       .query("orders")
       .filter((q) => q.eq(q.field("paymentReference"), args.paymentReference))
       .first();
+  },
+});
+
+export const getEarningsSummary = query({
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
+    const now = Date.now();
+    const DAY = 86400000;
+    const sevenDaysAgo = now - 7 * DAY;
+    const twentyEightDaysAgo = now - 28 * DAY;
+
+    const paidOrders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller_status", (q) =>
+        q.eq("sellerId", userId).eq("status", "paid")
+      )
+      .collect();
+
+    let totalEarnings = 0;
+    let last7Days = 0;
+    let last28Days = 0;
+
+    for (const order of paidOrders) {
+      totalEarnings += order.amountCents;
+      if (order.paidAt && order.paidAt >= sevenDaysAgo) {
+        last7Days += order.amountCents;
+      }
+      if (order.paidAt && order.paidAt >= twentyEightDaysAgo) {
+        last28Days += order.amountCents;
+      }
+    }
+
+    return {
+      balance: totalEarnings,
+      last7Days,
+      last28Days,
+      totalEarnings,
+    };
   },
 });
