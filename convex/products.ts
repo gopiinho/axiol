@@ -70,6 +70,34 @@ export const listByUser = query({
       .order("desc")
       .take(100);
 
+    const paidOrders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller_status", (q) =>
+        q.eq("sellerId", userId).eq("status", "paid")
+      )
+      .collect();
+
+    const salesByProduct = new Map<string, { sales: number; revenueCents: number }>();
+    for (const order of paidOrders) {
+      const existing = salesByProduct.get(order.productId);
+      if (existing) {
+        existing.sales += 1;
+        existing.revenueCents += order.amountCents;
+      } else {
+        salesByProduct.set(order.productId, { sales: 1, revenueCents: order.amountCents });
+      }
+    }
+
+    const allClicks = await ctx.db
+      .query("productClicks")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .collect();
+
+    const clicksByProduct = new Map<string, number>();
+    for (const click of allClicks) {
+      clicksByProduct.set(click.productId, (clicksByProduct.get(click.productId) ?? 0) + 1);
+    }
+
     const withItemCounts = await Promise.all(
       products.map(async (product) => {
         const items = await ctx.db
@@ -82,11 +110,53 @@ export const listByUser = query({
         const config = product.config;
         const thumb = config.thumbnail;
         const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
-        return { ...product, itemCount: items.length, coverImageUrl, thumbnailImageUrl, username: user.username };
+        const stats = salesByProduct.get(product._id);
+        return {
+          ...product,
+          itemCount: items.length,
+          coverImageUrl,
+          thumbnailImageUrl,
+          username: user.username,
+          sales: stats?.sales ?? 0,
+          revenueCents: stats?.revenueCents ?? 0,
+          clicks: clicksByProduct.get(product._id) ?? 0,
+        };
       })
     );
 
     return withItemCounts;
+  },
+});
+
+export const getStoreTotals = query({
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
+
+    const paidOrders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller_status", (q) =>
+        q.eq("sellerId", userId).eq("status", "paid")
+      )
+      .collect();
+
+    let totalSales = 0;
+    let totalRevenueCents = 0;
+    for (const order of paidOrders) {
+      totalSales += 1;
+      totalRevenueCents += order.amountCents;
+    }
+
+    const allClicks = await ctx.db
+      .query("productClicks")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .collect();
+
+    return {
+      totalSales,
+      totalRevenueCents,
+      totalClicks: allClicks.length,
+    };
   },
 });
 
