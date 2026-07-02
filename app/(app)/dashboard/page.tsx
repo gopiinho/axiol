@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { PlusCircle, Store, Package, Zap, Info } from "lucide-react";
+import { PlusCircle, Store, Package, Zap } from "lucide-react";
 import { useQuery } from "convex/react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { api } from "@/convex/_generated/api";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 
 import { useProducts } from "@/features/products/hooks/useProduct";
 import { useReelMappings } from "@/features/automations/hooks/useAutomations";
+import { EarningsCard } from "@/features/analytics/components/EarningsCard";
 
 const QUICK_ACTIONS = [
   {
@@ -34,50 +34,6 @@ const QUICK_ACTIONS = [
     accent: "bg-status-warn-subtle text-status-warn-subtle-fg",
   },
 ];
-
-function formatINR(amount: number): string {
-  return `₹${amount.toLocaleString("en-IN")}`;
-}
-
-function EarningsCard({
-  label,
-  value,
-  tooltip,
-  loading,
-}: {
-  label: string;
-  value: number;
-  tooltip: string;
-  loading: boolean;
-}) {
-  return (
-    <div className="border-border/70 bg-card hover:border-border rounded-xs border p-7 transition-colors">
-      <div className="mb-1 flex items-center gap-1.5">
-        <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-          {label}
-        </span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              className="text-muted-foreground/50 hover:text-muted-foreground cursor-help transition-colors"
-            >
-              <Info className="h-3.5 w-3.5" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-      {loading ? (
-        <div className="bg-muted mt-1 h-8 w-24 animate-pulse rounded" />
-      ) : (
-        <p className="text-2xl font-bold tabular-nums">{formatINR(value)}</p>
-      )}
-    </div>
-  );
-}
 
 export default function DashboardPage() {
   const { products, isLoading: productsLoading } = useProducts();
