@@ -92,7 +92,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             </nav>
           </aside>
 
-          <section className="min-w-0">
+          <section className="min-w-0 h-screen overflow-y-auto">
             <main className="pb-14 md:pb-0">{children}</main>
           </section>
         </div>
