@@ -41,6 +41,7 @@
     "react": "19.2.3",
     "react-colorful": "^5.7.0",
     "react-dom": "19.2.3",
+    "recharts": "^3.9.1",
     "sanitize-html": "^2.17.4",
     "tailwind-merge": "^3.4.0"
   },
