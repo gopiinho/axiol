@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import {
-  useToggleMapping,
-  useUpdateMapping,
-} from "@/features/automations/hooks/useAutomations";
+import { useToggleMapping, useUpdateMapping } from "@/features/automations/hooks/useAutomations";
 import {
   DEFAULT_KEYWORD_PRESETS,
   KEYWORD_PRESET_STORAGE_KEY,
@@ -13,13 +10,9 @@ import {
 } from "@/features/automations/lib/keywords";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Circle } from "lucide-react";
 import KeywordEditor from "./KeywordEditor";
 
 interface MappingData {
@@ -161,6 +154,30 @@ export default function EditAutomationDialog({
         </DialogHeader>
 
         <div className="px-5 py-5">
+          <div
+            className={
+              mapping.active
+                ? "bg-foreground text-background mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-emerald-500 px-4 py-3"
+                : "bg-foreground text-background mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-amber-500 px-4 py-3"
+            }
+          >
+            <Circle
+              className={
+                mapping.active
+                  ? "h-2.5 w-2.5 fill-emerald-500 text-emerald-500"
+                  : "h-2.5 w-2.5 fill-amber-500 text-amber-500"
+              }
+            />
+            <div>
+              <p className="text-sm font-semibold">{mapping.active ? "Active" : "Draft"}</p>
+              <p className="text-muted text-xs">
+                {mapping.active
+                  ? "Auto-DM is enabled and responding to comments on this reel."
+                  : "Not sending DMs yet. Toggle the switch to activate."}
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <Label className="text-foreground text-sm font-semibold">Trigger Keywords</Label>
             <p className="text-muted-foreground text-xs">

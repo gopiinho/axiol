@@ -137,6 +137,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
   body {
     @apply bg-background text-foreground font-primary;
   }
@@ -332,22 +337,15 @@
     background-size: 20px 20px;
   }
 
-  /* Logo flip animation - continuous left to right spin */
-  @keyframes logo-flip {
-    0% {
-      transform: perspective(500px) rotateY(0deg);
-    }
-    50% {
-      transform: perspective(500px) rotateY(180deg) scale(0.95);
-    }
-    100% {
-      transform: perspective(500px) rotateY(360deg) scale(1);
+  /* Slower spin for the loading asterisk */
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
     }
   }
 
-  .animate-logo-flip {
-    animation: logo-flip 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    transform-style: preserve-3d;
+  .animate-spin-slow {
+    animation: spin-slow 5s linear infinite;
   }
 
   .scrollbar-none {

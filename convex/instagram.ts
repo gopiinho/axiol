@@ -12,8 +12,24 @@ import { getSession } from "./security";
 import { requireSession } from "./security";
 import { validateReelMappingInput, normalizeKeywordString } from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
+import { Id } from "./_generated/dataModel";
+import { MutationCtx } from "./_generated/server";
 
 const WEBHOOK_SECRET = process.env.INSTAGRAM_INTERNAL_SECRET;
+
+async function syncProductAutomationEnabled(
+  ctx: MutationCtx,
+  productId: Id<"products">,
+) {
+  const hasAnyActive = await ctx.db
+    .query("reelMappings")
+    .withIndex("by_product", (q) => q.eq("productId", productId))
+    .filter((q) => q.eq(q.field("active"), true))
+    .first();
+  if (!hasAnyActive) {
+    await ctx.db.patch(productId, { automationEnabled: false });
+  }
+}
 
 function assertWebhookSourceSecret(sourceSecret: string) {
   if (!WEBHOOK_SECRET || sourceSecret !== WEBHOOK_SECRET) {
@@ -434,6 +450,7 @@ export const publishReelMapping = mutation({
       active: true,
       publishedAt: Date.now(),
     });
+    await ctx.db.patch(mapping.productId, { automationEnabled: true });
   },
 });
 
@@ -603,7 +620,12 @@ export const deleteReelMapping = mutation({
     if (!mapping || mapping.userId !== userId) {
       throw new Error("Mapping not found");
     }
-    await ctx.db.delete(args.id);
+    if (mapping.active) {
+      await ctx.db.delete(args.id);
+      await syncProductAutomationEnabled(ctx, mapping.productId);
+    } else {
+      await ctx.db.delete(args.id);
+    }
   },
 });
 
@@ -619,9 +641,15 @@ export const toggleReelMapping = mutation({
       throw new Error("Mapping not found");
     }
 
+    const wasActive = mapping.active;
     await ctx.db.patch(args.id, {
-      active: !mapping.active,
+      active: !wasActive,
     });
+    if (wasActive) {
+      await syncProductAutomationEnabled(ctx, mapping.productId);
+    } else {
+      await ctx.db.patch(mapping.productId, { automationEnabled: true });
+    }
   },
 });
 

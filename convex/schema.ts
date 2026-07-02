@@ -128,6 +128,15 @@ export default defineSchema({
     paidAt: v.optional(v.number()),
   })
     .index("by_product", ["productId"])
+    .index("by_seller", ["sellerId"])
+    .index("by_seller_status", ["sellerId", "status"]),
+
+  productClicks: defineTable({
+    productId: v.id("products"),
+    sellerId: v.id("users"),
+    timestamp: v.number(),
+  })
+    .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"]),
 
   bookings: defineTable({

@@ -12,6 +12,7 @@ export type ThumbnailConfig = {
 export type CheckoutConfig = {
   coverImageId?: string;
   descriptionJson?: string;
+  buttonText?: string;
   collectFields: Array<{
     key: string;
     label: string;
@@ -75,6 +76,7 @@ export function getDefaultConfig(type: ProductTypeKey): ProductConfig {
         break;
       case "checkout":
         config.checkout = {
+          buttonText: "Buy Now",
           collectFields: [...DEFAULT_CHECKOUT_FIELDS],
         };
         break;
@@ -97,7 +99,7 @@ export function getCapabilityDefault(capability: ProductCapabilityKey) {
     case "thumbnail":
       return { style: "button" as const, ...DEFAULT_THUMBNAIL_FIELDS, buttonText: "Get Access" };
     case "checkout":
-      return { collectFields: [...DEFAULT_CHECKOUT_FIELDS] };
+      return { buttonText: "Buy Now", collectFields: [...DEFAULT_CHECKOUT_FIELDS] };
     case "contentDelivery":
       return { mode: "none" as const };
     case "formCollection":

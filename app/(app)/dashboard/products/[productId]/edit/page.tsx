@@ -49,7 +49,7 @@ export default function EditProduct({
     phoneEnabled: false,
     username: "",
     type: "",
-    defaultButtonText: "Get Access",
+    checkoutButtonText: "Buy Now",
   });
   const saveFnsRef = useRef<Map<number, () => Promise<void>>>(new Map());
 
@@ -80,25 +80,23 @@ export default function EditProduct({
         imageUrl: product.thumbnailImageUrl ?? null,
         price: product.price,
       });
+      const checkoutConfig = product.config?.checkout as {
+        buttonText?: string;
+        collectFields?: Array<{ key: string; enabled: boolean }>;
+      } | undefined;
+      const phoneField = checkoutConfig?.collectFields?.find((f) => f.key === "phone");
       setCheckoutLiveState({
         name: product.name,
         description: product.description || "",
         price: product.price || "",
         coverImageUrl: product.coverImageUrl ?? null,
-        phoneEnabled: false,
+        phoneEnabled: phoneField?.enabled ?? false,
         username: user?.username || "",
         type: product.type,
-        defaultButtonText: saved?.buttonText || definition.defaultButtonText,
+        checkoutButtonText: checkoutConfig?.buttonText || "Buy Now",
       });
     }
   }, [product, definition, user?.username]);
-
-  useEffect(() => {
-    setCheckoutLiveState((prev) => ({
-      ...prev,
-      defaultButtonText: thumbnailLiveState.buttonText,
-    }));
-  }, [thumbnailLiveState.buttonText]);
 
   const handleRegisterSave = useCallback((stepIndex: number, fn: () => Promise<void>) => {
     saveFnsRef.current.set(stepIndex, fn);

@@ -11,6 +11,7 @@ export const thumbnailConfigValidator = v.object({
 export const checkoutConfigValidator = v.object({
   coverImageId: v.optional(v.id("_storage")),
   descriptionJson: v.optional(v.string()),
+  buttonText: v.optional(v.string()),
   collectFields: v.array(
     v.object({
       key: v.string(),

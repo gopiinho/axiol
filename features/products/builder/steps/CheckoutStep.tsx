@@ -15,8 +15,6 @@ import {
 } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { CheckoutLiveState } from "@/features/products/components/cards/types";
-import { getProductTypeDefinition } from "../../registry/productTypes";
-import type { ProductTypeKey } from "../../registry/productTypes";
 import type { Id } from "@/convex/_generated/dataModel";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -44,7 +42,15 @@ export function CheckoutStep({
   const [productUrl, setProductUrl] = useState(product.productUrl);
   const [description, setDescription] = useState(product.description ?? "");
   const [price, setPrice] = useState(product.price ?? "");
-  const [phoneEnabled, setPhoneEnabled] = useState(false);
+  const savedCheckoutConfig = product.config?.checkout as
+    | { collectFields?: Array<{ key: string; enabled: boolean }>; buttonText?: string }
+    | undefined;
+  const savedPhoneEnabled =
+    savedCheckoutConfig?.collectFields?.find((f) => f.key === "phone")?.enabled ?? false;
+  const [phoneEnabled, setPhoneEnabled] = useState(savedPhoneEnabled);
+  const [ctaButtonText, setCtaButtonText] = useState(
+    savedCheckoutConfig?.buttonText || "Buy Now"
+  );
 
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -127,7 +133,7 @@ export function CheckoutStep({
         key: "phone",
         label: "Phone number",
         type: "phone" as const,
-        required: false,
+        required: phoneEnabled,
         enabled: phoneEnabled,
       },
     ];
@@ -136,6 +142,7 @@ export function CheckoutStep({
       productId: productId as unknown as Id<"products">,
       config: {
         descriptionJson: description.trim() || undefined,
+        buttonText: ctaButtonText.trim(),
         collectFields,
       },
     });
@@ -146,6 +153,7 @@ export function CheckoutStep({
     productUrl,
     description,
     price,
+    ctaButtonText,
     phoneEnabled,
     updateProduct,
     updateCheckoutConfig,
@@ -156,8 +164,6 @@ export function CheckoutStep({
   }, [handleSave, onRegisterSave]);
 
   useEffect(() => {
-    const thumbConfig = product.config?.thumbnail as { buttonText?: string } | undefined;
-    const typeDef = getProductTypeDefinition(product.type as ProductTypeKey);
     onLiveChange?.({
       name: name.trim() || product.name,
       description: description.trim(),
@@ -166,9 +172,20 @@ export function CheckoutStep({
       phoneEnabled,
       username: product.username ?? "",
       type: product.type,
-      defaultButtonText: thumbConfig?.buttonText || typeDef.defaultButtonText,
+      checkoutButtonText: ctaButtonText.trim() || "Buy Now",
     });
-  }, [name, description, price, displayCoverUrl, phoneEnabled, product.name, product.username, product.type, product.config, onLiveChange]);
+  }, [
+    name,
+    description,
+    price,
+    displayCoverUrl,
+    phoneEnabled,
+    ctaButtonText,
+    product.name,
+    product.username,
+    product.type,
+    onLiveChange,
+  ]);
 
   return (
     <div className="space-y-10">
@@ -212,7 +229,7 @@ export function CheckoutStep({
                 <img
                   src={displayCoverUrl}
                   alt="Cover preview"
-                  className="block h-auto max-h-105 w-full object-cover"
+                  className="block aspect-3/1 h-auto w-full object-cover"
                 />
               </div>
             </>
@@ -287,6 +304,17 @@ export function CheckoutStep({
               value={description}
               onChange={setDescription}
               placeholder="Describe your product..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="checkout-cta" className="text-sm font-bold">
+              Call to Action Button *
+            </Label>
+            <Input
+              id="checkout-cta"
+              value={ctaButtonText}
+              onChange={(e) => setCtaButtonText(e.target.value)}
+              placeholder="Buy Now"
             />
           </div>
           <div className="space-y-2">
@@ -372,8 +400,8 @@ export function CheckoutStep({
               className={cn(
                 "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors",
                 phoneEnabled
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border/60 text-muted-foreground hover:border-primary/60"
+                  ? "border-primary bg-card/90 text-primary"
+                  : "border-input bg-card/90 text-muted-foreground hover:border-primary/60"
               )}
             >
               <Check
@@ -386,6 +414,8 @@ export function CheckoutStep({
           </div>
         </div>
       </div>
+
+      <div className="pb-8" />
     </div>
   );
 }
