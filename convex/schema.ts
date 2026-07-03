@@ -310,4 +310,17 @@ export default defineSchema({
   waitlist: defineTable({
     email: v.string(),
   }).index("by_email", ["email"]),
+
+  contentUploads: defineTable({
+    userId: v.id("users"),
+    r2Key: v.string(),
+    fileName: v.string(),
+    fileSize: v.number(),
+    fileType: v.string(),
+    productId: v.optional(v.id("products")),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_key", ["r2Key"])
+    .index("by_product", ["productId"]),
 });

@@ -10,6 +10,8 @@
 
 import type * as auth from "../auth.js";
 import type * as catCounter from "../catCounter.js";
+import type * as contentLimits from "../contentLimits.js";
+import type * as contentStorage from "../contentStorage.js";
 import type * as crons from "../crons.js";
 import type * as dmQueue from "../dmQueue.js";
 import type * as http from "../http.js";
@@ -35,6 +37,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   catCounter: typeof catCounter;
+  contentLimits: typeof contentLimits;
+  contentStorage: typeof contentStorage;
   crons: typeof crons;
   dmQueue: typeof dmQueue;
   http: typeof http;
@@ -80,4 +84,5 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   betterAuth: import("@convex-dev/better-auth/_generated/component.js").ComponentApi<"betterAuth">;
+  contentStorage: import("@convex-dev/r2/_generated/component.js").ComponentApi<"contentStorage">;
 };
