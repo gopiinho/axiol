@@ -174,6 +174,19 @@ export default defineSchema({
     .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"]),
 
+  deliveryTokens: defineTable({
+    token: v.string(),
+    orderId: v.id("orders"),
+    productId: v.id("products"),
+    status: v.union(v.literal("active"), v.literal("exhausted"), v.literal("expired")),
+    downloadCount: v.number(),
+    maxDownloads: v.number(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_order", ["orderId"]),
+
   deliveries: defineTable({
     productId: v.id("products"),
     orderId: v.optional(v.id("orders")),

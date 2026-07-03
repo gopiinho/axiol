@@ -13,6 +13,7 @@ import type * as catCounter from "../catCounter.js";
 import type * as contentLimits from "../contentLimits.js";
 import type * as contentStorage from "../contentStorage.js";
 import type * as crons from "../crons.js";
+import type * as deliveries from "../deliveries.js";
 import type * as dmQueue from "../dmQueue.js";
 import type * as http from "../http.js";
 import type * as instagram from "../instagram.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   contentLimits: typeof contentLimits;
   contentStorage: typeof contentStorage;
   crons: typeof crons;
+  deliveries: typeof deliveries;
   dmQueue: typeof dmQueue;
   http: typeof http;
   instagram: typeof instagram;
