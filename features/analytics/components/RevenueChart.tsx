@@ -8,6 +8,7 @@ import {
   Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
+  CartesianGrid,
 } from "recharts";
 
 interface TimelineDataPoint {
@@ -23,23 +24,39 @@ interface RevenueChartProps {
 }
 
 function formatINR(value: number): string {
-  return `${value.toLocaleString("en-IN")}`;
+  return value.toLocaleString("en-IN");
 }
 
-function formatAbbreviated(value: number): string {
-  if (value >= 10000000) {
-    return `₹${(value / 10000000).toFixed(1)}Cr`;
-  }
-  if (value >= 100000) {
-    return `₹${(value / 100000).toFixed(1)}L`;
-  }
-  if (value >= 1000) {
-    return `₹${(value / 1000).toFixed(1)}K`;
-  }
-  return `${value}`;
+function fmt(n: number): string {
+  return Number.isInteger(n) ? n.toString() : n.toFixed(1);
 }
+
+function formatRevenueTick(value: number, dataMax: number): string {
+  if (dataMax >= 10_000_000) return `₹${fmt(value / 10_000_000)}Cr`;
+  if (dataMax >= 100_000) return `₹${fmt(value / 100_000)}L`;
+  if (dataMax >= 1_000) return `₹${fmt(value / 1_000)}K`;
+  return `₹${value}`;
+}
+
+function formatCountTick(value: number): string {
+  const v = Math.round(value);
+  if (v >= 1_000) return `${fmt(v / 1_000)}K`;
+  return v.toString();
+}
+
+function niceMax(value: number): number {
+  if (value <= 0) return 4;
+  const ceil = Math.ceil(value * 1.15);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(ceil)));
+  return Math.ceil(ceil / magnitude) * magnitude;
+}
+
+const TICK_COUNT = 5;
 
 export function RevenueChart({ data, loading }: RevenueChartProps) {
+  const revenueMax = Math.max(...data.map((d) => d.revenue), 0);
+  const countMax = Math.max(...data.map((d) => Math.max(d.sales, d.clicks)), 0);
+
   return (
     <div className="border-border/70 bg-card rounded-xs border">
       <div className="py-8 sm:px-6 lg:py-8">
@@ -51,7 +68,8 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={256}>
-            <ComposedChart data={data} margin={{ top: 8, right: 16, bottom: 4, left: 8 }}>
+            <ComposedChart data={data} margin={{ top: 12, right: 0, bottom: 4, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
               <XAxis
                 dataKey="label"
                 axisLine={false}
@@ -64,8 +82,10 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                tickFormatter={formatAbbreviated}
-                domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.25)]}
+                tickFormatter={(v: number) => formatRevenueTick(v, revenueMax)}
+                tickCount={TICK_COUNT}
+                domain={[0, niceMax(revenueMax)]}
+                width={50}
               />
               <YAxis
                 yAxisId="count"
@@ -73,8 +93,11 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                width={32}
-                domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.25)]}
+                tickFormatter={formatCountTick}
+                tickCount={TICK_COUNT}
+                allowDecimals={false}
+                domain={[0, niceMax(countMax)]}
+                width={38}
               />
               <RechartsTooltip
                 content={({ active, payload }) => {
@@ -121,7 +144,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 dataKey="sales"
                 fill="var(--foreground)"
                 radius={[0, 0, 0, 0]}
-                maxBarSize={16}
+                maxBarSize={40}
               />
               <Bar
                 yAxisId="count"
@@ -130,7 +153,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 fill="var(--foreground)"
                 fillOpacity={0.3}
                 radius={[2, 2, 0, 0]}
-                maxBarSize={16}
+                maxBarSize={40}
               />
               <Line
                 yAxisId="revenue"

@@ -47,11 +47,19 @@ const GRANULARITY_OPTIONS = [
   { value: "monthly" as const, label: "Monthly" },
 ];
 
+type Granularity = "daily" | "monthly";
+
+const MONTHLY_ONLY_PERIODS = new Set(["3m", "this_year", "last_year"]);
+
 export default function AnalyticsPage() {
   useUser();
 
   const [timePeriod, setTimePeriod] = useState<string>("7d");
-  const [granularity, setGranularity] = useState<"daily" | "monthly">("daily");
+  const [granularity, setGranularity] = useState<Granularity>("daily");
+
+  const visibleGranularities = MONTHLY_ONLY_PERIODS.has(timePeriod)
+    ? GRANULARITY_OPTIONS
+    : GRANULARITY_OPTIONS.filter((g) => g.value === "daily");
 
   const rawEarnings = useQuery(api.orders.getEarningsSummary);
   const earnings = useCachedQueryResult("analytics:earnings", rawEarnings);
@@ -97,22 +105,30 @@ export default function AnalyticsPage() {
             <p className="app-subtitle mt-1">See how your store is performing.</p>
           </div>
           <div className="flex items-center gap-2">
+            {visibleGranularities.length > 1 && (
+              <Select
+                value={granularity}
+                onValueChange={(v) => setGranularity(v as Granularity)}
+              >
+                <SelectTrigger className="w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {visibleGranularities.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select
-              value={granularity}
-              onValueChange={(v) => setGranularity(v as "daily" | "monthly")}
+              value={timePeriod}
+              onValueChange={(v) => {
+                setTimePeriod(v);
+                if (!MONTHLY_ONLY_PERIODS.has(v)) setGranularity("daily");
+              }}
             >
-              <SelectTrigger className="w-28">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {GRANULARITY_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={timePeriod} onValueChange={setTimePeriod}>
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
