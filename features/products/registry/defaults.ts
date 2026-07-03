@@ -23,8 +23,8 @@ export type CheckoutConfig = {
 };
 
 export type ContentConfig =
-  | { mode: "upload"; storageId?: string; fileName?: string }
-  | { mode: "external_link"; url?: string }
+  | { mode: "upload"; r2Key?: string; fileName?: string; fileSize?: number }
+  | { mode: "external_link"; url?: string; productName?: string }
   | { mode: "none" };
 
 export type FormConfig = {
