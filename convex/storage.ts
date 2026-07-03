@@ -28,8 +28,13 @@ export const saveProfileImage = mutation({
   handler: async (ctx, args) => {
     const { userId, user } = await requireSession(ctx);
 
-    const metadata = await ctx.storage.getMetadata(args.storageId);
-    if (!metadata) throw new Error("File not found");
+    let metadata;
+    try {
+      metadata = await ctx.storage.getMetadata(args.storageId);
+    } catch {
+      throw new Error("Upload expired or invalid. Please try uploading again.");
+    }
+    if (!metadata) throw new Error("Upload expired or invalid. Please try uploading again.");
     if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
       await ctx.storage.delete(args.storageId);
       throw new Error("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
@@ -57,8 +62,13 @@ export const saveProductCoverImage = mutation({
       throw new Error("Product not found");
     }
 
-    const metadata = await ctx.storage.getMetadata(args.storageId);
-    if (!metadata) throw new Error("File not found");
+    let metadata;
+    try {
+      metadata = await ctx.storage.getMetadata(args.storageId);
+    } catch {
+      throw new Error("Upload expired or invalid. Please try uploading again.");
+    }
+    if (!metadata) throw new Error("Upload expired or invalid. Please try uploading again.");
     if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
       await ctx.storage.delete(args.storageId);
       throw new Error("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
@@ -101,8 +111,13 @@ export const saveThumbnailImage = mutation({
     if (!product || product.createdBy !== userId) {
       throw new Error("Product not found");
     }
-    const metadata = await ctx.storage.getMetadata(args.storageId);
-    if (!metadata) throw new Error("File not found");
+    let metadata;
+    try {
+      metadata = await ctx.storage.getMetadata(args.storageId);
+    } catch {
+      throw new Error("Upload expired or invalid. Please try uploading again.");
+    }
+    if (!metadata) throw new Error("Upload expired or invalid. Please try uploading again.");
     if (!ALLOWED_IMAGE_TYPES.includes(metadata.contentType ?? "")) {
       await ctx.storage.delete(args.storageId);
       throw new Error("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
@@ -149,57 +164,6 @@ export const removeThumbnailImage = mutation({
         config: {
           ...product.config,
           thumbnail: { ...prev, imageId: undefined },
-        },
-        updatedAt: Date.now(),
-      });
-    }
-  },
-});
-
-export const generateContentUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    await requireSession(ctx);
-    return await ctx.storage.generateUploadUrl();
-  },
-});
-
-export const saveContentFile = mutation({
-  args: { productId: v.id("products"), storageId: v.id("_storage"), fileName: v.string() },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
-    const product = await ctx.db.get(args.productId);
-    if (!product || product.createdBy !== userId) {
-      throw new Error("Product not found");
-    }
-    const metadata = await ctx.storage.getMetadata(args.storageId);
-    if (!metadata) throw new Error("File not found");
-    await ctx.db.patch(args.productId, {
-      config: {
-        ...product.config,
-        content: { mode: "upload" as const, storageId: args.storageId, fileName: args.fileName },
-      },
-      updatedAt: Date.now(),
-    });
-  },
-});
-
-export const removeContentFile = mutation({
-  args: { productId: v.id("products") },
-  handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
-    const product = await ctx.db.get(args.productId);
-    if (!product || product.createdBy !== userId) {
-      throw new Error("Product not found");
-    }
-
-    const content = product.config?.content;
-    if (content?.mode === "upload" && content.storageId) {
-      await ctx.storage.delete(content.storageId);
-      await ctx.db.patch(args.productId, {
-        config: {
-          ...product.config,
-          content: { mode: "upload" as const, storageId: undefined, fileName: undefined },
         },
         updatedAt: Date.now(),
       });

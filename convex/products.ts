@@ -10,6 +10,7 @@ import {
   contentConfigValidator,
   productTypeValidator,
 } from "./productConfig";
+import { r2 } from "./contentStorage";
 import {
   PRODUCT_TYPES,
   getProductTypeDefinition,
@@ -211,7 +212,26 @@ export const create = mutation({
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId, user } = await requireSession(ctx);
+
+    const isPro = user.subscriptionStatus === "active";
+    if (!isPro) {
+      const existingProducts = await ctx.db
+        .query("products")
+        .withIndex("by_user", (q) => q.eq("createdBy", userId))
+        .collect();
+
+      const nonArchived = existingProducts.filter(
+        (p) => p.status !== "archived"
+      );
+
+      if (nonArchived.length >= 5) {
+        throw new Error(
+          "Free plan limit: 5 products. Upgrade to create more."
+        );
+      }
+    }
+
     const validated = validateProductInput({
       ...args,
       status: "draft",
@@ -332,6 +352,37 @@ export const updateContentConfig = mutation({
     if (!hasCapability(definition, "contentDelivery")) {
       throw new Error("This product type does not support content delivery.");
     }
+
+    const oldContent = product.config.content;
+    const oldR2Key =
+      oldContent && oldContent.mode === "upload" ? oldContent.r2Key : undefined;
+    const newR2Key =
+      args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
+
+    if (oldR2Key && oldR2Key !== newR2Key) {
+      await r2.deleteObject(ctx, oldR2Key);
+
+      const uploadRecord = await ctx.db
+        .query("contentUploads")
+        .withIndex("by_key", (q) => q.eq("r2Key", oldR2Key))
+        .first();
+      if (uploadRecord) {
+        await ctx.db.delete(uploadRecord._id);
+      }
+    }
+
+    if (newR2Key) {
+      const uploadRecord = await ctx.db
+        .query("contentUploads")
+        .withIndex("by_key", (q) => q.eq("r2Key", newR2Key))
+        .first();
+      if (uploadRecord && !uploadRecord.productId) {
+        await ctx.db.patch(uploadRecord._id, {
+          productId: args.productId,
+        });
+      }
+    }
+
     await ctx.db.patch(args.productId, {
       config: { ...product.config, content: args.config },
       updatedAt: Date.now(),
@@ -405,6 +456,35 @@ export const remove = mutation({
 
     if (!product || product.createdBy !== userId) {
       throw new Error("Product not found.");
+    }
+
+    if (product.coverImageId) {
+      await ctx.storage.delete(product.coverImageId);
+    }
+
+    const content = product.config.content;
+    if (
+      content &&
+      content.mode === "upload" &&
+      typeof content.r2Key === "string"
+    ) {
+      await r2.deleteObject(ctx, content.r2Key);
+
+      const uploadRecord = await ctx.db
+        .query("contentUploads")
+        .withIndex("by_key", (q) => q.eq("r2Key", content.r2Key!))
+        .first();
+      if (uploadRecord) {
+        await ctx.db.delete(uploadRecord._id);
+      }
+    }
+
+    const uploadRecords = await ctx.db
+      .query("contentUploads")
+      .withIndex("by_product", (q) => q.eq("productId", args.id))
+      .collect();
+    for (const record of uploadRecords) {
+      await ctx.db.delete(record._id);
     }
 
     const items = await ctx.db

@@ -26,8 +26,9 @@ export const checkoutConfigValidator = v.object({
 export const contentConfigValidator = v.union(
   v.object({
     mode: v.literal("upload"),
-    storageId: v.optional(v.id("_storage")),
+    r2Key: v.optional(v.string()),
     fileName: v.optional(v.string()),
+    fileSize: v.optional(v.number()),
   }),
   v.object({
     mode: v.literal("external_link"),
