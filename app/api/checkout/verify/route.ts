@@ -43,7 +43,18 @@ export async function GET(request: NextRequest) {
     }
 
     if (order.status === "paid") {
-      return NextResponse.json({ ok: true, status: "paid" });
+      try {
+        const tokenResult = await convex.mutation(api.deliveries.generateToken, {
+          orderId: order._id,
+        });
+        return NextResponse.json({
+          ok: true,
+          status: "paid",
+          downloadUrl: tokenResult.downloadUrl,
+        });
+      } catch {
+        return NextResponse.json({ ok: true, status: "paid" });
+      }
     }
 
     const cfOrderId = order.paymentReference;
@@ -61,7 +72,17 @@ export async function GET(request: NextRequest) {
         status: "paid",
       });
 
-      return NextResponse.json({ ok: true, status: "paid" });
+      let downloadUrl: string | undefined;
+      try {
+        const tokenResult = await convex.mutation(api.deliveries.generateToken, {
+          orderId: order._id,
+        });
+        downloadUrl = tokenResult.downloadUrl;
+      } catch {
+        // Token generation is best-effort for verify
+      }
+
+      return NextResponse.json({ ok: true, status: "paid", downloadUrl });
     }
 
     if (cfStatus === "ACTIVE" || cfStatus === "PENDING") {
