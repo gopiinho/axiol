@@ -368,7 +368,7 @@ export function ContentStep({
                       <p className="text-sm font-medium">{displayName}</p>
                       <p className="text-muted-foreground text-xs">
                         {uploadedFile
-                          ? `${displaySize} (unsaved)`
+                          ? `${displaySize}`
                           : displaySize}
                       </p>
                     </div>
