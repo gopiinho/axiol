@@ -16,6 +16,7 @@ import {
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { CheckoutLiveState } from "@/features/products/components/cards/types";
 import type { Id } from "@/convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 2 * 1024 * 1024;
@@ -48,9 +49,7 @@ export function CheckoutStep({
   const savedPhoneEnabled =
     savedCheckoutConfig?.collectFields?.find((f) => f.key === "phone")?.enabled ?? false;
   const [phoneEnabled, setPhoneEnabled] = useState(savedPhoneEnabled);
-  const [ctaButtonText, setCtaButtonText] = useState(
-    savedCheckoutConfig?.buttonText || "Buy Now"
-  );
+  const [ctaButtonText, setCtaButtonText] = useState(savedCheckoutConfig?.buttonText || "Buy Now");
 
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -248,19 +247,15 @@ export function CheckoutStep({
                 </>
               ) : (
                 <>
-                  <span
+                  <Button
                     onClick={() => !coverUploading && inputRef.current?.click()}
-                    className={cn(
-                      "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
-                      "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
-                      "transition-all duration-200",
-                      "hover:bg-accent hover:text-accent-foreground",
-                      "cursor-pointer"
-                    )}
+                    disabled={coverUploading}
+                    variant="outline"
+                    size="sm"
                   >
                     <Plus className="h-4 w-4" strokeWidth={2} />
                     Upload photo
-                  </span>
+                  </Button>
                   <span className="text-muted-foreground text-xs">
                     Images should be horizontal, at least 1280x720px, and 72 DPI (dots per inch).
                   </span>

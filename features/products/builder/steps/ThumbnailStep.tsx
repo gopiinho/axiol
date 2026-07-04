@@ -14,6 +14,7 @@ import type { ProductStepComponentProps } from "../../registry/steps";
 import type { ThumbnailLiveState } from "@/features/products/components/cards/types";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Loader2, Folder, Plus, X, Pencil, Square, PanelTop } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const STYLE_OPTIONS = [
   { value: "button", label: "Button", icon: Square },
@@ -35,7 +36,12 @@ interface ThumbnailStepProps extends ProductStepComponentProps {
   onLiveChange?: (state: ThumbnailLiveState) => void;
 }
 
-export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange }: ThumbnailStepProps) {
+export function ThumbnailStep({
+  productId,
+  product,
+  onRegisterSave,
+  onLiveChange,
+}: ThumbnailStepProps) {
   const savedThumbnail = product.config?.thumbnail as
     | { style?: string; title?: string; subtitle?: string; buttonText?: string }
     | undefined;
@@ -129,9 +135,7 @@ export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange
       title: title.trim() || product.name,
       subtitle: subtitle.trim() || undefined,
       buttonText: buttonText.trim() || "Download Now",
-      imageUrl: showImage
-        ? (thumbnailPreview || persistedThumbUrl)
-        : null,
+      imageUrl: showImage ? thumbnailPreview || persistedThumbUrl : null,
       price: product.price,
     });
   }, [
@@ -230,16 +234,10 @@ export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange
             </button>
 
             <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5">
-              <span
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => !uploading && inputRef.current?.click()}
-                className={cn(
-                  "bg-card mt-1 inline-flex items-center gap-2 rounded-xs px-4 py-2",
-                  "text-foreground border-border/60 w-fit border text-sm font-semibold shadow-sm",
-                  "transition-all duration-200",
-                  "hover:bg-accent hover:text-accent-foreground",
-                  "cursor-pointer",
-                  uploading && "cursor-not-allowed opacity-50"
-                )}
               >
                 {uploading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -247,7 +245,7 @@ export function ThumbnailStep({ productId, product, onRegisterSave, onLiveChange
                   <Plus className="h-4 w-4" strokeWidth={2} />
                 )}
                 {uploading ? "Uploading..." : "Upload photo"}
-              </span>
+              </Button>
               <span className="text-muted-foreground text-xs">
                 Images should be square, at least 400x400px, and 72 DPI (dots per inch).
               </span>
