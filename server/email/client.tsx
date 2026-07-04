@@ -33,7 +33,7 @@ export async function sendDownloadEmail(
     );
 
     const { error } = await resend.emails.send({
-      from: `${storeName} <${FROM_EMAIL}>`,
+      from: `${storeName || "Axiol"} <${FROM_EMAIL}>`,
       to,
       subject: `Your download: ${productName}`,
       html,

@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
               productId: existing.productId,
             });
 
-            const storeName = productInfo?.storeName ?? "Axiol";
-            const productName = productInfo?.name ?? "your product";
+            const storeName = productInfo?.storeName || "Axiol";
+            const productName = productInfo?.name || "your product";
             const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
 
             const amount = new Intl.NumberFormat("en-IN", {
