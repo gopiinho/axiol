@@ -100,7 +100,6 @@ export function ContentStep({
     saved.savedFile
   );
   const [uploadedFile, setUploadedFile] = useState<FileEntry | null>(null);
-  const [cleared, setCleared] = useState(false);
   const [errors, setErrors] = useState<{
     file?: string;
     url?: string;
@@ -154,7 +153,6 @@ export function ContentStep({
           fileSize: file.size,
         });
         setSavedFile(null);
-        setCleared(false);
 
         if (prevUploaded) {
           try {
@@ -190,18 +188,39 @@ export function ContentStep({
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    try {
-      await deleteContentFile({ r2Key: deleteTarget.r2Key });
-    } catch {
-      // best effort
+
+    const isSaved = deleteTarget.r2Key === savedFile?.r2Key;
+
+    if (isSaved) {
+      try {
+        await deleteContentFile({ r2Key: deleteTarget.r2Key });
+        await updateContentConfig({
+          productId: productId as unknown as Id<"products">,
+          config: { mode: "upload" },
+        });
+        setSavedFile(null);
+      } catch (err) {
+        setErrors((prev) => ({
+          ...prev,
+          file:
+            err instanceof Error
+              ? err.message
+              : "Failed to delete file. Please try again.",
+        }));
+        setDeleteTarget(null);
+        return;
+      }
+    } else {
+      if (deleteTarget.r2Key === uploadedFile?.r2Key) {
+        setUploadedFile(null);
+      }
+      try {
+        await deleteContentFile({ r2Key: deleteTarget.r2Key });
+      } catch {
+        // best effort for unsaved files
+      }
     }
-    if (deleteTarget.r2Key === uploadedFile?.r2Key) {
-      setUploadedFile(null);
-    }
-    if (deleteTarget.r2Key === savedFile?.r2Key) {
-      setSavedFile(null);
-      setCleared(true);
-    }
+
     setDeleteTarget(null);
   };
 
@@ -218,13 +237,6 @@ export function ContentStep({
       });
       setSavedFile(uploadedFile);
       setUploadedFile(null);
-      setCleared(false);
-    } else if (cleared) {
-      await updateContentConfig({
-        productId: productId as unknown as Id<"products">,
-        config: { mode: "upload" },
-      });
-      setCleared(false);
     } else if (externalUrl.trim()) {
       await updateContentConfig({
         productId: productId as unknown as Id<"products">,
@@ -236,7 +248,7 @@ export function ContentStep({
       });
       setSavedFile(null);
     }
-  }, [uploadedFile, cleared, externalUrl, productName, productId, updateContentConfig]);
+  }, [uploadedFile, externalUrl, productName, productId, updateContentConfig]);
 
   const saveAndValidate = useCallback(async () => {
     const newErrors: {
@@ -246,7 +258,7 @@ export function ContentStep({
     } = {};
 
     if (mode === "upload") {
-      if (!uploadedFile && !savedFile && !cleared) {
+      if (!uploadedFile && !savedFile) {
         newErrors.file = "Upload a file to continue";
       }
     }
@@ -262,7 +274,7 @@ export function ContentStep({
     }
 
     await handleSave();
-  }, [handleSave, mode, uploadedFile, savedFile, cleared, externalUrl, productName]);
+  }, [handleSave, mode, uploadedFile, savedFile, externalUrl, productName]);
 
   useEffect(() => {
     onRegisterSave?.(saveAndValidate);
@@ -356,7 +368,7 @@ export function ContentStep({
                       <p className="text-sm font-medium">{displayName}</p>
                       <p className="text-muted-foreground text-xs">
                         {uploadedFile
-                          ? `${displaySize} (unsaved)`
+                          ? `${displaySize}`
                           : displaySize}
                       </p>
                     </div>

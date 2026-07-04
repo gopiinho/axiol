@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { RichTextRenderer } from "@/features/products/components/rich-text";
 import { CheckoutSidebar } from "@/features/products/components/StickyPurchaseBar";
+import { CheckoutSuccessCard } from "@/features/products/components/CheckoutSuccessCard";
 
 interface CheckoutContentProps {
   username: string;
@@ -52,6 +52,7 @@ export function CheckoutContent({
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const cashfreeRef = useRef<CashfreeInstance | null>(null);
@@ -144,6 +145,7 @@ export function CheckoutContent({
         const verifyData = await verifyRes.json();
 
         if (verifyData.ok && verifyData.status === "paid") {
+          setDownloadUrl(verifyData.downloadUrl ?? null);
           setStatus("success");
         } else {
           setMessage("Payment failed. Please try again.");
@@ -168,33 +170,12 @@ export function CheckoutContent({
 
   if (status === "success") {
     return (
-      <div
-        className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center text-center"
-        style={{ padding: "2rem" }}
-      >
-        <CheckCircle2
-          className="mb-4 h-16 w-16"
-          style={{ color: "var(--store-accent, #22c55e)" }}
-        />
-        <h1 className="mb-2 text-2xl font-bold" style={{ color: "var(--store-text)" }}>
-          Payment Successful!
-        </h1>
-        <p className="mb-6" style={{ color: "var(--store-text-muted)" }}>
-          Thank you for your purchase of <strong>{product.name}</strong>. You&apos;ll receive a
-          confirmation at {email}.
-        </p>
-        <Link href={`/${username}`}>
-          <Button
-            style={{
-              backgroundColor: "var(--store-accent)",
-              borderColor: "var(--store-accent)",
-              color: "white",
-            }}
-          >
-            Back to Store
-          </Button>
-        </Link>
-      </div>
+      <CheckoutSuccessCard
+        productName={product.name}
+        downloadUrl={downloadUrl}
+        buyerEmail={email}
+        username={username}
+      />
     );
   }
 

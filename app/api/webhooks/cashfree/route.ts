@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Cashfree, CFEnvironment } from "cashfree-pg";
 import { api } from "@/convex/_generated/api";
 import { getServerConvexClient } from "@/server/convex/client";
+import { sendDownloadEmail } from "@/server/email/client";
 
 const appId = process.env.CASHFREE_APP_ID || "";
 const secretKey = process.env.CASHFREE_SECRET_KEY || "";
@@ -57,6 +58,30 @@ export async function POST(request: NextRequest) {
             orderId: existing._id,
             status: "paid",
           });
+
+          try {
+            const tokenResult = await convex.mutation(api.deliveries.generateToken, {
+              orderId: existing._id,
+            });
+
+            const productInfo = await convex.query(api.deliveries.getProductForDelivery, {
+              productId: existing.productId,
+            });
+
+            const storeName = productInfo?.storeName ?? "Axiol";
+            const productName = productInfo?.name ?? "your product";
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+
+            await sendDownloadEmail(
+              existing.buyerEmail,
+              productName,
+              `${siteUrl}${tokenResult.downloadUrl}`,
+              storeName,
+              siteUrl
+            );
+          } catch (e) {
+            console.error("Delivery generation failed for webhook:", e);
+          }
         }
       }
     }
