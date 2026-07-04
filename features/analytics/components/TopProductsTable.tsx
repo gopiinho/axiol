@@ -31,7 +31,7 @@ export function TopProductsTable({ products, loading }: TopProductsTableProps) {
         </div>
       ) : sorted.length === 0 ? (
         <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-          No sales yet
+          No sales yet.
         </div>
       ) : (
         <div className="overflow-x-auto">

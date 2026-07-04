@@ -11,9 +11,14 @@ export async function sendDownloadEmail(
   storeName: string,
   siteUrl: string
 ): Promise<{ ok: boolean; error?: string }> {
+  const safeName = storeName.replace(/[<>@,"\\]/g, "").trim() || "Axiol";
+  const absoluteUrl = downloadUrl.startsWith("http")
+    ? downloadUrl
+    : `${siteUrl}${downloadUrl}`;
+
   try {
     const { error } = await resend.emails.send({
-      from: `${storeName} <${FROM_EMAIL}>`,
+      from: `${safeName} <${FROM_EMAIL}>`,
       to,
       subject: `Your download: ${productName}`,
       html: `
@@ -21,8 +26,8 @@ export async function sendDownloadEmail(
           <img src="${siteUrl}/cover.png" alt="" style="width: 100%; display: block;" />
           <div style="padding: 24px; text-align: center;">
             <h2 style="margin: 0 0 8px;">${productName}</h2>
-            <p style="margin: 0 0 24px; color: #555;">Your purchase from ${storeName} is ready.</p>
-            <a href="${downloadUrl}" style="display: inline-block; padding: 12px 24px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            <p style="margin: 0 0 24px; color: #555;">Your purchase from ${safeName} is ready.</p>
+            <a href="${absoluteUrl}" style="display: inline-block; padding: 12px 24px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600;">
               Download
             </a>
             <p style="margin: 24px 0 0; font-size: 13px; color: #999;">

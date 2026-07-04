@@ -47,14 +47,16 @@ function formatCountTick(value: number): string {
 const TICK_COUNT = 5;
 
 export function RevenueChart({ data, loading }: RevenueChartProps) {
+  const isEmpty = data.every((d) => d.revenue === 0 && d.sales === 0 && d.clicks === 0);
+
   return (
     <div className="border-border/70 bg-card rounded-xs border">
       <div className="py-8 sm:px-6 lg:py-8">
         {loading ? (
           <div className="bg-muted h-64 w-full animate-pulse rounded" />
-        ) : data.length === 0 ? (
+        ) : isEmpty ? (
           <div className="text-muted-foreground flex h-64 items-center justify-center text-sm">
-            No data yet
+            No sales yet.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={256}>

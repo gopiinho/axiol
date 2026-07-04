@@ -189,7 +189,7 @@ export const getProductForDelivery = query({
 
     return {
       name: product.name,
-      storeName: seller.storeName ?? seller.name ?? "Axiol",
+      storeName: seller.storeName || seller.name || "Axiol",
     };
   },
 });
