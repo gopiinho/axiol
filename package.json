@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "email:dev": "react-email dev"
   },
   "dependencies": {
     "@convex-dev/better-auth": "^0.11.2",
@@ -22,6 +23,7 @@
     "@radix-ui/react-popover": "^1.1.16",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
+    "@react-email/components": "^1.0.12",
     "@tiptap/extension-link": "^3.26.0",
     "@tiptap/extension-placeholder": "^3.26.0",
     "@tiptap/pm": "^3.26.0",
@@ -40,10 +42,11 @@
     "posthog-node": "^5.19.0",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
-    "resend": "^4.2.0",
     "react-colorful": "^5.7.0",
     "react-dom": "19.2.3",
+    "react-email": "^6.6.6",
     "recharts": "^3.9.1",
+    "resend": "^4.2.0",
     "sanitize-html": "^2.17.4",
     "tailwind-merge": "^3.4.0"
   },
