@@ -23,13 +23,14 @@ export default function CreateFlowFooter({
   const isLastStep = currentStep === totalSteps;
 
   return (
-    <div className="bg-background/95 fixed inset-x-0 bottom-16 z-60 border-t backdrop-blur md:bottom-0">
-      <div className="mx-auto flex w-full max-w-md gap-2 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:max-w-xl lg:max-w-2xl">
+    <div className="bg-background/95 fixed inset-x-0 bottom-14 border-t backdrop-blur md:bottom-0">
+      <div className="mx-auto flex w-full max-w-md gap-4 p-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:max-w-xl lg:max-w-2xl">
         <Button
           type="button"
           variant="outline"
-          className="flex-1"
+          className="flex-1 text-xs"
           onClick={onBack}
+          size="sm"
           disabled={currentStep === 1}
         >
           <ArrowLeft className="h-4 w-4" />
@@ -37,8 +38,9 @@ export default function CreateFlowFooter({
         </Button>
         <Button
           type="button"
-          className="flex-1"
+          className="flex-1 text-xs"
           onClick={onPrimaryAction}
+          size="sm"
           disabled={primaryActionDisabled}
         >
           {isLastStep ? (

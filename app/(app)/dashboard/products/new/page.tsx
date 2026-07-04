@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -10,6 +10,7 @@ import {
 
 export default function NewProduct() {
   const formRef = useRef<CreateProductFlowHandle>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   return (
     <div>
@@ -25,9 +26,10 @@ export default function NewProduct() {
             <Button
               size="lg"
               className="gap-2 sm:self-start"
+              disabled={isCreating}
               onClick={() => formRef.current?.submit()}
             >
-              Create product
+              {isCreating ? "Creating..." : "Create product"}
             </Button>
           </div>
         </div>
@@ -40,7 +42,7 @@ export default function NewProduct() {
           or memberships — see what sticks.
         </p>
         <div className="flex w-full flex-col gap-6 sm:gap-10">
-          <CreateProductFlow ref={formRef} />
+          <CreateProductFlow ref={formRef} onLoadingChange={setIsCreating} />
         </div>
       </div>
     </div>

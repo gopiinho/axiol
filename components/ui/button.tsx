@@ -5,12 +5,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center cursor-pointer gap-2 whitespace-nowrap rounded-[0.3rem] font-bold transition-all duration-200 active:scale-[0.96] active:duration-75 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/40 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center cursor-pointer gap-2 whitespace-nowrap rounded-[0.3rem] font-bold transition-all duration-200 active:scale-[0.96] active:duration-75 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/40 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive relative overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/12 before:to-transparent before:opacity-0 before:transition-opacity before:duration-150 hover:before:opacity-100 [&>*]:relative [&>*]:z-10",
   {
     variants: {
       variant: {
         default:
-          "border border-primary/70 bg-primary text-primary-foreground text-foreground hover:bg-primary/90",
+          "border border-primary/70 bg-primary/90 border border-primary text-primary-foreground text-foreground hover:bg-primary/90",
         destructive:
           "border border-destructive/60 bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/30",
         outline: "border border-border/90 text-foreground hover:border-border",

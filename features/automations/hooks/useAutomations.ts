@@ -23,3 +23,7 @@ export function useDeleteMapping() {
 export function useCreateMapping() {
   return useMutation(api.instagram.createReelMapping);
 }
+
+export function useUpdateMapping() {
+  return useMutation(api.instagram.updateReelMapping);
+}

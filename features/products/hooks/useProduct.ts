@@ -94,14 +94,6 @@ export function useRemoveThumbnailImage() {
   return useMutation(api.storage.removeThumbnailImage);
 }
 
-export function useGenerateContentUploadUrl() {
-  return useMutation(api.storage.generateContentUploadUrl);
-}
-
-export function useSaveContentFile() {
-  return useMutation(api.storage.saveContentFile);
-}
-
-export function useRemoveContentFile() {
-  return useMutation(api.storage.removeContentFile);
+export function useDeleteContentFile() {
+  return useMutation(api.contentStorage.deleteContentFile);
 }

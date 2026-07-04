@@ -8,6 +8,7 @@ import { icons } from "@/lib/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AffiliateItemLink from "@/features/analytics/components/AffiliateItemLink";
+import { TrackProductClick } from "@/features/analytics/components/TrackProductClick";
 import { getServerConvexClient } from "@/server/convex/client";
 import { getProductTypeLabel } from "@/features/products/components/ProductTypeIcon";
 import { CheckoutContent } from "@/features/products/components/CheckoutContent";
@@ -135,13 +136,13 @@ export default async function ProductDetailPage({
         ...themeStyle,
       }}
     >
-      <div className="mx-auto h-full w-full lg:max-w-[90%]">
-        <div className="mx-auto h-full w-full px-4 lg:max-w-[70%]">
+      <TrackProductClick productId={product._id} sellerId={product.createdBy} />
+      <div className="mx-auto h-full w-full">
+        <div className="mx-auto h-full w-full lg:max-w-[80%]">
           <div
-            className="relative flex items-center gap-3"
+            className="relative flex items-center gap-3 px-3 py-4"
             style={{
               borderBottom: `1px solid var(--store-border)`,
-              padding: "var(--store-card-padding, 1rem) 0",
             }}
           >
             <Link href={`/${username}`} className="shrink-0">
@@ -198,7 +199,7 @@ export default async function ProductDetailPage({
           </div>
 
           {product.type === "affiliate" ? (
-            <div className="py-6">
+            <div className="py-6 pb-16">
               <Link href={`/${username}`} className="mb-6 inline-block">
                 <Button variant="ghost" className="gap-2">
                   <ArrowLeft className="h-4 w-4" />
@@ -208,12 +209,14 @@ export default async function ProductDetailPage({
 
               {product.coverImageUrl && (
                 <div className="mb-8 overflow-hidden rounded-2xl">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={product.coverImageUrl}
-                    alt={product.name}
-                    className="max-h-80 w-full object-cover"
-                  />
+                  <div className="aspect-2/1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={product.coverImageUrl}
+                      alt={product.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -235,7 +238,7 @@ export default async function ProductDetailPage({
                 {product.description && (
                   <div className="max-w-2xl">
                     <div
-                      className="prose prose-sm max-w-none"
+                      className="prose prose-sm product-description max-w-none"
                       style={{ color: "var(--store-text)" }}
                       dangerouslySetInnerHTML={{ __html: product.description }}
                     />

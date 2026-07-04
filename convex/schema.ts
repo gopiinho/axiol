@@ -128,6 +128,15 @@ export default defineSchema({
     paidAt: v.optional(v.number()),
   })
     .index("by_product", ["productId"])
+    .index("by_seller", ["sellerId"])
+    .index("by_seller_status", ["sellerId", "status"]),
+
+  productClicks: defineTable({
+    productId: v.id("products"),
+    sellerId: v.id("users"),
+    timestamp: v.number(),
+  })
+    .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"]),
 
   bookings: defineTable({
@@ -164,6 +173,19 @@ export default defineSchema({
   })
     .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"]),
+
+  deliveryTokens: defineTable({
+    token: v.string(),
+    orderId: v.id("orders"),
+    productId: v.id("products"),
+    status: v.union(v.literal("active"), v.literal("exhausted"), v.literal("expired")),
+    downloadCount: v.number(),
+    maxDownloads: v.number(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_order", ["orderId"]),
 
   deliveries: defineTable({
     productId: v.id("products"),
@@ -301,4 +323,17 @@ export default defineSchema({
   waitlist: defineTable({
     email: v.string(),
   }).index("by_email", ["email"]),
+
+  contentUploads: defineTable({
+    userId: v.id("users"),
+    r2Key: v.string(),
+    fileName: v.string(),
+    fileSize: v.number(),
+    fileType: v.string(),
+    productId: v.optional(v.id("products")),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_key", ["r2Key"])
+    .index("by_product", ["productId"]),
 });

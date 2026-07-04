@@ -3,12 +3,14 @@ import { mutation, query, MutationCtx, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { requireSession } from "./security";
 import { validateProductInput } from "../lib/validators/products";
+import { parsePriceRupees } from "../lib/validators/price";
 import {
   thumbnailConfigValidator,
   checkoutConfigValidator,
   contentConfigValidator,
   productTypeValidator,
 } from "./productConfig";
+import { r2 } from "./contentStorage";
 import {
   PRODUCT_TYPES,
   getProductTypeDefinition,
@@ -61,13 +63,41 @@ async function requireProductOwner(ctx: MutationCtx | QueryCtx, productId: Id<"p
 export const listByUser = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId, user } = await requireSession(ctx);
 
     const products = await ctx.db
       .query("products")
       .withIndex("by_user", (q) => q.eq("createdBy", userId))
       .order("desc")
       .take(100);
+
+    const paidOrders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller_status", (q) =>
+        q.eq("sellerId", userId).eq("status", "paid")
+      )
+      .collect();
+
+    const salesByProduct = new Map<string, { sales: number; revenueCents: number }>();
+    for (const order of paidOrders) {
+      const existing = salesByProduct.get(order.productId);
+      if (existing) {
+        existing.sales += 1;
+        existing.revenueCents += order.amountCents;
+      } else {
+        salesByProduct.set(order.productId, { sales: 1, revenueCents: order.amountCents });
+      }
+    }
+
+    const allClicks = await ctx.db
+      .query("productClicks")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .collect();
+
+    const clicksByProduct = new Map<string, number>();
+    for (const click of allClicks) {
+      clicksByProduct.set(click.productId, (clicksByProduct.get(click.productId) ?? 0) + 1);
+    }
 
     const withItemCounts = await Promise.all(
       products.map(async (product) => {
@@ -81,11 +111,53 @@ export const listByUser = query({
         const config = product.config;
         const thumb = config.thumbnail;
         const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
-        return { ...product, itemCount: items.length, coverImageUrl, thumbnailImageUrl };
+        const stats = salesByProduct.get(product._id);
+        return {
+          ...product,
+          itemCount: items.length,
+          coverImageUrl,
+          thumbnailImageUrl,
+          username: user.username,
+          sales: stats?.sales ?? 0,
+          revenueCents: stats?.revenueCents ?? 0,
+          clicks: clicksByProduct.get(product._id) ?? 0,
+        };
       })
     );
 
     return withItemCounts;
+  },
+});
+
+export const getStoreTotals = query({
+  args: {},
+  handler: async (ctx) => {
+    const { userId } = await requireSession(ctx);
+
+    const paidOrders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller_status", (q) =>
+        q.eq("sellerId", userId).eq("status", "paid")
+      )
+      .collect();
+
+    let totalSales = 0;
+    let totalRevenueCents = 0;
+    for (const order of paidOrders) {
+      totalSales += 1;
+      totalRevenueCents += order.amountCents;
+    }
+
+    const allClicks = await ctx.db
+      .query("productClicks")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .collect();
+
+    return {
+      totalSales,
+      totalRevenueCents,
+      totalClicks: allClicks.length,
+    };
   },
 });
 
@@ -140,7 +212,26 @@ export const create = mutation({
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId, user } = await requireSession(ctx);
+
+    const isPro = user.subscriptionStatus === "active";
+    if (!isPro) {
+      const existingProducts = await ctx.db
+        .query("products")
+        .withIndex("by_user", (q) => q.eq("createdBy", userId))
+        .collect();
+
+      const nonArchived = existingProducts.filter(
+        (p) => p.status !== "archived"
+      );
+
+      if (nonArchived.length >= 5) {
+        throw new Error(
+          "Free plan limit: 5 products. Upgrade to create more."
+        );
+      }
+    }
+
     const validated = validateProductInput({
       ...args,
       status: "draft",
@@ -157,6 +248,7 @@ export const create = mutation({
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
+      priceCents: parsePriceRupees(validated.price),
       type: validated.type as "affiliate" | "digital",
       status: "draft",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -199,6 +291,7 @@ export const update = mutation({
       productUrl,
       description: validated.description,
       price: validated.price,
+      priceCents: parsePriceRupees(validated.price),
       type: validated.type as "affiliate" | "digital",
       automationEnabled: validated.automationEnabled,
       updatedAt: Date.now(),
@@ -259,6 +352,37 @@ export const updateContentConfig = mutation({
     if (!hasCapability(definition, "contentDelivery")) {
       throw new Error("This product type does not support content delivery.");
     }
+
+    const oldContent = product.config.content;
+    const oldR2Key =
+      oldContent && oldContent.mode === "upload" ? oldContent.r2Key : undefined;
+    const newR2Key =
+      args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
+
+    if (oldR2Key && oldR2Key !== newR2Key) {
+      await r2.deleteObject(ctx, oldR2Key);
+
+      const uploadRecord = await ctx.db
+        .query("contentUploads")
+        .withIndex("by_key", (q) => q.eq("r2Key", oldR2Key))
+        .first();
+      if (uploadRecord) {
+        await ctx.db.delete(uploadRecord._id);
+      }
+    }
+
+    if (newR2Key) {
+      const uploadRecord = await ctx.db
+        .query("contentUploads")
+        .withIndex("by_key", (q) => q.eq("r2Key", newR2Key))
+        .first();
+      if (uploadRecord && !uploadRecord.productId) {
+        await ctx.db.patch(uploadRecord._id, {
+          productId: args.productId,
+        });
+      }
+    }
+
     await ctx.db.patch(args.productId, {
       config: { ...product.config, content: args.config },
       updatedAt: Date.now(),
@@ -332,6 +456,35 @@ export const remove = mutation({
 
     if (!product || product.createdBy !== userId) {
       throw new Error("Product not found.");
+    }
+
+    if (product.coverImageId) {
+      await ctx.storage.delete(product.coverImageId);
+    }
+
+    const content = product.config.content;
+    if (
+      content &&
+      content.mode === "upload" &&
+      typeof content.r2Key === "string"
+    ) {
+      await r2.deleteObject(ctx, content.r2Key);
+
+      const uploadRecord = await ctx.db
+        .query("contentUploads")
+        .withIndex("by_key", (q) => q.eq("r2Key", content.r2Key!))
+        .first();
+      if (uploadRecord) {
+        await ctx.db.delete(uploadRecord._id);
+      }
+    }
+
+    const uploadRecords = await ctx.db
+      .query("contentUploads")
+      .withIndex("by_product", (q) => q.eq("productId", args.id))
+      .collect();
+    for (const record of uploadRecords) {
+      await ctx.db.delete(record._id);
     }
 
     const items = await ctx.db

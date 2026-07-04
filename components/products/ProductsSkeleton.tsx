@@ -29,7 +29,7 @@ export default function ProductsSkeleton() {
         <table className="w-full">
           <thead>
             <tr className="border-border/50 border-b">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 6 }).map((_, i) => (
                 <th key={i} className="px-4 py-3">
                   <div className="bg-muted h-3 w-16 animate-pulse rounded" />
                 </th>
@@ -40,7 +40,7 @@ export default function ProductsSkeleton() {
           <tbody>
             {Array.from({ length: 4 }).map((_, row) => (
               <tr key={row} className="border-border/50 border-b">
-                {Array.from({ length: 5 }).map((_, col) => (
+                {Array.from({ length: 6 }).map((_, col) => (
                   <td key={col} className="px-4 py-4">
                     <div
                       className={`bg-muted h-4 animate-pulse rounded ${
@@ -52,7 +52,11 @@ export default function ProductsSkeleton() {
                               ? "w-12"
                               : col === 3
                                 ? "w-16"
-                                : "w-10"
+                                : col === 4
+                                  ? "w-10"
+                                  : col === 5
+                                    ? "w-16"
+                                    : "w-14"
                       }`}
                     />
                   </td>

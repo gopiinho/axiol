@@ -10,12 +10,17 @@
 
 import type * as auth from "../auth.js";
 import type * as catCounter from "../catCounter.js";
+import type * as contentLimits from "../contentLimits.js";
+import type * as contentStorage from "../contentStorage.js";
 import type * as crons from "../crons.js";
+import type * as deliveries from "../deliveries.js";
 import type * as dmQueue from "../dmQueue.js";
 import type * as http from "../http.js";
 import type * as instagram from "../instagram.js";
 import type * as integrations from "../integrations.js";
 import type * as lib_instagramCrypto from "../lib/instagramCrypto.js";
+import type * as orders from "../orders.js";
+import type * as productClicks from "../productClicks.js";
 import type * as productConfig from "../productConfig.js";
 import type * as productItems from "../productItems.js";
 import type * as products from "../products.js";
@@ -33,12 +38,17 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   catCounter: typeof catCounter;
+  contentLimits: typeof contentLimits;
+  contentStorage: typeof contentStorage;
   crons: typeof crons;
+  deliveries: typeof deliveries;
   dmQueue: typeof dmQueue;
   http: typeof http;
   instagram: typeof instagram;
   integrations: typeof integrations;
   "lib/instagramCrypto": typeof lib_instagramCrypto;
+  orders: typeof orders;
+  productClicks: typeof productClicks;
   productConfig: typeof productConfig;
   productItems: typeof productItems;
   products: typeof products;
@@ -76,4 +86,5 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   betterAuth: import("@convex-dev/better-auth/_generated/component.js").ComponentApi<"betterAuth">;
+  contentStorage: import("@convex-dev/r2/_generated/component.js").ComponentApi<"contentStorage">;
 };

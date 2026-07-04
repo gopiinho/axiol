@@ -62,7 +62,7 @@ export function ProductBuilderLayout({
       <div className="lg:flex lg:gap-8 lg:items-start">
         <div className="lg:flex-1 lg:min-w-0">{children}</div>
         {preview && (
-          <div className="hidden lg:block lg:w-[380px] lg:shrink-0">
+          <div className="hidden lg:block lg:w-[380px] lg:shrink-0 lg:self-stretch">
             <div className="sticky top-8">{preview}</div>
           </div>
         )}

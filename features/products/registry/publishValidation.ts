@@ -88,7 +88,7 @@ const contentDeliveryValidator: PublishValidator = (product) => {
     errors.push({ step: "content", message: "Content configuration is required." });
     return errors;
   }
-  if (config.mode === "upload" && !config.storageId) {
+  if (config.mode === "upload" && !config.r2Key) {
     errors.push({ step: "content", message: "Upload a file before publishing." });
   }
   if (config.mode === "external_link" && !config.url) {

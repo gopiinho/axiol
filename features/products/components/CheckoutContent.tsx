@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { CheckoutFields } from "@/features/products/components/CheckoutForm";
 import { RichTextRenderer } from "@/features/products/components/rich-text";
-import { PurchaseBar } from "@/features/products/components/StickyPurchaseBar";
-import heartPixel from "@/public/icons/heart.png";
+import { CheckoutSidebar } from "@/features/products/components/StickyPurchaseBar";
+import { CheckoutSuccessCard } from "@/features/products/components/CheckoutSuccessCard";
 
 interface CheckoutContentProps {
   username: string;
@@ -16,10 +13,12 @@ interface CheckoutContentProps {
     _id: string;
     name: string;
     type: string;
+    productUrl?: string | null;
     price?: string | null;
     priceCents?: number | null;
     description?: string | null;
     coverImageUrl?: string | null;
+    config?: Record<string, unknown>;
   };
   definition: {
     key: string;
@@ -27,6 +26,19 @@ interface CheckoutContentProps {
     requiresPrice: boolean;
   } | null;
   hasStickyBar: boolean;
+}
+
+function loadCashfreeScript(): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined" && typeof window.Cashfree !== "undefined") {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+    script.onload = () => resolve();
+    document.head.appendChild(script);
+  });
 }
 
 export function CheckoutContent({
@@ -37,33 +49,138 @@ export function CheckoutContent({
 }: CheckoutContentProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const cashfreeRef = useRef<CashfreeInstance | null>(null);
+
+  const checkoutConfig = product.config?.checkout as
+    | { buttonText?: string; collectFields?: Array<{ key: string; enabled: boolean; required: boolean }> }
+    | undefined;
+
+  const collectFields = checkoutConfig?.collectFields ?? [];
+  const phoneField = collectFields.find((f) => f.key === "phone");
+  const showPhone = phoneField?.enabled ?? false;
+  const phoneRequired = phoneField?.required ?? false;
+
+  useEffect(() => {
+    loadCashfreeScript().then(() => {
+      if (!cashfreeRef.current && typeof window.Cashfree !== "undefined") {
+        cashfreeRef.current = window.Cashfree({
+          mode: process.env.NEXT_PUBLIC_CASHFREE_MODE || "sandbox",
+        });
+      }
+    });
+  }, []);
 
   const rawPrice = product.price
     ? product.price
-    : product.priceCents
-      ? product.priceCents > 0
-        ? `${(product.priceCents / 100).toFixed(2)}`
-        : null
+    : product.priceCents && product.priceCents > 0
+      ? `₹ ${product.priceCents}`
       : null;
 
   const displayPrice = rawPrice ? (/^[₹$€£]/.test(rawPrice) ? rawPrice : `₹ ${rawPrice}`) : "Free";
 
-  const ctaText = definition?.defaultButtonText ?? "Get Access";
-  const isSimplifiedForm = ["collect_emails", "applications"].includes(product.type);
+  const ctaText = checkoutConfig?.buttonText || (definition?.defaultButtonText ?? "Get Access");
 
-  const handleSubmit = async () => {
-    if (!name.trim() || !email.trim() || loading) return;
+  const handleSubmit = useCallback(async () => {
+    const newErrors: Record<string, boolean> = {};
+    if (!name.trim()) newErrors.name = true;
+    if (!email.trim()) newErrors.email = true;
+    if (showPhone && !phone.trim()) newErrors.phone = true;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    if (loading) return;
+
+    setErrors({});
     setLoading(true);
-    // TODO: handle payment and order creation
-    setLoading(false);
-  };
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/checkout/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product._id,
+          username,
+          productUrl: product.productUrl,
+          buyerName: name.trim(),
+          buyerEmail: email.trim(),
+          buyerPhone: phone.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Failed to create order");
+
+      const cf = cashfreeRef.current;
+      if (!cf) {
+        setLoading(false);
+        setMessage("Payment system not ready. Please try again.");
+        return;
+      }
+
+      const result = await cf.checkout({
+        paymentSessionId: data.paymentSessionId,
+        redirectTarget: "_modal",
+      });
+
+      if (result.error) {
+        setMessage("Payment was not completed.");
+        return;
+      }
+
+      if (result.redirect) {
+        return;
+      }
+
+      if (result.paymentDetails) {
+        const verifyRes = await fetch(`/api/checkout/verify?orderId=${data.orderId}`);
+        const verifyData = await verifyRes.json();
+
+        if (verifyData.ok && verifyData.status === "paid") {
+          setDownloadUrl(verifyData.downloadUrl ?? null);
+          setStatus("success");
+        } else {
+          setMessage("Payment failed. Please try again.");
+        }
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    name,
+    email,
+    phone,
+    loading,
+    showPhone,
+    phoneRequired,
+    product._id,
+    product.productUrl,
+    username,
+  ]);
+
+  if (status === "success") {
+    return (
+      <CheckoutSuccessCard
+        productName={product.name}
+        downloadUrl={downloadUrl}
+        buyerEmail={email}
+        username={username}
+      />
+    );
+  }
 
   return (
-    <div
-      className="mx-auto flex min-h-screen w-full flex-col"
-      style={{ paddingBottom: hasStickyBar ? "5.5rem" : "2rem" }}
-    >
+    <div className="mx-auto flex min-h-screen w-full flex-col px-3 py-4">
       <Link
         href={`/${username}`}
         className="inline-flex items-center gap-1.5 py-3 transition-colors hover:opacity-70"
@@ -76,118 +193,93 @@ export function CheckoutContent({
         Back
       </Link>
 
-      {product.coverImageUrl && (
-        <div
-          className="mb-6 overflow-hidden"
-          style={{
-            borderRadius: "var(--store-radius, 0.5rem)",
-            marginBottom: "var(--store-section-gap, 1.5rem)",
-          }}
-        >
-          <img
-            src={product.coverImageUrl}
-            alt={product.name}
-            className="w-full object-cover"
-            style={{ maxHeight: "24rem" }}
-          />
-        </div>
-      )}
-
-      <h1
-        className="font-accent mb-2 leading-tight font-bold tracking-tight"
-        style={{
-          color: "var(--store-text)",
-          fontSize: "var(--store-heading-size, 1.375rem)",
-        }}
-      >
-        {product.name}
-      </h1>
-
-      <p
-        className="mb-6 font-semibold"
-        style={{
-          color: "var(--store-accent)",
-          fontSize: "var(--store-price-size, 0.9375rem)",
-        }}
-      >
-        {displayPrice}
-      </p>
-
-      {product.description && (
-        <div
-          style={{
-            marginBottom: "var(--store-section-gap, 1.5rem)",
-            fontSize: "var(--store-body-size, 0.875rem)",
-          }}
-        >
-          <RichTextRenderer html={product.description} style={{ color: "var(--store-text)" }} />
-        </div>
-      )}
-
-      <div className="mb-4 border-t" style={{ borderColor: "var(--store-border)" }}>
-        <h2
-          className="font-semibold tracking-wide uppercase"
-          style={{
-            color: "var(--store-text)",
-            fontSize: "var(--store-body-size, 0.8125rem)",
-            marginTop: "var(--store-section-gap, 1.5rem)",
-            marginBottom: "var(--store-card-gap, 1rem)",
-          }}
-        >
-          Contact Information
-        </h2>
-
-        <CheckoutFields name={name} email={email} onNameChange={setName} onEmailChange={setEmail} />
-
-        {isSimplifiedForm && (
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading}
-            className="mt-6 w-full font-semibold"
-            size="lg"
-            style={{
-              backgroundColor: "var(--store-accent)",
-              borderColor: "var(--store-accent)",
-              color: "white",
-              borderRadius: "var(--store-radius, 0.5rem)",
-              fontSize: "var(--store-body-size, 0.875rem)",
-            }}
-          >
-            {loading ? "Submitting..." : ctaText}
-          </Button>
-        )}
-
-        {isSimplifiedForm && (
-          <div className="border-border/60 mt-12 border-t pt-6">
-            <p
-              className="text-center leading-relaxed"
+      <div className="flex flex-col md:grid md:grid-cols-[1fr_340px] md:items-start md:gap-8 lg:grid-cols-[1fr_380px] lg:gap-12">
+        <div>
+          {product.coverImageUrl && (
+            <div
+              className="overflow-hidden"
               style={{
-                color: "var(--store-text-muted)",
-                fontSize: "var(--store-body-size, 0.8125rem)",
+                borderRadius: "var(--store-radius, 0.5rem)",
+                marginBottom: "var(--store-section-gap, 1.5rem)",
               }}
             >
-              Powered by Axiol{" "}
-              <Image
-                src={heartPixel.src}
-                alt="heart"
-                width={5}
-                height={5}
-                className="inline-block h-2 w-2"
-              />
-            </p>
-          </div>
-        )}
-      </div>
+              <div className="aspect-3/1">
+                <img
+                  src={product.coverImageUrl}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+          )}
 
-      {hasStickyBar && (
-        <PurchaseBar
-          price={displayPrice}
-          buttonText={ctaText}
-          loading={loading}
-          onSubmit={handleSubmit}
-        />
-      )}
+          <h1
+            className="mb-2 leading-tight font-bold tracking-tight"
+            style={{
+              color: "var(--store-text)",
+              fontSize: "var(--store-heading-size, 1.375rem)",
+            }}
+          >
+            {product.name}
+          </h1>
+
+          {!hasStickyBar && (
+            <p
+              className="mb-6 font-semibold"
+              style={{
+                color: "var(--store-accent)",
+                fontSize: "var(--store-price-size, 0.9375rem)",
+              }}
+            >
+              {displayPrice}
+            </p>
+          )}
+
+          {product.description && (
+            <div
+              style={{
+                marginBottom: "var(--store-section-gap, 1.5rem)",
+                fontSize: "var(--store-body-size, 0.875rem)",
+              }}
+            >
+              <RichTextRenderer
+                html={product.description}
+                className="product-description"
+                style={{ color: "var(--store-text)" }}
+              />
+            </div>
+          )}
+        </div>
+
+        <div>
+          <CheckoutSidebar
+            price={displayPrice}
+            ctaText={ctaText}
+            loading={loading}
+            message={message}
+            name={name}
+            email={email}
+            phone={phone}
+            onNameChange={(v) => {
+              setName(v);
+              setErrors((prev) => ({ ...prev, name: false }));
+            }}
+            onEmailChange={(v) => {
+              setEmail(v);
+              setErrors((prev) => ({ ...prev, email: false }));
+            }}
+            onPhoneChange={(v) => {
+              setPhone(v);
+              setErrors((prev) => ({ ...prev, phone: false }));
+            }}
+            onSubmit={handleSubmit}
+            showPrice={hasStickyBar}
+            showPhone={showPhone}
+            phoneRequired={phoneRequired}
+            errors={errors}
+          />
+        </div>
+      </div>
     </div>
   );
 }

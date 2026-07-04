@@ -18,7 +18,7 @@ import type { ProductTypeKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
 import { STEP_COMPONENTS } from "@/features/products/builder/steps/StepRegistry";
 import { ProductStepPreview } from "@/features/products/builder/previews/ProductStepPreview";
-import type { ThumbnailLiveState } from "@/features/products/components/cards/types";
+import type { ThumbnailLiveState, CheckoutLiveState } from "@/features/products/components/cards/types";
 
 export default function EditProduct({
   params,
@@ -40,6 +40,16 @@ export default function EditProduct({
     style: "button",
     title: "",
     buttonText: "Download Now",
+  });
+  const [checkoutLiveState, setCheckoutLiveState] = useState<CheckoutLiveState>({
+    name: "",
+    description: "",
+    price: "",
+    coverImageUrl: null,
+    phoneEnabled: false,
+    username: "",
+    type: "",
+    checkoutButtonText: "Buy Now",
   });
   const saveFnsRef = useRef<Map<number, () => Promise<void>>>(new Map());
 
@@ -70,8 +80,23 @@ export default function EditProduct({
         imageUrl: product.thumbnailImageUrl ?? null,
         price: product.price,
       });
+      const checkoutConfig = product.config?.checkout as {
+        buttonText?: string;
+        collectFields?: Array<{ key: string; enabled: boolean }>;
+      } | undefined;
+      const phoneField = checkoutConfig?.collectFields?.find((f) => f.key === "phone");
+      setCheckoutLiveState({
+        name: product.name,
+        description: product.description || "",
+        price: product.price || "",
+        coverImageUrl: product.coverImageUrl ?? null,
+        phoneEnabled: phoneField?.enabled ?? false,
+        username: user?.username || "",
+        type: product.type,
+        checkoutButtonText: checkoutConfig?.buttonText || "Buy Now",
+      });
     }
-  }, [product, definition]);
+  }, [product, definition, user?.username]);
 
   const handleRegisterSave = useCallback((stepIndex: number, fn: () => Promise<void>) => {
     saveFnsRef.current.set(stepIndex, fn);
@@ -208,7 +233,11 @@ export default function EditProduct({
             preview={
               <ProductStepPreview
                 stepKey={definition.steps[currentStepIndex]}
-                liveState={thumbnailLiveState}
+                liveState={
+                  definition.steps[currentStepIndex] === "checkout"
+                    ? checkoutLiveState
+                    : thumbnailLiveState
+                }
               />
             }
           >
@@ -238,7 +267,9 @@ export default function EditProduct({
                     visible={index === currentStepIndex}
                     {...(stepKey === "thumbnail"
                       ? ({ onLiveChange: setThumbnailLiveState } as Record<string, unknown>)
-                      : {})}
+                      : stepKey === "checkout"
+                        ? ({ onLiveChange: setCheckoutLiveState } as Record<string, unknown>)
+                        : {})}
                   />
                 </div>
               );
