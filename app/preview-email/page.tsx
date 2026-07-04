@@ -1,6 +1,7 @@
 import { render } from "react-email";
 import { headers } from "next/headers";
 import { DownloadReceipt } from "@/emails/download-receipt";
+import { AutoResizeIframe } from "./auto-resize-iframe";
 
 export default async function PreviewEmailPage() {
   const h = await headers();
@@ -62,18 +63,7 @@ export default async function PreviewEmailPage() {
           and refresh
         </span>
       </div>
-      <iframe
-        srcDoc={html}
-        style={{
-          width: "100%",
-          maxWidth: 600,
-          height: "80vh",
-          border: 0,
-          borderRadius: 8,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-          background: "#fff",
-        }}
-      />
+      <AutoResizeIframe html={html} />
     </div>
   );
 }

@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
             const amount = new Intl.NumberFormat("en-IN", {
               style: "currency",
               currency: existing.currency,
-            }).format(existing.amountCents / 100);
+            }).format(existing.amountCents);
 
             const orderDate = new Date(
               existing.paidAt ?? existing.createdAt
