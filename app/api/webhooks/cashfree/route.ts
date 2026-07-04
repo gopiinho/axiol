@@ -70,12 +70,12 @@ export async function POST(request: NextRequest) {
 
             const storeName = productInfo?.storeName || "Axiol";
             const productName = productInfo?.name || "your product";
-            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
 
             const amount = new Intl.NumberFormat("en-IN", {
               style: "currency",
               currency: existing.currency,
-            }).format(existing.amountCents / 100);
+            }).format(existing.amountCents);
 
             const orderDate = new Date(
               existing.paidAt ?? existing.createdAt

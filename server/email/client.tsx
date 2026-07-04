@@ -25,7 +25,6 @@ export async function sendDownloadEmail(
         downloadUrl={downloadUrl}
         siteUrl={siteUrl}
         customerName={customerName}
-        customerEmail={to}
         amount={amount}
         orderId={orderId}
         orderDate={orderDate}

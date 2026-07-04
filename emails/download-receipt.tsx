@@ -17,7 +17,6 @@ interface DownloadReceiptProps {
   downloadUrl: string;
   siteUrl: string;
   customerName: string;
-  customerEmail: string;
   amount: string;
   orderId: string;
   orderDate: string;
@@ -29,7 +28,6 @@ export function DownloadReceipt({
   downloadUrl,
   siteUrl,
   customerName,
-  customerEmail,
   amount,
   orderId,
   orderDate,
@@ -125,7 +123,6 @@ export function DownloadReceipt({
 
             <Row label="Product" value={productName} />
             <Row label="Store" value={storeName} />
-            <Row label="Email" value={customerEmail} />
             <Row label="Amount" value={amount} />
             {orderId ? <Row label="Order ID" value={orderId} /> : null}
             {orderDate ? <Row label="Date" value={orderDate} /> : null}
