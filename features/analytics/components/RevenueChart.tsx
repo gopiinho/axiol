@@ -31,10 +31,10 @@ function fmt(n: number): string {
   return Number.isInteger(n) ? n.toString() : n.toFixed(1);
 }
 
-function formatRevenueTick(value: number, dataMax: number): string {
-  if (dataMax >= 10_000_000) return `₹${fmt(value / 10_000_000)}Cr`;
-  if (dataMax >= 100_000) return `₹${fmt(value / 100_000)}L`;
-  if (dataMax >= 1_000) return `₹${fmt(value / 1_000)}K`;
+function formatRevenueTick(value: number): string {
+  if (value >= 10_000_000) return `₹${fmt(value / 10_000_000)}Cr`;
+  if (value >= 100_000) return `₹${fmt(value / 100_000)}L`;
+  if (value >= 1_000) return `₹${fmt(value / 1_000)}K`;
   return `₹${value}`;
 }
 
@@ -44,19 +44,9 @@ function formatCountTick(value: number): string {
   return v.toString();
 }
 
-function niceMax(value: number): number {
-  if (value <= 0) return 4;
-  const ceil = Math.ceil(value * 1.15);
-  const magnitude = Math.pow(10, Math.floor(Math.log10(ceil)));
-  return Math.ceil(ceil / magnitude) * magnitude;
-}
-
 const TICK_COUNT = 5;
 
 export function RevenueChart({ data, loading }: RevenueChartProps) {
-  const revenueMax = Math.max(...data.map((d) => d.revenue), 0);
-  const countMax = Math.max(...data.map((d) => Math.max(d.sales, d.clicks)), 0);
-
   return (
     <div className="border-border/70 bg-card rounded-xs border">
       <div className="py-8 sm:px-6 lg:py-8">
@@ -82,9 +72,9 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                tickFormatter={(v: number) => formatRevenueTick(v, revenueMax)}
+                tickFormatter={formatRevenueTick}
                 tickCount={TICK_COUNT}
-                domain={[0, niceMax(revenueMax)]}
+                domain={[0, "dataMax"]}
                 width={50}
               />
               <YAxis
@@ -96,7 +86,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 tickFormatter={formatCountTick}
                 tickCount={TICK_COUNT}
                 allowDecimals={false}
-                domain={[0, niceMax(countMax)]}
+                domain={[0, "dataMax"]}
                 width={38}
               />
               <RechartsTooltip
