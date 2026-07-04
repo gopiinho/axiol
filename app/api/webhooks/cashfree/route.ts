@@ -72,12 +72,29 @@ export async function POST(request: NextRequest) {
             const productName = productInfo?.name ?? "your product";
             const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
 
+            const amount = new Intl.NumberFormat("en-IN", {
+              style: "currency",
+              currency: existing.currency,
+            }).format(existing.amountCents / 100);
+
+            const orderDate = new Date(
+              existing.paidAt ?? existing.createdAt
+            ).toLocaleDateString("en-IN", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+
             await sendDownloadEmail(
               existing.buyerEmail,
               productName,
               `${siteUrl}${tokenResult.downloadUrl}`,
               storeName,
-              siteUrl
+              siteUrl,
+              existing.buyerName,
+              amount,
+              existing.paymentReference ?? "",
+              orderDate
             );
           } catch (e) {
             console.error("Delivery generation failed for webhook:", e);
