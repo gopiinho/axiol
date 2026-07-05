@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import type { Id, Doc } from "@/convex/_generated/dataModel";
 import {
   useProducts,
-  usePublishProduct,
   useUnpublishProduct,
   useDeleteProduct,
 } from "../hooks/useProduct";
@@ -28,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, EyeOff, Trash2, Send, Edit, Loader2 } from "lucide-react";
+import { MoreHorizontal, EyeOff, Trash2, Edit, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import NoProducts from "@/components/products/NoProducts";
@@ -47,7 +46,6 @@ const statusLabels: Record<string, string> = {
 
 function ProductMobileCard({
   product,
-  onPublish,
   onUnpublish,
   onDelete,
 }: {
@@ -60,15 +58,13 @@ function ProductMobileCard({
     revenueCents: number;
     clicks: number;
   };
-  onPublish: (id: Id<"products">) => void;
   onUnpublish: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
 }) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  const needsItems = product.type === "affiliate" && product.itemCount === 0;
+  const [unpublishOpen, setUnpublishOpen] = useState(false);
 
   return (
     <>
@@ -94,18 +90,21 @@ function ProductMobileCard({
           )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{product.name}</p>
-            {product.username && product.status !== "draft" && (
-              <a
-                href={`${typeof window !== "undefined" ? window.location.origin : ""}/${product.username}/p/${product.productUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="text-primary mt-0.5 block truncate text-[10px] hover:underline"
-              >
-                {typeof window !== "undefined" ? window.location.host : ""}/{product.username}/p/
-                {product.productUrl}
-              </a>
-            )}
+            <a
+              href={
+                product.username && product.status !== "draft"
+                  ? `${typeof window !== "undefined" ? window.location.origin.replace("://www.", "://") : ""}/${product.username}/p/${product.productUrl}`
+                  : undefined
+              }
+              target={product.username && product.status !== "draft" ? "_blank" : undefined}
+              rel={product.username && product.status !== "draft" ? "noopener noreferrer" : undefined}
+              onClick={product.username && product.status !== "draft" ? undefined : (e) => e.stopPropagation()}
+              tabIndex={product.username && product.status !== "draft" ? undefined : -1}
+              className={`text-primary mt-0.5 block truncate text-[10px] hover:underline ${product.username && product.status !== "draft" ? "" : "invisible pointer-events-none"}`}
+            >
+              {typeof window !== "undefined" ? window.location.host.replace(/^www\./, "") : ""}/{product.username}/p/
+              {product.productUrl}
+            </a>
             <div className="mt-0.5 flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-1">
                 <ProductTypeIcon type={product.type} className="text-muted-foreground h-3 w-3" />
@@ -152,18 +151,8 @@ function ProductMobileCard({
                 <Edit className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
-              {product.status !== "published" && (
-                <DropdownMenuItem
-                  onClick={() => onPublish(product._id)}
-                  disabled={needsItems}
-                  title={needsItems ? "Add at least one item before publishing" : undefined}
-                >
-                  <Send className="h-4 w-4" />
-                  Publish
-                </DropdownMenuItem>
-              )}
               {product.status === "published" && (
-                <DropdownMenuItem onClick={() => onUnpublish(product._id)}>
+                <DropdownMenuItem onClick={() => setUnpublishOpen(true)}>
                   <EyeOff className="h-4 w-4" />
                   Unpublish
                 </DropdownMenuItem>
@@ -204,23 +193,33 @@ function ProductMobileCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={unpublishOpen} onOpenChange={setUnpublishOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unpublish &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This product will no longer show up in your store. Customers with the link
+              won&rsquo;t be able to access it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button variant="destructive" onClick={() => { onUnpublish(product._id); setUnpublishOpen(false); }}>
+              Unpublish
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
 
 export function ProductTable() {
   const { products, isLoading } = useProducts();
-  const publishProduct = usePublishProduct();
   const unpublishProduct = useUnpublishProduct();
   const deleteProduct = useDeleteProduct();
 
-  const handlePublish = async (id: Id<"products">) => {
-    try {
-      await publishProduct({ id });
-    } catch {
-      /* handled by toast */
-    }
-  };
   const handleUnpublish = async (id: Id<"products">) => {
     try {
       await unpublishProduct({ id });
@@ -256,7 +255,6 @@ export function ProductTable() {
           <ProductMobileCard
             key={product._id}
             product={product}
-            onPublish={handlePublish}
             onUnpublish={handleUnpublish}
             onDelete={handleDelete}
           />
@@ -265,10 +263,10 @@ export function ProductTable() {
 
       {/* Desktop table */}
       <div className="bg-card hidden overflow-hidden rounded-xs sm:block">
-        <table className="w-full">
+        <table className="w-full table-fixed">
           <thead className="bg-muted/50">
             <tr className="border-border/50 border-b">
-              <th className="text-muted-foreground px-4 py-3 text-left text-sm font-black">
+              <th className="text-muted-foreground px-4 py-3 text-left text-sm font-black w-[35%]">
                 Product
               </th>
               <th className="text-muted-foreground hidden px-4 py-3 text-left text-sm font-black md:table-cell">
@@ -295,7 +293,6 @@ export function ProductTable() {
               <ProductRow
                 key={product._id}
                 product={product}
-                onPublish={handlePublish}
                 onUnpublish={handleUnpublish}
                 onDelete={handleDelete}
               />

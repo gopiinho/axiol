@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, EyeOff, Trash2, Send, Edit, Loader2 } from "lucide-react";
+import { MoreHorizontal, EyeOff, Trash2, Edit, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductTypeIcon } from "./ProductTypeIcon";
 
@@ -34,7 +34,6 @@ interface ProductRowProps {
     revenueCents: number;
     clicks: number;
   };
-  onPublish: (id: Id<"products">) => void;
   onUnpublish: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
 }
@@ -51,12 +50,11 @@ const statusLabels: Record<string, string> = {
   archived: "Archived",
 };
 
-export function ProductRow({ product, onPublish, onUnpublish, onDelete }: ProductRowProps) {
+export function ProductRow({ product, onUnpublish, onDelete }: ProductRowProps) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  const needsItems = product.type === "affiliate" && product.itemCount === 0;
+  const [unpublishOpen, setUnpublishOpen] = useState(false);
 
   const handleClick = () => {
     router.push(`/dashboard/products/${product._id}/edit`);
@@ -93,18 +91,21 @@ export function ProductRow({ product, onPublish, onUnpublish, onDelete }: Produc
                 />
                 <p className="max-w-52 truncate text-sm font-semibold">{product.name}</p>
               </div>
-              {product.username && product.status !== "draft" && (
-                <a
-                  href={`${typeof window !== "undefined" ? window.location.origin : ""}/${product.username}/p/${product.productUrl}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-primary block max-w-52 truncate text-[11px] hover:underline"
-                >
-                  {typeof window !== "undefined" ? window.location.host : ""}/{product.username}/p/
-                  {product.productUrl}
-                </a>
-              )}
+              <a
+                href={
+                  product.username && product.status !== "draft"
+                    ? `${typeof window !== "undefined" ? window.location.origin.replace("://www.", "://") : ""}/${product.username}/p/${product.productUrl}`
+                    : undefined
+                }
+                target={product.username && product.status !== "draft" ? "_blank" : undefined}
+                rel={product.username && product.status !== "draft" ? "noopener noreferrer" : undefined}
+                onClick={product.username && product.status !== "draft" ? undefined : (e) => e.stopPropagation()}
+                tabIndex={product.username && product.status !== "draft" ? undefined : -1}
+                className={`text-primary mt-0.5 block max-w-52 truncate text-[11px] hover:underline ${product.username && product.status !== "draft" ? "" : "invisible pointer-events-none"}`}
+              >
+                {typeof window !== "undefined" ? window.location.host.replace(/^www\./, "") : ""}/{product.username}/p/
+                {product.productUrl}
+              </a>
             </div>
           </div>
         </td>
@@ -144,18 +145,8 @@ export function ProductRow({ product, onPublish, onUnpublish, onDelete }: Produc
                 <Edit className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
-              {product.status !== "published" && (
-                <DropdownMenuItem
-                  onClick={() => onPublish(product._id)}
-                  disabled={needsItems}
-                  title={needsItems ? "Add at least one item before publishing" : undefined}
-                >
-                  <Send className="h-4 w-4" />
-                  Publish
-                </DropdownMenuItem>
-              )}
               {product.status === "published" && (
-                <DropdownMenuItem onClick={() => onUnpublish(product._id)}>
+                <DropdownMenuItem onClick={() => setUnpublishOpen(true)}>
                   <EyeOff className="h-4 w-4" />
                   Unpublish
                 </DropdownMenuItem>
@@ -196,6 +187,24 @@ export function ProductRow({ product, onPublish, onUnpublish, onDelete }: Produc
               }}
             >
               {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={unpublishOpen} onOpenChange={setUnpublishOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unpublish &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This product will no longer show up in your store. Customers with the link
+              won&rsquo;t be able to access it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button variant="destructive" onClick={() => { onUnpublish(product._id); setUnpublishOpen(false); }}>
+              Unpublish
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
