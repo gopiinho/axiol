@@ -3,14 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Home, LogOut, Box, Settings, Store, Zap, ChevronLeft } from "lucide-react";
+import { BarChart3, Home, LogOut, Box, Settings, Store, Zap, ChevronLeft, Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useUser } from "@/features/auth/client/UserContext";
 import BottomNav from "@/components/BottomNav";
 import { UserProfile } from "./UserProfile";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -112,9 +111,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
-              {isLoggingOut ? "Logging out..." : "Log out"}
-            </AlertDialogAction>
+            <Button variant="default" onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : "Log out"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
