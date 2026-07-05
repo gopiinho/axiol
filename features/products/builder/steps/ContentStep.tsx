@@ -11,7 +11,6 @@ import { Loader2, Upload, X, Plus, Link, Pencil } from "lucide-react";
 import { useUploadWithProgress } from "../../hooks/useUploadWithProgress";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -101,6 +100,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
   }>({});
   const [isDragging, setIsDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FileEntry | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const updateContentConfig = useUpdateContentConfig();
@@ -182,6 +182,8 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
 
+    setDeleting(true);
+
     const isSaved = deleteTarget.r2Key === savedFile?.r2Key;
 
     if (isSaved) {
@@ -198,6 +200,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
           file: err instanceof Error ? err.message : "Failed to delete file. Please try again.",
         }));
         setDeleteTarget(null);
+        setDeleting(false);
         return;
       }
     } else {
@@ -211,6 +214,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
       }
     }
 
+    setDeleting(false);
     setDeleteTarget(null);
   };
 
@@ -492,12 +496,13 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <Button
+              variant="destructive"
+              disabled={deleting}
               onClick={handleDeleteConfirm}
-              className="bg-destructive hover:bg-destructive/90"
             >
-              Delete
-            </AlertDialogAction>
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
