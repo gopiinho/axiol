@@ -7,12 +7,12 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Save, ArrowRight, Archive, Upload, Loader2 } from "lucide-react";
+import { Save, ArrowRight, EyeOff, Upload, Loader2 } from "lucide-react";
 import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon";
 import { ProductItemsManager } from "@/features/products/components/ProductItemsManager";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import { useUser } from "@/features/auth/client/UserContext";
-import { usePublishProduct, useArchiveProduct } from "@/features/products/hooks/useProduct";
+import { usePublishProduct, useUnpublishProduct } from "@/features/products/hooks/useProduct";
 import { getProductTypeDefinition } from "@/features/products/registry/productTypes";
 import type { ProductTypeKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
@@ -57,7 +57,7 @@ export default function EditProduct({
   const saveFnsRef = useRef<Map<number, () => Promise<void>>>(new Map());
 
   const publishProduct = usePublishProduct();
-  const archiveProduct = useArchiveProduct();
+  const unpublishProduct = useUnpublishProduct();
 
   const isLoading = product === undefined || items === undefined;
   const needsItems = product?.type === "affiliate" && (items?.length ?? 0) === 0;
@@ -141,10 +141,34 @@ export default function EditProduct({
     }
   };
 
-  const handleArchive = async () => {
+  const handleUnpublish = async () => {
     try {
-      await archiveProduct({ id: productId });
+      await unpublishProduct({ id: productId });
     } catch {}
+  };
+
+  const handleSaveStay = async () => {
+    setBusyAction("save");
+    try {
+      await saveFnsRef.current.get(currentStepIndex)?.();
+    } catch {
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const handleNextForPublished = async () => {
+    if (!definition || busyAction) return;
+    setBusyAction("next");
+    try {
+      await saveFnsRef.current.get(currentStepIndex)?.();
+      if (!isLastStep) {
+        setCurrentStepIndex((prev) => Math.min(prev + 1, definition.steps.length - 1));
+      }
+    } catch {
+    } finally {
+      setBusyAction(null);
+    }
   };
 
   return (
@@ -202,11 +226,15 @@ export default function EditProduct({
 
               {product.status === "published" && (
                 <>
-                  <Button variant="outline" onClick={handleArchive}>
-                    <Archive className="h-4 w-4" />
-                    Archive
+                  <Button variant="outline" onClick={handleUnpublish}>
+                    <EyeOff className="h-4 w-4" />
+                    Unpublish
                   </Button>
-                  <Button variant="default" onClick={handleSave} disabled={!!busyAction}>
+                  <Button
+                    variant={isLastStep ? "default" : "outline"}
+                    onClick={handleSaveStay}
+                    disabled={!!busyAction}
+                  >
                     {busyAction === "save" ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
@@ -214,6 +242,20 @@ export default function EditProduct({
                     )}
                     Save
                   </Button>
+                  {!isLastStep && (
+                    <Button
+                      variant="default"
+                      onClick={handleNextForPublished}
+                      disabled={!!busyAction}
+                    >
+                      Next
+                      {busyAction === "next" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ArrowRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
                 </>
               )}
             </div>

@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Archive, Trash2, Send, Edit, Loader2 } from "lucide-react";
+import { MoreHorizontal, EyeOff, Trash2, Send, Edit, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductTypeIcon } from "./ProductTypeIcon";
 
@@ -35,7 +35,7 @@ interface ProductRowProps {
     clicks: number;
   };
   onPublish: (id: Id<"products">) => void;
-  onArchive: (id: Id<"products">) => void;
+  onUnpublish: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
 }
 
@@ -51,7 +51,7 @@ const statusLabels: Record<string, string> = {
   archived: "Archived",
 };
 
-export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductRowProps) {
+export function ProductRow({ product, onPublish, onUnpublish, onDelete }: ProductRowProps) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -154,10 +154,10 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
                   Publish
                 </DropdownMenuItem>
               )}
-              {product.status !== "archived" && (
-                <DropdownMenuItem onClick={() => onArchive(product._id)}>
-                  <Archive className="h-4 w-4" />
-                  Archive
+              {product.status === "published" && (
+                <DropdownMenuItem onClick={() => onUnpublish(product._id)}>
+                  <EyeOff className="h-4 w-4" />
+                  Unpublish
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />

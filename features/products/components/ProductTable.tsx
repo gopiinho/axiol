@@ -6,7 +6,7 @@ import type { Id, Doc } from "@/convex/_generated/dataModel";
 import {
   useProducts,
   usePublishProduct,
-  useArchiveProduct,
+  useUnpublishProduct,
   useDeleteProduct,
 } from "../hooks/useProduct";
 import { ProductRow } from "./ProductRow";
@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Archive, Trash2, Send, Edit, Loader2 } from "lucide-react";
+import { MoreHorizontal, EyeOff, Trash2, Send, Edit, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import NoProducts from "@/components/products/NoProducts";
@@ -48,7 +48,7 @@ const statusLabels: Record<string, string> = {
 function ProductMobileCard({
   product,
   onPublish,
-  onArchive,
+  onUnpublish,
   onDelete,
 }: {
   product: Doc<"products"> & {
@@ -61,7 +61,7 @@ function ProductMobileCard({
     clicks: number;
   };
   onPublish: (id: Id<"products">) => void;
-  onArchive: (id: Id<"products">) => void;
+  onUnpublish: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
 }) {
   const router = useRouter();
@@ -162,10 +162,10 @@ function ProductMobileCard({
                   Publish
                 </DropdownMenuItem>
               )}
-              {product.status !== "archived" && (
-                <DropdownMenuItem onClick={() => onArchive(product._id)}>
-                  <Archive className="h-4 w-4" />
-                  Archive
+              {product.status === "published" && (
+                <DropdownMenuItem onClick={() => onUnpublish(product._id)}>
+                  <EyeOff className="h-4 w-4" />
+                  Unpublish
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
@@ -211,7 +211,7 @@ function ProductMobileCard({
 export function ProductTable() {
   const { products, isLoading } = useProducts();
   const publishProduct = usePublishProduct();
-  const archiveProduct = useArchiveProduct();
+  const unpublishProduct = useUnpublishProduct();
   const deleteProduct = useDeleteProduct();
 
   const handlePublish = async (id: Id<"products">) => {
@@ -221,9 +221,9 @@ export function ProductTable() {
       /* handled by toast */
     }
   };
-  const handleArchive = async (id: Id<"products">) => {
+  const handleUnpublish = async (id: Id<"products">) => {
     try {
-      await archiveProduct({ id });
+      await unpublishProduct({ id });
     } catch {
       /* handled by toast */
     }
@@ -257,7 +257,7 @@ export function ProductTable() {
             key={product._id}
             product={product}
             onPublish={handlePublish}
-            onArchive={handleArchive}
+            onUnpublish={handleUnpublish}
             onDelete={handleDelete}
           />
         ))}
@@ -296,7 +296,7 @@ export function ProductTable() {
                 key={product._id}
                 product={product}
                 onPublish={handlePublish}
-                onArchive={handleArchive}
+                onUnpublish={handleUnpublish}
                 onDelete={handleDelete}
               />
             ))}

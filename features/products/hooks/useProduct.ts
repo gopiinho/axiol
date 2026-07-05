@@ -46,6 +46,10 @@ export function useArchiveProduct() {
   return useMutation(api.products.archive);
 }
 
+export function useUnpublishProduct() {
+  return useMutation(api.products.unpublish);
+}
+
 export function useCreateProductItem() {
   return useMutation(api.productItems.create);
 }
