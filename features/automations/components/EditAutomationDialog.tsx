@@ -157,8 +157,8 @@ export default function EditAutomationDialog({
           <div
             className={
               mapping.active
-                ? "bg-foreground text-background mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-emerald-500 px-4 py-3"
-                : "bg-foreground text-background mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-amber-500 px-4 py-3"
+                ? "bg-foreground/10 mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-emerald-500 px-4 py-3"
+                : "bg-foreground/10 mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-amber-500 px-4 py-3"
             }
           >
             <Circle
@@ -170,7 +170,7 @@ export default function EditAutomationDialog({
             />
             <div>
               <p className="text-sm font-semibold">{mapping.active ? "Active" : "Draft"}</p>
-              <p className="text-muted text-xs">
+              <p className="text-muted-foreground text-xs">
                 {mapping.active
                   ? "Auto-DM is enabled and responding to comments on this reel."
                   : "Not sending DMs yet. Toggle the switch to activate."}

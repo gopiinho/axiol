@@ -161,7 +161,11 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
+              <DropdownMenuItem
+                className="text-destructive"
+                variant="destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
                 <Trash2 className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -181,15 +185,15 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            <Button
+              variant="destructive"
               onClick={() => {
                 setDeleteOpen(false);
                 onDelete(product._id);
               }}
             >
               Delete
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
