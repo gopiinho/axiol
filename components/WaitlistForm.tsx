@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 
 const PARTICLES = [
@@ -137,7 +138,7 @@ export function WaitlistForm() {
           disabled={state === "loading"}
           className="h-14 px-8 text-base sm:text-lg"
         >
-          {state === "loading" ? "Joining..." : "Join waitlist"}
+          {state === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Join waitlist"}
         </Button>
       </form>
       {state === "error" && (

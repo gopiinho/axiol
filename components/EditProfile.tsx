@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, Instagram, Youtube } from "lucide-react";
+import { Globe, Instagram, Loader2, Youtube } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -77,7 +77,7 @@ export function EditProfile({
         <DialogHeader className="border-border/70 flex-row items-center justify-between border-b px-5 py-3.5">
           <DialogTitle className="text-lg font-semibold">Edit store</DialogTitle>
           <Button size="sm" onClick={onSave} disabled={saving} className="px-5">
-            {saving ? "Saving..." : "Save"}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
           </Button>
         </DialogHeader>
 

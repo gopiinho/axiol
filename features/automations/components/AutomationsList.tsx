@@ -27,7 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Trash2, Edit, Send, MoreHorizontal, MessageSquareQuote, ExternalLink } from "lucide-react";
+import { Trash2, Edit, Send, MoreHorizontal, MessageSquareQuote, ExternalLink, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EditAutomationDialog from "./EditAutomationDialog";
 
@@ -431,7 +431,7 @@ export default function AutomationsList() {
               disabled={deleteLoading}
               onClick={() => deleteTarget && handleDelete(deleteTarget)}
             >
-              {deleteLoading ? "Deleting..." : "Delete"}
+              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

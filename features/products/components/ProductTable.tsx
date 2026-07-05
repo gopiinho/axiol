@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -29,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Archive, Trash2, Send, Edit } from "lucide-react";
+import { MoreHorizontal, Archive, Trash2, Send, Edit, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import NoProducts from "@/components/products/NoProducts";
@@ -67,6 +66,7 @@ function ProductMobileCard({
 }) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const needsItems = product.type === "affiliate" && product.itemCount === 0;
 
@@ -189,15 +189,18 @@ function ProductMobileCard({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/90"
-              onClick={() => {
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                await onDelete(product._id);
+                setDeleting(false);
                 setDeleteOpen(false);
-                onDelete(product._id);
               }}
             >
-              Delete
-            </AlertDialogAction>
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

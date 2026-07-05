@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -21,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Archive, Trash2, Send, Edit } from "lucide-react";
+import { MoreHorizontal, Archive, Trash2, Send, Edit, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductTypeIcon } from "./ProductTypeIcon";
 
@@ -55,6 +54,7 @@ const statusLabels: Record<string, string> = {
 export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductRowProps) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const needsItems = product.type === "affiliate" && product.itemCount === 0;
 
@@ -187,12 +187,15 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button
               variant="destructive"
-              onClick={() => {
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                await onDelete(product._id);
+                setDeleting(false);
                 setDeleteOpen(false);
-                onDelete(product._id);
               }}
             >
-              Delete
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

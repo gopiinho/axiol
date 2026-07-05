@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { PalettePicker } from "./PalettePicker";
 import { LayoutPicker } from "./LayoutPicker";
 import type { PaletteConfig, LayoutConfig, BackgroundPatternValue } from "@/lib/themes";
@@ -43,7 +44,7 @@ export function ThemeEditor({
             Cancel
           </Button>
           <Button size="sm" onClick={onSave} disabled={saving || !dirty}>
-            {saving ? "Saving..." : "Save Theme"}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
           </Button>
         </div>
       </div>

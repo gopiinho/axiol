@@ -278,17 +278,8 @@ function DeleteAccountDialog({
             onClick={handleDelete}
             disabled={!isConfirmed || isDeleting}
           >
-            {isDeleting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              <>
-                <Trash2 className="h-4 w-4" />
-                Delete Account
-              </>
-            )}
+            {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            Delete Account
           </Button>
         </DialogFooter>
       </DialogContent>

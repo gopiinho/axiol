@@ -257,14 +257,14 @@ export default function MyStorePage() {
                 {publicUrl && (
                   <Button variant="outline" size="sm" className="gap-1.5" asChild>
                     <Link href={`/${user?.username}`} target="_blank">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Visit Store
+                      <ExternalLink className="h-3 w-3" />
+                      Visit
                     </Link>
                   </Button>
                 )}
                 <Button size="sm" onClick={openEditModal} className="gap-1.5">
-                  <Pencil className="h-3.5 w-3.5" />
-                  Edit Store
+                  <Pencil className="h-3 w-3" />
+                  Edit
                 </Button>
               </div>
             </div>

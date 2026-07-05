@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Circle } from "lucide-react";
+import { Circle, Loader2 } from "lucide-react";
 import KeywordEditor from "./KeywordEditor";
 
 interface MappingData {
@@ -146,9 +146,9 @@ export default function EditAutomationDialog({
               size="sm"
               onClick={handleSave}
               disabled={saving || !keywordValid || !hasChanges}
-              className="px-5"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {saving ? "" : "Save"}
             </Button>
           </div>
         </DialogHeader>

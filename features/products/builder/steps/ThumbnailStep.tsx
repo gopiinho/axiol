@@ -244,7 +244,7 @@ export function ThumbnailStep({
                 ) : (
                   <Plus className="h-4 w-4" strokeWidth={2} />
                 )}
-                {uploading ? "Uploading..." : "Upload photo"}
+                Upload photo
               </Button>
               <span className="text-muted-foreground text-xs">
                 Images should be square, at least 400x400px, and 72 DPI (dots per inch).

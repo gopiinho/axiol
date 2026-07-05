@@ -7,7 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Save, ArrowRight, Archive, Upload } from "lucide-react";
+import { Save, ArrowRight, Archive, Upload, Loader2 } from "lucide-react";
 import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon";
 import { ProductItemsManager } from "@/features/products/components/ProductItemsManager";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
@@ -36,7 +36,7 @@ export default function EditProduct({
   });
 
   const router = useRouter();
-  const [saving, setSaving] = useState(false);
+  const [busyAction, setBusyAction] = useState<"save" | "next" | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [thumbnailLiveState, setThumbnailLiveState] = useState<ThumbnailLiveState>({
@@ -108,8 +108,8 @@ export default function EditProduct({
   }, []);
 
   const handleNext = async () => {
-    if (!definition || saving) return;
-    setSaving(true);
+    if (!definition || busyAction) return;
+    setBusyAction("next");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
       if (isLastStep) {
@@ -126,18 +126,18 @@ export default function EditProduct({
       }
     } catch {
     } finally {
-      setSaving(false);
+      setBusyAction(null);
     }
   };
 
   const handleSave = async () => {
-    setSaving(true);
+    setBusyAction("save");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
       router.push("/dashboard/products");
     } catch {
     } finally {
-      setSaving(false);
+      setBusyAction(null);
     }
   };
 
@@ -163,31 +163,39 @@ export default function EditProduct({
             <div className="flex gap-2">
               {(product.status === "draft" || product.status === "archived") && (
                 <>
-                  <Button variant="outline" onClick={handleSave} disabled={saving}>
-                    <Save className="h-4 w-4" />
-                    {saving ? "Saving..." : "Save"}
+                  <Button variant="outline" onClick={handleSave} disabled={!!busyAction}>
+                    {busyAction === "save" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Save
                   </Button>
                   <Button
                     variant="default"
                     onClick={handleNext}
-                    disabled={saving || publishing || needsItems}
+                    disabled={!!busyAction || publishing || needsItems}
                     title={needsItems ? "Add at least one item before publishing" : undefined}
                   >
                     {isLastStep ? (
-                      publishing ? (
-                        "Publishing..."
-                      ) : (
-                        <>
+                      <>
+                        {publishing ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
                           <Upload className="h-4 w-4" />
-                          Publish
-                        </>
-                      )
-                    ) : saving ? (
-                      "Saving..."
+                        )}
+                        Publish
+                      </>
                     ) : (
-                      "Next"
+                      <>
+                        Next
+                        {busyAction === "next" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <ArrowRight className="h-4 w-4" />
+                        )}
+                      </>
                     )}
-                    {!isLastStep && !saving && <ArrowRight className="ml-1.5 h-4 w-4" />}
                   </Button>
                 </>
               )}
@@ -195,12 +203,16 @@ export default function EditProduct({
               {product.status === "published" && (
                 <>
                   <Button variant="outline" onClick={handleArchive}>
-                    <Archive className="mr-1.5 h-4 w-4" />
+                    <Archive className="h-4 w-4" />
                     Archive
                   </Button>
-                  <Button variant="default" onClick={handleSave} disabled={saving}>
-                    <Save className="mr-1.5 h-4 w-4" />
-                    {saving ? "Saving..." : "Save"}
+                  <Button variant="default" onClick={handleSave} disabled={!!busyAction}>
+                    {busyAction === "save" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Save
                   </Button>
                 </>
               )}
