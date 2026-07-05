@@ -18,7 +18,10 @@ import type { ProductTypeKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
 import { STEP_COMPONENTS } from "@/features/products/builder/steps/StepRegistry";
 import { ProductStepPreview } from "@/features/products/builder/previews/ProductStepPreview";
-import type { ThumbnailLiveState, CheckoutLiveState } from "@/features/products/components/cards/types";
+import type {
+  ThumbnailLiveState,
+  CheckoutLiveState,
+} from "@/features/products/components/cards/types";
 
 export default function EditProduct({
   params,
@@ -80,10 +83,12 @@ export default function EditProduct({
         imageUrl: product.thumbnailImageUrl ?? null,
         price: product.price,
       });
-      const checkoutConfig = product.config?.checkout as {
-        buttonText?: string;
-        collectFields?: Array<{ key: string; enabled: boolean }>;
-      } | undefined;
+      const checkoutConfig = product.config?.checkout as
+        | {
+            buttonText?: string;
+            collectFields?: Array<{ key: string; enabled: boolean }>;
+          }
+        | undefined;
       const phoneField = checkoutConfig?.collectFields?.find((f) => f.key === "phone");
       setCheckoutLiveState({
         name: product.name,
@@ -159,7 +164,7 @@ export default function EditProduct({
               {(product.status === "draft" || product.status === "archived") && (
                 <>
                   <Button variant="outline" onClick={handleSave} disabled={saving}>
-                    <Save className="mr-1.5 h-4 w-4" />
+                    <Save className="h-4 w-4" />
                     {saving ? "Saving..." : "Save"}
                   </Button>
                   <Button
@@ -168,17 +173,21 @@ export default function EditProduct({
                     disabled={saving || publishing || needsItems}
                     title={needsItems ? "Add at least one item before publishing" : undefined}
                   >
-                  {isLastStep
-                    ? publishing
-                      ? "Publishing..."
-                      : <>
-                          <Upload className="mr-1.5 h-4 w-4" />
+                    {isLastStep ? (
+                      publishing ? (
+                        "Publishing..."
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4" />
                           Publish
                         </>
-                    : saving
-                      ? "Saving..."
-                      : "Next"}
-                  {!isLastStep && !saving && <ArrowRight className="ml-1.5 h-4 w-4" />}
+                      )
+                    ) : saving ? (
+                      "Saving..."
+                    ) : (
+                      "Next"
+                    )}
+                    {!isLastStep && !saving && <ArrowRight className="ml-1.5 h-4 w-4" />}
                   </Button>
                 </>
               )}
