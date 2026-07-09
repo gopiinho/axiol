@@ -182,6 +182,9 @@ export default function EditProduct({
     setBusyAction("save");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
+      if (isLastStep) {
+        router.push("/dashboard/products");
+      }
     } catch {
     } finally {
       setBusyAction(null);
