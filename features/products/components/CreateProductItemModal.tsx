@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -87,7 +88,7 @@ export function CreateProductItemModal({ productId, open, onClose }: CreateProdu
               disabled={loading || !affiliateLink.trim()}
               className="px-5"
             >
-              {loading ? "Adding..." : "Add"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
             </Button>
           </div>
         </DialogHeader>

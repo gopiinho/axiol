@@ -407,6 +407,27 @@ export const archive = mutation({
   },
 });
 
+export const unpublish = mutation({
+  args: { id: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+    const product = await ctx.db.get(args.id);
+
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found.");
+    }
+
+    if (product.status !== "published") {
+      throw new Error("Only published products can be unpublished.");
+    }
+
+    await ctx.db.patch(args.id, {
+      status: "draft",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const publish = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {

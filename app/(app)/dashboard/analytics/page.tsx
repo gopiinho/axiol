@@ -210,8 +210,8 @@ export default function AnalyticsPage() {
                       size="sm"
                       className="gap-1.5"
                     >
-                      <Play className="h-3.5 w-3.5" />
-                      {startingWorker ? "Starting..." : "Start"}
+                      {startingWorker ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+                      Start
                     </Button>
                   )}
                 </div>

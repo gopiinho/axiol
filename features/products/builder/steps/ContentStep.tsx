@@ -11,7 +11,6 @@ import { Loader2, Upload, X, Plus, Link, Pencil } from "lucide-react";
 import { useUploadWithProgress } from "../../hooks/useUploadWithProgress";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -25,6 +24,7 @@ import {
   isBlockedExtension,
   MAX_CONTENT_SIZE,
 } from "@/convex/contentLimits";
+import { Button } from "@/components/ui/button";
 
 function StepNumber({ num }: { num: number }) {
   return (
@@ -58,8 +58,7 @@ function readSaved(product: ProductStepComponentProps["product"]): {
   productName: string;
 } {
   const content = product.config?.content as SavedContent | undefined;
-  if (!content)
-    return { savedFile: null, url: "", mode: "upload", productName: "" };
+  if (!content) return { savedFile: null, url: "", mode: "upload", productName: "" };
 
   if (content.mode === "external_link") {
     return {
@@ -86,19 +85,13 @@ function readSaved(product: ProductStepComponentProps["product"]): {
   return { savedFile: null, url: "", mode: "upload", productName: "" };
 }
 
-export function ContentStep({
-  productId,
-  product,
-  onRegisterSave,
-}: ProductStepComponentProps) {
+export function ContentStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
   const saved = readSaved(product);
 
   const [mode, setMode] = useState<Mode>(saved.mode);
   const [externalUrl, setExternalUrl] = useState(saved.url);
   const [productName, setProductName] = useState(saved.productName);
-  const [savedFile, setSavedFile] = useState<FileEntry | null>(
-    saved.savedFile
-  );
+  const [savedFile, setSavedFile] = useState<FileEntry | null>(saved.savedFile);
   const [uploadedFile, setUploadedFile] = useState<FileEntry | null>(null);
   const [errors, setErrors] = useState<{
     file?: string;
@@ -107,12 +100,12 @@ export function ContentStep({
   }>({});
   const [isDragging, setIsDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FileEntry | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const updateContentConfig = useUpdateContentConfig();
   const deleteContentFile = useDeleteContentFile();
-  const { upload, uploading, progress, error: uploadError } =
-    useUploadWithProgress();
+  const { upload, uploading, progress, error: uploadError } = useUploadWithProgress();
 
   const displayFile = uploadedFile ?? savedFile;
 
@@ -189,6 +182,8 @@ export function ContentStep({
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
 
+    setDeleting(true);
+
     const isSaved = deleteTarget.r2Key === savedFile?.r2Key;
 
     if (isSaved) {
@@ -202,12 +197,10 @@ export function ContentStep({
       } catch (err) {
         setErrors((prev) => ({
           ...prev,
-          file:
-            err instanceof Error
-              ? err.message
-              : "Failed to delete file. Please try again.",
+          file: err instanceof Error ? err.message : "Failed to delete file. Please try again.",
         }));
         setDeleteTarget(null);
+        setDeleting(false);
         return;
       }
     } else {
@@ -221,6 +214,7 @@ export function ContentStep({
       }
     }
 
+    setDeleting(false);
     setDeleteTarget(null);
   };
 
@@ -264,8 +258,7 @@ export function ContentStep({
     }
     if (mode === "url") {
       if (!externalUrl.trim()) newErrors.url = "URL is required";
-      if (!productName.trim())
-        newErrors.productName = "Product name is required";
+      if (!productName.trim()) newErrors.productName = "Product name is required";
     }
 
     setErrors(newErrors);
@@ -283,9 +276,7 @@ export function ContentStep({
   const hasUrlValue = !!externalUrl.trim() && mode === "url";
   const hasFileValue = !!displayFile && mode === "upload";
   const displayName = displayFile?.fileName ?? "";
-  const displaySize = displayFile
-    ? `${(displayFile.fileSize / (1024 * 1024)).toFixed(1)} MB`
-    : "";
+  const displaySize = displayFile ? `${(displayFile.fileSize / (1024 * 1024)).toFixed(1)} MB` : "";
 
   return (
     <>
@@ -367,9 +358,7 @@ export function ContentStep({
                     <div>
                       <p className="text-sm font-medium">{displayName}</p>
                       <p className="text-muted-foreground text-xs">
-                        {uploadedFile
-                          ? `${displaySize}`
-                          : displaySize}
+                        {uploadedFile ? `${displaySize}` : displaySize}
                       </p>
                     </div>
                   </div>
@@ -414,17 +403,13 @@ export function ContentStep({
                     </div>
                   ) : uploadError ? (
                     <div className="flex flex-col items-center gap-2">
-                      <p className="text-destructive text-center text-xs">
-                        {uploadError}
-                      </p>
+                      <p className="text-destructive text-center text-xs">{uploadError}</p>
                       <span
-                        onClick={() =>
-                          inputRef.current?.click()
-                        }
+                        onClick={() => inputRef.current?.click()}
                         className={cn(
                           "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
                           "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
-                          "transition-all duration-200 hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                          "hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all duration-200"
                         )}
                       >
                         <Plus className="h-4 w-4" strokeWidth={2} />
@@ -433,22 +418,11 @@ export function ContentStep({
                     </div>
                   ) : (
                     <>
-                      <span
-                        onClick={() =>
-                          inputRef.current?.click()
-                        }
-                        className={cn(
-                          "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
-                          "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
-                          "transition-all duration-200 hover:bg-accent hover:text-accent-foreground cursor-pointer"
-                        )}
-                      >
+                      <Button onClick={() => inputRef.current?.click()} variant="outline" size="sm">
                         <Plus className="h-4 w-4" strokeWidth={2} />
                         Upload
-                      </span>
-                      <span className="text-muted-foreground text-xs">
-                        Drag Your File(s) Here
-                      </span>
+                      </Button>
+                      <span className="text-muted-foreground text-xs">Drag Your File(s) Here</span>
                     </>
                   )}
                 </div>
@@ -480,7 +454,7 @@ export function ContentStep({
                         productName: undefined,
                       }));
                     }}
-                    placeholder={"Your Product's Name (ex. \"Course 101\")"}
+                    placeholder={'Your Product\'s Name (ex. "Course 101")'}
                     className="pl-9"
                     aria-invalid={!!errors.productName}
                   />
@@ -499,14 +473,8 @@ export function ContentStep({
             {errors.file && !uploadError && (
               <p className="text-destructive text-sm">{errors.file}</p>
             )}
-            {errors.url && (
-              <p className="text-destructive text-sm">{errors.url}</p>
-            )}
-            {errors.productName && (
-              <p className="text-destructive text-sm">
-                {errors.productName}
-              </p>
-            )}
+            {errors.url && <p className="text-destructive text-sm">{errors.url}</p>}
+            {errors.productName && <p className="text-destructive text-sm">{errors.productName}</p>}
           </div>
         </div>
       </div>
@@ -522,20 +490,19 @@ export function ContentStep({
             <AlertDialogTitle>Delete file?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently remove{" "}
-              <span className="font-medium text-foreground">
-                {deleteTarget?.fileName}
-              </span>
-              . This action cannot be undone.
+              <span className="text-foreground font-medium">{deleteTarget?.fileName}</span>. This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <Button
+              variant="destructive"
+              disabled={deleting}
               onClick={handleDeleteConfirm}
-              className="bg-destructive hover:bg-destructive/90"
             >
-              Delete
-            </AlertDialogAction>
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

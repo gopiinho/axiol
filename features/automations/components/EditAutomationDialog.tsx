@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Circle } from "lucide-react";
+import { Circle, Loader2 } from "lucide-react";
 import KeywordEditor from "./KeywordEditor";
 
 interface MappingData {
@@ -146,9 +146,9 @@ export default function EditAutomationDialog({
               size="sm"
               onClick={handleSave}
               disabled={saving || !keywordValid || !hasChanges}
-              className="px-5"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {saving ? "" : "Save"}
             </Button>
           </div>
         </DialogHeader>
@@ -157,8 +157,8 @@ export default function EditAutomationDialog({
           <div
             className={
               mapping.active
-                ? "bg-foreground text-background mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-emerald-500 px-4 py-3"
-                : "bg-foreground text-background mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-amber-500 px-4 py-3"
+                ? "bg-foreground/10 mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-emerald-500 px-4 py-3"
+                : "bg-foreground/10 mb-5 flex items-center gap-2.5 rounded-r-xs border-l-2 border-l-amber-500 px-4 py-3"
             }
           >
             <Circle
@@ -170,7 +170,7 @@ export default function EditAutomationDialog({
             />
             <div>
               <p className="text-sm font-semibold">{mapping.active ? "Active" : "Draft"}</p>
-              <p className="text-muted text-xs">
+              <p className="text-muted-foreground text-xs">
                 {mapping.active
                   ? "Auto-DM is enabled and responding to comments on this reel."
                   : "Not sending DMs yet. Toggle the switch to activate."}

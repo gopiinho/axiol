@@ -18,6 +18,7 @@ interface ProductBuilderLayoutProps {
   currentStepIndex: number;
   totalSteps: number;
   onStepClick: (index: number) => void;
+  disabledSteps?: Set<number>;
   children: React.ReactNode;
   preview?: React.ReactNode;
 }
@@ -29,6 +30,7 @@ export function ProductBuilderLayout({
   currentStepIndex,
   totalSteps: _totalSteps,
   onStepClick,
+  disabledSteps,
   children,
   preview,
 }: ProductBuilderLayoutProps) {
@@ -38,18 +40,27 @@ export function ProductBuilderLayout({
         {definition.steps.map((stepKey, index) => {
           const isActive = index === currentStepIndex;
           const isCompleted = index < currentStepIndex;
+          const isDisabled = disabledSteps?.has(index);
           const StepIcon = STEP_ICONS[stepKey];
           return (
             <button
               key={stepKey}
               type="button"
-              onClick={() => onStepClick(index)}
-              className={`flex cursor-pointer items-center gap-2 rounded-full px-3 py-3 text-xs font-medium whitespace-nowrap transition-colors ${
+              onClick={() => !isDisabled && onStepClick(index)}
+              disabled={isDisabled}
+              title={
+                isDisabled
+                  ? `Complete ${STEP_LABELS[definition.steps[0]]} before accessing this step`
+                  : undefined
+              }
+              className={`flex items-center gap-2 rounded-full px-3 py-3 text-xs font-medium whitespace-nowrap transition-colors ${
                 isActive
                   ? "bg-foreground text-background"
                   : isCompleted
                     ? "bg-primary text-foreground"
-                    : "bg-background text-muted-foreground hover:bg-card/30"
+                    : isDisabled
+                      ? "bg-background text-muted-foreground/40 cursor-not-allowed"
+                      : "bg-background text-muted-foreground hover:bg-card/30 cursor-pointer"
               }`}
             >
               {StepIcon && <StepIcon className="h-4 w-4" />}

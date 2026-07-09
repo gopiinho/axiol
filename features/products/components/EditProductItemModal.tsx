@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -90,7 +91,7 @@ export function EditProductItemModal({ item, open, onClose }: EditProductItemMod
               disabled={loading || !affiliateLink.trim()}
               className="px-5"
             >
-              {loading ? "Saving..." : "Save"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
             </Button>
           </div>
         </DialogHeader>
