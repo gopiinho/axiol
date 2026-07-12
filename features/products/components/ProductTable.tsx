@@ -7,6 +7,7 @@ import {
   useProducts,
   useUnpublishProduct,
   useDeleteProduct,
+  useDuplicateProduct,
 } from "../hooks/useProduct";
 import { ProductRow } from "./ProductRow";
 import { ProductTypeIcon, getProductTypeLabel } from "./ProductTypeIcon";
@@ -27,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, EyeOff, Trash2, Edit, Loader2 } from "lucide-react";
+import { MoreHorizontal, EyeOff, Trash2, Edit, Loader2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import NoProducts from "@/components/products/NoProducts";
@@ -48,6 +49,7 @@ function ProductMobileCard({
   product,
   onUnpublish,
   onDelete,
+  onDuplicate,
 }: {
   product: Doc<"products"> & {
     itemCount: number;
@@ -60,11 +62,22 @@ function ProductMobileCard({
   };
   onUnpublish: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
+  onDuplicate: (id: Id<"products">) => void;
 }) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [unpublishOpen, setUnpublishOpen] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+
+  const handleDuplicate = async () => {
+    setDuplicating(true);
+    try {
+      await onDuplicate(product._id);
+    } finally {
+      setDuplicating(false);
+    }
+  };
 
   return (
     <>
@@ -151,6 +164,10 @@ function ProductMobileCard({
                 <Edit className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate} disabled={duplicating}>
+                <Copy className="h-4 w-4" />
+                {duplicating ? "Duplicating..." : "Duplicate"}
+              </DropdownMenuItem>
               {product.status === "published" && (
                 <DropdownMenuItem onClick={() => setUnpublishOpen(true)}>
                   <EyeOff className="h-4 w-4" />
@@ -219,6 +236,7 @@ export function ProductTable() {
   const { products, isLoading } = useProducts();
   const unpublishProduct = useUnpublishProduct();
   const deleteProduct = useDeleteProduct();
+  const duplicateProduct = useDuplicateProduct();
 
   const handleUnpublish = async (id: Id<"products">) => {
     try {
@@ -233,6 +251,10 @@ export function ProductTable() {
     } catch {
       /* handled by toast */
     }
+  };
+  const handleDuplicate = async (id: Id<"products">) => {
+    const newId = await duplicateProduct({ id });
+    window.location.href = `/dashboard/products/${newId}/edit`;
   };
 
   if (isLoading) {
@@ -257,6 +279,7 @@ export function ProductTable() {
             product={product}
             onUnpublish={handleUnpublish}
             onDelete={handleDelete}
+            onDuplicate={handleDuplicate}
           />
         ))}
       </div>
@@ -285,7 +308,7 @@ export function ProductTable() {
                 Status
               </th>
 
-              <th className="w-10 px-4 py-3" />
+              <th className="w-16 px-4 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -295,6 +318,7 @@ export function ProductTable() {
                 product={product}
                 onUnpublish={handleUnpublish}
                 onDelete={handleDelete}
+                onDuplicate={handleDuplicate}
               />
             ))}
           </tbody>

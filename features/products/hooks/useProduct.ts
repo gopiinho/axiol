@@ -101,3 +101,7 @@ export function useRemoveThumbnailImage() {
 export function useDeleteContentFile() {
   return useMutation(api.contentStorage.deleteContentFile);
 }
+
+export function useDuplicateProduct() {
+  return useMutation(api.products.duplicate);
+}

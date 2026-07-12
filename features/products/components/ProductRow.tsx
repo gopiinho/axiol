@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, EyeOff, Trash2, Edit, Loader2 } from "lucide-react";
+import { MoreHorizontal, EyeOff, Trash2, Edit, Loader2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductTypeIcon } from "./ProductTypeIcon";
 
@@ -36,6 +36,7 @@ interface ProductRowProps {
   };
   onUnpublish: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
+  onDuplicate: (id: Id<"products">) => void;
 }
 
 const statusStyles: Record<string, string> = {
@@ -50,14 +51,24 @@ const statusLabels: Record<string, string> = {
   archived: "Archived",
 };
 
-export function ProductRow({ product, onUnpublish, onDelete }: ProductRowProps) {
+export function ProductRow({ product, onUnpublish, onDelete, onDuplicate }: ProductRowProps) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [unpublishOpen, setUnpublishOpen] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   const handleClick = () => {
     router.push(`/dashboard/products/${product._id}/edit`);
+  };
+
+  const handleDuplicate = async () => {
+    setDuplicating(true);
+    try {
+      await onDuplicate(product._id);
+    } finally {
+      setDuplicating(false);
+    }
   };
 
   return (
@@ -144,6 +155,10 @@ export function ProductRow({ product, onUnpublish, onDelete }: ProductRowProps) 
               <DropdownMenuItem onClick={handleClick}>
                 <Edit className="h-4 w-4" />
                 Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate} disabled={duplicating}>
+                <Copy className="h-4 w-4" />
+                {duplicating ? "Duplicating..." : "Duplicate"}
               </DropdownMenuItem>
               {product.status === "published" && (
                 <DropdownMenuItem onClick={() => setUnpublishOpen(true)}>
