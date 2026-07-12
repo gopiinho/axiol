@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useUpdateContentConfig, useDeleteContentFile } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Loader2, Upload, X, Plus, Link, Pencil } from "lucide-react";
+import { Loader2, Upload, X, Plus, Link, Pencil, Lock, FileText } from "lucide-react";
 import { useUploadWithProgress } from "../../hooks/useUploadWithProgress";
 import {
   AlertDialog,
@@ -45,6 +45,7 @@ interface SavedContent {
   r2Key?: string;
   fileName?: string;
   fileSize?: number;
+  displayName?: string;
   url?: string;
   productName?: string;
 }
@@ -56,9 +57,10 @@ function readSaved(product: ProductStepComponentProps["product"]): {
   url: string;
   mode: Mode;
   productName: string;
+  displayName: string;
 } {
   const content = product.config?.content as SavedContent | undefined;
-  if (!content) return { savedFile: null, url: "", mode: "upload", productName: "" };
+  if (!content) return { savedFile: null, url: "", mode: "upload", productName: "", displayName: "" };
 
   if (content.mode === "external_link") {
     return {
@@ -66,6 +68,7 @@ function readSaved(product: ProductStepComponentProps["product"]): {
       url: content.url ?? "",
       mode: "url",
       productName: content.productName ?? "",
+      displayName: "",
     };
   }
 
@@ -79,20 +82,27 @@ function readSaved(product: ProductStepComponentProps["product"]): {
       url: "",
       mode: "upload",
       productName: "",
+      displayName: content.displayName ?? "",
     };
   }
 
-  return { savedFile: null, url: "", mode: "upload", productName: "" };
+  return { savedFile: null, url: "", mode: "upload", productName: "", displayName: "" };
 }
 
 export function ContentStep({ productId, product, onRegisterSave }: ProductStepComponentProps) {
+  const isLocked = !!product.publishedAt;
   const saved = readSaved(product);
+
+  const updateContentConfig = useUpdateContentConfig();
+  const deleteContentFile = useDeleteContentFile();
+  const { upload, uploading, progress, error: uploadError } = useUploadWithProgress();
 
   const [mode, setMode] = useState<Mode>(saved.mode);
   const [externalUrl, setExternalUrl] = useState(saved.url);
   const [productName, setProductName] = useState(saved.productName);
   const [savedFile, setSavedFile] = useState<FileEntry | null>(saved.savedFile);
   const [uploadedFile, setUploadedFile] = useState<FileEntry | null>(null);
+  const [displayName, setDisplayName] = useState(saved.displayName);
   const [errors, setErrors] = useState<{
     file?: string;
     url?: string;
@@ -102,10 +112,6 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
   const [deleteTarget, setDeleteTarget] = useState<FileEntry | null>(null);
   const [deleting, setDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const updateContentConfig = useUpdateContentConfig();
-  const deleteContentFile = useDeleteContentFile();
-  const { upload, uploading, progress, error: uploadError } = useUploadWithProgress();
 
   const displayFile = uploadedFile ?? savedFile;
 
@@ -145,6 +151,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
           fileName: file.name,
           fileSize: file.size,
         });
+        setDisplayName(file.name);
         setSavedFile(null);
 
         if (prevUploaded) {
@@ -194,6 +201,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
           config: { mode: "upload" },
         });
         setSavedFile(null);
+        setDisplayName("");
       } catch (err) {
         setErrors((prev) => ({
           ...prev,
@@ -227,6 +235,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
           r2Key: uploadedFile.r2Key,
           fileName: uploadedFile.fileName || undefined,
           fileSize: uploadedFile.fileSize,
+          displayName: displayName || undefined,
         },
       });
       setSavedFile(uploadedFile);
@@ -241,8 +250,19 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
         },
       });
       setSavedFile(null);
+    } else if (isLocked && savedFile && displayName.trim()) {
+      await updateContentConfig({
+        productId: productId as unknown as Id<"products">,
+        config: {
+          mode: "upload",
+          r2Key: savedFile.r2Key,
+          fileName: savedFile.fileName || undefined,
+          fileSize: savedFile.fileSize,
+          displayName: displayName.trim() || undefined,
+        },
+      });
     }
-  }, [uploadedFile, externalUrl, productName, productId, updateContentConfig]);
+  }, [uploadedFile, externalUrl, productName, displayName, productId, updateContentConfig, isLocked, savedFile]);
 
   const saveAndValidate = useCallback(async () => {
     const newErrors: {
@@ -275,8 +295,8 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
 
   const hasUrlValue = !!externalUrl.trim() && mode === "url";
   const hasFileValue = !!displayFile && mode === "upload";
-  const displayName = displayFile?.fileName ?? "";
-  const displaySize = displayFile ? `${(displayFile.fileSize / (1024 * 1024)).toFixed(1)} MB` : "";
+  const fileDisplayName = displayName || displayFile?.fileName || "";
+  const fileSize = displayFile ? `${(displayFile.fileSize / (1024 * 1024)).toFixed(1)} MB` : "";
 
   return (
     <>
@@ -307,17 +327,17 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                   type="button"
                   role="tab"
                   aria-selected={mode === "upload"}
-                  disabled={hasUrlValue}
+                  disabled={isLocked || hasUrlValue}
                   onClick={() => {
                     setMode("upload");
                     setErrors({});
                   }}
                   className={cn(
-                    "inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
+                    "inline-flex items-center rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
                     mode === "upload"
                       ? "bg-primary text-foreground"
                       : "text-muted-foreground hover:text-foreground",
-                    hasUrlValue && "cursor-not-allowed opacity-40"
+                    (isLocked || hasUrlValue) && "cursor-not-allowed opacity-40"
                   )}
                 >
                   Upload File
@@ -326,17 +346,17 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                   type="button"
                   role="tab"
                   aria-selected={mode === "url"}
-                  disabled={hasFileValue}
+                  disabled={isLocked || hasFileValue}
                   onClick={() => {
                     setMode("url");
                     setErrors({});
                   }}
                   className={cn(
-                    "inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
+                    "inline-flex items-center rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
                     mode === "url"
                       ? "bg-primary text-foreground"
                       : "text-muted-foreground hover:text-foreground",
-                    hasFileValue && "cursor-not-allowed opacity-40"
+                    (isLocked || hasFileValue) && "cursor-not-allowed opacity-40"
                   )}
                 >
                   Redirect to URL
@@ -345,88 +365,111 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
             </div>
 
             {mode === "upload" ? (
-              displayFile ? (
-                <div className="border-border/60 bg-card/50 flex items-center justify-between rounded-xs border p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-xs">
-                      {uploading ? (
-                        <Loader2 className="text-primary h-5 w-5 animate-spin" />
+              <div className="space-y-4">
+                {displayFile ? (
+                  <div className="space-y-4">
+                    <div className="border-border/60 bg-card/50 flex items-center justify-between rounded-xs border p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-xs">
+                          {uploading ? (
+                            <Loader2 className="text-primary h-5 w-5 animate-spin" />
+                          ) : (
+                            <FileText className="text-primary h-5 w-5" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{displayFile.fileName}</p>
+                          <p className="text-muted-foreground text-xs">{fileSize}</p>
+                        </div>
+                      </div>
+                      {isLocked ? (
+                        <Lock className="text-muted-foreground h-4 w-4 shrink-0" />
                       ) : (
-                        <Upload className="text-primary h-5 w-5" />
+                        <button
+                          type="button"
+                          onClick={handleRemoveClick}
+                          disabled={uploading}
+                          className="text-destructive hover:bg-destructive/10 flex items-center gap-1 rounded-xs px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Remove
+                        </button>
                       )}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{displayName}</p>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="displayName" className="text-xs font-bold">
+                        File name for buyers
+                      </Label>
+                      <div className="relative">
+                        <Pencil className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                        <Input
+                          id="displayName"
+                          value={displayName}
+                          onChange={(e) => setDisplayName(e.target.value)}
+                          placeholder={displayFile.fileName}
+                          className="pl-9"
+                        />
+                      </div>
                       <p className="text-muted-foreground text-xs">
-                        {uploadedFile ? `${displaySize}` : displaySize}
+                        This is the name your customers will see when downloading
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveClick}
-                    disabled={uploading}
-                    className="text-destructive hover:bg-destructive/10 flex items-center gap-1 rounded-xs px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40"
+                ) : isLocked ? null : (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (!uploading) setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    className={cn(
+                      "flex w-full flex-col items-center justify-center gap-3 rounded-xs",
+                      "border-border/70 bg-card/50 border border-dashed p-8",
+                      "transition-all duration-200",
+                      isDragging && "border-primary bg-primary/5 scale-[1.01]",
+                      errors.file && "border-destructive",
+                      uploading && "min-h-[140px]"
+                    )}
                   >
-                    <X className="h-3.5 w-3.5" />
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    if (!uploading) setIsDragging(true);
-                  }}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={handleDrop}
-                  className={cn(
-                    "flex w-full flex-col items-center justify-center gap-3 rounded-xs",
-                    "border-border/70 bg-card/50 border border-dashed p-5",
-                    "transition-colors duration-200",
-                    isDragging && "border-primary bg-primary/5",
-                    errors.file && "border-destructive",
-                    uploading && "min-h-[136px]"
-                  )}
-                >
-                  {uploading ? (
-                    <div className="w-full max-w-xs space-y-2">
-                      <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-                        <div
-                          className="bg-primary h-full rounded-full transition-all duration-300 ease-out"
-                          style={{ width: `${progress}%` }}
-                        />
+                    {uploading ? (
+                      <div className="w-full max-w-xs space-y-2">
+                        <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+                          <div
+                            className="bg-primary h-full rounded-full transition-all duration-300 ease-out"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <p className="text-muted-foreground text-center text-xs">
+                          {progress >= 100 ? "Saving..." : `${progress}% uploaded`}
+                        </p>
                       </div>
-                      <p className="text-muted-foreground text-center text-xs">
-                        {progress >= 100 ? "Saving..." : `${progress}% uploaded`}
-                      </p>
-                    </div>
-                  ) : uploadError ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-destructive text-center text-xs">{uploadError}</p>
-                      <span
-                        onClick={() => inputRef.current?.click()}
-                        className={cn(
-                          "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
-                          "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
-                          "hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all duration-200"
-                        )}
-                      >
-                        <Plus className="h-4 w-4" strokeWidth={2} />
-                        Try Again
-                      </span>
-                    </div>
-                  ) : (
-                    <>
-                      <Button onClick={() => inputRef.current?.click()} variant="outline" size="sm">
-                        <Plus className="h-4 w-4" strokeWidth={2} />
-                        Upload
-                      </Button>
-                      <span className="text-muted-foreground text-xs">Drag Your File(s) Here</span>
-                    </>
-                  )}
-                </div>
-              )
+                    ) : uploadError ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-destructive text-center text-xs">{uploadError}</p>
+                        <Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
+                          <Plus className="h-4 w-4" strokeWidth={2} />
+                          Try Again
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+                          <Upload className="text-primary h-6 w-6" />
+                        </div>
+                        <Button onClick={() => inputRef.current?.click()} variant="outline" size="sm">
+                          <Plus className="h-4 w-4" strokeWidth={2} />
+                          Upload
+                        </Button>
+                        <span className="text-muted-foreground text-xs">
+                          Drop your file here or click to browse
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="relative">
@@ -440,6 +483,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                     }}
                     placeholder="https://..."
                     className="pl-9"
+                    disabled={isLocked}
                     aria-invalid={!!errors.url}
                   />
                 </div>
@@ -456,6 +500,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                     }}
                     placeholder={'Your Product\'s Name (ex. "Course 101")'}
                     className="pl-9"
+                    disabled={isLocked}
                     aria-invalid={!!errors.productName}
                   />
                 </div>

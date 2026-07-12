@@ -75,27 +75,6 @@ export default function EditProduct({
   const definition = product ? getProductTypeDefinition(product.type as ProductTypeKey) : null;
   const isLastStep = definition ? currentStepIndex === definition.steps.length - 1 : false;
 
-  const firstIncompleteIndex = (() => {
-    if (!product || !definition || product.status === "published") return null;
-    const steps = definition.steps;
-    for (let i = 0; i < steps.length; i++) {
-      let complete = true;
-      const key = steps[i];
-      if (key === "thumbnail") {
-        const t = product.config?.thumbnail as Record<string, unknown> | undefined;
-        complete = Boolean(t?.style && t?.title && t?.buttonText);
-      } else if (key === "content") {
-        const c = product.config?.content as Record<string, unknown> | undefined;
-        if (!c) complete = false;
-        else if (c.mode === "upload") complete = Boolean(c.r2Key);
-        else if (c.mode === "external_link") complete = Boolean(c.url);
-        else complete = false;
-      }
-      if (!complete) return i;
-    }
-    return null;
-  })();
-
   useEffect(() => {
     if (product && definition) {
       const saved = product.config?.thumbnail as
@@ -327,11 +306,6 @@ export default function EditProduct({
             currentStepIndex={currentStepIndex}
             totalSteps={definition.steps.length}
             onStepClick={setCurrentStepIndex}
-            disabledSteps={
-              firstIncompleteIndex != null
-                ? new Set(definition.steps.slice(firstIncompleteIndex + 1).map((_, i) => i + firstIncompleteIndex + 1))
-                : undefined
-            }
             preview={
               <ProductStepPreview
                 stepKey={definition.steps[currentStepIndex]}
@@ -363,6 +337,7 @@ export default function EditProduct({
                       username: user?.username,
                       type: product.type,
                       status: product.status,
+                      publishedAt: product.publishedAt ?? null,
                       config: product.config as Record<string, unknown>,
                     }}
                     onRegisterSave={(fn) => handleRegisterSave(index, fn)}
