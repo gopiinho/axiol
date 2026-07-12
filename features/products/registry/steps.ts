@@ -15,6 +15,7 @@ export type ProductData = {
   username?: string;
   type: string;
   status: string;
+  publishedAt?: number | null;
   config?: Record<string, unknown>;
 };
 

@@ -353,6 +353,30 @@ export const updateContentConfig = mutation({
       throw new Error("This product type does not support content delivery.");
     }
 
+    if (product.publishedAt) {
+      const oldR2Key =
+        product.config.content && product.config.content.mode === "upload"
+          ? product.config.content.r2Key
+          : undefined;
+      const newR2Key =
+        args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
+
+      if (oldR2Key && newR2Key === oldR2Key) {
+        await ctx.db.patch(args.productId, {
+          config: {
+            ...product.config,
+            content: { ...product.config.content, ...args.config },
+          },
+          updatedAt: Date.now(),
+        });
+        return;
+      }
+
+      throw new Error(
+        "Content cannot be modified after publishing. Duplicate the product to release updated content."
+      );
+    }
+
     const oldContent = product.config.content;
     const oldR2Key =
       oldContent && oldContent.mode === "upload" ? oldContent.r2Key : undefined;
@@ -527,6 +551,49 @@ export const remove = mutation({
     }
 
     await ctx.db.delete(args.id);
+  },
+});
+
+export const duplicate = mutation({
+  args: { id: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId, product } = await requireProductOwner(ctx, args.id);
+
+    const thumbnailConfig = product.config.thumbnail
+      ? { ...product.config.thumbnail, imageId: undefined }
+      : undefined;
+
+    const checkoutConfig = product.config.checkout
+      ? { ...product.config.checkout, coverImageId: undefined }
+      : undefined;
+
+    const baseUrl = product.productUrl.replace(/-copy(-\d+)?$/, "");
+    const productUrl = await ensureUniqueProductUrl(ctx, userId, `${baseUrl}-copy`);
+    const now = Date.now();
+
+    const newId = await ctx.db.insert("products", {
+      createdBy: userId,
+      name: `${product.name} (Copy)`,
+      productUrl,
+      description: product.description,
+      coverImageId: undefined,
+      price: product.price,
+      priceCents: product.priceCents,
+      type: product.type,
+      status: "draft",
+      config: {
+        ...product.config,
+        thumbnail: thumbnailConfig,
+        checkout: checkoutConfig,
+        content: { mode: "none" },
+      },
+      createdAt: now,
+      publishedAt: undefined,
+      updatedAt: now,
+      automationEnabled: product.automationEnabled,
+    });
+
+    return newId;
   },
 });
 
