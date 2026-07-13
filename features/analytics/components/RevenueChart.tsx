@@ -1,10 +1,13 @@
 "use client";
 
+import { useId, useState } from "react";
+
 import {
   ResponsiveContainer,
   ComposedChart,
+  Area,
   Bar,
-  Line,
+  Customized,
   Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
@@ -44,9 +47,21 @@ function formatCountTick(value: number): string {
   return v.toString();
 }
 
+function computeNiceMax(dataMax: number, tickCount: number): number {
+  if (dataMax <= 0) return tickCount;
+  const step = dataMax / (tickCount - 1);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(step)));
+  const residual = step / magnitude;
+  const niceStep =
+    residual <= 1.5 ? magnitude : residual <= 3.5 ? 2 * magnitude : residual <= 7.5 ? 5 * magnitude : 10 * magnitude;
+  return Math.ceil(dataMax / niceStep) * niceStep + niceStep;
+}
+
 const TICK_COUNT = 5;
 
 export function RevenueChart({ data, loading }: RevenueChartProps) {
+  const gradientId = useId();
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const isEmpty = data.every((d) => d.revenue === 0 && d.sales === 0 && d.clicks === 0);
 
   return (
@@ -60,13 +75,25 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={256}>
-            <ComposedChart data={data} margin={{ top: 12, right: 0, bottom: 4, left: 0 }}>
+            <ComposedChart
+                data={data}
+                margin={{ top: 12, right: 0, bottom: 4, left: 0 }}
+                onMouseMove={(state) => {
+                  if (typeof state.activeTooltipIndex === "number") setActiveIndex(state.activeTooltipIndex);
+                }}
+                onMouseLeave={() => setActiveIndex(null)}>
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
               <XAxis
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+                tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
               />
               <YAxis
                 yAxisId="revenue"
@@ -76,7 +103,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
                 tickFormatter={formatRevenueTick}
                 tickCount={TICK_COUNT}
-                domain={[0, "dataMax"]}
+                domain={[0, (dataMax: number) => computeNiceMax(dataMax, TICK_COUNT)]}
                 width={50}
               />
               <YAxis
@@ -88,10 +115,11 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 tickFormatter={formatCountTick}
                 tickCount={TICK_COUNT}
                 allowDecimals={false}
-                domain={[0, "dataMax"]}
+                domain={[0, (dataMax: number) => Math.ceil(computeNiceMax(dataMax, TICK_COUNT))]}
                 width={38}
               />
               <RechartsTooltip
+                cursor={false}
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
                   const row = payload[0].payload as TimelineDataPoint;
@@ -130,6 +158,18 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                   );
                 }}
               />
+              <Customized
+                component={({ width, height, offset }: Record<string, any>) => {
+                  if (activeIndex == null) return null;
+                  const plotWidth = width - offset.left - offset.right;
+                  const barWidth = plotWidth / data.length;
+                  const cx = offset.left + barWidth * activeIndex + barWidth / 2;
+                  const cy = height - offset.bottom;
+                  return (
+                    <line x1={cx} y1={cy} x2={cx} y2={cy + 6} stroke="var(--border)" strokeWidth={2} strokeDasharray="2 2" />
+                  );
+                }}
+              />
               <Bar
                 yAxisId="count"
                 stackId="engagement"
@@ -147,11 +187,13 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 radius={[2, 2, 0, 0]}
                 maxBarSize={40}
               />
-              <Line
+              <Area
+                type="monotone"
                 yAxisId="revenue"
                 dataKey="revenue"
                 stroke="var(--primary)"
                 strokeWidth={2}
+                fill={`url(#${gradientId})`}
                 dot={false}
                 activeDot={{
                   r: 6,
