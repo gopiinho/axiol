@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useQueryParam } from "@/lib/hooks/useQueryParam";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { ExternalLink, Package, Pencil, Settings, Store, Palette } from "lucide-react";
@@ -52,7 +53,7 @@ export default function MyStorePage() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"store" | "design">("store");
+  const [activeTab, setActiveTab] = useQueryParam("tab", "store");
 
   const [palette, setPalette] = useState<PaletteConfig>(() => {
     if (user?.palette && typeof user.palette === "object") {
