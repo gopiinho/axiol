@@ -36,7 +36,8 @@ export function StoreContent({
       className={`home-font-primary flex flex-col ${className ?? ""}`}
       style={{
         ...themeStyle,
-        background: "none",
+        backgroundImage: "none",
+        backgroundSize: "auto",
         color: "var(--store-text)",
       }}
     >
