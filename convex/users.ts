@@ -84,7 +84,7 @@ export const getPublicStore = query({
     const products = await ctx.db
       .query("products")
       .withIndex("by_status", (q) => q.eq("createdBy", user._id).eq("status", "published"))
-      .order("desc")
+      .order("asc")
       .collect();
 
     const enriched = await Promise.all(

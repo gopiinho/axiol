@@ -67,8 +67,8 @@ export const listByUser = query({
 
     const products = await ctx.db
       .query("products")
-      .withIndex("by_user", (q) => q.eq("createdBy", userId))
-      .order("desc")
+      .withIndex("by_user_order", (q) => q.eq("createdBy", userId))
+      .order("asc")
       .take(100);
 
     const paidOrders = await ctx.db
@@ -126,6 +126,28 @@ export const listByUser = query({
     );
 
     return withItemCounts;
+  },
+});
+
+export const reorder = mutation({
+  args: {
+    items: v.array(
+      v.object({
+        id: v.id("products"),
+        order: v.number(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireSession(ctx);
+
+    for (const { id, order } of args.items) {
+      const product = await ctx.db.get(id);
+      if (!product) continue;
+      if (product.createdBy !== userId) throw new Error("Unauthorized");
+
+      await ctx.db.patch(id, { order });
+    }
   },
 });
 
@@ -241,6 +263,13 @@ export const create = mutation({
     const defaultConfig = getDefaultConfig(validated.type as ProductTypeKey);
     const now = Date.now();
 
+    const lastProduct = await ctx.db
+      .query("products")
+      .withIndex("by_user_order", (q) => q.eq("createdBy", userId))
+      .order("desc")
+      .first();
+    const nextOrder = (lastProduct?.order ?? -1) + 1;
+
     return await ctx.db.insert("products", {
       createdBy: userId,
       name: validated.name,
@@ -257,6 +286,7 @@ export const create = mutation({
       publishedAt: undefined,
       updatedAt: now,
       automationEnabled: validated.automationEnabled,
+      order: nextOrder,
     });
   },
 });
@@ -571,6 +601,13 @@ export const duplicate = mutation({
     const productUrl = await ensureUniqueProductUrl(ctx, userId, `${baseUrl}-copy`);
     const now = Date.now();
 
+    const lastProduct = await ctx.db
+      .query("products")
+      .withIndex("by_user_order", (q) => q.eq("createdBy", userId))
+      .order("desc")
+      .first();
+    const nextOrder = (lastProduct?.order ?? -1) + 1;
+
     const newId = await ctx.db.insert("products", {
       createdBy: userId,
       name: `${product.name} (Copy)`,
@@ -591,6 +628,7 @@ export const duplicate = mutation({
       publishedAt: undefined,
       updatedAt: now,
       automationEnabled: product.automationEnabled,
+      order: nextOrder,
     });
 
     return newId;
