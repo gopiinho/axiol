@@ -13,6 +13,7 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -152,6 +153,19 @@ export default function BottomNav() {
                     </Link>
                   );
                 })}
+
+                <div className="border-border/10 mt-4 border-t pt-2">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      window.dispatchEvent(new CustomEvent("open-logout-dialog"));
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-card"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Log Out
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

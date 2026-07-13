@@ -89,6 +89,18 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                 );
               })}
             </nav>
+
+            <div className="border-border/10 mt-auto border-t">
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-logout-dialog"));
+                }}
+                className="flex w-full items-center cursor-pointer gap-3 border-l-5 border-transparent px-3.5 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-card"
+              >
+                <LogOut className="h-4 w-4" />
+                Log Out
+              </button>
+            </div>
           </aside>
 
           <section className="min-w-0 h-screen overflow-y-auto">
