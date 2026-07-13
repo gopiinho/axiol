@@ -66,6 +66,10 @@ export function useReorderProductItems() {
   return useMutation(api.productItems.reorder);
 }
 
+export function useReorderProducts() {
+  return useMutation(api.products.reorder);
+}
+
 export function useGenerateProductCoverUploadUrl() {
   return useMutation(api.storage.generateProductCoverUploadUrl);
 }

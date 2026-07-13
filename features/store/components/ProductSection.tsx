@@ -31,10 +31,10 @@ export function ProductSection({
 
   return (
     <div
-      className={`mt-4 columns-1 gap-6 px-4 pb-16 ${compact ? "" : "md:columns-2 lg:mx-auto lg:max-w-[70%]"}`}
+      className={`mt-4 grid grid-cols-1 gap-4 px-4 pb-16 ${compact ? "" : "md:grid-cols-2 lg:mx-auto lg:max-w-[70%]"}`}
     >
       {products.map((product, index) => (
-        <div key={product._id} className="mb-6 break-inside-avoid">
+        <div key={product._id}>
           <ProductCard
             product={product}
             username={username}
