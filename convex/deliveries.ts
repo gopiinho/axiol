@@ -98,10 +98,11 @@ export const validateToken = query({
 
     const content = product.config.content;
     const productName = product.name;
-    const fileName = content?.mode === "upload" ? content.fileName : undefined;
+    const displayName = content?.mode === "upload" ? content.displayName : undefined;
+    const fileName = displayName || (content?.mode === "upload" ? content.fileName : undefined);
 
     if (content?.mode === "upload" && content.r2Key) {
-      const safeName = (content.fileName ?? productName).replace(/"/g, "'");
+      const safeName = (displayName || content.fileName || productName).replace(/"/g, "'");
       const command = new GetObjectCommand({
         Bucket: r2.config.bucket,
         Key: content.r2Key,

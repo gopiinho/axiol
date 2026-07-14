@@ -23,7 +23,7 @@ import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import { useUser } from "@/features/auth/client/UserContext";
 import { usePublishProduct, useUnpublishProduct } from "@/features/products/hooks/useProduct";
 import { getProductTypeDefinition } from "@/features/products/registry/productTypes";
-import type { ProductTypeKey } from "@/features/products/registry/productTypes";
+import type { ProductTypeKey, ProductStepKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
 import { STEP_COMPONENTS } from "@/features/products/builder/steps/StepRegistry";
 import { ProductStepPreview } from "@/features/products/builder/previews/ProductStepPreview";
@@ -31,6 +31,7 @@ import type {
   ThumbnailLiveState,
   CheckoutLiveState,
 } from "@/features/products/components/cards/types";
+import { useQueryParam } from "@/lib/hooks/useQueryParam";
 
 export default function EditProduct({
   params,
@@ -48,7 +49,7 @@ export default function EditProduct({
   const [busyAction, setBusyAction] = useState<"save" | "next" | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [unpublishOpen, setUnpublishOpen] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [rawStep, setCurrentStep] = useQueryParam("step", "thumbnail");
   const [thumbnailLiveState, setThumbnailLiveState] = useState<ThumbnailLiveState>({
     style: "button",
     title: "",
@@ -73,28 +74,11 @@ export default function EditProduct({
   const needsItems = product?.type === "affiliate" && (items?.length ?? 0) === 0;
 
   const definition = product ? getProductTypeDefinition(product.type as ProductTypeKey) : null;
+  const currentStep = definition && definition.steps.includes(rawStep as ProductStepKey)
+    ? rawStep
+    : (definition?.steps?.[0] ?? rawStep);
+  const currentStepIndex = definition ? definition.steps.indexOf(currentStep as ProductStepKey) : 0;
   const isLastStep = definition ? currentStepIndex === definition.steps.length - 1 : false;
-
-  const firstIncompleteIndex = (() => {
-    if (!product || !definition || product.status === "published") return null;
-    const steps = definition.steps;
-    for (let i = 0; i < steps.length; i++) {
-      let complete = true;
-      const key = steps[i];
-      if (key === "thumbnail") {
-        const t = product.config?.thumbnail as Record<string, unknown> | undefined;
-        complete = Boolean(t?.style && t?.title && t?.buttonText);
-      } else if (key === "content") {
-        const c = product.config?.content as Record<string, unknown> | undefined;
-        if (!c) complete = false;
-        else if (c.mode === "upload") complete = Boolean(c.r2Key);
-        else if (c.mode === "external_link") complete = Boolean(c.url);
-        else complete = false;
-      }
-      if (!complete) return i;
-    }
-    return null;
-  })();
 
   useEffect(() => {
     if (product && definition) {
@@ -153,7 +137,7 @@ export default function EditProduct({
           setPublishing(false);
         }
       } else {
-        setCurrentStepIndex((prev) => Math.min(prev + 1, definition.steps.length - 1));
+        setCurrentStep(definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]);
       }
     } catch {
     } finally {
@@ -197,7 +181,7 @@ export default function EditProduct({
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
       if (!isLastStep) {
-        setCurrentStepIndex((prev) => Math.min(prev + 1, definition.steps.length - 1));
+        setCurrentStep(definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]);
       }
     } catch {
     } finally {
@@ -326,12 +310,7 @@ export default function EditProduct({
             currentStepKey={definition.steps[currentStepIndex]}
             currentStepIndex={currentStepIndex}
             totalSteps={definition.steps.length}
-            onStepClick={setCurrentStepIndex}
-            disabledSteps={
-              firstIncompleteIndex != null
-                ? new Set(definition.steps.slice(firstIncompleteIndex + 1).map((_, i) => i + firstIncompleteIndex + 1))
-                : undefined
-            }
+            onStepClick={(index) => setCurrentStep(definition.steps[index])}
             preview={
               <ProductStepPreview
                 stepKey={definition.steps[currentStepIndex]}
@@ -363,6 +342,7 @@ export default function EditProduct({
                       username: user?.username,
                       type: product.type,
                       status: product.status,
+                      publishedAt: product.publishedAt ?? null,
                       config: product.config as Record<string, unknown>,
                     }}
                     onRegisterSave={(fn) => handleRegisterSave(index, fn)}

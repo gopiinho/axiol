@@ -33,10 +33,11 @@ export function StoreContent({
 }: StoreContentProps) {
   return (
     <div
-      className={`home-font-primary flex ${compact ? "" : "h-full"} flex-col ${compact ? "" : "overflow-hidden"} ${className ?? ""}`}
+      className={`home-font-primary flex flex-col ${className ?? ""}`}
       style={{
         ...themeStyle,
-        backgroundColor: "var(--store-bg)",
+        backgroundImage: "none",
+        backgroundSize: "auto",
         color: "var(--store-text)",
       }}
     >
@@ -48,7 +49,7 @@ export function StoreContent({
         headerLayout={headerLayout}
       />
 
-      <div className={compact ? "" : "h-full"}>
+      <div>
         <ProductSection products={products} username={username} interactive={interactive} compact={compact} />
       </div>
     </div>

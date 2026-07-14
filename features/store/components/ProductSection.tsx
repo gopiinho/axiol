@@ -2,6 +2,7 @@
 
 import { ProductCard } from "@/features/products/components/ProductCard";
 import type { ProductItem } from "@/features/store/types";
+import { BrushCleaning } from "lucide-react";
 
 type ProductSectionProps = {
   products: ProductItem[];
@@ -20,7 +21,7 @@ export function ProductSection({
     return (
       <div className="h-full py-16 text-center">
         <p className="mx-auto mb-3 text-4xl" style={{ color: "var(--store-accent)" }}>
-          :(
+          <BrushCleaning className="mx-auto h-12 w-12" />
         </p>
         <p style={{ color: "var(--store-text-muted)" }} className="text-base">
           Nothing to show here yet!
@@ -31,10 +32,10 @@ export function ProductSection({
 
   return (
     <div
-      className={`mt-4 columns-1 gap-6 px-4 pb-16 ${compact ? "" : "md:columns-2 lg:mx-auto lg:max-w-[70%]"}`}
+      className={`mt-4 grid grid-cols-1 gap-4 px-4 pb-16 ${compact ? "" : "md:grid-cols-2 lg:mx-auto lg:max-w-[70%]"}`}
     >
       {products.map((product, index) => (
-        <div key={product._id} className="mb-6 break-inside-avoid">
+        <div key={product._id}>
           <ProductCard
             product={product}
             username={username}

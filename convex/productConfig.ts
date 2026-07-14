@@ -29,6 +29,7 @@ export const contentConfigValidator = v.union(
     r2Key: v.optional(v.string()),
     fileName: v.optional(v.string()),
     fileSize: v.optional(v.number()),
+    displayName: v.optional(v.string()),
   }),
   v.object({
     mode: v.literal("external_link"),

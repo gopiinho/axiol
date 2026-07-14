@@ -107,12 +107,11 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
 
   return (
     <main
-      className="flex min-h-screen justify-center"
+      className="min-h-screen"
       style={{ backgroundColor: "var(--store-bg)", ...themeStyle }}
     >
-      <div className="mx-auto h-full w-full lg:max-w-[90%]">
+      <div className="mx-auto w-full lg:max-w-[90%]">
         <StoreContent
-          className="min-h-screen"
           displayName={displayName}
           bio={user.bio}
           profileImageUrl={profileSrc}

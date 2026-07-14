@@ -1,16 +1,20 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useQueryParam } from "@/lib/hooks/useQueryParam";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { ExternalLink, Package, Pencil, Settings, Store, Palette } from "lucide-react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useCachedQueryResult } from "@/lib/hooks/useCachedQueryResult";
 import { StorePreview } from "@/components/StorePreview";
 import { EditProfile } from "@/components/EditProfile";
 import { ProductCard } from "@/features/products/components/ProductCard";
+import { SortableProductCard } from "@/features/products/components/SortableProductCard";
+import { useReorderProducts } from "@/features/products/hooks/useProduct";
 import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
 import {
   buildThemeStyle,
@@ -19,6 +23,22 @@ import {
   type LayoutConfig,
 } from "@/lib/themes";
 import { resolvePalette } from "@/lib/colorUtils";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  KeyboardSensor,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSwappingStrategy,
+} from "@dnd-kit/sortable";
 
 const DEFAULT_PALETTE: PaletteConfig = resolvePalette({
   bg: "oklch(0.97 0.015 340)",
@@ -40,8 +60,69 @@ export default function MyStorePage() {
 
   const rawProducts = useQuery(api.products.listByUser);
   const products = useCachedQueryResult("store:products", rawProducts);
-  const publishedProducts = products?.filter((p) => p.status === "published") ?? [];
+  const publishedProducts = useMemo(
+    () => products?.filter((p) => p.status === "published") ?? [],
+    [products]
+  );
+  const reorderProducts = useReorderProducts();
   const updateProfile = useMutation(api.users.updateProfile);
+
+  const [localProducts, setLocalProducts] = useState(publishedProducts);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalProducts(publishedProducts);
+  }, [publishedProducts]);
+
+  const productIds = useMemo(
+    () => localProducts.map((p) => p._id),
+    [localProducts]
+  );
+
+  const activeProduct = useMemo(
+    () => localProducts.find((p) => p._id === activeId) ?? null,
+    [localProducts, activeId]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      setActiveId(null);
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = localProducts.findIndex((p) => p._id === active.id);
+      const newIndex = localProducts.findIndex((p) => p._id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reordered = [...localProducts];
+      [reordered[oldIndex], reordered[newIndex]] = [reordered[newIndex], reordered[oldIndex]];
+
+      const updated = reordered.map((p, idx) => ({ ...p, order: idx }));
+      setLocalProducts(updated);
+
+      try {
+        await reorderProducts({
+          items: updated.map((p) => ({ id: p._id as Id<"products">, order: p.order })),
+        });
+      } catch {
+        setLocalProducts(publishedProducts);
+      }
+    },
+    [localProducts, reorderProducts, publishedProducts]
+  );
 
   const [editOpen, setEditOpen] = useState(false);
   const [storeName, setStoreName] = useState("");
@@ -52,7 +133,7 @@ export default function MyStorePage() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"store" | "design">("store");
+  const [activeTab, setActiveTab] = useQueryParam("tab", "store");
 
   const [palette, setPalette] = useState<PaletteConfig>(() => {
     if (user?.palette && typeof user.palette === "object") {
@@ -308,30 +389,55 @@ export default function MyStorePage() {
             )}
           </div>
 
-          <div className="min-h-[50vh] px-5 pt-6 lg:px-6 lg:pt-8">
+          <div className="min-h-[50vh] px-5 pt-6 pb-12 lg:px-6 lg:pt-8 lg:pb-16">
             {activeTab === "store" ? (
-              publishedProducts.length > 0 ? (
-                <div className="columns-1 gap-6 sm:columns-2">
-                  {publishedProducts.map((product, index) => (
-                    <div key={product._id} className="mb-6 break-inside-avoid">
+              localProducts.length > 0 ? (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCorners}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext items={productIds} strategy={rectSwappingStrategy}>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {localProducts.map((product, index) => (
+                        <SortableProductCard
+                          key={product._id}
+                          product={{
+                            _id: product._id,
+                            name: product.name,
+                            productUrl: product.productUrl,
+                            type: product.type,
+                            price: product.price,
+                            coverImageUrl: product.coverImageUrl ?? null,
+                            thumbnailImageUrl: product.thumbnailImageUrl ?? null,
+                            config: product.config as Record<string, unknown>,
+                            itemCount: 0,
+                          }}
+                          index={index}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                  <DragOverlay>
+                    {activeProduct ? (
                       <ProductCard
                         product={{
-                          _id: product._id,
-                          name: product.name,
-                          productUrl: product.productUrl,
-                          type: product.type,
-                          price: product.price,
-                          coverImageUrl: product.coverImageUrl ?? null,
-                          thumbnailImageUrl: product.thumbnailImageUrl ?? null,
-                          config: product.config as Record<string, unknown>,
+                          _id: activeProduct._id,
+                          name: activeProduct.name,
+                          productUrl: activeProduct.productUrl,
+                          type: activeProduct.type,
+                          price: activeProduct.price,
+                          coverImageUrl: activeProduct.coverImageUrl ?? null,
+                          thumbnailImageUrl: activeProduct.thumbnailImageUrl ?? null,
+                          config: activeProduct.config as Record<string, unknown>,
                           itemCount: 0,
                         }}
-                        index={index}
-                        interactive={true}
+                        interactive
                       />
-                    </div>
-                  ))}
-                </div>
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
               ) : (
                 <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
                   <Package className="mx-auto h-10 w-10" style={{ color: "var(--store-accent)" }} />

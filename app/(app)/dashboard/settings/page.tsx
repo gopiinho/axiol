@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryParam } from "@/lib/hooks/useQueryParam";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,8 @@ export default function SettingsPage() {
   const { user: profile } = useUser();
   const { integrations } = useIntegrations();
 
+  const [tab, setTab] = useQueryParam("tab", "general");
+
   const subscriptionLabel =
     profile?.subscriptionStatus === "trial" && profile?.trialEndsAt
       ? `Trial — ends ${new Date(profile.trialEndsAt).toLocaleDateString()}`
@@ -55,7 +58,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="mx-auto mt-6 max-w-xl">
-        <Tabs defaultValue="general">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList
             variant="line"
             className="border-border/70 w-full justify-start gap-0 rounded-none border-b p-0"

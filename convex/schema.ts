@@ -64,10 +64,12 @@ export default defineSchema({
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
     automationEnabled: v.boolean(),
+    order: v.number(),
   })
     .index("by_user", ["createdBy"])
+    .index("by_user_order", ["createdBy", "order"])
     .index("by_productUrl", ["productUrl", "createdBy"])
-    .index("by_status", ["createdBy", "status"]),
+    .index("by_status", ["createdBy", "status", "order"]),
 
   productItems: defineTable({
     productId: v.id("products"),

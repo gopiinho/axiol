@@ -18,7 +18,6 @@ interface ProductBuilderLayoutProps {
   currentStepIndex: number;
   totalSteps: number;
   onStepClick: (index: number) => void;
-  disabledSteps?: Set<number>;
   children: React.ReactNode;
   preview?: React.ReactNode;
 }
@@ -30,7 +29,6 @@ export function ProductBuilderLayout({
   currentStepIndex,
   totalSteps: _totalSteps,
   onStepClick,
-  disabledSteps,
   children,
   preview,
 }: ProductBuilderLayoutProps) {
@@ -40,27 +38,18 @@ export function ProductBuilderLayout({
         {definition.steps.map((stepKey, index) => {
           const isActive = index === currentStepIndex;
           const isCompleted = index < currentStepIndex;
-          const isDisabled = disabledSteps?.has(index);
           const StepIcon = STEP_ICONS[stepKey];
           return (
             <button
               key={stepKey}
               type="button"
-              onClick={() => !isDisabled && onStepClick(index)}
-              disabled={isDisabled}
-              title={
-                isDisabled
-                  ? `Complete ${STEP_LABELS[definition.steps[0]]} before accessing this step`
-                  : undefined
-              }
-              className={`flex items-center gap-2 rounded-full px-3 py-3 text-xs font-medium whitespace-nowrap transition-colors ${
+              onClick={() => onStepClick(index)}
+              className={`flex cursor-pointer items-center gap-2 rounded-full px-3 py-3 text-xs font-medium whitespace-nowrap transition-colors ${
                 isActive
                   ? "bg-foreground text-background"
                   : isCompleted
                     ? "bg-primary text-foreground"
-                    : isDisabled
-                      ? "bg-background text-muted-foreground/40 cursor-not-allowed"
-                      : "bg-background text-muted-foreground hover:bg-card/30 cursor-pointer"
+                    : "bg-background text-muted-foreground hover:bg-card/30"
               }`}
             >
               {StepIcon && <StepIcon className="h-4 w-4" />}
@@ -73,7 +62,7 @@ export function ProductBuilderLayout({
       <div className="lg:flex lg:gap-8 lg:items-start">
         <div className="lg:flex-1 lg:min-w-0">{children}</div>
         {preview && (
-          <div className="hidden lg:block lg:w-[380px] lg:shrink-0 lg:self-stretch">
+          <div className="hidden lg:block lg:w-95 lg:shrink-0 lg:self-stretch">
             <div className="sticky top-8">{preview}</div>
           </div>
         )}

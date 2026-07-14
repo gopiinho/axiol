@@ -30,10 +30,10 @@ function ToolbarButton({ onClick, active, label, children }: ToolbarButtonProps)
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "flex h-7 w-7 items-center justify-center rounded-xs transition-colors",
+        "flex h-7 w-7 items-center cursor-pointer justify-center rounded-xs transition-colors",
         active
-          ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+          ? "text-primary"
+          : "text-background hover:bg-secondary hover:text-foreground"
       )}
     >
       {children}
@@ -132,11 +132,11 @@ export function RichTextEditor({
     <div
       className={cn(
         "border-border/60 bg-card/90 overflow-hidden rounded-xs border transition-[color,box-shadow,transform]",
-        "focus-within:border-ring focus-within:ring-ring/40 focus-within:bg-card focus-within:ring-[3px]",
+        "",
         className
       )}
     >
-      <div className="border-border/60 flex items-center gap-0.5 border-b px-2 py-1.5">
+      <div className="border-border/60 bg-foreground flex items-center gap-0.5 border-b px-2 py-1.5">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive("bold")}
@@ -197,7 +197,7 @@ export function RichTextEditor({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleInputKeyDown}
             placeholder="https://example.com"
-            className="h-8 flex-1 text-sm"
+            className="flex-1 text-sm"
           />
           <button
             type="button"

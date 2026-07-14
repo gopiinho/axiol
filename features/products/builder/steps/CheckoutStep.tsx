@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, X, User, Mail, Phone, Check } from "lucide-react";
+import { Loader2, Plus, X, User, Mail, Phone } from "lucide-react";
 import { RichTextEditor } from "../../components/rich-text";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import {
   useUpdateProduct,
   useUpdateCheckoutConfig,
@@ -389,23 +390,10 @@ export function CheckoutStep({
                 disabled
               />
             </div>
-            <button
-              type="button"
-              onClick={() => setPhoneEnabled(!phoneEnabled)}
-              className={cn(
-                "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors",
-                phoneEnabled
-                  ? "border-primary bg-card/90 text-primary"
-                  : "border-input bg-card/90 text-muted-foreground hover:border-primary/60"
-              )}
-            >
-              <Check
-                className={cn(
-                  "h-4 w-4 transition-opacity",
-                  phoneEnabled ? "opacity-100" : "opacity-0"
-                )}
-              />
-            </button>
+            <Switch
+              checked={phoneEnabled}
+              onCheckedChange={setPhoneEnabled}
+            />
           </div>
         </div>
       </div>
