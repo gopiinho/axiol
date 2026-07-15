@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
     if (type === "VENDOR_STATUS_UPDATE") {
       const vendorId = data.merchant_vendor_id;
       const updatedStatus = data.updated_status;
+      const documentStatus = data.document_status;
       const vendorEmail = data.email;
       const vendorName = data.name;
 
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
         await convex.mutation(api.vendors.updateVendorStatusByVendorId, {
           vendorId,
           vendorStatus: updatedStatus,
+          ...(documentStatus ? { documentStatus } : {}),
         });
 
         if (vendorEmail && (updatedStatus === "ACTIVE" || updatedStatus === "BLOCKED")) {

@@ -10,6 +10,13 @@ const baseUrl = isSandbox
   ? "https://sandbox.cashfree.com/pg"
   : "https://api.cashfree.com/pg";
 
+const ADDRESS_PROOF_CASHFREE_FIELD: Record<string, string> = {
+  aadhaar: "uidai",
+  driving_license: "driving_license",
+  passport: "passport_number",
+  voter_id: "voter_id",
+};
+
 function jsonError(status: number, message: string) {
   return NextResponse.json({ ok: false, error: message }, { status });
 }
@@ -22,10 +29,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { panNumber, aadhaarNumber, businessType, payoutMethod, bankAccount, bankIfsc, bankHolder, upiVpa, upiHolder } = body;
+    const { panNumber, addressProofType, addressProofNumber, businessType, payoutMethod, bankAccount, bankIfsc, bankHolder, upiVpa, upiHolder } = body;
 
     if (!panNumber || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) {
       return jsonError(400, "Valid PAN number is required (format: ABCDE1234F)");
+    }
+
+    const validTypes = ["aadhaar", "driving_license", "passport", "voter_id"];
+    if (!addressProofType || !validTypes.includes(addressProofType)) {
+      return jsonError(400, "Valid address proof type is required (aadhaar, driving_license, passport, or voter_id)");
+    }
+
+    if (!addressProofNumber) {
+      return jsonError(400, "Address proof number is required");
     }
 
     if (!businessType) {
@@ -57,6 +73,8 @@ export async function POST(request: NextRequest) {
 
     const vendorId = `axiol_${profile._id}`;
 
+    const cashfreeField = ADDRESS_PROOF_CASHFREE_FIELD[addressProofType];
+
     const vendorPayload: Record<string, unknown> = {
       vendor_id: vendorId,
       status: "ACTIVE",
@@ -69,7 +87,7 @@ export async function POST(request: NextRequest) {
         account_type: "INDIVIDUAL",
         business_type: businessType,
         pan: panNumber,
-        ...(aadhaarNumber ? { uidai: aadhaarNumber } : {}),
+        [cashfreeField]: addressProofNumber,
       },
     };
 
@@ -116,7 +134,8 @@ export async function POST(request: NextRequest) {
           vendorId,
           vendorStatus,
           panNumber,
-          aadhaarNumber: aadhaarNumber || "",
+          addressProofType,
+          addressProofNumber,
           payoutMethod,
           bankAccount: payoutMethod === "bank" ? bankAccount : undefined,
           bankIfsc: payoutMethod === "bank" ? bankIfsc : undefined,
@@ -142,7 +161,8 @@ export async function POST(request: NextRequest) {
       vendorId,
       vendorStatus,
       panNumber,
-      aadhaarNumber: aadhaarNumber || "",
+      addressProofType,
+      addressProofNumber,
       payoutMethod,
       bankAccount: payoutMethod === "bank" ? bankAccount : undefined,
       bankIfsc: payoutMethod === "bank" ? bankIfsc : undefined,
