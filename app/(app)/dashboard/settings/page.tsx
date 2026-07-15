@@ -19,6 +19,7 @@ import {
 import { useIntegrations } from "@/features/integrations/hooks/useIntegrations";
 import IntegrationCard from "@/features/integrations/components/IntegrationCard";
 import type { IntegrationDefinition } from "@/features/integrations/types";
+import { PaymentsTab } from "@/components/dashboard/PaymentsTab";
 
 const INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
   {
@@ -51,13 +52,13 @@ export default function SettingsPage() {
       : (profile?.subscriptionStatus ?? "N/A");
 
   return (
-    <div className="px-5 pt-6 lg:px-6 lg:pt-8">
-      <div className="mx-auto max-w-xl">
+    <div className="px-5 pt-6 pb-12 lg:px-6 lg:pt-8 lg:pb-16">
+      <div className="mx-auto max-w-3xl">
         <h1 className="app-title">Settings</h1>
         <p className="app-subtitle mt-1">Your account and connected services.</p>
       </div>
 
-      <div className="mx-auto mt-6 max-w-xl">
+      <div className="mx-auto mt-6 max-w-3xl">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList
             variant="line"
@@ -76,6 +77,12 @@ export default function SettingsPage() {
               Integrations
             </TabsTrigger>
             <TabsTrigger
+              value="payments"
+              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+            >
+              Payments
+            </TabsTrigger>
+            <TabsTrigger
               value="advanced"
               className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
@@ -89,6 +96,10 @@ export default function SettingsPage() {
 
           <TabsContent value="integrations" className="pt-6">
             <IntegrationsTab integrations={integrations} />
+          </TabsContent>
+
+          <TabsContent value="payments" className="pt-6">
+            <PaymentsTab />
           </TabsContent>
 
           <TabsContent value="advanced" className="pt-6">
