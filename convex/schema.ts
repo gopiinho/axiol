@@ -47,6 +47,16 @@ export default defineSchema({
     vendorStatus: v.optional(v.string()),
     panNumber: v.optional(v.string()),
     aadhaarNumber: v.optional(v.string()),
+    addressProofType: v.optional(
+      v.union(
+        v.literal("aadhaar"),
+        v.literal("driving_license"),
+        v.literal("passport"),
+        v.literal("voter_id")
+      )
+    ),
+    addressProofNumber: v.optional(v.string()),
+    vendorDocumentStatus: v.optional(v.record(v.string(), v.string())),
     payoutMethod: v.optional(v.union(v.literal("bank"), v.literal("upi"))),
     bankAccount: v.optional(v.string()),
     bankIfsc: v.optional(v.string()),

@@ -7,7 +7,8 @@ export const saveVendorDetails = mutation({
     vendorId: v.string(),
     vendorStatus: v.string(),
     panNumber: v.string(),
-    aadhaarNumber: v.string(),
+    addressProofType: v.optional(v.string()),
+    addressProofNumber: v.optional(v.string()),
     payoutMethod: v.union(v.literal("bank"), v.literal("upi")),
     bankAccount: v.optional(v.string()),
     bankIfsc: v.optional(v.string()),
@@ -18,11 +19,12 @@ export const saveVendorDetails = mutation({
   handler: async (ctx, args) => {
     const { userId } = await requireSession(ctx);
 
-    await ctx.db.patch(userId, {
+    const patch: Record<string, unknown> = {
       vendorId: args.vendorId,
       vendorStatus: args.vendorStatus,
       panNumber: args.panNumber,
-      aadhaarNumber: args.aadhaarNumber,
+      addressProofType: args.addressProofType,
+      addressProofNumber: args.addressProofNumber,
       payoutMethod: args.payoutMethod,
       bankAccount: args.bankAccount,
       bankIfsc: args.bankIfsc,
@@ -30,7 +32,9 @@ export const saveVendorDetails = mutation({
       upiVpa: args.upiVpa,
       upiHolder: args.upiHolder,
       vendorCreatedAt: Date.now(),
-    });
+    };
+
+    await ctx.db.patch(userId, patch);
   },
 });
 
@@ -51,14 +55,23 @@ export const updateVendorStatusByVendorId = mutation({
   args: {
     vendorId: v.string(),
     vendorStatus: v.string(),
+    documentStatus: v.optional(v.record(v.string(), v.string())),
   },
   handler: async (ctx, args) => {
     const prefix = "axiol_";
     if (!args.vendorId.startsWith(prefix)) return;
-    const userId = args.vendorId.slice(prefix.length) as any;
-    await ctx.db.patch(userId, {
+    const idString = args.vendorId.slice(prefix.length);
+    const userId = ctx.db.normalizeId("users", idString);
+    if (!userId) return;
+
+    const patch: Record<string, unknown> = {
       vendorStatus: args.vendorStatus,
-    });
+    };
+    if (args.documentStatus) {
+      patch.vendorDocumentStatus = args.documentStatus;
+    }
+
+    await ctx.db.patch(userId, patch);
   },
 });
 
@@ -74,6 +87,9 @@ export const getPayoutProfile = query({
       vendorId: user.vendorId,
       vendorStatus: user.vendorStatus,
       panNumber: user.panNumber,
+      addressProofType: user.addressProofType,
+      addressProofNumber: user.addressProofNumber,
+      vendorDocumentStatus: user.vendorDocumentStatus,
       payoutMethod: user.payoutMethod,
       bankAccount: user.bankAccount,
       bankIfsc: user.bankIfsc,
