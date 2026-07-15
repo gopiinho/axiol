@@ -43,6 +43,17 @@ export default defineSchema({
     subscriptionStatus: v.optional(
       v.union(v.literal("trial"), v.literal("active"), v.literal("expired"), v.literal("cancelled"))
     ),
+    vendorId: v.optional(v.string()),
+    vendorStatus: v.optional(v.string()),
+    panNumber: v.optional(v.string()),
+    aadhaarNumber: v.optional(v.string()),
+    payoutMethod: v.optional(v.union(v.literal("bank"), v.literal("upi"))),
+    bankAccount: v.optional(v.string()),
+    bankIfsc: v.optional(v.string()),
+    bankHolder: v.optional(v.string()),
+    upiVpa: v.optional(v.string()),
+    upiHolder: v.optional(v.string()),
+    vendorCreatedAt: v.optional(v.number()),
   })
     .index("by_email", ["email"])
     .index("by_username", ["username"])
@@ -128,6 +139,11 @@ export default defineSchema({
     paymentReference: v.optional(v.string()),
     createdAt: v.number(),
     paidAt: v.optional(v.number()),
+    vendorId: v.optional(v.string()),
+    vendorShareCents: v.optional(v.number()),
+    platformFeeCents: v.optional(v.number()),
+    platformFeePct: v.optional(v.number()),
+    tdsCents: v.optional(v.number()),
   })
     .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"])
