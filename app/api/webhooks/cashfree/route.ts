@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Cashfree, CFEnvironment } from "cashfree-pg";
 import { api } from "@/convex/_generated/api";
 import { getServerConvexClient } from "@/server/convex/client";
-import { sendDownloadEmail } from "@/server/email/client";
+import { sendDownloadEmail, sendKycNotification } from "@/server/email/client";
 
 const appId = process.env.CASHFREE_APP_ID || "";
 const secretKey = process.env.CASHFREE_SECRET_KEY || "";
@@ -43,6 +43,31 @@ export async function POST(request: NextRequest) {
 
     const payload = JSON.parse(rawBody);
     const { type, data } = payload;
+
+    if (type === "VENDOR_STATUS_UPDATE") {
+      const vendorId = data.merchant_vendor_id;
+      const updatedStatus = data.updated_status;
+      const vendorEmail = data.email;
+      const vendorName = data.name;
+
+      if (vendorId && updatedStatus) {
+        const convex = getServerConvexClient();
+        await convex.mutation(api.vendors.updateVendorStatusByVendorId, {
+          vendorId,
+          vendorStatus: updatedStatus,
+        });
+
+        if (vendorEmail && (updatedStatus === "ACTIVE" || updatedStatus === "BLOCKED")) {
+          await sendKycNotification(
+            vendorEmail,
+            updatedStatus,
+            vendorName || "",
+            "Axiol",
+            process.env.NEXT_PUBLIC_SITE_URL || "https://axiol.store",
+          );
+        }
+      }
+    }
 
     if (type === "PAYMENT_SUCCESS_WEBHOOK") {
       const cfOrderId = data.order?.order_id;
