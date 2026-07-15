@@ -27,6 +27,7 @@ import type * as products from "../products.js";
 import type * as security from "../security.js";
 import type * as storage from "../storage.js";
 import type * as users from "../users.js";
+import type * as vendors from "../vendors.js";
 import type * as waitlist from "../waitlist.js";
 
 import type {
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   security: typeof security;
   storage: typeof storage;
   users: typeof users;
+  vendors: typeof vendors;
   waitlist: typeof waitlist;
 }>;
 

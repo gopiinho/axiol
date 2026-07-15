@@ -48,7 +48,19 @@ export async function POST(request: NextRequest) {
       return jsonError(400, "Product is not priced");
     }
 
+    const creator = await convex.query(api.vendors.getPayoutProfileForOrder, {
+      userId: product.createdBy,
+    });
+
     const orderId = `axiol_${productId}_${Date.now()}`;
+
+    const isPro = creator?.subscriptionStatus === "active";
+    const platformFeePct = isPro ? 0 : 10;
+    const platformFee = Math.round(amountCents * platformFeePct / 100);
+    const tds = Math.round(amountCents * 0.01);
+    const vendorNet = amountCents - platformFee - tds;
+
+    const hasActiveVendor = creator?.vendorId && creator?.vendorStatus === "ACTIVE";
 
     const cashfreeOrder = await cashfree.PGCreateOrder({
       order_id: orderId,
@@ -63,6 +75,13 @@ export async function POST(request: NextRequest) {
       order_meta: {
         return_url: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL}/${username}/p/${productUrl}`,
       },
+      ...(hasActiveVendor && creator?.vendorId
+        ? {
+            order_splits: [
+              { vendor_id: creator.vendorId, amount: vendorNet },
+            ],
+          }
+        : {}),
     });
 
     const order = await convex.mutation(api.orders.create, {
@@ -75,6 +94,11 @@ export async function POST(request: NextRequest) {
       currency: "INR",
       paymentProvider: "cashfree",
       paymentReference: cashfreeOrder.data.order_id || "",
+      vendorId: creator?.vendorId,
+      vendorShareCents: hasActiveVendor ? vendorNet : undefined,
+      platformFeeCents: hasActiveVendor ? platformFee : undefined,
+      platformFeePct: hasActiveVendor ? platformFeePct : undefined,
+      tdsCents: hasActiveVendor ? tds : undefined,
     });
 
     return NextResponse.json({
