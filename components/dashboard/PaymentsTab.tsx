@@ -293,7 +293,7 @@ function renderSetupForm(
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-muted-foreground mb-1 block text-xs font-medium">PAN Card Number</label>
+                <label className="text-muted-foreground mb-1 block text-xs font-medium">PAN Card Number *</label>
                 <Input
                   value={form.panNumber}
                   onChange={(e) => updateField("panNumber", e.target.value.toUpperCase())}
@@ -305,7 +305,7 @@ function renderSetupForm(
               </div>
               <div>
                 <label className="text-muted-foreground mb-1 block text-xs font-medium">
-                  Aadhaar Number <span className="text-muted-foreground/50">— optional</span>
+                  Aadhaar Number
                 </label>
                 <Input
                   value={form.aadhaarNumber}
@@ -484,7 +484,7 @@ function renderSetupForm(
         </div>
       )}
 
-      <p className="text-muted-foreground text-xs leading-relaxed">
+      <p className="text-muted-foreground text-xs text-center leading-relaxed">
         Your information is used solely for compliance and payout verification.
       </p>
 
@@ -594,7 +594,7 @@ function renderActive(
         </div>
       </div>
 
-      <div className="bg-muted/50 space-y-2 rounded-md px-3 py-3 text-xs">
+      <div className="bg-muted/50 space-y-2 rounded-xs px-3 py-3 text-xs">
         <div className="flex justify-between">
           <span className="text-muted-foreground">PAN</span>
           <span className="text-foreground font-mono">{profile?.panNumber ? maskText(profile.panNumber, 2, 4) : "—"}</span>
@@ -633,7 +633,6 @@ function renderActive(
           {checking ? (
             <>
               <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              Checking...
             </>
           ) : (
             "Refresh Status"
