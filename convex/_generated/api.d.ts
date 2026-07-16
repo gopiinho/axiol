@@ -20,6 +20,7 @@ import type * as instagram from "../instagram.js";
 import type * as integrations from "../integrations.js";
 import type * as lib_instagramCrypto from "../lib/instagramCrypto.js";
 import type * as orders from "../orders.js";
+import type * as otpEmail from "../otpEmail.js";
 import type * as productClicks from "../productClicks.js";
 import type * as productConfig from "../productConfig.js";
 import type * as productItems from "../productItems.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   integrations: typeof integrations;
   "lib/instagramCrypto": typeof lib_instagramCrypto;
   orders: typeof orders;
+  otpEmail: typeof otpEmail;
   productClicks: typeof productClicks;
   productConfig: typeof productConfig;
   productItems: typeof productItems;
