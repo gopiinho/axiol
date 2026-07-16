@@ -8,6 +8,7 @@ export default defineSchema({
   users: defineTable({
     betterAuthId: v.string(),
     email: v.string(),
+    emailVerified: v.boolean(),
     username: v.string(),
     name: v.string(),
     bio: v.string(),
