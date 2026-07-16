@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, MutationCtx } from "./_generated/server";
-import { requireSession, getSession } from "./security";
+import { requireSession, getSession, requireVerifiedSession } from "./security";
 import { Id } from "./_generated/dataModel";
 
 const TRIAL_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days
@@ -160,6 +160,7 @@ export const getProfile = query({
     return {
       _id: user._id,
       email: user.email,
+      emailVerified: user.emailVerified,
       username: user.username,
       name: user.name,
       bio: user.bio,
@@ -177,6 +178,17 @@ export const getProfile = query({
       subscriptionStatus: user.subscriptionStatus,
       trialEndsAt: user.trialEndsAt,
     };
+  },
+});
+
+export const markEmailVerified = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const { userId, user } = await requireSession(ctx);
+    if (user.emailVerified) {
+      return;
+    }
+    await ctx.db.patch(userId, { emailVerified: true });
   },
 });
 
@@ -211,7 +223,7 @@ export const updateProfile = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Record<string, any> = {};
@@ -258,6 +270,7 @@ export const updateProfile = mutation({
 export const createProfile = mutation({
   args: {
     username: v.string(),
+    emailVerified: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -302,6 +315,7 @@ export const createProfile = mutation({
     return await ctx.db.insert("users", {
       betterAuthId,
       email: identity.email ?? "",
+      emailVerified: args.emailVerified ?? false,
       username,
       name: identity.name ?? "",
       bio: "",
@@ -345,7 +359,7 @@ export const checkUsernameAvailable = query({
 export const deleteAccount = mutation({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     await deleteAllUserData(ctx, userId);
 
