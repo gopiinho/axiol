@@ -68,7 +68,6 @@ export default function DashboardPage() {
       </section>
 
       <div className="space-y-8 p-5 sm:p-8">
-        <h2 className="mb-3 text-lg font-medium">Activity</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
