@@ -5,7 +5,7 @@ import type { Doc } from "@/convex/_generated/dataModel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useUpdateProduct } from "../hooks/useProduct";
 
@@ -27,7 +27,6 @@ export const ProductDetail = forwardRef<ProductDetailHandle, ProductDetailProps>
     const [price, setPrice] = useState(product.price ?? "");
 
     const [, setSaving] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const updateProduct = useUpdateProduct();
 
@@ -42,7 +41,6 @@ export const ProductDetail = forwardRef<ProductDetailHandle, ProductDetailProps>
 
     const handleSave = async () => {
       setSaving(true);
-      setErrorMessage(null);
       try {
         await updateProduct({
           id: product._id,
@@ -52,9 +50,9 @@ export const ProductDetail = forwardRef<ProductDetailHandle, ProductDetailProps>
           price: productType !== "affiliate" ? price.trim() || undefined : undefined,
           type: productType as "affiliate" | "digital",
         });
-      } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : "Failed to save product.");
-        throw error;
+        toast.success("Product saved!");
+      } catch {
+        toast.error("Failed to save product", { description: "Please try again." });
       } finally {
         setSaving(false);
       }
@@ -66,13 +64,6 @@ export const ProductDetail = forwardRef<ProductDetailHandle, ProductDetailProps>
 
     return (
       <div className="space-y-8">
-        {errorMessage && (
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
-        )}
-
         <div className="grid gap-6">
           <div className="space-y-2">
             <Label htmlFor="product-name">Name</Label>

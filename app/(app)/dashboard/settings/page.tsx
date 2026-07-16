@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   Trash2,
   Loader2,
@@ -222,14 +223,11 @@ function DeleteAccountDialog({
 }) {
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState("");
-
   const expectedText = `delete ${username ?? "my account"}`;
   const isConfirmed = confirmText.toLowerCase() === expectedText.toLowerCase();
 
   const handleDelete = async () => {
     if (!isConfirmed) return;
-    setError("");
     setIsDeleting(true);
 
     try {
@@ -241,7 +239,7 @@ function DeleteAccountDialog({
       window.location.href = "/login";
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to delete account";
-      setError(msg);
+      toast.error(msg || "Failed to delete account", { description: "Please try again." });
       setIsDeleting(false);
     }
   };
@@ -250,7 +248,6 @@ function DeleteAccountDialog({
     if (isDeleting) return;
     if (!next) {
       setConfirmText("");
-      setError("");
     }
     onOpenChange(next);
   };
@@ -288,12 +285,6 @@ function DeleteAccountDialog({
             spellCheck={false}
           />
         </div>
-
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive rounded-xl border px-3 py-2 text-sm">
-            {error}
-          </div>
-        )}
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isDeleting}>

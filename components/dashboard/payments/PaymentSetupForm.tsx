@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import { Landmark, Smartphone, ArrowRight, ArrowLeft, Loader2, Fingerprint, Car, BookOpen, IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +33,7 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingDocType, setUploadingDocType] = useState<string | null>(null);
-  const [error, setError] = useState("");
+
   const [touched, setTouched] = useState<Set<keyof PayoutFormData>>(new Set());
 
   const [panCardFile, setPanCardFile] = useState<File | null>(null);
@@ -49,7 +50,6 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
   const updateField = useCallback(
     (field: keyof PayoutFormData, value: string) => {
       setForm((prev) => ({ ...prev, [field]: value }));
-      setError("");
       if (field === "addressProofType") {
         setAddressProofFiles({});
       }
@@ -129,10 +129,9 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
     markTouched("panNumber");
     const err = validateStep(1);
     if (err) {
-      setError(err);
+      toast.error(err);
       return;
     }
-    setError("");
     setStep(2);
   }, [validateStep, markTouched]);
 
@@ -140,10 +139,9 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
     markTouched("addressProofType", "addressProofNumber");
     const err = validateStep(2);
     if (err) {
-      setError(err);
+      toast.error(err);
       return;
     }
-    setError("");
     setStep(3);
   }, [validateStep, markTouched]);
 
@@ -174,12 +172,11 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
   const handleSubmit = useCallback(async () => {
     const err = validateStep(3);
     if (err) {
-      setError(err);
+      toast.error(err);
       return;
     }
 
     setSubmitting(true);
-    setError("");
 
     try {
       const vendorRes = await fetch("/api/vendors/create", {
@@ -201,14 +198,14 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
 
       const vendorData = await vendorRes.json();
       if (!vendorData.ok) {
-        setError(vendorData.error || "Failed to save vendor details");
+        toast.error(vendorData.error || "Failed to save payment details", { description: "Please try again." });
         setSubmitting(false);
         return;
       }
 
       const panOk = await uploadFile("PAN", panCardFile!, form.panNumber.toUpperCase());
       if (!panOk) {
-        setError("PAN card upload failed. Please try again.");
+        toast.error("PAN card upload failed", { description: "Please try again." });
         setSubmitting(false);
         return;
       }
@@ -222,15 +219,16 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
         if (!f) continue;
         const ok = await uploadFile(pt.docType, f, form.addressProofNumber);
         if (!ok) {
-          setError(`${pt.label} upload failed. Please try again.`);
+          toast.error(`${pt.label} upload failed`, { description: "Please try again." });
           setSubmitting(false);
           return;
         }
       }
 
+      toast.success("Payment details saved!");
       onComplete(vendorData.status || "IN_BENE_CREATION");
     } catch {
-      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong", { description: "Please try again." });
     } finally {
       setSubmitting(false);
       setUploadingDocType(null);
@@ -504,12 +502,6 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
         )}
       </div>
 
-      {error && (
-        <div className="border-destructive/25 bg-destructive/8 text-destructive rounded-md border px-3 py-2 text-xs">
-          {error}
-        </div>
-      )}
-
       <div className="space-y-3">
         {step === 1 && (
           <Button onClick={handleNext} className="w-full">
@@ -548,7 +540,6 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
             type="button"
             onClick={() => {
               setStep((prev) => (prev - 1) as 1 | 2 | 3);
-              setError("");
             }}
             disabled={submitting}
             className="w-full"

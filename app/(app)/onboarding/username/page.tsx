@@ -3,15 +3,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { AlertCircle, AtSign, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { AtSign, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { toast } from "sonner";
 
 export default function OnboardingUsernamePage() {
   const [username, setUsername] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [debouncedUsername, setDebouncedUsername] = useState("");
 
@@ -51,19 +51,19 @@ export default function OnboardingUsernamePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
       const trimmed = username.toLowerCase().trim();
       if (!trimmed) {
-        throw new Error("Please choose a username");
+        toast.error("Please choose a username");
+        return;
       }
 
       await createProfile({ username: trimmed, emailVerified: true });
       router.push("/dashboard");
     } catch (err) {
-      setError(
+      toast.error(
         err instanceof Error ? err.message : "Failed to create profile. Please try again."
       );
       setLoading(false);
@@ -87,15 +87,6 @@ export default function OnboardingUsernamePage() {
             Choose your username
           </p>
         </div>
-
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 rounded-xl border px-4 py-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div className="space-y-1">

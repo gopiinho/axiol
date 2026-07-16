@@ -4,7 +4,7 @@ import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
 import { ProductTypeSelector } from "./ProductTypeSelector";
 import { useCreateProduct } from "../hooks/useProduct";
 import { PRODUCT_TYPES } from "../registry/productTypes";
@@ -24,7 +24,6 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle, { onLoading
     const [type, setType] = useState("digital");
     const [price, setPrice] = useState("");
     const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [errors, setErrors] = useState<{ name?: string; price?: string }>({});
 
     const definition = PRODUCT_TYPES[type as ProductTypeKey];
@@ -40,7 +39,6 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle, { onLoading
       if (Object.keys(newErrors).length > 0 || loading) return;
 
       setLoading(true);
-      setErrorMessage(null);
 
       try {
         const productId = await createProduct({
@@ -48,13 +46,10 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle, { onLoading
           type: type as "affiliate" | "digital",
           price: showPrice ? price.trim() || undefined : undefined,
         });
+        toast.success("Product created!");
         router.push(`/dashboard/products/${productId}/edit`);
-      } catch (error) {
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Couldn't create this product. Check your connection and try again."
-        );
+      } catch {
+        toast.error("Couldn't create product", { description: "Check your connection and try again." });
       } finally {
         setLoading(false);
       }
@@ -73,13 +68,6 @@ export const CreateProductFlow = forwardRef<CreateProductFlowHandle, { onLoading
 
     return (
       <div className="space-y-10">
-        {errorMessage && (
-          <Alert variant="destructive">
-            <AlertTitle>Couldn&apos;t create product</AlertTitle>
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
-        )}
-
         <section className="grid gap-1">
           <Label htmlFor="product-name" className="font-bold">
             Name

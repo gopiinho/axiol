@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import { Landmark, Smartphone, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,7 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
   const [upiVpa, setUpiVpa] = useState(profile.upiVpa || "");
   const [upiHolder, setUpiHolder] = useState(profile.upiHolder || "");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+
 
   const validate = useCallback((): string | null => {
     if (method === "bank") {
@@ -38,10 +39,9 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
 
   const handleSubmit = useCallback(async () => {
     const err = validate();
-    if (err) { setError(err); return; }
+    if (err) { toast.error(err); return; }
 
     setSubmitting(true);
-    setError("");
 
     try {
       const res = await fetch("/api/vendors/bank-update", {
@@ -59,13 +59,14 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
 
       const data = await res.json();
       if (!data.ok) {
-        setError(data.error || "Failed to update payment details");
+        toast.error(data.error || "Failed to update payment details", { description: "Please try again." });
         return;
       }
 
+      toast.success("Payment details updated!");
       onComplete(data.status);
     } catch {
-      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong", { description: "Please try again." });
     } finally {
       setSubmitting(false);
     }
@@ -157,12 +158,6 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
               placeholder="Account holder name"
             />
           </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="border-destructive/25 bg-destructive/8 text-destructive rounded-md border px-3 py-2 text-xs">
-          {error}
         </div>
       )}
 

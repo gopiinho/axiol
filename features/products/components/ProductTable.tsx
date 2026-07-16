@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { Id, Doc } from "@/convex/_generated/dataModel";
 import {
   useProducts,
@@ -241,20 +242,22 @@ export function ProductTable() {
   const handleUnpublish = async (id: Id<"products">) => {
     try {
       await unpublishProduct({ id });
+      toast.success("Product unpublished!");
     } catch {
-      /* handled by toast */
+      toast.error("Failed to unpublish product", { description: "Please try again." });
     }
   };
   const handleDelete = async (id: Id<"products">) => {
     try {
       await deleteProduct({ id });
+      toast.success("Product deleted!");
     } catch {
-      /* handled by toast */
+      toast.error("Failed to delete product", { description: "Please try again." });
     }
   };
   const handleDuplicate = async (id: Id<"products">) => {
     const newId = await duplicateProduct({ id });
-    window.location.href = `/dashboard/products/${newId}/edit`;
+    toast.success("Product duplicated!");
   };
 
   if (isLoading) {

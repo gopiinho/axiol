@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, XCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CheckoutFields } from "@/features/products/components/CheckoutForm";
 
@@ -9,7 +9,6 @@ interface CheckoutSidebarProps {
   ctaText: string;
   loading?: boolean;
   disabled?: boolean;
-  message?: string;
   name: string;
   email: string;
   onNameChange: (name: string) => void;
@@ -28,7 +27,6 @@ export function CheckoutSidebar({
   ctaText,
   loading = false,
   disabled = false,
-  message,
   name,
   email,
   onNameChange,
@@ -72,20 +70,6 @@ export function CheckoutSidebar({
           >
             {formattedPrice}
           </span>
-        </div>
-      )}
-
-      {message && (
-        <div
-          className="flex items-center gap-2 rounded-lg p-3 text-sm"
-          style={{
-            backgroundColor: "oklch(0.93 0.03 20 / 0.15)",
-            color: "oklch(0.5 0.15 20)",
-            border: "1px solid oklch(0.8 0.08 20 / 0.3)",
-          }}
-        >
-          <XCircle className="h-4 w-4 shrink-0" />
-          {message}
         </div>
       )}
 

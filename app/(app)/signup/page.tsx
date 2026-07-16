@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import {
-  AlertCircle,
   AtSign,
   Eye,
   EyeOff,
@@ -21,6 +20,7 @@ import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -28,7 +28,6 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [debouncedUsername, setDebouncedUsername] = useState("");
 
@@ -57,7 +56,7 @@ export default function SignupPage() {
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : "Failed to create profile";
-        setError(msg);
+        toast.error(msg || "Failed to create profile");
         setLoading(false);
       });
   }, [convexAuthed, createProfile, router]);
@@ -71,16 +70,17 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
       if (!email || !username || !name || !password) {
-        throw new Error("Please fill in all fields");
+        toast.error("Please fill in all fields");
+        return;
       }
 
       if (password.length < 12) {
-        throw new Error("Password must be at least 12 characters");
+        toast.error("Password must be at least 12 characters");
+        return;
       }
 
       const result = await authClient.signUp.email({
@@ -90,7 +90,9 @@ export default function SignupPage() {
       });
 
       if (result.error) {
-        throw new Error(result.error.message ?? "Signup failed");
+        toast.error(result.error.message ?? "Signup failed");
+        setLoading(false);
+        return;
       }
 
       pending.current = {
@@ -99,7 +101,7 @@ export default function SignupPage() {
       };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Signup failed. Please try again.";
-      setError(errorMessage);
+      toast.error(errorMessage);
       setLoading(false);
     }
   };
@@ -121,15 +123,6 @@ export default function SignupPage() {
             Let&apos;s monetize your following!
           </p>
         </div>
-
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 rounded-xl border px-4 py-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">

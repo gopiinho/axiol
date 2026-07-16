@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { Loader2, Plus, X, User, Mail, Phone } from "lucide-react";
 import { RichTextEditor } from "../../components/rich-text";
 import { cn } from "@/lib/utils";
@@ -88,6 +89,7 @@ export function CheckoutStep({
         storageId: storageId as unknown as Id<"_storage">,
       });
     } catch {
+      toast.error("Failed to upload cover image", { description: "Please try again." });
       setCoverPreview(null);
     } finally {
       setCoverUploading(false);
@@ -101,7 +103,9 @@ export function CheckoutStep({
       await removeProductCoverImage({
         productId: productId as unknown as Id<"products">,
       });
-    } catch {}
+    } catch {
+      toast.error("Failed to remove cover image", { description: "Please try again." });
+    }
   };
 
   const handleSave = useCallback(async () => {

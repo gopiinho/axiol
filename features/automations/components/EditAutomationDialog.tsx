@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useToggleMapping, useUpdateMapping } from "@/features/automations/hooks/useAutomations";
 import {
@@ -108,8 +109,11 @@ export default function EditAutomationDialog({
     try {
       const normalized = keywordList.join(",");
       await updateMapping({ id: mapping._id, keyword: normalized });
+      toast.success("Keywords updated!");
       rememberKeywords(keywordList);
       onOpenChange(false);
+    } catch {
+      toast.error("Failed to save keywords", { description: "Please try again." });
     } finally {
       setSaving(false);
     }

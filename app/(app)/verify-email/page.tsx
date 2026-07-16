@@ -1,28 +1,34 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import { useConvexAuth, useMutation } from "convex/react";
-import { AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const OTP_LENGTH = 6;
 
 export default function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const email = (searchParams?.email as string) || "";
+  const params = use(
+    searchParams ??
+      (Promise.resolve({}) as Promise<{
+        [key: string]: string | string[] | undefined;
+      }>),
+  );
+  const email = (params.email as string) || "";
   const router = useRouter();
   const { isAuthenticated: convexAuthed } = useConvexAuth();
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -121,7 +127,6 @@ export default function VerifyEmailPage({
 
   const handleVerify = useCallback(async () => {
     if (!email || otp.length !== OTP_LENGTH) return;
-    setError("");
     setLoading(true);
 
     try {
@@ -129,9 +134,12 @@ export default function VerifyEmailPage({
       if (result.error) {
         throw new Error(result.error.message || "Invalid or expired code");
       }
+      toast.success("Verified!", {
+        description: "Redirecting to your dashboard...",
+      });
       setVerified(true);
     } catch (err) {
-      setError(
+      toast.error(
         err instanceof Error
           ? err.message
           : "Invalid or expired code. Please try again."
@@ -144,7 +152,6 @@ export default function VerifyEmailPage({
 
   const handleResend = useCallback(async () => {
     if (!email || cooldown > 0) return;
-    setError("");
     setCooldown(30);
     setDigits(Array(OTP_LENGTH).fill(""));
 
@@ -183,24 +190,6 @@ export default function VerifyEmailPage({
           </p>
         </div>
 
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 rounded-xl border px-4 py-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {verified && (
-          <div className="border-status-success/25 bg-status-success/8 text-status-success mb-5 rounded-xl border px-4 py-3">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 shrink-0" />
-              <p className="text-sm font-medium">Verified! Redirecting to your dashboard...</p>
-            </div>
-          </div>
-        )}
-
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
           <div className="flex items-center justify-center gap-2 sm:gap-3">
             {digits.map((digit, i) => (
@@ -220,9 +209,7 @@ export default function VerifyEmailPage({
                   "h-14 w-11 rounded-md border text-center text-2xl font-mono font-bold outline-none transition-colors sm:h-16 sm:w-13",
                   "focus:ring-primary/50 focus:ring-2",
                   "disabled:cursor-not-allowed disabled:opacity-50",
-                  error
-                    ? "border-destructive/50 bg-destructive/5"
-                    : "border-input bg-card/90"
+                  "border-input bg-card/90"
                 )}
                 maxLength={1}
                 autoFocus={i === 0}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   useUpdateThumbnailConfig,
@@ -97,6 +98,7 @@ export function ThumbnailStep({
         },
       });
     } catch {
+      toast.error("Failed to upload thumbnail", { description: "Please try again." });
       setThumbnailPreview(null);
     } finally {
       setUploading(false);
@@ -110,7 +112,9 @@ export function ThumbnailStep({
       await removeThumbnailImage({
         productId: productId as unknown as Id<"products">,
       });
-    } catch {}
+    } catch {
+      toast.error("Failed to remove thumbnail", { description: "Please try again." });
+    }
   };
 
   const handleSave = useCallback(async () => {

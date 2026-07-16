@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import { Loader2, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PayoutDetailsCard } from "./PayoutDetailsCard";
@@ -54,6 +55,7 @@ function VerifyingView({ profile }: { profile: PayoutProfile }) {
     try {
       await fetch("/api/vendors/status");
     } catch {
+      toast.error("Failed to check status", { description: "Please try again." });
     } finally {
       setChecking(false);
     }
@@ -130,19 +132,16 @@ function ActionRequiredView({ profile }: { profile: PayoutProfile }) {
   const [reUploading, setReUploading] = useState<string | null>(null);
   const [reUploadFile, setReUploadFile] = useState<File | null>(null);
   const [reUploadingDoc, setReUploadingDoc] = useState(false);
-  const [reUploadError, setReUploadError] = useState("");
 
   const handleReUpload = useCallback((docType: string) => {
     setReUploading(docType);
     setReUploadFile(null);
-    setReUploadError("");
   }, []);
 
   const handleReUploadSubmit = useCallback(async () => {
     if (!reUploading || !reUploadFile) return;
 
     setReUploadingDoc(true);
-    setReUploadError("");
 
     try {
       const formData = new FormData();
@@ -157,14 +156,14 @@ function ActionRequiredView({ profile }: { profile: PayoutProfile }) {
       const data = await res.json();
 
       if (!data.ok) {
-        setReUploadError(data.error || "Upload failed");
+        toast.error("Upload failed", { description: data.error || "Please try again." });
         return;
       }
 
       setReUploading(null);
       setReUploadFile(null);
     } catch {
-      setReUploadError("Something went wrong. Please try again.");
+      toast.error("Something went wrong", { description: "Please try again." });
     } finally {
       setReUploadingDoc(false);
     }
@@ -202,9 +201,6 @@ function ActionRequiredView({ profile }: { profile: PayoutProfile }) {
             onFileSelect={setReUploadFile}
             uploading={reUploadingDoc}
           />
-          {reUploadError && (
-            <p className="text-destructive text-xs">{reUploadError}</p>
-          )}
           <div className="flex gap-2">
             <Button
               size="sm"
