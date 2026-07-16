@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/components/providers";
 
 const manrope = Manrope({
   weight: ["400", "500", "600", "700", "800"],
@@ -35,7 +36,7 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${spaceGrotesk.variable} ${dmSans.variable} relative min-h-screen w-full antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
