@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AlertCircle, Loader2, CheckCircle2, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
@@ -12,9 +12,12 @@ import { cn } from "@/lib/utils";
 
 const OTP_LENGTH = 6;
 
-export default function ResetPasswordPage() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+export default function ResetPasswordPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+  const email = (searchParams?.email as string) || "";
   const router = useRouter();
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));

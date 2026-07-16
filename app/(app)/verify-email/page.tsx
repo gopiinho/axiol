@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useConvexAuth, useMutation } from "convex/react";
 import { AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -12,9 +12,12 @@ import { cn } from "@/lib/utils";
 
 const OTP_LENGTH = 6;
 
-export default function VerifyEmailPage() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+export default function VerifyEmailPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+  const email = (searchParams?.email as string) || "";
   const router = useRouter();
   const { isAuthenticated: convexAuthed } = useConvexAuth();
 
