@@ -11,6 +11,8 @@ export function useQueryParam(key: string, defaultValue: string): [string, (valu
   const searchParamsRef = useRef(searchParams);
   searchParamsRef.current = searchParams;
 
+  const pendingRef = useRef<string | null>(null);
+
   const currentValue = searchParams.get(key) ?? defaultValue;
 
   const setValue = useCallback(
@@ -23,7 +25,10 @@ export function useQueryParam(key: string, defaultValue: string): [string, (valu
         params.set(key, value);
       }
       const query = params.toString();
-      router.replace(`${pathname}${query ? `?${query}` : ""}`, { scroll: false });
+      const targetUrl = `${pathname}${query ? `?${query}` : ""}`;
+      if (pendingRef.current === targetUrl) return;
+      pendingRef.current = targetUrl;
+      router.replace(targetUrl, { scroll: false });
     },
     [router, pathname, key, defaultValue],
   );
