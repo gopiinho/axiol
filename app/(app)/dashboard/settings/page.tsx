@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Loader2, AlertCircle } from "lucide-react";
+import {
+  Trash2,
+  Loader2,
+  AlertCircle,
+  SlidersHorizontal,
+  Puzzle,
+  CreditCard,
+  ShieldAlert,
+} from "lucide-react";
 import { useUser } from "@/features/auth/client/UserContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,13 +60,13 @@ export default function SettingsPage() {
       : (profile?.subscriptionStatus ?? "N/A");
 
   return (
-    <div className="px-5 pt-6 pb-12 lg:px-6 lg:pt-8 lg:pb-16">
-      <div className="mx-auto max-w-3xl">
+    <div>
+      <section className="border-b p-5 sm:p-8">
         <h1 className="app-title">Settings</h1>
         <p className="app-subtitle mt-1">Your account and connected services.</p>
-      </div>
+      </section>
 
-      <div className="mx-auto mt-6 max-w-3xl">
+      <div className="mx-auto max-w-3xl px-5 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-16">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList
             variant="line"
@@ -66,27 +74,31 @@ export default function SettingsPage() {
           >
             <TabsTrigger
               value="general"
-              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
+              <SlidersHorizontal className="size-4" />
               General
             </TabsTrigger>
             <TabsTrigger
               value="integrations"
-              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
+              <Puzzle className="size-4" />
               Integrations
             </TabsTrigger>
             <TabsTrigger
               value="payments"
-              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
+              <CreditCard className="size-4" />
               Payments
             </TabsTrigger>
             <TabsTrigger
               value="advanced"
-              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
-              Advanced
+              <ShieldAlert className="size-4" />
+              Security
             </TabsTrigger>
           </TabsList>
 
