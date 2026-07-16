@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 import { validateProductItemInput } from "../lib/validators/productItems";
 
 export const listByProduct = query({
@@ -24,7 +24,7 @@ export const create = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const validated = validateProductItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
@@ -68,7 +68,7 @@ export const update = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const validated = validateProductItemInput({
       affiliateLink: args.affiliateLink,
       price: args.price,
@@ -98,7 +98,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("productItems") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const item = await ctx.db.get(args.id);
     if (!item) throw new Error("Item not found");
@@ -122,7 +122,7 @@ export const reorder = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     for (const { id, order } of args.items) {
       const item = await ctx.db.get(id);

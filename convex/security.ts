@@ -33,6 +33,26 @@ export async function getSession(
   }
 }
 
+export async function requireVerifiedSession(
+  ctx: SessionCtx
+): Promise<{ userId: Id<"users">; user: Doc<"users"> }> {
+  const session = await requireSession(ctx);
+  if (!session.user.emailVerified) {
+    throw new Error("Email not verified");
+  }
+  return session;
+}
+
+export async function getVerifiedSession(
+  ctx: SessionCtx
+): Promise<{ userId: Id<"users">; user: Doc<"users"> } | null> {
+  try {
+    return await requireVerifiedSession(ctx);
+  } catch {
+    return null;
+  }
+}
+
 export async function requireCreatorSession(
   ctx: SessionCtx
 ): Promise<{ userId: Id<"users">; user: Doc<"users"> }> {

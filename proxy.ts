@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const AUTH_PAGES = ["/login", "/signup"];
+const UNVERIFIED_PAGES = [
+  "/verify-email",
+  "/forgot-password",
+  "/reset-password",
+  "/onboarding/username",
+];
+const ALLOWED_UNAUTHED = [...AUTH_PAGES, ...UNVERIFIED_PAGES];
 const SESSION_COOKIE = "better-auth.session_token";
 
 export function proxy(request: NextRequest) {
@@ -25,5 +32,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/signup"],
+  matcher: ["/dashboard/:path*", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/onboarding/username"],
 };

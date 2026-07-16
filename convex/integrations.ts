@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
-import { requireSession, getSession } from "./security";
+import { requireVerifiedSession, getVerifiedSession } from "./security";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -25,7 +25,7 @@ function computeInstagramStatus(
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const session = await getSession(ctx);
+    const session = await getVerifiedSession(ctx);
     if (!session) return [];
 
     const { userId } = session;
@@ -59,7 +59,7 @@ export const getByProvider = query({
     provider: v.union(v.literal("instagram"), v.literal("google_calendar")),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const row = await ctx.db
       .query("integrations")
@@ -140,7 +140,7 @@ export const disconnect = mutation({
     provider: v.union(v.literal("instagram"), v.literal("google_calendar")),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const existing = await ctx.db
       .query("integrations")
@@ -165,7 +165,7 @@ export const markError = mutation({
     errorMessage: v.string(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const existing = await ctx.db
       .query("integrations")
@@ -199,7 +199,7 @@ export const syncStatus = mutation({
     provider: v.optional(v.union(v.literal("instagram"), v.literal("google_calendar"))),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const provider = args.provider as IntegrationProvider | undefined;
 
