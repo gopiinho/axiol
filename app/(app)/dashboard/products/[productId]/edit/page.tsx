@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -131,15 +132,19 @@ export default function EditProduct({
         setPublishing(true);
         try {
           await publishProduct({ id: productId });
+          toast.success("Product published!");
           router.push("/dashboard/products");
         } catch {
+          toast.error("Failed to publish product", { description: "Please try again." });
         } finally {
           setPublishing(false);
         }
       } else {
+        toast.success("Changes saved!");
         setCurrentStep(definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]);
       }
     } catch {
+      toast.error("Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }
@@ -149,8 +154,10 @@ export default function EditProduct({
     setBusyAction("save");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
+      toast.success("Product saved!");
       router.push("/dashboard/products");
     } catch {
+      toast.error("Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }
@@ -159,17 +166,22 @@ export default function EditProduct({
   const handleUnpublish = async () => {
     try {
       await unpublishProduct({ id: productId });
-    } catch {}
+      toast.success("Product unpublished!");
+    } catch {
+      toast.error("Failed to unpublish product", { description: "Please try again." });
+    }
   };
 
   const handleSaveStay = async () => {
     setBusyAction("save");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
+      toast.success("Changes saved!");
       if (isLastStep) {
         router.push("/dashboard/products");
       }
     } catch {
+      toast.error("Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }
@@ -180,10 +192,12 @@ export default function EditProduct({
     setBusyAction("next");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
+      toast.success("Changes saved!");
       if (!isLastStep) {
         setCurrentStep(definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]);
       }
     } catch {
+      toast.error("Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }

@@ -1,23 +1,30 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader2, CheckCircle2, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const OTP_LENGTH = 6;
 
 export default function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const email = (searchParams?.email as string) || "";
+  const params = use(
+    searchParams ??
+      (Promise.resolve({}) as Promise<{
+        [key: string]: string | string[] | undefined;
+      }>),
+  );
+  const email = (params.email as string) || "";
   const router = useRouter();
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
@@ -25,10 +32,8 @@ export default function ResetPasswordPage({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [error, setError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const inputsRef = useRef<(HTMLInputElement | null)[]>(Array(OTP_LENGTH).fill(null));
 
@@ -48,13 +53,7 @@ export default function ResetPasswordPage({
     }
   }, [password, confirmPassword]);
 
-  useEffect(() => {
-    if (!success) return;
-    const timer = setTimeout(() => {
-      router.push("/login?reset=success");
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [success, router]);
+
 
   const focusInput = (index: number) => {
     const el = inputsRef.current[index];
@@ -115,20 +114,22 @@ export default function ResetPasswordPage({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setError("");
       setLoading(true);
 
       try {
         if (!email || otp.length !== OTP_LENGTH) {
-          throw new Error("Please enter the verification code");
+          toast.error("Please enter the verification code");
+          return;
         }
 
         if (password.length < 12) {
-          throw new Error("Password must be at least 12 characters");
+          toast.error("Password must be at least 12 characters");
+          return;
         }
 
         if (password !== confirmPassword) {
-          throw new Error("Passwords do not match");
+          toast.error("Passwords do not match");
+          return;
         }
 
         const result = await authClient.emailOtp.resetPassword({
@@ -141,9 +142,12 @@ export default function ResetPasswordPage({
           throw new Error(result.error.message ?? "Failed to reset password");
         }
 
-        setSuccess(true);
+        toast.success("Password reset successful!", {
+          description: "Sign in with your new password.",
+        });
+        router.push("/login?reset=success");
       } catch (err) {
-        setError(
+        toast.error(
           err instanceof Error ? err.message : "Something went wrong. Please try again."
         );
         setDigits(Array(OTP_LENGTH).fill(""));
@@ -153,29 +157,6 @@ export default function ResetPasswordPage({
     },
     [email, otp, password, confirmPassword]
   );
-
-  if (success) {
-    return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-        <div className="pointer-events-none absolute inset-0" />
-        <FadeIn
-          className="relative z-10 w-full max-w-130 overflow-hidden p-6 sm:p-10"
-          offset={24}
-          duration={0.5}
-        >
-          <div className="mb-10 text-center">
-            <CheckCircle2 className="text-status-success mx-auto mb-4 h-12 w-12" />
-            <h2 className="font-accent text-3xl font-bold tracking-tight sm:text-4xl">
-              Password reset
-            </h2>
-            <p className="text-muted-foreground mt-2 text-lg sm:text-xl">
-              Your password has been reset successfully. Redirecting to login...
-            </p>
-          </div>
-        </FadeIn>
-      </div>
-    );
-  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden py-10">
@@ -194,15 +175,6 @@ export default function ResetPasswordPage({
             Enter the code sent to {email}
           </p>
         </div>
-
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 rounded-xl border px-4 py-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="flex items-center justify-center gap-2 sm:gap-3">
@@ -223,9 +195,7 @@ export default function ResetPasswordPage({
                   "h-14 w-11 rounded-md border text-center text-2xl font-mono font-bold outline-none transition-colors sm:h-16 sm:w-13",
                   "focus:ring-primary/50 focus:ring-2",
                   "disabled:cursor-not-allowed disabled:opacity-50",
-                  error
-                    ? "border-destructive/50 bg-destructive/5"
-                    : "border-input bg-card/90"
+                  "border-input bg-card/90"
                 )}
                 maxLength={1}
                 autoFocus={i === 0}

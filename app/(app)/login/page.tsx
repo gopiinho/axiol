@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { toast } from "sonner";
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
@@ -12,29 +13,42 @@ import { FadeIn } from "@/components/motion/FadeIn";
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const params = use(
+    searchParams ??
+      (Promise.resolve({}) as Promise<{
+        [key: string]: string | string[] | undefined;
+      }>),
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const resetSuccess = searchParams?.reset === "success";
+
+  useEffect(() => {
+    if (params.reset === "success") {
+      toast.success("Password reset successful!", {
+        description: "Sign in with your new password.",
+      });
+    }
+  }, [params.reset]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
       if (!email || !password) {
-        throw new Error("Please fill in all fields");
+        toast.error("Please fill in all fields");
+        return;
       }
 
       if (password.length < 12) {
-        throw new Error("Password must be at least 12 characters");
+        toast.error("Password must be at least 12 characters");
+        return;
       }
 
       const result = await authClient.signIn.email({
@@ -50,16 +64,22 @@ export default function LoginPage({
     } catch (err) {
       console.error("Login error:", err);
 
-      const errorMessage = err instanceof Error ? err.message : "Login failed. Please try again.";
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
 
       if (errorMessage.includes("locked")) {
-        setError(errorMessage);
+        toast.error("Account temporarily locked", {
+          description: "Too many attempts. Try again in a few minutes.",
+        });
       } else if (errorMessage.includes("Invalid") || errorMessage.includes("invalid")) {
-        setError("Invalid email or password. Please check your credentials and try again.");
+        toast.error("Invalid email or password", {
+          description: "Check your credentials and try again.",
+        });
       } else if (errorMessage.includes("attempt")) {
-        setError(errorMessage);
+        toast.error(errorMessage);
       } else {
-        setError("Something unexpected happened. Check your connection and try again.");
+        toast.error("Login failed", {
+          description: "Check your connection and try again.",
+        });
       }
     } finally {
       setLoading(false);
@@ -83,24 +103,6 @@ export default function LoginPage({
             Ready to make some 💸 ?
           </p>
         </div>
-
-        {resetSuccess && (
-          <div className="border-status-success/25 bg-status-success/8 text-status-success mb-5 rounded-xl border px-4 py-3">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 shrink-0" />
-              <p className="text-sm font-medium">Password reset successful! Sign in with your new password.</p>
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 border px-4 py-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div className="space-y-2">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { BarChart3, Home, LogOut, Box, Settings, Store, Zap, ChevronLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useUser } from "@/features/auth/client/UserContext";
 import BottomNav from "@/components/BottomNav";
@@ -49,6 +50,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       setIsLoggingOut(true);
       await authClient.signOut();
     } catch {
+      toast.error("Failed to log out", { description: "Please try again." });
     } finally {
       setIsLoggingOut(false);
       setLogoutOpen(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import Image from "next/image";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -63,6 +64,9 @@ export default function AutomationsList() {
     try {
       setDeleteLoading(true);
       await deleteMapping({ id });
+      toast.success("Automation deleted!");
+    } catch {
+      toast.error("Failed to delete automation", { description: "Please try again." });
     } finally {
       setDeleteTarget(null);
       setDeleteLoading(false);
@@ -72,8 +76,9 @@ export default function AutomationsList() {
   const handleToggle = async (id: Id<"reelMappings">) => {
     try {
       await toggleMapping({ id });
+      toast.success("Automation status updated!");
     } catch {
-      /* silent */
+      toast.error("Failed to update automation", { description: "Please try again." });
     }
   };
 

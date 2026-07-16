@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader2, Mail } from "lucide-react";
+import { toast } from "sonner";
+import { Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
@@ -11,18 +12,17 @@ import { FadeIn } from "@/components/motion/FadeIn";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
       if (!email) {
-        throw new Error("Please enter your email address");
+        toast.error("Please enter your email address");
+        return;
       }
 
       await authClient.emailOtp.sendVerificationOtp({
@@ -53,15 +53,6 @@ export default function ForgotPasswordPage() {
             Enter your email and we&apos;ll send you a reset code if an account exists.
           </p>
         </div>
-
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive animate-shake mb-5 rounded-xl border px-4 py-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div className="space-y-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
 import type { Id, Doc } from "@/convex/_generated/dataModel";
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
@@ -195,6 +196,7 @@ export function ProductItemsManager({ productId, items, productType }: ProductIt
           items: updated.map((item) => ({ id: item._id, order: item.order })),
         });
       } catch {
+        toast.error("Failed to reorder items", { description: "Please try again." });
         setLocalItems(items);
       }
     },
@@ -205,9 +207,10 @@ export function ProductItemsManager({ productId, items, productType }: ProductIt
     if (!deletingItem) return;
     try {
       await deleteItem({ id: deletingItem._id });
+      toast.success("Item deleted!");
       setLocalItems((prev) => prev.filter((i) => i._id !== deletingItem._id));
     } catch {
-      // handled in future via toast
+      toast.error("Failed to delete item", { description: "Please try again." });
     }
     setDeletingItem(null);
   };

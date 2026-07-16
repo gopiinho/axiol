@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useQueryParam } from "@/lib/hooks/useQueryParam";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
+import { toast } from "sonner";
 import { ExternalLink, Package, Pencil, Settings, Store, Palette } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -118,6 +119,7 @@ export default function MyStorePage() {
           items: updated.map((p) => ({ id: p._id as Id<"products">, order: p.order })),
         });
       } catch {
+        toast.error("Failed to reorder products", { description: "Please try again." });
         setLocalProducts(publishedProducts);
       }
     },
@@ -237,8 +239,9 @@ export default function MyStorePage() {
         storeName,
       });
       setEditOpen(false);
+      toast.success("Store details updated!");
     } catch (error) {
-      console.error("Failed to save profile:", error);
+      toast.error("Failed to save profile", { description: "Please try again." });
     } finally {
       setSavingProfile(false);
     }
@@ -254,8 +257,9 @@ export default function MyStorePage() {
         layout: layout as any,
       });
       setThemeDirty(false);
+      toast.success("Design updated!");
     } catch (error) {
-      console.error("Failed to save theme:", error);
+      toast.error("Failed to save theme", { description: "Please try again." });
     } finally {
       setThemeSaving(false);
     }

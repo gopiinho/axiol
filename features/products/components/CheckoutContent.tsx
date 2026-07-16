@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { RichTextRenderer } from "@/features/products/components/rich-text";
@@ -53,7 +54,6 @@ export function CheckoutContent({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const cashfreeRef = useRef<CashfreeInstance | null>(null);
 
@@ -100,7 +100,6 @@ export function CheckoutContent({
 
     setErrors({});
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await fetch("/api/checkout/create-order", {
@@ -122,7 +121,7 @@ export function CheckoutContent({
       const cf = cashfreeRef.current;
       if (!cf) {
         setLoading(false);
-        setMessage("Payment system not ready. Please try again.");
+        toast.error("Payment system not ready", { description: "Please try again." });
         return;
       }
 
@@ -132,7 +131,7 @@ export function CheckoutContent({
       });
 
       if (result.error) {
-        setMessage("Payment was not completed.");
+        toast.error("Payment was not completed");
         return;
       }
 
@@ -148,11 +147,11 @@ export function CheckoutContent({
           setDownloadUrl(verifyData.downloadUrl ?? null);
           setStatus("success");
         } else {
-          setMessage("Payment failed. Please try again.");
+          toast.error("Payment failed", { description: "Please try again." });
         }
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Something went wrong");
+      toast.error("Something went wrong", { description: error instanceof Error ? error.message : "Please try again later." });
     } finally {
       setLoading(false);
     }
@@ -256,7 +255,6 @@ export function CheckoutContent({
             price={displayPrice}
             ctaText={ctaText}
             loading={loading}
-            message={message}
             name={name}
             email={email}
             phone={phone}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -30,7 +30,6 @@ export function EditProductItemModal({ item, open, onClose }: EditProductItemMod
   const [title, setTitle] = useState(item.title ?? "");
   const [imageUrl, setImageUrl] = useState(item.imageUrl ?? "");
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const updateItem = useUpdateProductItem();
 
@@ -45,7 +44,6 @@ export function EditProductItemModal({ item, open, onClose }: EditProductItemMod
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage(null);
 
     try {
       await updateItem({
@@ -57,13 +55,10 @@ export function EditProductItemModal({ item, open, onClose }: EditProductItemMod
         imageUrl: imageUrl || undefined,
       });
 
+      toast.success("Item updated!");
       onClose();
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Couldn't update this item. Check your connection and try again."
-      );
+    } catch {
+      toast.error("Couldn't update item", { description: "Check your connection and try again." });
     } finally {
       setLoading(false);
     }
@@ -97,13 +92,6 @@ export function EditProductItemModal({ item, open, onClose }: EditProductItemMod
         </DialogHeader>
 
         <form id="edit-item-form" onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
-          {errorMessage && (
-            <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t update item</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="edit-item-title">Product name</Label>
             <Input

@@ -5,14 +5,7 @@ import { useAction, useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Id } from "@/convex/_generated/dataModel";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/features/auth/client/UserContext";
 import { useInstagramConnection } from "@/features/automations/hooks/useInstagramConnection";
@@ -62,7 +55,6 @@ function CreateAutomationWizard() {
   const [reelsError, setReelsError] = useState<string | null>(null);
   const [reels, setReels] = useState<Reel[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [saveError, setSaveError] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [generatePreview, setGeneratePreview] = useState<{
@@ -239,11 +231,14 @@ function CreateAutomationWizard() {
         keyword: keywordNormalized,
       });
 
+      toast.success("Automation draft saved!");
       rememberKeywords(keywordList);
       router.push("/dashboard/automations");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save draft";
-      setSaveError(message === "Unauthorized" ? "Session expired. Please sign in again." : message);
+      toast.error("Couldn't save draft", {
+        description: message === "Unauthorized" ? "Session expired. Please sign in again." : message,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -346,18 +341,6 @@ function CreateAutomationWizard() {
         onBack={handleBackAction}
         onPrimaryAction={handlePrimaryAction}
       />
-
-      <Dialog open={Boolean(saveError)} onOpenChange={(open) => !open && setSaveError(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Couldn&apos;t save draft</DialogTitle>
-            <DialogDescription>{saveError ?? "Please try again."}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setSaveError(null)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

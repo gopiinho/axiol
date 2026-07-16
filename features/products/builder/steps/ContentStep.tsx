@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useUpdateContentConfig, useDeleteContentFile } from "../../hooks/useProduct";
 import type { ProductStepComponentProps } from "../../registry/steps";
@@ -113,6 +114,12 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
   const [deleting, setDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (uploadError) {
+      toast.error("Upload failed", { description: "Please try again." });
+    }
+  }, [uploadError]);
+
   const displayFile = uploadedFile ?? savedFile;
 
   const validateFile = useCallback((file: File): string | null => {
@@ -202,11 +209,8 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
         });
         setSavedFile(null);
         setDisplayName("");
-      } catch (err) {
-        setErrors((prev) => ({
-          ...prev,
-          file: err instanceof Error ? err.message : "Failed to delete file. Please try again.",
-        }));
+      } catch {
+        toast.error("Failed to delete file", { description: "Please try again." });
         setDeleteTarget(null);
         setDeleting(false);
         return;
@@ -444,14 +448,6 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                         <p className="text-muted-foreground text-center text-xs">
                           {progress >= 100 ? "Saving..." : `${progress}% uploaded`}
                         </p>
-                      </div>
-                    ) : uploadError ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <p className="text-destructive text-center text-xs">{uploadError}</p>
-                        <Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
-                          <Plus className="h-4 w-4" strokeWidth={2} />
-                          Try Again
-                        </Button>
                       </div>
                     ) : (
                       <>

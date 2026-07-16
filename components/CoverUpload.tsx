@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   useGenerateProductCoverUploadUrl,
   useSaveProductCoverImage,
@@ -21,7 +22,6 @@ interface CoverUploadProps {
 export function CoverUpload({ currentImageUrl, productId }: CoverUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const generateUploadUrl = useGenerateProductCoverUploadUrl();
@@ -34,15 +34,13 @@ export function CoverUpload({ currentImageUrl, productId }: CoverUploadProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setError(null);
-
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setError("Please upload a JPEG, PNG, or WebP image.");
+      toast.error("Please upload a JPEG, PNG, or WebP image");
       return;
     }
 
     if (file.size > MAX_SIZE) {
-      setError("File too large. Maximum size is 2 MB.");
+      toast.error("File too large", { description: "Maximum size is 2 MB." });
       return;
     }
 
@@ -65,7 +63,7 @@ export function CoverUpload({ currentImageUrl, productId }: CoverUploadProps) {
         storageId: storageId as unknown as Id<"_storage">,
       });
     } catch {
-      setError("Upload failed. Please try again.");
+      toast.error("Cover upload failed", { description: "Please try again." });
       setPreview(null);
     } finally {
       setUploading(false);
@@ -74,12 +72,11 @@ export function CoverUpload({ currentImageUrl, productId }: CoverUploadProps) {
   };
 
   const handleRemove = async () => {
-    setError(null);
     setPreview(null);
     try {
       await removeCoverImage({ productId });
     } catch {
-      setError("Failed to remove cover image.");
+      toast.error("Failed to remove cover image", { description: "Please try again." });
     }
   };
 
@@ -161,8 +158,6 @@ export function CoverUpload({ currentImageUrl, productId }: CoverUploadProps) {
           </div>
         </div>
       )}
-
-      {error && <p className="text-destructive text-xs font-medium">{error}</p>}
 
       <input
         ref={inputRef}

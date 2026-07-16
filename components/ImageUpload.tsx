@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { useMutation } from "convex/react";
 import { Upload, Loader2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -33,7 +34,6 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const defaultGenerateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const generateUploadUrl = customGenerateUploadUrl ?? defaultGenerateUploadUrl;
@@ -42,15 +42,13 @@ export function ImageUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setError(null);
-
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setError("Please upload a JPEG, PNG, or WebP image.");
+      toast.error("Please upload a JPEG, PNG, or WebP image");
       return;
     }
 
     if (file.size > maxSizeBytes) {
-      setError(`File too large. Maximum size is ${maxSizeLabel}.`);
+      toast.error("File too large", { description: `Maximum size is ${maxSizeLabel}.` });
       return;
     }
 
@@ -70,7 +68,7 @@ export function ImageUpload({
       const { storageId } = await result.json();
       onUploaded(storageId);
     } catch {
-      setError("Upload failed. Please try again.");
+      toast.error("Upload failed", { description: "Please try again." });
       setPreview(null);
     } finally {
       setUploading(false);
@@ -161,8 +159,6 @@ export function ImageUpload({
           <X className="h-4 w-4" />
         </button>
       )}
-
-      {error && <p className="text-destructive mt-2 text-center text-xs font-medium">{error}</p>}
 
       <input
         ref={inputRef}
