@@ -3,7 +3,7 @@ import { R2 } from "@convex-dev/r2";
 import { mutation } from "./_generated/server";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 import { validateContentFile } from "./contentLimits";
 
 export const r2 = new R2(components.contentStorage);
@@ -12,7 +12,7 @@ const MAX_PENDING_UPLOADS = 10;
 
 export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
   checkUpload: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const pending = await ctx.db
       .query("contentUploads")
@@ -27,7 +27,7 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
   },
 
   onUpload: async (ctx, _bucket, key) => {
-    await requireSession(ctx);
+    await requireVerifiedSession(ctx);
 
     const metadata = await r2.getMetadata(ctx, key);
     if (!metadata) return;
@@ -54,7 +54,7 @@ export const recordContentFile = mutation({
     fileType: v.string(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const validation = validateContentFile(
       args.fileType,
@@ -87,7 +87,7 @@ export const recordContentFile = mutation({
 export const deleteContentFile = mutation({
   args: { r2Key: v.string() },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const record = await ctx.db
       .query("contentUploads")

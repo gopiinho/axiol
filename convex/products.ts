@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, MutationCtx, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 import { validateProductInput } from "../lib/validators/products";
 import { parsePriceRupees } from "../lib/validators/price";
 import {
@@ -52,7 +52,7 @@ async function ensureUniqueProductUrl(
 }
 
 async function requireProductOwner(ctx: MutationCtx | QueryCtx, productId: Id<"products">) {
-  const { userId } = await requireSession(ctx);
+  const { userId } = await requireVerifiedSession(ctx);
   const product = await ctx.db.get(productId);
   if (!product || product.createdBy !== userId) {
     throw new Error("Product not found.");
@@ -63,7 +63,7 @@ async function requireProductOwner(ctx: MutationCtx | QueryCtx, productId: Id<"p
 export const listByUser = query({
   args: {},
   handler: async (ctx) => {
-    const { userId, user } = await requireSession(ctx);
+    const { userId, user } = await requireVerifiedSession(ctx);
 
     const products = await ctx.db
       .query("products")
@@ -139,7 +139,7 @@ export const reorder = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     for (const { id, order } of args.items) {
       const product = await ctx.db.get(id);
@@ -154,7 +154,7 @@ export const reorder = mutation({
 export const getStoreTotals = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const paidOrders = await ctx.db
       .query("orders")
@@ -186,7 +186,7 @@ export const getStoreTotals = query({
 export const getById = query({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const product = await ctx.db.get(args.id);
     if (!product || product.createdBy !== userId) {
@@ -212,7 +212,7 @@ export const getById = query({
 export const getByProductUrl = query({
   args: { productUrl: v.string() },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     return await ctx.db
       .query("products")
@@ -234,7 +234,7 @@ export const create = mutation({
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { userId, user } = await requireSession(ctx);
+    const { userId, user } = await requireVerifiedSession(ctx);
 
     const isPro = user.subscriptionStatus === "active";
     if (!isPro) {
@@ -302,7 +302,7 @@ export const update = mutation({
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.id);
 
     if (!product || product.createdBy !== userId) {
@@ -447,7 +447,7 @@ export const updateContentConfig = mutation({
 export const archive = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.id);
 
     if (!product || product.createdBy !== userId) {
@@ -464,7 +464,7 @@ export const archive = mutation({
 export const unpublish = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.id);
 
     if (!product || product.createdBy !== userId) {
@@ -526,7 +526,7 @@ export const publish = mutation({
 export const remove = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.id);
 
     if (!product || product.createdBy !== userId) {
@@ -712,7 +712,7 @@ export const getPublicProduct = query({
 export const listForSelect = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const products = await ctx.db
       .query("products")

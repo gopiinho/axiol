@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -10,7 +10,7 @@ const MAX_PRODUCT_COVER_SIZE = 2 * 1024 * 1024;
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    await requireSession(ctx);
+    await requireVerifiedSession(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -18,7 +18,7 @@ export const generateUploadUrl = mutation({
 export const generateProductCoverUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    await requireSession(ctx);
+    await requireVerifiedSession(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -26,7 +26,7 @@ export const generateProductCoverUploadUrl = mutation({
 export const saveProfileImage = mutation({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, args) => {
-    const { userId, user } = await requireSession(ctx);
+    const { userId, user } = await requireVerifiedSession(ctx);
 
     let metadata;
     try {
@@ -55,7 +55,7 @@ export const saveProfileImage = mutation({
 export const saveProductCoverImage = mutation({
   args: { productId: v.id("products"), storageId: v.id("_storage") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const product = await ctx.db.get(args.productId);
     if (!product || product.createdBy !== userId) {
@@ -89,7 +89,7 @@ export const saveProductCoverImage = mutation({
 export const removeProductCoverImage = mutation({
   args: { productId: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const product = await ctx.db.get(args.productId);
     if (!product || product.createdBy !== userId) {
@@ -106,7 +106,7 @@ export const removeProductCoverImage = mutation({
 export const saveThumbnailImage = mutation({
   args: { productId: v.id("products"), storageId: v.id("_storage") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.productId);
     if (!product || product.createdBy !== userId) {
       throw new Error("Product not found");
@@ -151,7 +151,7 @@ export const saveThumbnailImage = mutation({
 export const removeThumbnailImage = mutation({
   args: { productId: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.productId);
     if (!product || product.createdBy !== userId) {
       throw new Error("Product not found");
@@ -174,7 +174,7 @@ export const removeThumbnailImage = mutation({
 export const removeProfileImage = mutation({
   args: {},
   handler: async (ctx) => {
-    const { userId, user } = await requireSession(ctx);
+    const { userId, user } = await requireVerifiedSession(ctx);
 
     if (user.profileImageId) {
       await ctx.storage.delete(user.profileImageId);

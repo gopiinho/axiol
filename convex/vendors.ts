@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 
 export const saveVendorDetails = mutation({
   args: {
@@ -17,7 +17,7 @@ export const saveVendorDetails = mutation({
     upiHolder: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const patch: Record<string, unknown> = {
       vendorId: args.vendorId,
@@ -43,7 +43,7 @@ export const updateVendorStatus = mutation({
     vendorStatus: v.string(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     await ctx.db.patch(userId, {
       vendorStatus: args.vendorStatus,
@@ -78,7 +78,7 @@ export const updateVendorStatusByVendorId = mutation({
 export const getPayoutProfile = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const user = await ctx.db.get(userId);
 
     if (!user) return null;

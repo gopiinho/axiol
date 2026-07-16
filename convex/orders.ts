@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 
 export const create = mutation({
   args: {
@@ -191,7 +191,7 @@ export const getRevenueTimeline = query({
     granularity: v.union(v.literal("daily"), v.literal("weekly"), v.literal("monthly")),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const { start, end } = getTimeRange(args.timePeriod);
     const allKeys = generateBucketKeys(start, end, args.granularity);
@@ -236,7 +236,7 @@ export const getRevenueTimeline = query({
 export const getEarningsSummary = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const now = Date.now();
     const DAY = 86400000;
     const sevenDaysAgo = now - 7 * DAY;
