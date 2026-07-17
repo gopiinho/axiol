@@ -14,9 +14,9 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const hostname = request.headers.get("host") || "";
-  if (hostname.startsWith("www.")) {
+  if (!hostname.startsWith("www.") && !hostname.includes("localhost")) {
     const url = request.nextUrl.clone();
-    url.host = hostname.replace(/^www\./, "");
+    url.host = `www.${hostname}`;
     return NextResponse.redirect(url, 301);
   }
 
