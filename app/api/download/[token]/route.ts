@@ -108,6 +108,10 @@ export async function GET(
     return errorPage("Unavailable", "The content for this product is no longer available.", 404);
   } catch (error) {
     console.error("Download error:", error);
-    return errorPage("Something went wrong", "An unexpected error occurred. Please try again later.", 500);
+    return errorPage(
+      "Something went wrong",
+      "An unexpected error occurred. Please try again later.",
+      500
+    );
   }
 }

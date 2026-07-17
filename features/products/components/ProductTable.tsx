@@ -111,12 +111,19 @@ function ProductMobileCard({
                   : undefined
               }
               target={product.username && product.status !== "draft" ? "_blank" : undefined}
-              rel={product.username && product.status !== "draft" ? "noopener noreferrer" : undefined}
-              onClick={product.username && product.status !== "draft" ? undefined : (e) => e.stopPropagation()}
+              rel={
+                product.username && product.status !== "draft" ? "noopener noreferrer" : undefined
+              }
+              onClick={
+                product.username && product.status !== "draft"
+                  ? undefined
+                  : (e) => e.stopPropagation()
+              }
               tabIndex={product.username && product.status !== "draft" ? undefined : -1}
-              className={`text-primary mt-0.5 block truncate text-[10px] hover:underline ${product.username && product.status !== "draft" ? "" : "invisible pointer-events-none"}`}
+              className={`text-primary mt-0.5 block truncate text-[10px] hover:underline ${product.username && product.status !== "draft" ? "" : "pointer-events-none invisible"}`}
             >
-              {typeof window !== "undefined" ? window.location.host.replace(/^www\./, "") : ""}/{product.username}/p/
+              {typeof window !== "undefined" ? window.location.host.replace(/^www\./, "") : ""}/
+              {product.username}/p/
               {product.productUrl}
             </a>
             <div className="mt-0.5 flex flex-wrap items-center gap-2">
@@ -217,13 +224,19 @@ function ProductMobileCard({
           <AlertDialogHeader>
             <AlertDialogTitle>Unpublish &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
             <AlertDialogDescription>
-              This product will no longer show up in your store. Customers with the link
-              won&rsquo;t be able to access it.
+              This product will no longer show up in your store. Customers with the link won&rsquo;t
+              be able to access it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="destructive" onClick={() => { onUnpublish(product._id); setUnpublishOpen(false); }}>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                onUnpublish(product._id);
+                setUnpublishOpen(false);
+              }}
+            >
               Unpublish
             </Button>
           </AlertDialogFooter>
@@ -292,7 +305,7 @@ export function ProductTable() {
         <table className="w-full table-fixed">
           <thead className="bg-muted/50">
             <tr className="border-border/50 border-b">
-              <th className="text-muted-foreground px-4 py-3 text-left text-sm font-black w-[35%]">
+              <th className="text-muted-foreground w-[35%] px-4 py-3 text-left text-sm font-black">
                 Product
               </th>
               <th className="text-muted-foreground hidden px-4 py-3 text-left text-sm font-black md:table-cell">

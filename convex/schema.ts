@@ -19,24 +19,28 @@ export default defineSchema({
     profileImageId: v.optional(v.id("_storage")),
     theme: v.optional(v.string()),
     accentColor: v.optional(v.string()),
-    palette: v.optional(v.object({
-      bg: v.string(),
-      accent: v.string(),
-      surface: v.optional(v.string()),
-      border: v.optional(v.string()),
-      text: v.optional(v.string()),
-      textMuted: v.optional(v.string()),
-      cardBg: v.optional(v.string()),
-    })),
-    layout: v.optional(v.object({
-      preset: v.optional(v.string()),
-      borderRadius: v.optional(v.string()),
-      cardStyle: v.optional(v.string()),
-      spacing: v.optional(v.string()),
-      headerLayout: v.optional(v.string()),
-      typeScale: v.optional(v.string()),
-      backgroundPattern: v.optional(v.string()),
-    })),
+    palette: v.optional(
+      v.object({
+        bg: v.string(),
+        accent: v.string(),
+        surface: v.optional(v.string()),
+        border: v.optional(v.string()),
+        text: v.optional(v.string()),
+        textMuted: v.optional(v.string()),
+        cardBg: v.optional(v.string()),
+      })
+    ),
+    layout: v.optional(
+      v.object({
+        preset: v.optional(v.string()),
+        borderRadius: v.optional(v.string()),
+        cardStyle: v.optional(v.string()),
+        spacing: v.optional(v.string()),
+        headerLayout: v.optional(v.string()),
+        typeScale: v.optional(v.string()),
+        backgroundPattern: v.optional(v.string()),
+      })
+    ),
     storeName: v.optional(v.string()),
     accountType: accountTypes,
     trialStartedAt: v.optional(v.number()),

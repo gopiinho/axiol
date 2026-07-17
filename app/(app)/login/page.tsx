@@ -19,7 +19,7 @@ export default function LoginPage({
     searchParams ??
       (Promise.resolve({}) as Promise<{
         [key: string]: string | string[] | undefined;
-      }>),
+      }>)
   );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -99,9 +99,7 @@ export default function LoginPage({
           <h2 className="font-accent text-3xl font-bold tracking-tight sm:text-4xl">
             Welcome back!
           </h2>
-          <p className="text-muted-foreground mt-2 text-base">
-            Ready to make some 💸 ?
-          </p>
+          <p className="text-muted-foreground mt-2 text-base">Ready to make some 💸 ?</p>
         </div>
 
         <form className="space-y-3" onSubmit={handleSubmit}>
@@ -146,7 +144,7 @@ export default function LoginPage({
               </button>
             </div>
             <div className="flex justify-center">
-              <Link href="/forgot-password" className="hover:underline text-sm">
+              <Link href="/forgot-password" className="text-sm hover:underline">
                 Forgot password?
               </Link>
             </div>

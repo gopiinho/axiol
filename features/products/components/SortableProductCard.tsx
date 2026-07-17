@@ -20,13 +20,8 @@ interface SortableProductCardProps {
   index?: number;
 }
 
-export function SortableProductCard({
-  product,
-  username,
-  index,
-}: SortableProductCardProps) {
-  const { setNodeRef, listeners, attributes, isDragging } =
-    useSortable({ id: product._id });
+export function SortableProductCard({ product, username, index }: SortableProductCardProps) {
+  const { setNodeRef, listeners, attributes, isDragging } = useSortable({ id: product._id });
 
   const style: React.CSSProperties = {
     touchAction: "none",
@@ -38,17 +33,9 @@ export function SortableProductCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={cn(
-        "relative [&_*]:!cursor-move",
-        isDragging && "opacity-20"
-      )}
+      className={cn("relative [&_*]:!cursor-move", isDragging && "opacity-20")}
     >
-      <ProductCard
-        product={product}
-        username={username}
-        index={index}
-        interactive
-      />
+      <ProductCard product={product} username={username} index={index} interactive />
     </div>
   );
 }

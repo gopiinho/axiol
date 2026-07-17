@@ -39,7 +39,10 @@ export function DocumentUpload({
     <div className="space-y-1.5">
       <label className="text-muted-foreground block text-xs font-medium">{label}</label>
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
@@ -71,14 +74,14 @@ export function DocumentUpload({
         {uploading ? (
           <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
         ) : uploaded ? (
-          <CheckCircle2 className="text-emerald-500 h-6 w-6" />
+          <CheckCircle2 className="h-6 w-6 text-emerald-500" />
         ) : error ? (
           <AlertCircle className="text-destructive h-6 w-6" />
         ) : (
           <Upload className="text-muted-foreground h-6 w-6" />
         )}
 
-        <span className="text-muted-foreground truncate text-xs text-center leading-relaxed">
+        <span className="text-muted-foreground truncate text-center text-xs leading-relaxed">
           {file ? file.name : "Tap to upload"}
         </span>
 

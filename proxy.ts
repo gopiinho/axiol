@@ -32,5 +32,13 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/onboarding/username"],
+  matcher: [
+    "/dashboard/:path*",
+    "/login",
+    "/signup",
+    "/verify-email",
+    "/forgot-password",
+    "/reset-password",
+    "/onboarding/username",
+  ],
 };

@@ -198,9 +198,7 @@ export const getRevenueTimeline = query({
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     const allClicks = await ctx.db
@@ -215,7 +213,10 @@ export const getRevenueTimeline = query({
     for (const order of paidOrders) {
       if (!order.paidAt) continue;
       const key = bucketKey(order.paidAt, args.granularity);
-      revenueByBucket.set(key, (revenueByBucket.get(key) ?? 0) + (order.vendorShareCents ?? order.amountCents));
+      revenueByBucket.set(
+        key,
+        (revenueByBucket.get(key) ?? 0) + (order.vendorShareCents ?? order.amountCents)
+      );
       salesByBucket.set(key, (salesByBucket.get(key) ?? 0) + 1);
     }
 
@@ -244,9 +245,7 @@ export const getEarningsSummary = query({
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     let totalEarnings = 0;

@@ -17,12 +17,7 @@ interface KycNotificationProps {
   siteUrl: string;
 }
 
-export function KycNotification({
-  status,
-  userName,
-  storeName,
-  siteUrl,
-}: KycNotificationProps) {
+export function KycNotification({ status, userName, storeName, siteUrl }: KycNotificationProps) {
   const isActive = status === "ACTIVE";
 
   return (
@@ -183,9 +178,7 @@ export function KycNotification({
                   <td style={{ fontSize: 14, color: "#999", fontWeight: 500, width: "30%" }}>
                     Store
                   </td>
-                  <td style={{ fontSize: 14, color: "#111", fontWeight: 600 }}>
-                    {storeName}
-                  </td>
+                  <td style={{ fontSize: 14, color: "#111", fontWeight: 600 }}>{storeName}</td>
                 </tr>
                 <tr>
                   <td style={{ fontSize: 14, color: "#999", fontWeight: 500, width: "30%" }}>

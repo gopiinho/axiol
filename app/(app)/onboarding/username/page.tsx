@@ -83,9 +83,7 @@ export default function OnboardingUsernamePage() {
           <h2 className="font-accent text-3xl font-bold tracking-tight sm:text-4xl">
             Almost there!
           </h2>
-          <p className="text-muted-foreground mt-2 text-basel">
-            Choose your username
-          </p>
+          <p className="text-muted-foreground text-basel mt-2">Choose your username</p>
         </div>
 
         <form className="space-y-3" onSubmit={handleSubmit}>

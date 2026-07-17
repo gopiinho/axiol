@@ -4,17 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import {
-  Home,
-  Box,
-  BarChart3,
-  Store,
-  Zap,
-  Settings,
-  Menu,
-  X,
-  LogOut,
-} from "lucide-react";
+import { Home, Box, BarChart3, Store, Zap, Settings, Menu, X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -26,9 +16,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-const BOTTOM_NAV_ITEMS = NAV_ITEMS.filter(
-  (item) => item.href !== "/dashboard/settings",
-);
+const BOTTOM_NAV_ITEMS = NAV_ITEMS.filter((item) => item.href !== "/dashboard/settings");
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -58,21 +46,11 @@ export default function BottomNav() {
                     "flex min-h-14 flex-1 flex-col items-center justify-center px-1 transition-all duration-200",
                     active
                       ? "bg-foreground text-primary"
-                      : "text-foreground hover:bg-secondary hover:text-foreground",
+                      : "text-foreground hover:bg-secondary hover:text-foreground"
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      "h-[1.2rem] w-[1.2rem]",
-                      active && "stroke-[2.5]",
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "mt-1 text-[10.5px]",
-                      active ? "font-bold" : "font-medium",
-                    )}
-                  >
+                  <Icon className={cn("h-[1.2rem] w-[1.2rem]", active && "stroke-[2.5]")} />
+                  <span className={cn("mt-1 text-[10.5px]", active ? "font-bold" : "font-medium")}>
                     {item.label}
                   </span>
                 </Link>
@@ -84,7 +62,7 @@ export default function BottomNav() {
               aria-label="Open navigation menu"
               className={cn(
                 "flex min-h-14 flex-1 flex-col items-center justify-center px-1 transition-all duration-200",
-                "text-foreground hover:bg-secondary hover:text-foreground",
+                "text-foreground hover:bg-secondary hover:text-foreground"
               )}
             >
               <Menu className="h-[1.2rem] w-[1.2rem]" />
@@ -138,17 +116,10 @@ export default function BottomNav() {
                       onClick={() => setIsMenuOpen(false)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-semibold transition-all duration-200",
-                        active
-                          ? "bg-foreground text-primary"
-                          : "text-foreground hover:bg-card",
+                        active ? "bg-foreground text-primary" : "text-foreground hover:bg-card"
                       )}
                     >
-                      <Icon
-                        className={cn(
-                          "h-5 w-5",
-                          active && "stroke-[2.5]",
-                        )}
-                      />
+                      <Icon className={cn("h-5 w-5", active && "stroke-[2.5]")} />
                       {item.label}
                     </Link>
                   );
@@ -160,7 +131,7 @@ export default function BottomNav() {
                       setIsMenuOpen(false);
                       window.dispatchEvent(new CustomEvent("open-logout-dialog"));
                     }}
-                    className="flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-card"
+                    className="text-foreground hover:bg-card flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-semibold transition-all duration-200"
                   >
                     <LogOut className="h-5 w-5" />
                     Log Out

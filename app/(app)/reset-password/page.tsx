@@ -22,7 +22,7 @@ export default function ResetPasswordPage({
     searchParams ??
       (Promise.resolve({}) as Promise<{
         [key: string]: string | string[] | undefined;
-      }>),
+      }>)
   );
   const email = (params.email as string) || "";
   const router = useRouter();
@@ -52,8 +52,6 @@ export default function ResetPasswordPage({
       setPasswordError("");
     }
   }, [password, confirmPassword]);
-
-
 
   const focusInput = (index: number) => {
     const el = inputsRef.current[index];
@@ -147,9 +145,7 @@ export default function ResetPasswordPage({
         });
         router.push("/login?reset=success");
       } catch (err) {
-        toast.error(
-          err instanceof Error ? err.message : "Something went wrong. Please try again."
-        );
+        toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again.");
         setDigits(Array(OTP_LENGTH).fill(""));
         setLoading(false);
         focusInput(0);
@@ -171,9 +167,7 @@ export default function ResetPasswordPage({
           <h2 className="font-accent text-3xl font-bold tracking-tight sm:text-4xl">
             Reset your password
           </h2>
-          <p className="text-muted-foreground mt-2 text-base">
-            Enter the code sent to {email}
-          </p>
+          <p className="text-muted-foreground mt-2 text-base">Enter the code sent to {email}</p>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -192,7 +186,7 @@ export default function ResetPasswordPage({
                 onPaste={i === 0 ? handlePaste : undefined}
                 disabled={loading}
                 className={cn(
-                  "h-14 w-11 rounded-md border text-center text-2xl font-mono font-bold outline-none transition-colors sm:h-16 sm:w-13",
+                  "h-14 w-11 rounded-md border text-center font-mono text-2xl font-bold transition-colors outline-none sm:h-16 sm:w-13",
                   "focus:ring-primary/50 focus:ring-2",
                   "disabled:cursor-not-allowed disabled:opacity-50",
                   "border-input bg-card/90"
@@ -242,9 +236,7 @@ export default function ResetPasswordPage({
                 required
                 minLength={12}
                 disabled={loading}
-                className={`h-12 pr-10 pl-10 ${
-                  passwordError ? "border-destructive" : ""
-                }`}
+                className={`h-12 pr-10 pl-10 ${passwordError ? "border-destructive" : ""}`}
               />
               <button
                 type="button"
@@ -256,9 +248,7 @@ export default function ResetPasswordPage({
                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {passwordError && (
-              <p className="text-destructive text-xs">{passwordError}</p>
-            )}
+            {passwordError && <p className="text-destructive text-xs">{passwordError}</p>}
           </div>
 
           <Button
@@ -273,7 +263,7 @@ export default function ResetPasswordPage({
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
           <Link href="/login" className="hover:underline">
-           Go back to Login
+            Go back to Login
           </Link>
         </p>
       </FadeIn>

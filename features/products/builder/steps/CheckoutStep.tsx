@@ -394,10 +394,7 @@ export function CheckoutStep({
                 disabled
               />
             </div>
-            <Switch
-              checked={phoneEnabled}
-              onCheckedChange={setPhoneEnabled}
-            />
+            <Switch checked={phoneEnabled} onCheckedChange={setPhoneEnabled} />
           </div>
         </div>
       </div>

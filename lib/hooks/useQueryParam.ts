@@ -3,7 +3,10 @@
 import { useCallback, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
-export function useQueryParam(key: string, defaultValue: string): [string, (value: string) => void] {
+export function useQueryParam(
+  key: string,
+  defaultValue: string
+): [string, (value: string) => void] {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -30,7 +33,7 @@ export function useQueryParam(key: string, defaultValue: string): [string, (valu
       pendingRef.current = targetUrl;
       router.replace(targetUrl, { scroll: false });
     },
-    [router, pathname, key, defaultValue],
+    [router, pathname, key, defaultValue]
   );
 
   return [currentValue, setValue];

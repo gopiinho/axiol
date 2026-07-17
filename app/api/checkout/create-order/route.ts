@@ -17,7 +17,6 @@ const cashfree = new Cashfree(
   secretKey
 );
 
-
 function jsonError(status: number, message: string) {
   return NextResponse.json({ ok: false, error: message }, { status });
 }
@@ -28,7 +27,10 @@ export async function POST(request: NextRequest) {
     const { productId, username, productUrl, buyerName, buyerEmail, buyerPhone } = body;
 
     if (!productId || !username || !productUrl || !buyerName?.trim() || !buyerEmail?.trim()) {
-      return jsonError(400, "Missing required fields: productId, username, productUrl, buyerName, buyerEmail");
+      return jsonError(
+        400,
+        "Missing required fields: productId, username, productUrl, buyerName, buyerEmail"
+      );
     }
 
     const convex = getServerConvexClient();
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     const isPro = creator?.subscriptionStatus === "active";
     const platformFeePct = isPro ? 0 : 10;
-    const platformFee = Math.round(amountCents * platformFeePct / 100);
+    const platformFee = Math.round((amountCents * platformFeePct) / 100);
     const tds = Math.round(amountCents * 0.01);
     const vendorNet = amountCents - platformFee - tds;
 
@@ -77,9 +79,7 @@ export async function POST(request: NextRequest) {
       },
       ...(hasActiveVendor && creator?.vendorId
         ? {
-            order_splits: [
-              { vendor_id: creator.vendorId, amount: vendorNet },
-            ],
+            order_splits: [{ vendor_id: creator.vendorId, amount: vendorNet }],
           }
         : {}),
     });

@@ -6,9 +6,7 @@ const appId = process.env.CASHFREE_APP_ID || "";
 const secretKey = process.env.CASHFREE_SECRET_KEY || "";
 
 const isSandbox = appId.startsWith("TEST");
-const baseUrl = isSandbox
-  ? "https://sandbox.cashfree.com/pg"
-  : "https://api.cashfree.com/pg";
+const baseUrl = isSandbox ? "https://sandbox.cashfree.com/pg" : "https://api.cashfree.com/pg";
 
 const ADDRESS_PROOF_CASHFREE_FIELD: Record<string, string> = {
   aadhaar: "uidai",
@@ -29,7 +27,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { panNumber, addressProofType, addressProofNumber, businessType, payoutMethod, bankAccount, bankIfsc, bankHolder, upiVpa, upiHolder } = body;
+    const {
+      panNumber,
+      addressProofType,
+      addressProofNumber,
+      businessType,
+      payoutMethod,
+      bankAccount,
+      bankIfsc,
+      bankHolder,
+      upiVpa,
+      upiHolder,
+    } = body;
 
     if (!panNumber || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) {
       return jsonError(400, "Valid PAN number is required (format: ABCDE1234F)");
@@ -37,7 +46,10 @@ export async function POST(request: NextRequest) {
 
     const validTypes = ["aadhaar", "driving_license", "passport", "voter_id"];
     if (!addressProofType || !validTypes.includes(addressProofType)) {
-      return jsonError(400, "Valid address proof type is required (aadhaar, driving_license, passport, or voter_id)");
+      return jsonError(
+        400,
+        "Valid address proof type is required (aadhaar, driving_license, passport, or voter_id)"
+      );
     }
 
     if (!addressProofNumber) {

@@ -61,7 +61,8 @@ function readSaved(product: ProductStepComponentProps["product"]): {
   displayName: string;
 } {
   const content = product.config?.content as SavedContent | undefined;
-  if (!content) return { savedFile: null, url: "", mode: "upload", productName: "", displayName: "" };
+  if (!content)
+    return { savedFile: null, url: "", mode: "upload", productName: "", displayName: "" };
 
   if (content.mode === "external_link") {
     return {
@@ -266,7 +267,16 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
         },
       });
     }
-  }, [uploadedFile, externalUrl, productName, displayName, productId, updateContentConfig, isLocked, savedFile]);
+  }, [
+    uploadedFile,
+    externalUrl,
+    productName,
+    displayName,
+    productId,
+    updateContentConfig,
+    isLocked,
+    savedFile,
+  ]);
 
   const saveAndValidate = useCallback(async () => {
     const newErrors: {
@@ -454,7 +464,11 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                         <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
                           <Upload className="text-primary h-6 w-6" />
                         </div>
-                        <Button onClick={() => inputRef.current?.click()} variant="outline" size="sm">
+                        <Button
+                          onClick={() => inputRef.current?.click()}
+                          variant="outline"
+                          size="sm"
+                        >
                           <Plus className="h-4 w-4" strokeWidth={2} />
                           Upload
                         </Button>
@@ -537,11 +551,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              disabled={deleting}
-              onClick={handleDeleteConfirm}
-            >
+            <Button variant="destructive" disabled={deleting} onClick={handleDeleteConfirm}>
               {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
             </Button>
           </AlertDialogFooter>

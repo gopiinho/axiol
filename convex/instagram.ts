@@ -9,17 +9,17 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { getVerifiedSession, requireVerifiedSession } from "./security";
-import { validateReelMappingInput, normalizeKeywordString } from "../lib/validators/instagram-mappings";
+import {
+  validateReelMappingInput,
+  normalizeKeywordString,
+} from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
 import { Id } from "./_generated/dataModel";
 import { MutationCtx } from "./_generated/server";
 
 const WEBHOOK_SECRET = process.env.INSTAGRAM_INTERNAL_SECRET;
 
-async function syncProductAutomationEnabled(
-  ctx: MutationCtx,
-  productId: Id<"products">,
-) {
+async function syncProductAutomationEnabled(ctx: MutationCtx, productId: Id<"products">) {
   const hasAnyActive = await ctx.db
     .query("reelMappings")
     .withIndex("by_product", (q) => q.eq("productId", productId))

@@ -53,7 +53,13 @@ function computeNiceMax(dataMax: number, tickCount: number): number {
   const magnitude = Math.pow(10, Math.floor(Math.log10(step)));
   const residual = step / magnitude;
   const niceStep =
-    residual <= 1.5 ? magnitude : residual <= 3.5 ? 2 * magnitude : residual <= 7.5 ? 5 * magnitude : 10 * magnitude;
+    residual <= 1.5
+      ? magnitude
+      : residual <= 3.5
+        ? 2 * magnitude
+        : residual <= 7.5
+          ? 5 * magnitude
+          : 10 * magnitude;
   return Math.ceil(dataMax / niceStep) * niceStep + niceStep;
 }
 
@@ -76,12 +82,14 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
         ) : (
           <ResponsiveContainer width="100%" height={256}>
             <ComposedChart
-                data={data}
-                margin={{ top: 12, right: 0, bottom: 4, left: 0 }}
-                onMouseMove={(state) => {
-                  if (typeof state.activeTooltipIndex === "number") setActiveIndex(state.activeTooltipIndex);
-                }}
-                onMouseLeave={() => setActiveIndex(null)}>
+              data={data}
+              margin={{ top: 12, right: 0, bottom: 4, left: 0 }}
+              onMouseMove={(state) => {
+                if (typeof state.activeTooltipIndex === "number")
+                  setActiveIndex(state.activeTooltipIndex);
+              }}
+              onMouseLeave={() => setActiveIndex(null)}
+            >
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.5} />
@@ -166,7 +174,15 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                   const cx = offset.left + barWidth * activeIndex + barWidth / 2;
                   const cy = height - offset.bottom;
                   return (
-                    <line x1={cx} y1={cy} x2={cx} y2={cy + 6} stroke="var(--border)" strokeWidth={2} strokeDasharray="2 2" />
+                    <line
+                      x1={cx}
+                      y1={cy}
+                      x2={cx}
+                      y2={cy + 6}
+                      stroke="var(--border)"
+                      strokeWidth={2}
+                      strokeDasharray="2 2"
+                    />
                   );
                 }}
               />

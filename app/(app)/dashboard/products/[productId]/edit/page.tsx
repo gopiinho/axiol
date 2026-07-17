@@ -75,9 +75,10 @@ export default function EditProduct({
   const needsItems = product?.type === "affiliate" && (items?.length ?? 0) === 0;
 
   const definition = product ? getProductTypeDefinition(product.type as ProductTypeKey) : null;
-  const currentStep = definition && definition.steps.includes(rawStep as ProductStepKey)
-    ? rawStep
-    : (definition?.steps?.[0] ?? rawStep);
+  const currentStep =
+    definition && definition.steps.includes(rawStep as ProductStepKey)
+      ? rawStep
+      : (definition?.steps?.[0] ?? rawStep);
   const currentStepIndex = definition ? definition.steps.indexOf(currentStep as ProductStepKey) : 0;
   const isLastStep = definition ? currentStepIndex === definition.steps.length - 1 : false;
 
@@ -141,7 +142,9 @@ export default function EditProduct({
         }
       } else {
         toast.success("Changes saved!");
-        setCurrentStep(definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]);
+        setCurrentStep(
+          definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]
+        );
       }
     } catch {
       toast.error("Failed to save. Please try again.");
@@ -194,7 +197,9 @@ export default function EditProduct({
       await saveFnsRef.current.get(currentStepIndex)?.();
       toast.success("Changes saved!");
       if (!isLastStep) {
-        setCurrentStep(definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]);
+        setCurrentStep(
+          definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]
+        );
       }
     } catch {
       toast.error("Failed to save. Please try again.");
@@ -213,11 +218,11 @@ export default function EditProduct({
             </h1>
             {product && (
               <ProductTypeIcon type={product.type} className="text-muted-foreground h-5 w-5" />
-              )}
-              </div>
+            )}
+          </div>
           {product && (
             <div className="flex gap-2">
-                {(product.status === "draft" || product.status === "archived") && (
+              {(product.status === "draft" || product.status === "archived") && (
                 <>
                   <Button variant="outline" onClick={handleSave} disabled={!!busyAction}>
                     {busyAction === "save" ? (

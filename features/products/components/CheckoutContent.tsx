@@ -58,7 +58,10 @@ export function CheckoutContent({
   const cashfreeRef = useRef<CashfreeInstance | null>(null);
 
   const checkoutConfig = product.config?.checkout as
-    | { buttonText?: string; collectFields?: Array<{ key: string; enabled: boolean; required: boolean }> }
+    | {
+        buttonText?: string;
+        collectFields?: Array<{ key: string; enabled: boolean; required: boolean }>;
+      }
     | undefined;
 
   const collectFields = checkoutConfig?.collectFields ?? [];
@@ -151,7 +154,9 @@ export function CheckoutContent({
         }
       }
     } catch (error) {
-      toast.error("Something went wrong", { description: error instanceof Error ? error.message : "Please try again later." });
+      toast.error("Something went wrong", {
+        description: error instanceof Error ? error.message : "Please try again later.",
+      });
     } finally {
       setLoading(false);
     }

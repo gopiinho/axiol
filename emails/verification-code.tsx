@@ -1,13 +1,4 @@
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Section,
-  Img,
-  Heading,
-  Text,
-} from "@react-email/components";
+import { Html, Head, Body, Container, Section, Img, Heading, Text } from "@react-email/components";
 
 interface VerificationCodeEmailProps {
   otp: string;

@@ -1,7 +1,12 @@
 import { notFound } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { getServerConvexClient } from "@/server/convex/client";
-import { buildThemeStyle, migrateOldTheme, type PaletteConfig, type LayoutConfig } from "@/lib/themes";
+import {
+  buildThemeStyle,
+  migrateOldTheme,
+  type PaletteConfig,
+  type LayoutConfig,
+} from "@/lib/themes";
 import { resolvePalette } from "@/lib/colorUtils";
 import { StoreContent } from "@/components/StoreContent";
 
@@ -53,9 +58,7 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
   if (palette) {
     palette = resolvePalette(palette);
   }
-  const themeStyle = palette
-    ? buildThemeStyle(palette, layout ?? {})
-    : ({} as React.CSSProperties);
+  const themeStyle = palette ? buildThemeStyle(palette, layout ?? {}) : ({} as React.CSSProperties);
 
   const profileSrc = user.profileImageUrl ?? user.avatarUrl ?? null;
 
@@ -106,10 +109,7 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
   }[];
 
   return (
-    <main
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--store-bg)", ...themeStyle }}
-    >
+    <main className="min-h-screen" style={{ backgroundColor: "var(--store-bg)", ...themeStyle }}>
       <div className="mx-auto w-full lg:max-w-[90%]">
         <StoreContent
           displayName={displayName}

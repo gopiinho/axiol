@@ -6,9 +6,7 @@ const appId = process.env.CASHFREE_APP_ID || "";
 const secretKey = process.env.CASHFREE_SECRET_KEY || "";
 
 const isSandbox = appId.startsWith("TEST");
-const baseUrl = isSandbox
-  ? "https://sandbox.cashfree.com/pg"
-  : "https://api.cashfree.com/pg";
+const baseUrl = isSandbox ? "https://sandbox.cashfree.com/pg" : "https://api.cashfree.com/pg";
 
 function jsonError(status: number, message: string) {
   return NextResponse.json({ ok: false, error: message }, { status });
@@ -26,16 +24,13 @@ export async function GET() {
       return NextResponse.json({ ok: true, status: null });
     }
 
-    const response = await fetch(
-      `${baseUrl}/easy-split/vendors/${payoutProfile.vendorId}`,
-      {
-        headers: {
-          "x-client-id": appId,
-          "x-client-secret": secretKey,
-          "x-api-version": "2025-01-01",
-        },
-      }
-    );
+    const response = await fetch(`${baseUrl}/easy-split/vendors/${payoutProfile.vendorId}`, {
+      headers: {
+        "x-client-id": appId,
+        "x-client-secret": secretKey,
+        "x-api-version": "2025-01-01",
+      },
+    });
 
     if (!response.ok) {
       return NextResponse.json({

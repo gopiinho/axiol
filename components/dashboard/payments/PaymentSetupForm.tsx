@@ -2,7 +2,17 @@
 
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Landmark, Smartphone, ArrowRight, ArrowLeft, Loader2, Fingerprint, Car, BookOpen, IdCard } from "lucide-react";
+import {
+  Landmark,
+  Smartphone,
+  ArrowRight,
+  ArrowLeft,
+  Loader2,
+  Fingerprint,
+  Car,
+  BookOpen,
+  IdCard,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,7 +24,12 @@ import {
 } from "@/components/ui/select";
 import { DocumentUpload } from "./DocumentUpload";
 import type { PayoutFormData } from "./types";
-import { BUSINESS_TYPES, ADDRESS_PROOF_OPTIONS, ADDRESS_PROOF_FILE_TYPES, EMPTY_FORM } from "./constants";
+import {
+  BUSINESS_TYPES,
+  ADDRESS_PROOF_OPTIONS,
+  ADDRESS_PROOF_FILE_TYPES,
+  EMPTY_FORM,
+} from "./constants";
 
 interface PaymentSetupFormProps {
   userName?: string;
@@ -47,20 +62,17 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
     });
   }, []);
 
-  const updateField = useCallback(
-    (field: keyof PayoutFormData, value: string) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-      if (field === "addressProofType") {
-        setAddressProofFiles({});
-      }
-      setTouched((prev) => {
-        const next = new Set(prev);
-        next.delete(field);
-        return next;
-      });
-    },
-    []
-  );
+  const updateField = useCallback((field: keyof PayoutFormData, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (field === "addressProofType") {
+      setAddressProofFiles({});
+    }
+    setTouched((prev) => {
+      const next = new Set(prev);
+      next.delete(field);
+      return next;
+    });
+  }, []);
 
   function isFieldInvalid(field: keyof PayoutFormData): boolean {
     if (!touched.has(field)) return false;
@@ -100,10 +112,11 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
         case 2: {
           if (!form.addressProofType) return "Select an address proof type";
           if (!form.addressProofNumber.trim()) return "Enter your address proof number";
-          const types = form.addressProofType ? ADDRESS_PROOF_FILE_TYPES[form.addressProofType] : [];
+          const types = form.addressProofType
+            ? ADDRESS_PROOF_FILE_TYPES[form.addressProofType]
+            : [];
           const missing = types.filter((t) => !addressProofFiles[t.docType]);
-          if (missing.length > 0)
-            return `Upload ${missing.map((t) => t.label).join(" and ")}`;
+          if (missing.length > 0) return `Upload ${missing.map((t) => t.label).join(" and ")}`;
           return null;
         }
         case 3: {
@@ -198,7 +211,9 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
 
       const vendorData = await vendorRes.json();
       if (!vendorData.ok) {
-        toast.error(vendorData.error || "Failed to save payment details", { description: "Please try again." });
+        toast.error(vendorData.error || "Failed to save payment details", {
+          description: "Please try again.",
+        });
         setSubmitting(false);
         return;
       }
@@ -309,7 +324,7 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
               </p>
             </div>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {ADDRESS_PROOF_OPTIONS.map((opt) => {
                   const Icon = PROOF_ICONS[opt.icon];
                   const selected = form.addressProofType === opt.value;
@@ -318,14 +333,14 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
                       key={opt.value}
                       type="button"
                       onClick={() => updateField("addressProofType", opt.value)}
-                      className={`flex flex-col items-center gap-1.5 cursor-pointer rounded-xs border px-3 py-3 text-sm transition-colors ${
+                      className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xs border px-3 py-3 text-sm transition-colors ${
                         selected
                           ? "border-foreground bg-foreground text-background"
                           : "border-border text-muted-foreground hover:border-muted-foreground"
                       }`}
                     >
                       {Icon && <Icon className="h-5 w-5" />}
-                      <span className="text-[11px] leading-tight text-center font-medium">
+                      <span className="text-center text-[11px] leading-tight font-medium">
                         {opt.label}
                       </span>
                     </button>
@@ -348,7 +363,9 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
                     />
                   </div>
 
-                  <div className={`grid grid-cols-1 gap-3 ${proofFileTypes.length > 1 ? "sm:grid-cols-2" : ""}`}>
+                  <div
+                    className={`grid grid-cols-1 gap-3 ${proofFileTypes.length > 1 ? "sm:grid-cols-2" : ""}`}
+                  >
                     {proofFileTypes.map((pt) => (
                       <DocumentUpload
                         key={pt.docType}
@@ -379,10 +396,7 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
                 value={form.businessType}
                 onValueChange={(v) => updateField("businessType", v)}
               >
-                <SelectTrigger
-                  className="w-full"
-                  aria-invalid={isFieldInvalid("businessType")}
-                >
+                <SelectTrigger className="w-full" aria-invalid={isFieldInvalid("businessType")}>
                   <SelectValue placeholder="Select your business type..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -407,7 +421,7 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
                 <button
                   type="button"
                   onClick={() => updateField("payoutMethod", "bank")}
-                  className={`flex flex-1 items-center gap-2 cursor-pointer rounded-md border px-3 py-3 text-sm transition-colors ${
+                  className={`flex flex-1 cursor-pointer items-center gap-2 rounded-md border px-3 py-3 text-sm transition-colors ${
                     form.payoutMethod === "bank"
                       ? "border-foreground bg-foreground text-background"
                       : "border-border text-muted-foreground hover:border-muted-foreground"
@@ -419,7 +433,7 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
                 <button
                   type="button"
                   onClick={() => updateField("payoutMethod", "upi")}
-                  className={`flex flex-1 items-center gap-2 cursor-pointer rounded-md border px-3 py-3 text-sm transition-colors ${
+                  className={`flex flex-1 cursor-pointer items-center gap-2 rounded-md border px-3 py-3 text-sm transition-colors ${
                     form.payoutMethod === "upi"
                       ? "border-foreground bg-foreground text-background"
                       : "border-border text-muted-foreground hover:border-muted-foreground"
@@ -438,7 +452,9 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
                     </label>
                     <Input
                       value={form.bankAccount}
-                      onChange={(e) => updateField("bankAccount", e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) =>
+                        updateField("bankAccount", e.target.value.replace(/\D/g, ""))
+                      }
                       placeholder="Enter account number"
                       maxLength={20}
                       className="font-mono"
@@ -518,11 +534,7 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
         )}
 
         {step === 3 && (
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="w-full"
-          >
+          <Button onClick={handleSubmit} disabled={submitting} className="w-full">
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -550,7 +562,7 @@ export function PaymentSetupForm({ userName, onComplete }: PaymentSetupFormProps
         )}
       </div>
 
-      <p className="text-muted-foreground text-xs text-center leading-relaxed">
+      <p className="text-muted-foreground text-center text-xs leading-relaxed">
         Your information is used solely for compliance and payout verification.
       </p>
     </>

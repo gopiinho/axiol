@@ -100,9 +100,7 @@ export const getPublicStore = query({
           : null;
 
         const { thumbnail: thumb } = product.config;
-        const thumbnailImageUrl = thumb?.imageId
-          ? await ctx.storage.getUrl(thumb.imageId)
-          : null;
+        const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
 
         return {
           ...product,
@@ -203,24 +201,28 @@ export const updateProfile = mutation({
     theme: v.optional(v.string()),
     accentColor: v.optional(v.string()),
     storeName: v.optional(v.string()),
-    palette: v.optional(v.object({
-      bg: v.string(),
-      accent: v.string(),
-      surface: v.optional(v.string()),
-      border: v.optional(v.string()),
-      text: v.optional(v.string()),
-      textMuted: v.optional(v.string()),
-      cardBg: v.optional(v.string()),
-    })),
-    layout: v.optional(v.object({
-      preset: v.optional(v.string()),
-      borderRadius: v.optional(v.string()),
-      cardStyle: v.optional(v.string()),
-      spacing: v.optional(v.string()),
-      headerLayout: v.optional(v.string()),
-      typeScale: v.optional(v.string()),
-      backgroundPattern: v.optional(v.string()),
-    })),
+    palette: v.optional(
+      v.object({
+        bg: v.string(),
+        accent: v.string(),
+        surface: v.optional(v.string()),
+        border: v.optional(v.string()),
+        text: v.optional(v.string()),
+        textMuted: v.optional(v.string()),
+        cardBg: v.optional(v.string()),
+      })
+    ),
+    layout: v.optional(
+      v.object({
+        preset: v.optional(v.string()),
+        borderRadius: v.optional(v.string()),
+        cardStyle: v.optional(v.string()),
+        spacing: v.optional(v.string()),
+        headerLayout: v.optional(v.string()),
+        typeScale: v.optional(v.string()),
+        backgroundPattern: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireVerifiedSession(ctx);

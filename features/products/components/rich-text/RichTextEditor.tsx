@@ -30,10 +30,8 @@ function ToolbarButton({ onClick, active, label, children }: ToolbarButtonProps)
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "flex h-7 w-7 items-center cursor-pointer justify-center rounded-xs transition-colors",
-        active
-          ? "text-primary"
-          : "text-background hover:bg-secondary hover:text-foreground"
+        "flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs transition-colors",
+        active ? "text-primary" : "text-background hover:bg-secondary hover:text-foreground"
       )}
     >
       {children}

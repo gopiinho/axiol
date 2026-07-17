@@ -33,12 +33,19 @@ const HEADER_OPTIONS: { value: HeaderLayoutValue; label: string }[] = [
 ];
 
 function PresetPreview({ config }: { config: LayoutConfig }) {
-  const radiusRem = config.borderRadius === "sharp" ? 0.25 : config.borderRadius === "subtle" ? 0.5 : config.borderRadius === "round" ? 1 : 1.5;
+  const radiusRem =
+    config.borderRadius === "sharp"
+      ? 0.25
+      : config.borderRadius === "subtle"
+        ? 0.5
+        : config.borderRadius === "round"
+          ? 1
+          : 1.5;
   const isShadow = config.cardStyle === "shadow";
   const isLayered = config.cardStyle === "layered";
 
   return (
-    <div className="relative w-full flex justify-center">
+    <div className="relative flex w-full justify-center">
       <div
         className="h-6 w-10 rounded-sm"
         style={{
@@ -80,12 +87,12 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
   return (
     <div className="space-y-0">
       <div className="flex items-center gap-2 px-1 pb-3">
-        <Layout className="h-4 w-4 text-muted-foreground" />
+        <Layout className="text-muted-foreground h-4 w-4" />
         <p className="text-sm font-semibold">Layout</p>
       </div>
 
       <div className="px-1 py-1.5">
-        <p className="mb-2 text-[11px] font-medium text-muted-foreground tracking-wide">Presets</p>
+        <p className="text-muted-foreground mb-2 text-[11px] font-medium tracking-wide">Presets</p>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
           {LAYOUT_PRESETS.map((p) => {
             const isSelected =
@@ -102,13 +109,13 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
                 className={`relative flex cursor-pointer flex-col items-center gap-1 rounded-xs border p-2 transition ${
                   isSelected
                     ? "border-foreground bg-foreground/[0.06]"
-                    : "border-transparent hover:bg-foreground/[0.03]"
+                    : "hover:bg-foreground/[0.03] border-transparent"
                 }`}
               >
                 <PresetPreview config={p.config} />
                 <span className="text-[10px] font-medium">{p.label}</span>
                 {isSelected && (
-                  <div className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background">
+                  <div className="bg-foreground text-background absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full">
                     <Check className="h-2.5 w-2.5" />
                   </div>
                 )}
@@ -118,13 +125,15 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
         </div>
       </div>
 
-      <div className="border-t border-border/60" />
+      <div className="border-border/60 border-t" />
 
-      <div className="px-1 py-3 space-y-4">
+      <div className="space-y-4 px-1 py-3">
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-medium">Rounding</span>
-            <span className="font-mono text-[10px] text-muted-foreground tabular-nums">{radiusLabel}</span>
+            <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
+              {radiusLabel}
+            </span>
           </div>
           <input
             type="range"
@@ -132,9 +141,9 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
             max={100}
             value={sliderPos}
             onChange={(e) => update("borderRadius", sliderToRadius(Number(e.target.value)))}
-            className="w-full h-1.5 appearance-none bg-border/60 rounded-full accent-primary cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer"
+            className="bg-border/60 accent-primary [&::-webkit-slider-thumb]:bg-primary h-1.5 w-full cursor-pointer appearance-none rounded-full [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full"
           />
-          <div className="mt-0.5 flex justify-between text-[9px] text-muted-foreground/50">
+          <div className="text-muted-foreground/50 mt-0.5 flex justify-between text-[9px]">
             <span>0px</span>
             <span>24px</span>
           </div>
@@ -153,7 +162,7 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
                   className={`flex-1 cursor-pointer rounded-xs px-2 py-1.5 text-[11px] font-medium transition ${
                     active
                       ? "bg-foreground text-background"
-                      : "bg-background text-foreground border border-border hover:border-primary/50"
+                      : "bg-background text-foreground border-border hover:border-primary/50 border"
                   }`}
                 >
                   {opt.label}
@@ -166,7 +175,7 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-medium">Spacing</span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-muted-foreground text-[10px]">
               {spacingVal <= 15 ? "Compact" : spacingVal >= 85 ? "Loose" : "Standard"}
             </span>
           </div>
@@ -176,9 +185,9 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
             max={100}
             value={spacingVal}
             onChange={(e) => update("spacing", sliderToSpacing(Number(e.target.value)))}
-            className="w-full h-1.5 appearance-none bg-border/60 rounded-full accent-primary cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer"
+            className="bg-border/60 accent-primary [&::-webkit-slider-thumb]:bg-primary h-1.5 w-full cursor-pointer appearance-none rounded-full [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full"
           />
-          <div className="mt-0.5 flex justify-between text-[9px] text-muted-foreground/50">
+          <div className="text-muted-foreground/50 mt-0.5 flex justify-between text-[9px]">
             <span>Compact</span>
             <span>Loose</span>
           </div>
@@ -197,7 +206,7 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
                   className={`flex-1 cursor-pointer rounded-xs px-2 py-1.5 text-[11px] font-medium transition ${
                     active
                       ? "bg-foreground text-background"
-                      : "bg-background text-foreground border border-border hover:border-primary/50"
+                      : "bg-background text-foreground border-border hover:border-primary/50 border"
                   }`}
                 >
                   {opt.label}
@@ -210,7 +219,7 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-medium">Type Scale</span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-muted-foreground text-[10px]">
               {typeVal <= 15 ? "Small" : typeVal >= 85 ? "Large" : "Medium"}
             </span>
           </div>
@@ -220,9 +229,9 @@ export function LayoutPicker({ layout, onLayoutChange }: LayoutPickerProps) {
             max={100}
             value={typeVal}
             onChange={(e) => update("typeScale", sliderToTypeScale(Number(e.target.value)))}
-            className="w-full h-1.5 appearance-none bg-border/60 rounded-full accent-primary cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer"
+            className="bg-border/60 accent-primary [&::-webkit-slider-thumb]:bg-primary h-1.5 w-full cursor-pointer appearance-none rounded-full [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full"
           />
-          <div className="mt-0.5 flex justify-between text-[9px] text-muted-foreground/50">
+          <div className="text-muted-foreground/50 mt-0.5 flex justify-between text-[9px]">
             <span>Small</span>
             <span>Large</span>
           </div>

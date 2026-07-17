@@ -50,7 +50,12 @@ export function StoreContent({
       />
 
       <div>
-        <ProductSection products={products} username={username} interactive={interactive} compact={compact} />
+        <ProductSection
+          products={products}
+          username={username}
+          interactive={interactive}
+          compact={compact}
+        />
       </div>
     </div>
   );

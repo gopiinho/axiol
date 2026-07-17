@@ -69,9 +69,7 @@ export function isBlockedExtension(fileName: string): boolean {
 }
 
 export function isBlockedMimeType(mimeType: string): boolean {
-  return BLOCKED_MIME_PREFIXES.some((prefix) =>
-    mimeType.toLowerCase().startsWith(prefix)
-  );
+  return BLOCKED_MIME_PREFIXES.some((prefix) => mimeType.toLowerCase().startsWith(prefix));
 }
 
 export function validateContentFile(

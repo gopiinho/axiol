@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
     try {
       cashfree.PGVerifyWebhookSignature(signature, rawBody, timestamp);
     } catch {
-      return NextResponse.json(
-        { ok: false, error: "Invalid webhook signature" },
-        { status: 401 }
-      );
+      return NextResponse.json({ ok: false, error: "Invalid webhook signature" }, { status: 401 });
     }
 
     const payload = JSON.parse(rawBody);
@@ -65,7 +62,7 @@ export async function POST(request: NextRequest) {
             updatedStatus,
             vendorName || "",
             "Axiol",
-            process.env.NEXT_PUBLIC_SITE_URL || "https://axiol.store",
+            process.env.NEXT_PUBLIC_SITE_URL || "https://axiol.store"
           );
         }
       }
@@ -104,13 +101,14 @@ export async function POST(request: NextRequest) {
               currency: existing.currency,
             }).format(existing.amountCents);
 
-            const orderDate = new Date(
-              existing.paidAt ?? existing.createdAt
-            ).toLocaleDateString("en-IN", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
+            const orderDate = new Date(existing.paidAt ?? existing.createdAt).toLocaleDateString(
+              "en-IN",
+              {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }
+            );
 
             await sendDownloadEmail(
               existing.buyerEmail,

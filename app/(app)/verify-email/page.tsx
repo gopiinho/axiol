@@ -22,7 +22,7 @@ export default function VerifyEmailPage({
     searchParams ??
       (Promise.resolve({}) as Promise<{
         [key: string]: string | string[] | undefined;
-      }>),
+      }>)
   );
   const email = (params.email as string) || "";
   const router = useRouter();
@@ -140,9 +140,7 @@ export default function VerifyEmailPage({
       setVerified(true);
     } catch (err) {
       toast.error(
-        err instanceof Error
-          ? err.message
-          : "Invalid or expired code. Please try again."
+        err instanceof Error ? err.message : "Invalid or expired code. Please try again."
       );
       setDigits(Array(OTP_LENGTH).fill(""));
       setLoading(false);
@@ -186,7 +184,7 @@ export default function VerifyEmailPage({
             Check your email
           </h2>
           <p className="text-muted-foreground mt-2 text-base">
-            We sent a 6-digit code to <span className="font-semibold text-foreground">{email}</span>
+            We sent a 6-digit code to <span className="text-foreground font-semibold">{email}</span>
           </p>
         </div>
 
@@ -205,8 +203,8 @@ export default function VerifyEmailPage({
                 onKeyDown={(e) => handleKeyDown(i, e)}
                 onPaste={i === 0 ? handlePaste : undefined}
                 disabled={loading || verified}
-                 className={cn(
-                  "h-14 w-11 rounded-md border text-center text-2xl font-mono font-bold outline-none transition-colors sm:h-16 sm:w-13",
+                className={cn(
+                  "h-14 w-11 rounded-md border text-center font-mono text-2xl font-bold transition-colors outline-none sm:h-16 sm:w-13",
                   "focus:ring-primary/50 focus:ring-2",
                   "disabled:cursor-not-allowed disabled:opacity-50",
                   "border-input bg-card/90"
@@ -235,9 +233,7 @@ export default function VerifyEmailPage({
               variant="ghost"
               className="w-full"
             >
-              {cooldown > 0
-                ? `Resend code in ${cooldown}s`
-                : "Resend code"}
+              {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
             </Button>
           </div>
         </form>

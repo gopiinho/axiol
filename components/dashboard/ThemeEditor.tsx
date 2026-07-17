@@ -49,7 +49,7 @@ export function ThemeEditor({
         </div>
       </div>
 
-      <div className="grid gap-0 lg:grid-cols-2 lg:divide-x lg:divide-border/60">
+      <div className="lg:divide-border/60 grid gap-0 lg:grid-cols-2 lg:divide-x">
         <div className="lg:pr-10">
           <PalettePicker
             palette={palette}

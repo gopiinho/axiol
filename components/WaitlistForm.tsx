@@ -49,11 +49,7 @@ export function WaitlistForm() {
           disabled={loading}
           className="border-primary bg-foreground text-background placeholder:text-background focus:ring-primary/40 focus:border-primary h-14 w-full min-w-0 border-2 px-5 text-base focus:ring-2 focus:outline-none disabled:opacity-60 sm:w-72 sm:text-lg"
         />
-        <Button
-          type="submit"
-          disabled={loading}
-          className="h-14 px-8 text-base sm:text-lg"
-        >
+        <Button type="submit" disabled={loading} className="h-14 px-8 text-base sm:text-lg">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Join waitlist"}
         </Button>
       </form>

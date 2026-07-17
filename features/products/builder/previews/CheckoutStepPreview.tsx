@@ -73,12 +73,7 @@ export function CheckoutStepPreview({
   delete (theme as Record<string, unknown>).backgroundImage;
   delete (theme as Record<string, unknown>).backgroundSize;
 
-  const displayPrice =
-    price && /^[₹$€£]/.test(price)
-      ? price
-      : price
-        ? `₹ ${price}`
-        : "Free";
+  const displayPrice = price && /^[₹$€£]/.test(price) ? price : price ? `₹ ${price}` : "Free";
 
   const isPaid = paidTypes.includes(type);
   const isSimplified = simplifiedTypes.includes(type);
@@ -90,12 +85,8 @@ export function CheckoutStepPreview({
     user?.instagramUrl
       ? { url: user.instagramUrl, icon: "instagram" as const, label: "Instagram" }
       : null,
-    user?.youtubeUrl
-      ? { url: user.youtubeUrl, icon: "youtube" as const, label: "YouTube" }
-      : null,
-    user?.websiteUrl
-      ? { url: user.websiteUrl, icon: "globe" as const, label: "Website" }
-      : null,
+    user?.youtubeUrl ? { url: user.youtubeUrl, icon: "youtube" as const, label: "YouTube" } : null,
+    user?.websiteUrl ? { url: user.websiteUrl, icon: "globe" as const, label: "Website" } : null,
   ].filter((link): link is NonNullable<typeof link> => link !== null);
 
   return (
@@ -141,7 +132,11 @@ export function CheckoutStepPreview({
                 >
                   {profileSrc ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={profileSrc} alt={displayName} className="h-full w-full object-cover" />
+                    <img
+                      src={profileSrc}
+                      alt={displayName}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <div
                       className="flex h-full w-full items-center justify-center text-[10px] font-bold text-white"
@@ -173,7 +168,10 @@ export function CheckoutStepPreview({
 
               <div
                 className="inline-flex items-center gap-1.5 px-4 pt-2 pb-0.5"
-                style={{ color: "var(--store-text-muted)", fontSize: "var(--store-body-size, 0.8125rem)" }}
+                style={{
+                  color: "var(--store-text-muted)",
+                  fontSize: "var(--store-body-size, 0.8125rem)",
+                }}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Back
@@ -189,7 +187,11 @@ export function CheckoutStepPreview({
                 >
                   <div className="aspect-[2/1]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={coverImageUrl} alt={name || "Cover"} className="h-full w-full object-cover" />
+                    <img
+                      src={coverImageUrl}
+                      alt={name || "Cover"}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                 </div>
               )}
@@ -197,20 +199,31 @@ export function CheckoutStepPreview({
               <div className="px-4">
                 <h1
                   className="mb-1 leading-tight font-bold tracking-tight"
-                  style={{ color: "var(--store-text)", fontSize: "var(--store-heading-size, 1.375rem)" }}
+                  style={{
+                    color: "var(--store-text)",
+                    fontSize: "var(--store-heading-size, 1.375rem)",
+                  }}
                 >
                   {name || "Product Name"}
                 </h1>
 
                 <p
                   className="mb-4 font-semibold"
-                  style={{ color: "var(--store-accent)", fontSize: "var(--store-price-size, 0.9375rem)" }}
+                  style={{
+                    color: "var(--store-accent)",
+                    fontSize: "var(--store-price-size, 0.9375rem)",
+                  }}
                 >
                   {displayPrice}
                 </p>
 
                 {description && (
-                  <div style={{ marginBottom: "var(--store-section-gap, 1.5rem)", fontSize: "var(--store-body-size, 0.875rem)" }}>
+                  <div
+                    style={{
+                      marginBottom: "var(--store-section-gap, 1.5rem)",
+                      fontSize: "var(--store-body-size, 0.875rem)",
+                    }}
+                  >
                     <RichTextRenderer html={description} style={{ color: "var(--store-text)" }} />
                   </div>
                 )}
@@ -230,7 +243,10 @@ export function CheckoutStepPreview({
 
                   <div className="space-y-3">
                     <div className="relative">
-                      <User className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" style={{ color: "var(--store-text-muted)" }} />
+                      <User
+                        className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2"
+                        style={{ color: "var(--store-text-muted)" }}
+                      />
                       <Input
                         placeholder="Your name"
                         disabled
@@ -245,7 +261,10 @@ export function CheckoutStepPreview({
                       />
                     </div>
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" style={{ color: "var(--store-text-muted)" }} />
+                      <Mail
+                        className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2"
+                        style={{ color: "var(--store-text-muted)" }}
+                      />
                       <Input
                         placeholder="you@example.com"
                         disabled
@@ -261,7 +280,10 @@ export function CheckoutStepPreview({
                     </div>
                     {phoneEnabled && (
                       <div className="relative">
-                        <Phone className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" style={{ color: "var(--store-text-muted)" }} />
+                        <Phone
+                          className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2"
+                          style={{ color: "var(--store-text-muted)" }}
+                        />
                         <Input
                           placeholder="Phone number"
                           disabled
@@ -299,10 +321,19 @@ export function CheckoutStepPreview({
                     <div className="border-border/60 mt-8 border-t pt-4">
                       <p
                         className="text-center leading-relaxed"
-                        style={{ color: "var(--store-text-muted)", fontSize: "var(--store-body-size, 0.8125rem)" }}
+                        style={{
+                          color: "var(--store-text-muted)",
+                          fontSize: "var(--store-body-size, 0.8125rem)",
+                        }}
                       >
                         Powered by Axiol{" "}
-                        <Image src={heartPixel.src} alt="heart" width={5} height={5} className="inline-block h-2 w-2" />
+                        <Image
+                          src={heartPixel.src}
+                          alt="heart"
+                          width={5}
+                          height={5}
+                          className="inline-block h-2 w-2"
+                        />
                       </p>
                     </div>
                   )}
@@ -313,14 +344,31 @@ export function CheckoutStepPreview({
             {isPaid && (
               <div
                 className="shrink-0 border-t"
-                style={{ backgroundColor: "var(--store-surface, white)", borderColor: "var(--store-border)" }}
+                style={{
+                  backgroundColor: "var(--store-surface, white)",
+                  borderColor: "var(--store-border)",
+                }}
               >
-                <div className="flex items-center gap-3 px-3 py-2" style={{ padding: "var(--store-card-padding, 1rem)" }}>
+                <div
+                  className="flex items-center gap-3 px-3 py-2"
+                  style={{ padding: "var(--store-card-padding, 1rem)" }}
+                >
                   <div className="flex flex-col">
-                    <span style={{ color: "var(--store-text-muted)", fontSize: "var(--store-body-size, 0.8125rem)" }}>
+                    <span
+                      style={{
+                        color: "var(--store-text-muted)",
+                        fontSize: "var(--store-body-size, 0.8125rem)",
+                      }}
+                    >
                       Total
                     </span>
-                    <span className="font-bold" style={{ color: "var(--store-accent)", fontSize: "var(--store-price-size, 0.9375rem)" }}>
+                    <span
+                      className="font-bold"
+                      style={{
+                        color: "var(--store-accent)",
+                        fontSize: "var(--store-price-size, 0.9375rem)",
+                      }}
+                    >
                       {displayPrice}
                     </span>
                   </div>
@@ -335,13 +383,13 @@ export function CheckoutStepPreview({
                       borderRadius: "var(--store-radius, 0.5rem)",
                       fontSize: "var(--store-body-size, 0.875rem)",
                     }}
-                    >
-                      {checkoutButtonText}
-                    </Button>
-                  </div>
+                  >
+                    {checkoutButtonText}
+                  </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
 
           <div className="relative flex justify-center py-1.5">
             <div className="absolute bottom-4 h-1 w-24 rounded-full bg-gray-600" />

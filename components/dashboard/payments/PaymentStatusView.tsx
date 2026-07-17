@@ -33,11 +33,23 @@ export function PaymentStatusView({ profile }: PaymentStatusViewProps) {
   }
 
   if (status === "BANK_VALIDATION_FAILED") {
-    return <FailedView profile={profile} message="Bank validation failed. Please update your bank or UPI details and try again." allowEdit />;
+    return (
+      <FailedView
+        profile={profile}
+        message="Bank validation failed. Please update your bank or UPI details and try again."
+        allowEdit
+      />
+    );
   }
 
   if (status === "BENE_CREATION_FAILED") {
-    return <FailedView profile={profile} message="Beneficiary creation failed. Please update your payment details and try again." allowEdit />;
+    return (
+      <FailedView
+        profile={profile}
+        message="Beneficiary creation failed. Please update your payment details and try again."
+        allowEdit
+      />
+    );
   }
 
   if (["BLOCKED", "ON_HOLD", "DELETED"].includes(status)) {
@@ -63,15 +75,15 @@ function VerifyingView({ profile }: { profile: PayoutProfile }) {
 
   return (
     <div className="app-panel space-y-4 px-4 py-5">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-foreground text-sm font-semibold flex items-center gap-1">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground flex items-center gap-1 text-sm font-semibold">
             Verification in progress
-            <Clock className="text-amber-500 h-4 w-4" />
+            <Clock className="h-4 w-4 text-amber-500" />
           </p>
           <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-            Cashfree is verifying your documents. This typically takes 24–48 hours.
-            You will be notified once the verification is complete.
+            Cashfree is verifying your documents. This typically takes 24–48 hours. You will be
+            notified once the verification is complete.
           </p>
         </div>
       </div>
@@ -106,11 +118,11 @@ function ActiveView({ profile }: { profile: PayoutProfile }) {
 
   return (
     <div className="app-panel space-y-4 px-4 py-5">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-foreground text-sm font-semibold flex items-center gap-1">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground flex items-center gap-1 text-sm font-semibold">
             Payments active
-            <CheckCircle2 className="text-emerald-500 h-4 w-4" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
           </p>
           <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
             Your earnings are settled directly by Cashfree{" "}
@@ -171,11 +183,11 @@ function ActionRequiredView({ profile }: { profile: PayoutProfile }) {
 
   return (
     <div className="app-panel space-y-4 px-4 py-5">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-foreground text-sm font-semibold flex items-center gap-1">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground flex items-center gap-1 text-sm font-semibold">
             Action required
-            <AlertCircle className="text-amber-500 h-4 w-4" />
+            <AlertCircle className="h-4 w-4 text-amber-500" />
           </p>
           <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
             Some of your documents could not be verified. Please upload corrected copies.
@@ -219,7 +231,10 @@ function ActionRequiredView({ profile }: { profile: PayoutProfile }) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => { setReUploading(null); setReUploadFile(null); }}
+              onClick={() => {
+                setReUploading(null);
+                setReUploadFile(null);
+              }}
             >
               Cancel
             </Button>
@@ -230,7 +245,15 @@ function ActionRequiredView({ profile }: { profile: PayoutProfile }) {
   );
 }
 
-function FailedView({ profile, message, allowEdit }: { profile: PayoutProfile; message: string; allowEdit?: boolean }) {
+function FailedView({
+  profile,
+  message,
+  allowEdit,
+}: {
+  profile: PayoutProfile;
+  message: string;
+  allowEdit?: boolean;
+}) {
   const [editing, setEditing] = useState(false);
 
   if (editing) {
@@ -245,9 +268,9 @@ function FailedView({ profile, message, allowEdit }: { profile: PayoutProfile; m
 
   return (
     <div className="app-panel space-y-4 px-4 py-5">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-foreground text-sm font-semibold flex items-center gap-1">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground flex items-center gap-1 text-sm font-semibold">
             Verification failed
             <AlertCircle className="text-destructive h-4 w-4" />
           </p>
@@ -269,9 +292,9 @@ function FailedView({ profile, message, allowEdit }: { profile: PayoutProfile; m
 function BlockedView({ profile }: { profile: PayoutProfile }) {
   return (
     <div className="app-panel space-y-4 px-4 py-5">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-foreground text-sm font-semibold flex items-center gap-1">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground flex items-center gap-1 text-sm font-semibold">
             Verification failed
             <AlertCircle className="text-destructive h-4 w-4" />
           </p>

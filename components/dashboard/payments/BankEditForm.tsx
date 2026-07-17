@@ -22,7 +22,6 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
   const [upiHolder, setUpiHolder] = useState(profile.upiHolder || "");
   const [submitting, setSubmitting] = useState(false);
 
-
   const validate = useCallback((): string | null => {
     if (method === "bank") {
       if (!bankAccount.trim()) return "Bank account number is required";
@@ -39,7 +38,10 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
 
   const handleSubmit = useCallback(async () => {
     const err = validate();
-    if (err) { toast.error(err); return; }
+    if (err) {
+      toast.error(err);
+      return;
+    }
 
     setSubmitting(true);
 
@@ -59,7 +61,9 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
 
       const data = await res.json();
       if (!data.ok) {
-        toast.error(data.error || "Failed to update payment details", { description: "Please try again." });
+        toast.error(data.error || "Failed to update payment details", {
+          description: "Please try again.",
+        });
         return;
       }
 
@@ -85,7 +89,7 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
         <button
           type="button"
           onClick={() => setMethod("bank")}
-          className={`flex flex-1 items-center gap-2 cursor-pointer rounded-md border px-3 py-3 text-sm transition-colors ${
+          className={`flex flex-1 cursor-pointer items-center gap-2 rounded-md border px-3 py-3 text-sm transition-colors ${
             method === "bank"
               ? "border-foreground bg-foreground text-background"
               : "border-border text-muted-foreground hover:border-muted-foreground"
@@ -97,7 +101,7 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
         <button
           type="button"
           onClick={() => setMethod("upi")}
-          className={`flex flex-1 items-center gap-2 cursor-pointer rounded-md border px-3 py-3 text-sm transition-colors ${
+          className={`flex flex-1 cursor-pointer items-center gap-2 rounded-md border px-3 py-3 text-sm transition-colors ${
             method === "upi"
               ? "border-foreground bg-foreground text-background"
               : "border-border text-muted-foreground hover:border-muted-foreground"
@@ -111,7 +115,9 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
       {method === "bank" ? (
         <div className="space-y-4">
           <div>
-            <label className="text-muted-foreground mb-1 block text-xs font-medium">Account Number</label>
+            <label className="text-muted-foreground mb-1 block text-xs font-medium">
+              Account Number
+            </label>
             <Input
               value={bankAccount}
               onChange={(e) => setBankAccount(e.target.value.replace(/\D/g, ""))}
@@ -121,7 +127,9 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
             />
           </div>
           <div>
-            <label className="text-muted-foreground mb-1 block text-xs font-medium">IFSC Code</label>
+            <label className="text-muted-foreground mb-1 block text-xs font-medium">
+              IFSC Code
+            </label>
             <Input
               value={bankIfsc}
               onChange={(e) => setBankIfsc(e.target.value.toUpperCase())}
@@ -131,7 +139,9 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
             />
           </div>
           <div>
-            <label className="text-muted-foreground mb-1 block text-xs font-medium">Account Holder Name</label>
+            <label className="text-muted-foreground mb-1 block text-xs font-medium">
+              Account Holder Name
+            </label>
             <Input
               value={bankHolder}
               onChange={(e) => setBankHolder(e.target.value)}
@@ -151,7 +161,9 @@ export function BankEditForm({ profile, onComplete, onCancel }: BankEditFormProp
             />
           </div>
           <div>
-            <label className="text-muted-foreground mb-1 block text-xs font-medium">Account Holder Name</label>
+            <label className="text-muted-foreground mb-1 block text-xs font-medium">
+              Account Holder Name
+            </label>
             <Input
               value={upiHolder}
               onChange={(e) => setUpiHolder(e.target.value)}

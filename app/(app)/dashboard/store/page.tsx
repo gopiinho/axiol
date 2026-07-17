@@ -76,10 +76,7 @@ export default function MyStorePage() {
     setLocalProducts(publishedProducts);
   }, [publishedProducts]);
 
-  const productIds = useMemo(
-    () => localProducts.map((p) => p._id),
-    [localProducts]
-  );
+  const productIds = useMemo(() => localProducts.map((p) => p._id), [localProducts]);
 
   const activeProduct = useMemo(
     () => localProducts.find((p) => p._id === activeId) ?? null,

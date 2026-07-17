@@ -6,9 +6,7 @@ const appId = process.env.CASHFREE_APP_ID || "";
 const secretKey = process.env.CASHFREE_SECRET_KEY || "";
 
 const isSandbox = appId.startsWith("TEST");
-const baseUrl = isSandbox
-  ? "https://sandbox.cashfree.com/pg"
-  : "https://api.cashfree.com/pg";
+const baseUrl = isSandbox ? "https://sandbox.cashfree.com/pg" : "https://api.cashfree.com/pg";
 
 function jsonError(status: number, message: string) {
   return NextResponse.json({ ok: false, error: message }, { status });
@@ -73,28 +71,22 @@ export async function PATCH(request: NextRequest) {
       };
     }
 
-    const response = await fetch(
-      `${baseUrl}/easy-split/vendors/${payoutProfile.vendorId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "x-client-id": appId,
-          "x-client-secret": secretKey,
-          "x-api-version": "2025-01-01",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(vendorPayload),
-      }
-    );
+    const response = await fetch(`${baseUrl}/easy-split/vendors/${payoutProfile.vendorId}`, {
+      method: "PATCH",
+      headers: {
+        "x-client-id": appId,
+        "x-client-secret": secretKey,
+        "x-api-version": "2025-01-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(vendorPayload),
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
       console.error("Cashfree vendor bank update failed:", data);
-      return jsonError(
-        response.status,
-        data.message || data.code || "Failed to update vendor"
-      );
+      return jsonError(response.status, data.message || data.code || "Failed to update vendor");
     }
 
     const vendorStatus = data.status || payoutProfile.vendorStatus || "IN_BENE_CREATION";

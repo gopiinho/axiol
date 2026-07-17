@@ -15,116 +15,119 @@ export type CreateProductFlowHandle = {
   loading: boolean;
 };
 
-export const CreateProductFlow = forwardRef<CreateProductFlowHandle, { onLoadingChange?: (loading: boolean) => void }>(
-  function CreateProductFlow({ onLoadingChange }, ref) {
-    const router = useRouter();
-    const createProduct = useCreateProduct();
+export const CreateProductFlow = forwardRef<
+  CreateProductFlowHandle,
+  { onLoadingChange?: (loading: boolean) => void }
+>(function CreateProductFlow({ onLoadingChange }, ref) {
+  const router = useRouter();
+  const createProduct = useCreateProduct();
 
-    const [name, setName] = useState("");
-    const [type, setType] = useState("digital");
-    const [price, setPrice] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<{ name?: string; price?: string }>({});
+  const [name, setName] = useState("");
+  const [type, setType] = useState("digital");
+  const [price, setPrice] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; price?: string }>({});
 
-    const definition = PRODUCT_TYPES[type as ProductTypeKey];
-    const showPrice = definition?.requiresPrice ?? false;
+  const definition = PRODUCT_TYPES[type as ProductTypeKey];
+  const showPrice = definition?.requiresPrice ?? false;
 
-    const handleSubmit = async () => {
-      const newErrors: { name?: string; price?: string } = {};
+  const handleSubmit = async () => {
+    const newErrors: { name?: string; price?: string } = {};
 
-      if (!name.trim()) newErrors.name = "Name is required";
-      if (showPrice && !price.trim()) newErrors.price = "Price is required";
+    if (!name.trim()) newErrors.name = "Name is required";
+    if (showPrice && !price.trim()) newErrors.price = "Price is required";
 
-      setErrors(newErrors);
-      if (Object.keys(newErrors).length > 0 || loading) return;
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0 || loading) return;
 
-      setLoading(true);
+    setLoading(true);
 
-      try {
-        const productId = await createProduct({
-          name: name.trim(),
-          type: type as "affiliate" | "digital",
-          price: showPrice ? price.trim() || undefined : undefined,
-        });
-        toast.success("Product created!");
-        router.push(`/dashboard/products/${productId}/edit`);
-      } catch {
-        toast.error("Couldn't create product", { description: "Check your connection and try again." });
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      const productId = await createProduct({
+        name: name.trim(),
+        type: type as "affiliate" | "digital",
+        price: showPrice ? price.trim() || undefined : undefined,
+      });
+      toast.success("Product created!");
+      router.push(`/dashboard/products/${productId}/edit`);
+    } catch {
+      toast.error("Couldn't create product", {
+        description: "Check your connection and try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useImperativeHandle(ref, () => ({
-      submit: handleSubmit,
-      get loading() {
-        return loading;
-      },
-    }));
+  useImperativeHandle(ref, () => ({
+    submit: handleSubmit,
+    get loading() {
+      return loading;
+    },
+  }));
 
-    useEffect(() => {
-      onLoadingChange?.(loading);
-    }, [loading, onLoadingChange]);
+  useEffect(() => {
+    onLoadingChange?.(loading);
+  }, [loading, onLoadingChange]);
 
-    return (
-      <div className="space-y-10">
+  return (
+    <div className="space-y-10">
+      <section className="grid gap-1">
+        <Label htmlFor="product-name" className="font-bold">
+          Name
+        </Label>
+        <Input
+          id="product-name"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            setErrors((prev) => ({ ...prev, name: undefined }));
+          }}
+          required
+          autoFocus
+          aria-invalid={!!errors.name}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+        />
+        {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
+      </section>
+
+      <section className="grid gap-3">
+        <Label className="font-bold">Products</Label>
+        <ProductTypeSelector
+          value={type}
+          onChange={(v) => {
+            setType(v);
+            setErrors((prev) => ({ ...prev, price: undefined }));
+          }}
+        />
+      </section>
+
+      {showPrice && (
         <section className="grid gap-1">
-          <Label htmlFor="product-name" className="font-bold">
-            Name
+          <Label htmlFor="product-price" className="font-bold">
+            Price
           </Label>
           <Input
-            id="product-name"
-            value={name}
+            id="product-price"
+            type="text"
+            inputMode="decimal"
+            value={price}
             onChange={(e) => {
-              setName(e.target.value);
-              setErrors((prev) => ({ ...prev, name: undefined }));
-            }}
-            required
-            autoFocus
-            aria-invalid={!!errors.name}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          />
-          {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
-        </section>
-
-        <section className="grid gap-3">
-          <Label className="font-bold">Products</Label>
-          <ProductTypeSelector
-            value={type}
-            onChange={(v) => {
-              setType(v);
+              const val = e.target.value.replace(/[^0-9.]/g, "");
+              const formatted = val.replace(/(\..*)\./g, "$1");
+              setPrice(formatted);
               setErrors((prev) => ({ ...prev, price: undefined }));
             }}
+            aria-invalid={!!errors.price}
           />
+          {errors.price && <p className="text-destructive text-sm">{errors.price}</p>}
         </section>
-
-        {showPrice && (
-          <section className="grid gap-1">
-            <Label htmlFor="product-price" className="font-bold">
-              Price
-            </Label>
-            <Input
-              id="product-price"
-              type="text"
-              inputMode="decimal"
-              value={price}
-              onChange={(e) => {
-                const val = e.target.value.replace(/[^0-9.]/g, "");
-                const formatted = val.replace(/(\..*)\./g, "$1");
-                setPrice(formatted);
-                setErrors((prev) => ({ ...prev, price: undefined }));
-              }}
-              aria-invalid={!!errors.price}
-            />
-            {errors.price && <p className="text-destructive text-sm">{errors.price}</p>}
-          </section>
-        )}
-      </div>
-    );
-  }
-);
+      )}
+    </div>
+  );
+});

@@ -25,14 +25,15 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       sendOnSignUp: false,
       autoSignInAfterVerification: true,
     },
-    socialProviders: googleId && googleSecret
-      ? {
-          google: {
-            clientId: googleId,
-            clientSecret: googleSecret,
-          },
-        }
-      : undefined,
+    socialProviders:
+      googleId && googleSecret
+        ? {
+            google: {
+              clientId: googleId,
+              clientSecret: googleSecret,
+            },
+          }
+        : undefined,
     account: {
       accountLinking: {
         enabled: true,

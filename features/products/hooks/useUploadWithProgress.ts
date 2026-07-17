@@ -16,13 +16,9 @@ export function useUploadWithProgress() {
     progress: 0,
     error: null,
   });
-  const generateUploadUrl = useMutation(
-    api.contentStorage.generateUploadUrl
-  );
+  const generateUploadUrl = useMutation(api.contentStorage.generateUploadUrl);
   const syncMetadata = useMutation(api.contentStorage.syncMetadata);
-  const recordContentFile = useMutation(
-    api.contentStorage.recordContentFile
-  );
+  const recordContentFile = useMutation(api.contentStorage.recordContentFile);
 
   const upload = useCallback(
     async (file: File): Promise<string> => {
@@ -51,10 +47,8 @@ export function useUploadWithProgress() {
             }
           };
 
-          xhr.onerror = () =>
-            reject(new Error("Network error during upload"));
-          xhr.ontimeout = () =>
-            reject(new Error("Upload timed out"));
+          xhr.onerror = () => reject(new Error("Network error during upload"));
+          xhr.ontimeout = () => reject(new Error("Upload timed out"));
 
           xhr.open("PUT", url);
           xhr.setRequestHeader("Content-Type", file.type);
@@ -73,10 +67,7 @@ export function useUploadWithProgress() {
         setState({ uploading: false, progress: 100, error: null });
         return key;
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Upload failed. Please try again.";
+        const message = err instanceof Error ? err.message : "Upload failed. Please try again.";
         setState({ uploading: false, progress: 0, error: message });
         throw err;
       }

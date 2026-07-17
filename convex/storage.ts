@@ -182,5 +182,3 @@ export const removeProfileImage = mutation({
     }
   },
 });
-
-

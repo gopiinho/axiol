@@ -20,9 +20,7 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
       .collect();
 
     if (pending.length >= MAX_PENDING_UPLOADS) {
-      throw new Error(
-        "Too many pending uploads. Please remove unused files or save your product."
-      );
+      throw new Error("Too many pending uploads. Please remove unused files or save your product.");
     }
   },
 
@@ -56,11 +54,7 @@ export const recordContentFile = mutation({
   handler: async (ctx, args) => {
     const { userId } = await requireVerifiedSession(ctx);
 
-    const validation = validateContentFile(
-      args.fileType,
-      args.fileName,
-      args.fileSize
-    );
+    const validation = validateContentFile(args.fileType, args.fileName, args.fileSize);
     if (!validation.valid) {
       await r2.deleteObject(ctx, args.r2Key);
       throw new Error(validation.error);
@@ -115,9 +109,7 @@ export const deleteContentFile = mutation({
       .collect();
 
     const referencedByProduct = userProducts.find(
-      (p) =>
-        p.config.content?.mode === "upload" &&
-        p.config.content.r2Key === args.r2Key
+      (p) => p.config.content?.mode === "upload" && p.config.content.r2Key === args.r2Key
     );
 
     if (referencedByProduct) {

@@ -45,11 +45,11 @@ function buildDmMessage(opts: {
   productType: ProductTypeKey;
   productName: string;
   productUrl: string;
-  items?: Array<{title?: string; price?: string; affiliateLink: string}>;
+  items?: Array<{ title?: string; price?: string; affiliateLink: string }>;
   maxItems?: number;
   includeWebsiteLink?: boolean;
   triggerType?: "comment" | "dm";
-}): { message: string; characterCount: number }
+}): { message: string; characterCount: number };
 ```
 
 - `productType === "affiliate"` → existing numbered-items format
@@ -59,11 +59,13 @@ function buildDmMessage(opts: {
 ### Queries
 
 **`generateDMMessage`** (public, used by Preview tab):
+
 - Args: `productId`, `triggerType`
 - Fetches product, checks type, fetches items only if affiliate
 - Delegates to `buildDmMessage`
 
 **`generateDMMessageForJob`** (internal, used by dmQueue):
+
 - Same logic, skips auth, fetches user for username resolution
 
 ## Changes
@@ -71,22 +73,26 @@ function buildDmMessage(opts: {
 ### 1. Schema (`convex/schema.ts`)
 
 Remove from `reelMappings` table:
+
 - `maxItemsInDM: v.number()`
 - `includeWebsiteLink: v.boolean()`
 
 Remove from `dmJobs` table:
+
 - `maxItemsInDM: v.number()`
 - `includeWebsiteLink: v.boolean()`
 
 ### 2. Convex Functions
 
 **`convex/instagram.ts`:**
+
 - Rewrite `buildDmMessage` with product type switch
 - `generateDMMessage`: remove `maxItems`, `includeWebsiteLink` args; add product type check
 - `generateDMMessageForJob`: same changes
 - `createReelMapping`: remove `maxItemsInDM`, `includeWebsiteLink` from args and stored data
 
 **`convex/dmQueue.ts`:**
+
 - `createJob`: remove `maxItemsInDM`, `includeWebsiteLink` from args
 - `sendDM`: remove `maxItemsInDM`, `includeWebsiteLink` usage; call `generateDMMessageForJob` without those args
 

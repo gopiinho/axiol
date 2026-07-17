@@ -44,10 +44,7 @@ export function PaymentsTab() {
       />
 
       {vendorStatus === null ? (
-        <PaymentSetupForm
-          userName={profile?.name}
-          onComplete={setLocalStatus}
-        />
+        <PaymentSetupForm userName={profile?.name} onComplete={setLocalStatus} />
       ) : payoutProfile ? (
         <PaymentStatusView profile={payoutProfile} />
       ) : null}

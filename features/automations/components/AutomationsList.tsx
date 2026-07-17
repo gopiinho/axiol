@@ -28,7 +28,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Trash2, Edit, Send, MoreHorizontal, MessageSquareQuote, ExternalLink, Loader2 } from "lucide-react";
+import {
+  Trash2,
+  Edit,
+  Send,
+  MoreHorizontal,
+  MessageSquareQuote,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import EditAutomationDialog from "./EditAutomationDialog";
 

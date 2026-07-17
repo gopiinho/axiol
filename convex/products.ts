@@ -73,9 +73,7 @@ export const listByUser = query({
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     const salesByProduct = new Map<string, { sales: number; revenueCents: number }>();
@@ -158,9 +156,7 @@ export const getStoreTotals = query({
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     let totalSales = 0;
@@ -243,14 +239,10 @@ export const create = mutation({
         .withIndex("by_user", (q) => q.eq("createdBy", userId))
         .collect();
 
-      const nonArchived = existingProducts.filter(
-        (p) => p.status !== "archived"
-      );
+      const nonArchived = existingProducts.filter((p) => p.status !== "archived");
 
       if (nonArchived.length >= 5) {
-        throw new Error(
-          "Free plan limit: 5 products. Upgrade to create more."
-        );
+        throw new Error("Free plan limit: 5 products. Upgrade to create more.");
       }
     }
 
@@ -388,8 +380,7 @@ export const updateContentConfig = mutation({
         product.config.content && product.config.content.mode === "upload"
           ? product.config.content.r2Key
           : undefined;
-      const newR2Key =
-        args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
+      const newR2Key = args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
 
       if (oldR2Key && newR2Key === oldR2Key) {
         await ctx.db.patch(args.productId, {
@@ -408,10 +399,8 @@ export const updateContentConfig = mutation({
     }
 
     const oldContent = product.config.content;
-    const oldR2Key =
-      oldContent && oldContent.mode === "upload" ? oldContent.r2Key : undefined;
-    const newR2Key =
-      args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
+    const oldR2Key = oldContent && oldContent.mode === "upload" ? oldContent.r2Key : undefined;
+    const newR2Key = args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
 
     if (oldR2Key && oldR2Key !== newR2Key) {
       await r2.deleteObject(ctx, oldR2Key);
@@ -538,11 +527,7 @@ export const remove = mutation({
     }
 
     const content = product.config.content;
-    if (
-      content &&
-      content.mode === "upload" &&
-      typeof content.r2Key === "string"
-    ) {
+    if (content && content.mode === "upload" && typeof content.r2Key === "string") {
       await r2.deleteObject(ctx, content.r2Key);
 
       const uploadRecord = await ctx.db

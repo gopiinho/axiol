@@ -237,7 +237,8 @@ function CreateAutomationWizard() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save draft";
       toast.error("Couldn't save draft", {
-        description: message === "Unauthorized" ? "Session expired. Please sign in again." : message,
+        description:
+          message === "Unauthorized" ? "Session expired. Please sign in again." : message,
       });
     } finally {
       setIsSaving(false);

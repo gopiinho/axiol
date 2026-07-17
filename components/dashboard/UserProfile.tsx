@@ -7,7 +7,7 @@ export function UserProfile() {
   const { user } = useUser();
 
   return (
-    <div className="bg-foreground border-border/10 flex items-center gap-3 border-b p-2 overflow-hidden">
+    <div className="bg-foreground border-border/10 flex items-center gap-3 overflow-hidden border-b p-2">
       <div className="from-primary/20 to-primary/5 border-primary/20 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden border bg-linear-to-br">
         {user?.profileImageUrl ? (
           <img

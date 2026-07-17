@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ImageUpload } from "@/components/ImageUpload";
 
-
 type EditProfileProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -214,8 +213,6 @@ export function EditProfile({
                 </div>
               </div>
             </div>
-
-
           </div>
         </div>
       </DialogContent>

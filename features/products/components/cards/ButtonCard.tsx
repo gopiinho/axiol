@@ -24,11 +24,23 @@ export function ButtonCard({
       className="group flex w-full cursor-pointer items-center gap-3 overflow-hidden transition-all duration-300 hover:opacity-90"
       style={cardStyleProps()}
     >
-      <ThumbnailImage url={previewUrl} alt={title} className="h-10 w-10 shrink-0" style={{ borderRadius: "var(--store-radius)" }} />
+      <ThumbnailImage
+        url={previewUrl}
+        alt={title}
+        className="h-10 w-10 shrink-0"
+        style={{ borderRadius: "var(--store-radius)" }}
+      />
 
-      <h3 className="min-w-0 truncate text-base font-semibold" style={{ color: "var(--store-text)" }}>{buttonText}</h3>
+      <h3
+        className="min-w-0 truncate text-base font-semibold"
+        style={{ color: "var(--store-text)" }}
+      >
+        {buttonText}
+      </h3>
 
-      <span className="font-semibold" style={cardPriceStyle()}>₹{price}</span>
+      <span className="font-semibold" style={cardPriceStyle()}>
+        ₹{price}
+      </span>
     </div>
   );
 

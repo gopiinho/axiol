@@ -106,10 +106,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="flex items-center gap-2">
             {visibleGranularities.length > 1 && (
-              <Select
-                value={granularity}
-                onValueChange={(v) => setGranularity(v as Granularity)}
-              >
+              <Select value={granularity} onValueChange={(v) => setGranularity(v as Granularity)}>
                 <SelectTrigger className="w-28">
                   <SelectValue />
                 </SelectTrigger>

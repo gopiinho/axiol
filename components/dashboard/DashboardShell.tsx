@@ -3,7 +3,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Home, LogOut, Box, Settings, Store, Zap, ChevronLeft, Loader2 } from "lucide-react";
+import {
+  BarChart3,
+  Home,
+  LogOut,
+  Box,
+  Settings,
+  Store,
+  Zap,
+  ChevronLeft,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useUser } from "@/features/auth/client/UserContext";
@@ -97,7 +107,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-logout-dialog"));
                 }}
-                className="flex w-full items-center cursor-pointer gap-3 border-l-5 border-transparent px-3.5 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-card"
+                className="text-foreground hover:bg-card flex w-full cursor-pointer items-center gap-3 border-l-5 border-transparent px-3.5 py-2.5 text-sm font-semibold transition-all duration-200"
               >
                 <LogOut className="h-4 w-4" />
                 Log Out
@@ -105,7 +115,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             </div>
           </aside>
 
-          <section className="min-w-0 h-screen overflow-y-auto">
+          <section className="h-screen min-w-0 overflow-y-auto">
             <main className="pb-14 md:pb-0">{children}</main>
           </section>
         </div>

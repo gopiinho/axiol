@@ -71,7 +71,8 @@ export async function sendOtpEmail(email: string, otp: string, type: string) {
     return;
   }
 
-  const subject = type === "forget-password" ? "Your password reset code" : "Your verification code";
+  const subject =
+    type === "forget-password" ? "Your password reset code" : "Your verification code";
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",

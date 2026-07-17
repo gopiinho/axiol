@@ -6,9 +6,7 @@ const appId = process.env.CASHFREE_APP_ID || "";
 const secretKey = process.env.CASHFREE_SECRET_KEY || "";
 
 const isSandbox = appId.startsWith("TEST");
-const baseUrl = isSandbox
-  ? "https://sandbox.cashfree.com/pg"
-  : "https://api.cashfree.com/pg";
+const baseUrl = isSandbox ? "https://sandbox.cashfree.com/pg" : "https://api.cashfree.com/pg";
 
 function jsonError(status: number, message: string) {
   return NextResponse.json({ ok: false, error: message }, { status });
@@ -27,7 +25,18 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { panNumber, addressProofType, addressProofNumber, businessType, payoutMethod, bankAccount, bankIfsc, bankHolder, upiVpa, upiHolder } = body;
+    const {
+      panNumber,
+      addressProofType,
+      addressProofNumber,
+      businessType,
+      payoutMethod,
+      bankAccount,
+      bankIfsc,
+      bankHolder,
+      upiVpa,
+      upiHolder,
+    } = body;
 
     const profile = await fetchAuthQuery(api.users.getProfile);
     if (!profile) {
@@ -55,7 +64,8 @@ export async function PATCH(request: NextRequest) {
         passport: "passport_number",
         voter_id: "voter_id",
       };
-      (vendorPayload.kyc_details as Record<string, unknown>)[cashfreeField[addressProofType]] = addressProofNumber;
+      (vendorPayload.kyc_details as Record<string, unknown>)[cashfreeField[addressProofType]] =
+        addressProofNumber;
     }
 
     if (payoutMethod === "bank") {
@@ -72,19 +82,16 @@ export async function PATCH(request: NextRequest) {
       };
     }
 
-    const response = await fetch(
-      `${baseUrl}/easy-split/vendors/${payoutProfile.vendorId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "x-client-id": appId,
-          "x-client-secret": secretKey,
-          "x-api-version": "2025-01-01",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(vendorPayload),
-      }
-    );
+    const response = await fetch(`${baseUrl}/easy-split/vendors/${payoutProfile.vendorId}`, {
+      method: "PATCH",
+      headers: {
+        "x-client-id": appId,
+        "x-client-secret": secretKey,
+        "x-api-version": "2025-01-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(vendorPayload),
+    });
 
     const data = await response.json();
 

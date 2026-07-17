@@ -13,10 +13,7 @@ interface ProductStepPreviewProps {
   liveState: ThumbnailLiveState | CheckoutLiveState | null;
 }
 
-export function ProductStepPreview({
-  stepKey,
-  liveState,
-}: ProductStepPreviewProps) {
+export function ProductStepPreview({ stepKey, liveState }: ProductStepPreviewProps) {
   switch (stepKey) {
     case "thumbnail":
       if (!liveState) return null;

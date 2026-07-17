@@ -58,7 +58,7 @@ export async function sendKycNotification(
   status: "ACTIVE" | "BLOCKED",
   userName: string,
   storeName: string,
-  siteUrl: string,
+  siteUrl: string
 ): Promise<{ ok: boolean; error?: string }> {
   try {
     const html = await render(

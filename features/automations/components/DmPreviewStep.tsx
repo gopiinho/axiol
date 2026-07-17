@@ -24,9 +24,7 @@ export default function DmPreviewStep({
     <div className="space-y-6">
       <div>
         <h2 className="text-base font-semibold">Message Preview</h2>
-        <p className="text-muted-foreground text-sm">
-          Preview the DM your followers will receive.
-        </p>
+        <p className="text-muted-foreground text-sm">Preview the DM your followers will receive.</p>
       </div>
 
       <div>
