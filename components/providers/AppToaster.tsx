@@ -23,7 +23,7 @@ export function AppToaster() {
       toastOptions={{
         classNames: {
           toast:
-            "!rounded-xs !border !px-4 !py-3 !text-sm !font-medium !shadow-card",
+            "!rounded-xs !border !px-4 !py-3 !text-sm !font-medium !shadow-card !w-fit !min-w-48 !left-0 !right-0 !mx-auto",
           description:
             "!text-background/80 text-xs",
           success:
