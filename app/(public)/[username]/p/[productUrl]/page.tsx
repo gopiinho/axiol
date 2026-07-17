@@ -1,6 +1,7 @@
 import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Globe, Instagram, Package, Youtube } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -19,6 +20,12 @@ import {
   type LayoutConfig,
 } from "@/lib/themes";
 import { resolvePalette } from "@/lib/colorUtils";
+import {
+  SITE_URL,
+  truncateDescription,
+  generateProductSchema,
+  generateBreadcrumbSchema,
+} from "@/lib/seo";
 
 const platformLogos: Record<string, StaticImageData> = {
   amazon: icons.amazonLogo,
@@ -38,6 +45,63 @@ const platformNames: Record<string, string> = {
 const iconMap = { instagram: Instagram, youtube: Youtube, globe: Globe } as const;
 
 const paidTypes = ["digital", "coaching", "course"];
+
+export const revalidate = 3600;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string; productUrl: string }>;
+}): Promise<Metadata> {
+  const { username, productUrl } = await params;
+  const convex = getServerConvexClient();
+
+  const data = await convex.query(api.products.getPublicProduct, {
+    username,
+    productUrl,
+  });
+
+  if (!data) {
+    return { title: "Product Not Found" };
+  }
+
+  const { product, creator } = data;
+  const displayName = creator?.storeName || creator?.name || username;
+  const title = product.name;
+  const description = product.description
+    ? truncateDescription(product.description)
+    : `${product.name} by ${displayName} on Axiol.`;
+  const imageUrl = product.coverImageUrl ?? undefined;
+  const canonicalUrl = `${SITE_URL}/${username}/p/${productUrl}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${product.name} by ${displayName}`,
+      description,
+      url: canonicalUrl,
+      type: "website",
+      siteName: "Axiol",
+      images: imageUrl
+        ? [{ url: imageUrl, width: 1200, height: 630, alt: product.name }]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} by ${displayName}`,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function ProductDetailPage({
   params,
@@ -128,7 +192,34 @@ export default async function ProductDetailPage({
   const isPaid = paidTypes.includes(product.type);
 
   return (
-    <main
+    <>
+      {product.status === "published" && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              generateProductSchema({
+                name: product.name,
+                description: product.description ?? undefined,
+                image: product.coverImageUrl ?? undefined,
+                url: `${SITE_URL}/${username}/p/${productUrl}`,
+                price: product.price,
+                currency: product.currency,
+                brand: displayName,
+              }),
+              generateBreadcrumbSchema([
+                { name: "Axiol", url: SITE_URL },
+                { name: displayName, url: `${SITE_URL}/${username}` },
+                {
+                  name: product.name,
+                  url: `${SITE_URL}/${username}/p/${productUrl}`,
+                },
+              ]),
+            ]),
+          }}
+        />
+      )}
+      <main
       className="home-font-primary min-h-screen"
       style={{
         backgroundColor: "var(--store-bg, white)",
@@ -348,5 +439,6 @@ export default async function ProductDetailPage({
         </div>
       </div>
     </main>
+    </>
   );
 }

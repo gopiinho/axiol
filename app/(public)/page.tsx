@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Zap, Instagram, ShoppingBag } from "lucide-react";
+import type { Metadata } from "next";
+import { ShoppingBag } from "lucide-react";
 import { WaitlistForm } from "@/components/WaitlistForm";
 import HomeNav from "@/components/HomeNav";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
@@ -8,9 +9,42 @@ import { StorefrontShowcase } from "@/components/landing/StorefrontShowcase";
 import { FeatureGrid } from "@/components/landing/FeatureGrid";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { CloudBackground } from "@/components/landing/CloudBackground";
+import {
+  generateOrganizationSchema,
+  generateWebSiteSchema,
+} from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "Monetize Your Audience",
+  description:
+    "The all-in-one storefront for content creators. Sell digital products, courses, coaching, and bookings — directly from your link-in-bio.",
+  openGraph: {
+    title: "Axiol — Your link-in-bio, built to earn",
+    description:
+      "Sell digital products, courses, and coaching from one beautiful storefront. The all-in-one platform for creators to monetize their audience.",
+    url: "https://www.axiol.store",
+    type: "website",
+    images: [
+      { url: "/og-default.png", width: 1200, height: 630, alt: "Axiol" },
+    ],
+  },
+  alternates: {
+    canonical: "https://www.axiol.store",
+  },
+};
 
 export default function Home() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            generateOrganizationSchema(),
+            generateWebSiteSchema(),
+          ]),
+        }}
+      />
     <main className="home-font-primary bg-background relative overflow-hidden">
       <div className="dot-grid pointer-events-none absolute inset-0 opacity-40" />
       <HomeNav />
@@ -20,12 +54,12 @@ export default function Home() {
         <div className="relative z-10 mx-auto w-full max-w-7xl">
           <div className="max-w-2xl space-y-6 sm:space-y-8 lg:max-w-3xl">
             <h1 className="text-primary text-outline-black text-5xl leading-[0.95] font-extrabold tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">
-              Turn your content into <span className="marker-stroke">income.</span>
+              Monetize your <span className="marker-stroke">audience.</span>
             </h1>
 
             <p className="max-w-md text-sm leading-relaxed sm:max-w-lg sm:text-lg lg:text-xl">
-              The easiest way to make money online. All of your digital products, affiliate links
-              and bookings — hosted within your link-in-bio.
+              The all-in-one storefront for creators. Sell digital products, courses, coaching, and
+              bookings — right from your link-in-bio.
             </p>
 
             <WaitlistForm />
@@ -137,5 +171,6 @@ export default function Home() {
         </div>
       </footer> */}
     </main>
+    </>
   );
 }
