@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -21,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Archive, Trash2, Send, Edit } from "lucide-react";
+import { MoreHorizontal, EyeOff, Trash2, Edit, Loader2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductTypeIcon } from "./ProductTypeIcon";
 
@@ -35,9 +34,9 @@ interface ProductRowProps {
     revenueCents: number;
     clicks: number;
   };
-  onPublish: (id: Id<"products">) => void;
-  onArchive: (id: Id<"products">) => void;
+  onUnpublish: (id: Id<"products">) => void;
   onDelete: (id: Id<"products">) => void;
+  onDuplicate: (id: Id<"products">) => void;
 }
 
 const statusStyles: Record<string, string> = {
@@ -52,14 +51,24 @@ const statusLabels: Record<string, string> = {
   archived: "Archived",
 };
 
-export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductRowProps) {
+export function ProductRow({ product, onUnpublish, onDelete, onDuplicate }: ProductRowProps) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
-
-  const needsItems = product.type === "affiliate" && product.itemCount === 0;
+  const [deleting, setDeleting] = useState(false);
+  const [unpublishOpen, setUnpublishOpen] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   const handleClick = () => {
     router.push(`/dashboard/products/${product._id}/edit`);
+  };
+
+  const handleDuplicate = async () => {
+    setDuplicating(true);
+    try {
+      await onDuplicate(product._id);
+    } finally {
+      setDuplicating(false);
+    }
   };
 
   return (
@@ -93,18 +102,28 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
                 />
                 <p className="max-w-52 truncate text-sm font-semibold">{product.name}</p>
               </div>
-              {product.username && product.status !== "draft" && (
-                <a
-                  href={`${typeof window !== "undefined" ? window.location.origin : ""}/${product.username}/p/${product.productUrl}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-primary block max-w-52 truncate text-[11px] hover:underline"
-                >
-                  {typeof window !== "undefined" ? window.location.host : ""}/{product.username}/p/
-                  {product.productUrl}
-                </a>
-              )}
+              <a
+                href={
+                  product.username && product.status !== "draft"
+                    ? `${typeof window !== "undefined" ? window.location.origin.replace("://www.", "://") : ""}/${product.username}/p/${product.productUrl}`
+                    : undefined
+                }
+                target={product.username && product.status !== "draft" ? "_blank" : undefined}
+                rel={
+                  product.username && product.status !== "draft" ? "noopener noreferrer" : undefined
+                }
+                onClick={
+                  product.username && product.status !== "draft"
+                    ? undefined
+                    : (e) => e.stopPropagation()
+                }
+                tabIndex={product.username && product.status !== "draft" ? undefined : -1}
+                className={`text-primary mt-0.5 block max-w-52 truncate text-[11px] hover:underline ${product.username && product.status !== "draft" ? "" : "pointer-events-none invisible"}`}
+              >
+                {typeof window !== "undefined" ? window.location.host.replace(/^www\./, "") : ""}/
+                {product.username}/p/
+                {product.productUrl}
+              </a>
             </div>
           </div>
         </td>
@@ -144,24 +163,22 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
                 <Edit className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
-              {product.status !== "published" && (
-                <DropdownMenuItem
-                  onClick={() => onPublish(product._id)}
-                  disabled={needsItems}
-                  title={needsItems ? "Add at least one item before publishing" : undefined}
-                >
-                  <Send className="h-4 w-4" />
-                  Publish
-                </DropdownMenuItem>
-              )}
-              {product.status !== "archived" && (
-                <DropdownMenuItem onClick={() => onArchive(product._id)}>
-                  <Archive className="h-4 w-4" />
-                  Archive
+              <DropdownMenuItem onClick={handleDuplicate} disabled={duplicating}>
+                <Copy className="h-4 w-4" />
+                {duplicating ? "Duplicating..." : "Duplicate"}
+              </DropdownMenuItem>
+              {product.status === "published" && (
+                <DropdownMenuItem onClick={() => setUnpublishOpen(true)}>
+                  <EyeOff className="h-4 w-4" />
+                  Unpublish
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
+              <DropdownMenuItem
+                className="text-destructive"
+                variant="destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
                 <Trash2 className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -181,15 +198,42 @@ export function ProductRow({ product, onPublish, onArchive, onDelete }: ProductR
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                await onDelete(product._id);
+                setDeleting(false);
                 setDeleteOpen(false);
-                onDelete(product._id);
               }}
             >
-              Delete
-            </AlertDialogAction>
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={unpublishOpen} onOpenChange={setUnpublishOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unpublish &ldquo;{product.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This product will no longer show up in your store. Customers with the link won&rsquo;t
+              be able to access it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                onUnpublish(product._id);
+                setUnpublishOpen(false);
+              }}
+            >
+              Unpublish
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

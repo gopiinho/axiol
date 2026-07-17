@@ -1,7 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Terms of Service — Axiol",
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description:
+    "Axiol Terms of Service — read the terms and conditions for using the Axiol creator storefront platform.",
+  alternates: { canonical: "https://www.axiol.store/terms" },
+  robots: { index: false },
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

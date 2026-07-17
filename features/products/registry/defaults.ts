@@ -23,7 +23,7 @@ export type CheckoutConfig = {
 };
 
 export type ContentConfig =
-  | { mode: "upload"; r2Key?: string; fileName?: string; fileSize?: number }
+  | { mode: "upload"; r2Key?: string; fileName?: string; fileSize?: number; displayName?: string }
   | { mode: "external_link"; url?: string; productName?: string }
   | { mode: "none" };
 

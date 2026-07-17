@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 
 export const create = mutation({
   args: {
@@ -13,6 +13,11 @@ export const create = mutation({
     currency: v.string(),
     paymentProvider: v.string(),
     paymentReference: v.string(),
+    vendorId: v.optional(v.string()),
+    vendorShareCents: v.optional(v.number()),
+    platformFeeCents: v.optional(v.number()),
+    platformFeePct: v.optional(v.number()),
+    tdsCents: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("orders", {
@@ -27,6 +32,11 @@ export const create = mutation({
       paymentProvider: args.paymentProvider,
       paymentReference: args.paymentReference,
       createdAt: Date.now(),
+      vendorId: args.vendorId,
+      vendorShareCents: args.vendorShareCents,
+      platformFeeCents: args.platformFeeCents,
+      platformFeePct: args.platformFeePct,
+      tdsCents: args.tdsCents,
     });
   },
 });
@@ -181,16 +191,14 @@ export const getRevenueTimeline = query({
     granularity: v.union(v.literal("daily"), v.literal("weekly"), v.literal("monthly")),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const { start, end } = getTimeRange(args.timePeriod);
     const allKeys = generateBucketKeys(start, end, args.granularity);
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     const allClicks = await ctx.db
@@ -205,7 +213,10 @@ export const getRevenueTimeline = query({
     for (const order of paidOrders) {
       if (!order.paidAt) continue;
       const key = bucketKey(order.paidAt, args.granularity);
-      revenueByBucket.set(key, (revenueByBucket.get(key) ?? 0) + order.amountCents);
+      revenueByBucket.set(
+        key,
+        (revenueByBucket.get(key) ?? 0) + (order.vendorShareCents ?? order.amountCents)
+      );
       salesByBucket.set(key, (salesByBucket.get(key) ?? 0) + 1);
     }
 
@@ -226,7 +237,7 @@ export const getRevenueTimeline = query({
 export const getEarningsSummary = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const now = Date.now();
     const DAY = 86400000;
     const sevenDaysAgo = now - 7 * DAY;
@@ -234,9 +245,7 @@ export const getEarningsSummary = query({
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     let totalEarnings = 0;
@@ -245,13 +254,13 @@ export const getEarningsSummary = query({
     let last28Days = 0;
 
     for (const order of paidOrders) {
-      totalEarnings += order.amountCents;
+      totalEarnings += order.vendorShareCents ?? order.amountCents;
       totalSales += 1;
       if (order.paidAt && order.paidAt >= sevenDaysAgo) {
-        last7Days += order.amountCents;
+        last7Days += order.vendorShareCents ?? order.amountCents;
       }
       if (order.paidAt && order.paidAt >= twentyEightDaysAgo) {
-        last28Days += order.amountCents;
+        last28Days += order.vendorShareCents ?? order.amountCents;
       }
     }
 

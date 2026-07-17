@@ -10,9 +10,7 @@ type StorePreviewProps = Omit<StoreContentProps, "themeStyle" | "interactive" | 
 };
 
 export function StorePreview({ username, palette, layout, ...contentProps }: StorePreviewProps) {
-  const themeStyle = palette
-    ? buildThemeStyle(palette, layout ?? {})
-    : ({} as React.CSSProperties);
+  const themeStyle = palette ? buildThemeStyle(palette, layout ?? {}) : ({} as React.CSSProperties);
 
   return (
     <div className="flex h-[min(85vh,700px)] w-full flex-col items-center">

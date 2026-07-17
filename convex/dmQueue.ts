@@ -11,7 +11,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
-import { requireSession, getSession } from "./security";
+import { requireVerifiedSession, getVerifiedSession } from "./security";
 import { decryptToken } from "./lib/instagramCrypto";
 
 const MAX_DMS_PER_HOUR = 195;
@@ -375,7 +375,7 @@ async function ensureWorkerRunning(ctx: MutationCtx): Promise<void> {
 export const kickoffWorker = mutation({
   args: {},
   handler: async (ctx) => {
-    await requireSession(ctx);
+    await requireVerifiedSession(ctx);
     await ensureWorkerRunning(ctx);
     return { message: "Worker started" };
   },
@@ -384,7 +384,7 @@ export const kickoffWorker = mutation({
 export const getQueueStats = query({
   args: {},
   handler: async (ctx) => {
-    const session = await getSession(ctx);
+    const session = await getVerifiedSession(ctx);
     if (!session)
       return {
         pending: 0,

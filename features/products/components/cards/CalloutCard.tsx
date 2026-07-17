@@ -24,19 +24,40 @@ export function CalloutCard({
       className="group flex w-full cursor-pointer flex-col overflow-hidden transition-all duration-300 hover:opacity-90"
       style={cardStyleProps()}
     >
-      <div className="flex items-start gap-4" style={{ padding: "var(--store-card-padding, 1rem)" }}>
-        <ThumbnailImage url={previewUrl} alt={title} className="h-20 w-20 shrink-0" style={{ borderRadius: "var(--store-radius)" }} />
+      <div
+        className="flex items-start gap-4"
+        style={{ padding: "var(--store-card-padding, 1rem)" }}
+      >
+        <ThumbnailImage
+          url={previewUrl}
+          alt={title}
+          className="h-16 w-16 shrink-0 sm:h-20 sm:w-20"
+          style={{ borderRadius: "var(--store-radius)" }}
+        />
 
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-          <h3 className="line-clamp-1 font-semibold" style={{ color: "var(--store-text)", fontSize: "var(--store-heading-size, 1.125rem)" }}>{title}</h3>
+          <h3
+            className="line-clamp-1 font-semibold"
+            style={{ color: "var(--store-text)", fontSize: "var(--store-heading-size, 1.125rem)" }}
+          >
+            {title}
+          </h3>
 
-          {subtitle && <p className="line-clamp-2" style={cardSubtitleStyle()}>{subtitle}</p>}
+          {subtitle && (
+            <p className="line-clamp-2" style={cardSubtitleStyle()}>
+              {subtitle}
+            </p>
+          )}
 
-          {product.price && <p className="font-medium" style={cardPriceStyle()}>₹{product.price}</p>}
+          {product.price && (
+            <p className="font-medium" style={cardPriceStyle()}>
+              ₹{product.price}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="flex px-[var(--store-card-padding,1rem)] pb-[var(--store-card-padding,1rem)]">
+      <div className="flex px-(--store-card-padding,1rem) pb-(--store-card-padding,1rem)">
         <span className="font-semibold transition hover:opacity-90" style={cardCtaStyle()}>
           {buttonText}
         </span>

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, MutationCtx, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 import { validateProductInput } from "../lib/validators/products";
 import { parsePriceRupees } from "../lib/validators/price";
 import {
@@ -52,7 +52,7 @@ async function ensureUniqueProductUrl(
 }
 
 async function requireProductOwner(ctx: MutationCtx | QueryCtx, productId: Id<"products">) {
-  const { userId } = await requireSession(ctx);
+  const { userId } = await requireVerifiedSession(ctx);
   const product = await ctx.db.get(productId);
   if (!product || product.createdBy !== userId) {
     throw new Error("Product not found.");
@@ -63,19 +63,17 @@ async function requireProductOwner(ctx: MutationCtx | QueryCtx, productId: Id<"p
 export const listByUser = query({
   args: {},
   handler: async (ctx) => {
-    const { userId, user } = await requireSession(ctx);
+    const { userId, user } = await requireVerifiedSession(ctx);
 
     const products = await ctx.db
       .query("products")
-      .withIndex("by_user", (q) => q.eq("createdBy", userId))
-      .order("desc")
+      .withIndex("by_user_order", (q) => q.eq("createdBy", userId))
+      .order("asc")
       .take(100);
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     const salesByProduct = new Map<string, { sales: number; revenueCents: number }>();
@@ -129,16 +127,36 @@ export const listByUser = query({
   },
 });
 
+export const reorder = mutation({
+  args: {
+    items: v.array(
+      v.object({
+        id: v.id("products"),
+        order: v.number(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireVerifiedSession(ctx);
+
+    for (const { id, order } of args.items) {
+      const product = await ctx.db.get(id);
+      if (!product) continue;
+      if (product.createdBy !== userId) throw new Error("Unauthorized");
+
+      await ctx.db.patch(id, { order });
+    }
+  },
+});
+
 export const getStoreTotals = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const paidOrders = await ctx.db
       .query("orders")
-      .withIndex("by_seller_status", (q) =>
-        q.eq("sellerId", userId).eq("status", "paid")
-      )
+      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
     let totalSales = 0;
@@ -164,7 +182,7 @@ export const getStoreTotals = query({
 export const getById = query({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const product = await ctx.db.get(args.id);
     if (!product || product.createdBy !== userId) {
@@ -190,7 +208,7 @@ export const getById = query({
 export const getByProductUrl = query({
   args: { productUrl: v.string() },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     return await ctx.db
       .query("products")
@@ -212,7 +230,7 @@ export const create = mutation({
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { userId, user } = await requireSession(ctx);
+    const { userId, user } = await requireVerifiedSession(ctx);
 
     const isPro = user.subscriptionStatus === "active";
     if (!isPro) {
@@ -221,14 +239,10 @@ export const create = mutation({
         .withIndex("by_user", (q) => q.eq("createdBy", userId))
         .collect();
 
-      const nonArchived = existingProducts.filter(
-        (p) => p.status !== "archived"
-      );
+      const nonArchived = existingProducts.filter((p) => p.status !== "archived");
 
       if (nonArchived.length >= 5) {
-        throw new Error(
-          "Free plan limit: 5 products. Upgrade to create more."
-        );
+        throw new Error("Free plan limit: 5 products. Upgrade to create more.");
       }
     }
 
@@ -240,6 +254,13 @@ export const create = mutation({
     const productUrl = await ensureUniqueProductUrl(ctx, userId, validated.productUrl);
     const defaultConfig = getDefaultConfig(validated.type as ProductTypeKey);
     const now = Date.now();
+
+    const lastProduct = await ctx.db
+      .query("products")
+      .withIndex("by_user_order", (q) => q.eq("createdBy", userId))
+      .order("desc")
+      .first();
+    const nextOrder = (lastProduct?.order ?? -1) + 1;
 
     return await ctx.db.insert("products", {
       createdBy: userId,
@@ -257,6 +278,7 @@ export const create = mutation({
       publishedAt: undefined,
       updatedAt: now,
       automationEnabled: validated.automationEnabled,
+      order: nextOrder,
     });
   },
 });
@@ -272,7 +294,7 @@ export const update = mutation({
     automationEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.id);
 
     if (!product || product.createdBy !== userId) {
@@ -353,11 +375,32 @@ export const updateContentConfig = mutation({
       throw new Error("This product type does not support content delivery.");
     }
 
+    if (product.publishedAt) {
+      const oldR2Key =
+        product.config.content && product.config.content.mode === "upload"
+          ? product.config.content.r2Key
+          : undefined;
+      const newR2Key = args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
+
+      if (oldR2Key && newR2Key === oldR2Key) {
+        await ctx.db.patch(args.productId, {
+          config: {
+            ...product.config,
+            content: { ...product.config.content, ...args.config },
+          },
+          updatedAt: Date.now(),
+        });
+        return;
+      }
+
+      throw new Error(
+        "Content cannot be modified after publishing. Duplicate the product to release updated content."
+      );
+    }
+
     const oldContent = product.config.content;
-    const oldR2Key =
-      oldContent && oldContent.mode === "upload" ? oldContent.r2Key : undefined;
-    const newR2Key =
-      args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
+    const oldR2Key = oldContent && oldContent.mode === "upload" ? oldContent.r2Key : undefined;
+    const newR2Key = args.config && args.config.mode === "upload" ? args.config.r2Key : undefined;
 
     if (oldR2Key && oldR2Key !== newR2Key) {
       await r2.deleteObject(ctx, oldR2Key);
@@ -393,7 +436,7 @@ export const updateContentConfig = mutation({
 export const archive = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.id);
 
     if (!product || product.createdBy !== userId) {
@@ -402,6 +445,27 @@ export const archive = mutation({
 
     await ctx.db.patch(args.id, {
       status: "archived",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const unpublish = mutation({
+  args: { id: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId } = await requireVerifiedSession(ctx);
+    const product = await ctx.db.get(args.id);
+
+    if (!product || product.createdBy !== userId) {
+      throw new Error("Product not found.");
+    }
+
+    if (product.status !== "published") {
+      throw new Error("Only published products can be unpublished.");
+    }
+
+    await ctx.db.patch(args.id, {
+      status: "draft",
       updatedAt: Date.now(),
     });
   },
@@ -451,7 +515,7 @@ export const publish = mutation({
 export const remove = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const product = await ctx.db.get(args.id);
 
     if (!product || product.createdBy !== userId) {
@@ -463,11 +527,7 @@ export const remove = mutation({
     }
 
     const content = product.config.content;
-    if (
-      content &&
-      content.mode === "upload" &&
-      typeof content.r2Key === "string"
-    ) {
+    if (content && content.mode === "upload" && typeof content.r2Key === "string") {
       await r2.deleteObject(ctx, content.r2Key);
 
       const uploadRecord = await ctx.db
@@ -506,6 +566,57 @@ export const remove = mutation({
     }
 
     await ctx.db.delete(args.id);
+  },
+});
+
+export const duplicate = mutation({
+  args: { id: v.id("products") },
+  handler: async (ctx, args) => {
+    const { userId, product } = await requireProductOwner(ctx, args.id);
+
+    const thumbnailConfig = product.config.thumbnail
+      ? { ...product.config.thumbnail, imageId: undefined }
+      : undefined;
+
+    const checkoutConfig = product.config.checkout
+      ? { ...product.config.checkout, coverImageId: undefined }
+      : undefined;
+
+    const baseUrl = product.productUrl.replace(/-copy(-\d+)?$/, "");
+    const productUrl = await ensureUniqueProductUrl(ctx, userId, `${baseUrl}-copy`);
+    const now = Date.now();
+
+    const lastProduct = await ctx.db
+      .query("products")
+      .withIndex("by_user_order", (q) => q.eq("createdBy", userId))
+      .order("desc")
+      .first();
+    const nextOrder = (lastProduct?.order ?? -1) + 1;
+
+    const newId = await ctx.db.insert("products", {
+      createdBy: userId,
+      name: `${product.name} (Copy)`,
+      productUrl,
+      description: product.description,
+      coverImageId: undefined,
+      price: product.price,
+      priceCents: product.priceCents,
+      type: product.type,
+      status: "draft",
+      config: {
+        ...product.config,
+        thumbnail: thumbnailConfig,
+        checkout: checkoutConfig,
+        content: { mode: "none" },
+      },
+      createdAt: now,
+      publishedAt: undefined,
+      updatedAt: now,
+      automationEnabled: product.automationEnabled,
+      order: nextOrder,
+    });
+
+    return newId;
   },
 });
 
@@ -586,7 +697,7 @@ export const getPublicProduct = query({
 export const listForSelect = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const products = await ctx.db
       .query("products")

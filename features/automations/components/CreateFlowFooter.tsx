@@ -44,17 +44,14 @@ export default function CreateFlowFooter({
           disabled={primaryActionDisabled}
         >
           {isLastStep ? (
-            isSaving ? (
-              <>
+            <>
+              {isSaving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
+              ) : (
                 <CheckCircle2 className="h-4 w-4" />
-                Save Draft
-              </>
-            )
+              )}
+              Save Draft
+            </>
           ) : (
             <>
               Continue

@@ -3,7 +3,7 @@ import { R2 } from "@convex-dev/r2";
 import { mutation } from "./_generated/server";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
-import { requireSession } from "./security";
+import { requireVerifiedSession } from "./security";
 import { validateContentFile } from "./contentLimits";
 
 export const r2 = new R2(components.contentStorage);
@@ -12,7 +12,7 @@ const MAX_PENDING_UPLOADS = 10;
 
 export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
   checkUpload: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const pending = await ctx.db
       .query("contentUploads")
@@ -20,14 +20,12 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
       .collect();
 
     if (pending.length >= MAX_PENDING_UPLOADS) {
-      throw new Error(
-        "Too many pending uploads. Please remove unused files or save your product."
-      );
+      throw new Error("Too many pending uploads. Please remove unused files or save your product.");
     }
   },
 
   onUpload: async (ctx, _bucket, key) => {
-    await requireSession(ctx);
+    await requireVerifiedSession(ctx);
 
     const metadata = await r2.getMetadata(ctx, key);
     if (!metadata) return;
@@ -54,13 +52,9 @@ export const recordContentFile = mutation({
     fileType: v.string(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
-    const validation = validateContentFile(
-      args.fileType,
-      args.fileName,
-      args.fileSize
-    );
+    const validation = validateContentFile(args.fileType, args.fileName, args.fileSize);
     if (!validation.valid) {
       await r2.deleteObject(ctx, args.r2Key);
       throw new Error(validation.error);
@@ -87,7 +81,7 @@ export const recordContentFile = mutation({
 export const deleteContentFile = mutation({
   args: { r2Key: v.string() },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const record = await ctx.db
       .query("contentUploads")
@@ -115,9 +109,7 @@ export const deleteContentFile = mutation({
       .collect();
 
     const referencedByProduct = userProducts.find(
-      (p) =>
-        p.config.content?.mode === "upload" &&
-        p.config.content.r2Key === args.r2Key
+      (p) => p.config.content?.mode === "upload" && p.config.content.r2Key === args.r2Key
     );
 
     if (referencedByProduct) {

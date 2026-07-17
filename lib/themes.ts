@@ -29,38 +29,96 @@ export type LayoutConfig = {
 
 export const PALETTE_PRESETS: { key: string; label: string; bg: string; accent: string }[] = [
   { key: "blush", label: "Blush", bg: "oklch(0.97 0.015 340)", accent: "oklch(0.65 0.2 340)" },
-  { key: "warm-earth", label: "Warm Earth", bg: "oklch(0.95 0.02 75)", accent: "oklch(0.58 0.14 50)" },
+  {
+    key: "warm-earth",
+    label: "Warm Earth",
+    bg: "oklch(0.95 0.02 75)",
+    accent: "oklch(0.58 0.14 50)",
+  },
   { key: "dark-oak", label: "Dark Oak", bg: "oklch(0.18 0.02 50)", accent: "oklch(0.7 0.2 25)" },
   { key: "monochrome", label: "Monochrome", bg: "oklch(0.99 0 0)", accent: "oklch(0.15 0 0)" },
   { key: "midnight", label: "Midnight", bg: "oklch(0.16 0.03 280)", accent: "oklch(0.75 0.2 170)" },
   { key: "sky", label: "Sky", bg: "oklch(0.94 0.02 255)", accent: "oklch(0.52 0.2 254)" },
-  { key: "lavender", label: "Lavender", bg: "oklch(0.95 0.015 310)", accent: "oklch(0.55 0.2 300)" },
+  {
+    key: "lavender",
+    label: "Lavender",
+    bg: "oklch(0.95 0.015 310)",
+    accent: "oklch(0.55 0.2 300)",
+  },
 ];
 
 export const LAYOUT_PRESETS: { key: string; label: string; config: LayoutConfig }[] = [
   {
-    key: "playful", label: "Playful",
-    config: { borderRadius: "pill", cardStyle: "layered", spacing: "loose", headerLayout: "centered", typeScale: "large", backgroundPattern: "dots" },
+    key: "playful",
+    label: "Playful",
+    config: {
+      borderRadius: "pill",
+      cardStyle: "layered",
+      spacing: "loose",
+      headerLayout: "centered",
+      typeScale: "large",
+      backgroundPattern: "dots",
+    },
   },
   {
-    key: "clean", label: "Clean",
-    config: { borderRadius: "subtle", cardStyle: "shadow", spacing: "standard", headerLayout: "left", typeScale: "medium", backgroundPattern: "solid" },
+    key: "clean",
+    label: "Clean",
+    config: {
+      borderRadius: "subtle",
+      cardStyle: "shadow",
+      spacing: "standard",
+      headerLayout: "left",
+      typeScale: "medium",
+      backgroundPattern: "solid",
+    },
   },
   {
-    key: "sharp", label: "Sharp",
-    config: { borderRadius: "sharp", cardStyle: "flat", spacing: "compact", headerLayout: "left", typeScale: "small", backgroundPattern: "solid" },
+    key: "sharp",
+    label: "Sharp",
+    config: {
+      borderRadius: "sharp",
+      cardStyle: "flat",
+      spacing: "compact",
+      headerLayout: "left",
+      typeScale: "small",
+      backgroundPattern: "solid",
+    },
   },
   {
-    key: "card", label: "Card",
-    config: { borderRadius: "round", cardStyle: "layered", spacing: "standard", headerLayout: "card", typeScale: "medium", backgroundPattern: "gradient" },
+    key: "card",
+    label: "Card",
+    config: {
+      borderRadius: "round",
+      cardStyle: "layered",
+      spacing: "standard",
+      headerLayout: "card",
+      typeScale: "medium",
+      backgroundPattern: "gradient",
+    },
   },
   {
-    key: "dense", label: "Dense",
-    config: { borderRadius: "sharp", cardStyle: "flat", spacing: "compact", headerLayout: "centered", typeScale: "small", backgroundPattern: "solid" },
+    key: "dense",
+    label: "Dense",
+    config: {
+      borderRadius: "sharp",
+      cardStyle: "flat",
+      spacing: "compact",
+      headerLayout: "centered",
+      typeScale: "small",
+      backgroundPattern: "solid",
+    },
   },
   {
-    key: "bold", label: "Bold",
-    config: { borderRadius: "subtle", cardStyle: "layered", spacing: "loose", headerLayout: "centered", typeScale: "large", backgroundPattern: "gradient" },
+    key: "bold",
+    label: "Bold",
+    config: {
+      borderRadius: "subtle",
+      cardStyle: "layered",
+      spacing: "loose",
+      headerLayout: "centered",
+      typeScale: "large",
+      backgroundPattern: "gradient",
+    },
   },
 ];
 
@@ -172,10 +230,7 @@ function backgroundStyle(pattern: BackgroundPatternValue, _bg: string): React.CS
   }
 }
 
-export function buildThemeStyle(
-  palette: PaletteConfig,
-  layout: LayoutConfig
-): React.CSSProperties {
+export function buildThemeStyle(palette: PaletteConfig, layout: LayoutConfig): React.CSSProperties {
   const resolved = resolvePalette(palette);
   const lay = resolveLayout(layout);
   const radius = resolveRadius(lay.borderRadius);
@@ -210,7 +265,7 @@ export function buildThemeStyle(
 }
 
 export function sliderToRadius(value: number): string {
-  return `${(value / 100 * 1.5).toFixed(2)}rem`;
+  return `${((value / 100) * 1.5).toFixed(2)}rem`;
 }
 
 export function radiusToSlider(v?: string): number {

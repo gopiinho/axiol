@@ -46,6 +46,10 @@ export function useArchiveProduct() {
   return useMutation(api.products.archive);
 }
 
+export function useUnpublishProduct() {
+  return useMutation(api.products.unpublish);
+}
+
 export function useCreateProductItem() {
   return useMutation(api.productItems.create);
 }
@@ -60,6 +64,10 @@ export function useDeleteProductItem() {
 
 export function useReorderProductItems() {
   return useMutation(api.productItems.reorder);
+}
+
+export function useReorderProducts() {
+  return useMutation(api.products.reorder);
 }
 
 export function useGenerateProductCoverUploadUrl() {
@@ -96,4 +104,8 @@ export function useRemoveThumbnailImage() {
 
 export function useDeleteContentFile() {
   return useMutation(api.contentStorage.deleteContentFile);
+}
+
+export function useDuplicateProduct() {
+  return useMutation(api.products.duplicate);
 }

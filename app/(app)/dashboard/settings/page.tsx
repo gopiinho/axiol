@@ -1,12 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Trash2,
+  Loader2,
+  AlertCircle,
+  SlidersHorizontal,
+  Puzzle,
+  CreditCard,
+  ShieldAlert,
+} from "lucide-react";
 import { useUser } from "@/features/auth/client/UserContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryParam } from "@/lib/hooks/useQueryParam";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +28,7 @@ import {
 import { useIntegrations } from "@/features/integrations/hooks/useIntegrations";
 import IntegrationCard from "@/features/integrations/components/IntegrationCard";
 import type { IntegrationDefinition } from "@/features/integrations/types";
+import { PaymentsTab } from "@/components/dashboard/PaymentsTab";
 
 const INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
   {
@@ -42,41 +53,53 @@ export default function SettingsPage() {
   const { user: profile } = useUser();
   const { integrations } = useIntegrations();
 
+  const [tab, setTab] = useQueryParam("tab", "general");
+
   const subscriptionLabel =
     profile?.subscriptionStatus === "trial" && profile?.trialEndsAt
       ? `Trial — ends ${new Date(profile.trialEndsAt).toLocaleDateString()}`
       : (profile?.subscriptionStatus ?? "N/A");
 
   return (
-    <div className="px-5 pt-6 lg:px-6 lg:pt-8">
-      <div className="mx-auto max-w-xl">
+    <div>
+      <section className="border-b p-5 sm:p-8">
         <h1 className="app-title">Settings</h1>
         <p className="app-subtitle mt-1">Your account and connected services.</p>
-      </div>
+      </section>
 
-      <div className="mx-auto mt-6 max-w-xl">
-        <Tabs defaultValue="general">
+      <div className="mx-auto max-w-3xl px-5 pt-6 pb-16 sm:px-8 sm:pt-8 sm:pb-16">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList
             variant="line"
             className="border-border/70 w-full justify-start gap-0 rounded-none border-b p-0"
           >
             <TabsTrigger
               value="general"
-              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
+              <SlidersHorizontal className="size-4" />
               General
             </TabsTrigger>
             <TabsTrigger
               value="integrations"
-              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
+              <Puzzle className="size-4" />
               Integrations
             </TabsTrigger>
             <TabsTrigger
-              value="advanced"
-              className="rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+              value="payments"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
             >
-              Advanced
+              <CreditCard className="size-4" />
+              Payments
+            </TabsTrigger>
+            <TabsTrigger
+              value="advanced"
+              className="cursor-pointer rounded-none px-3 py-2.5 text-sm data-[state=active]:shadow-none sm:px-4"
+            >
+              <ShieldAlert className="size-4" />
+              Security
             </TabsTrigger>
           </TabsList>
 
@@ -86,6 +109,10 @@ export default function SettingsPage() {
 
           <TabsContent value="integrations" className="pt-6">
             <IntegrationsTab integrations={integrations} />
+          </TabsContent>
+
+          <TabsContent value="payments" className="pt-6">
+            <PaymentsTab />
           </TabsContent>
 
           <TabsContent value="advanced" className="pt-6">
@@ -196,14 +223,11 @@ function DeleteAccountDialog({
 }) {
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState("");
-
   const expectedText = `delete ${username ?? "my account"}`;
   const isConfirmed = confirmText.toLowerCase() === expectedText.toLowerCase();
 
   const handleDelete = async () => {
     if (!isConfirmed) return;
-    setError("");
     setIsDeleting(true);
 
     try {
@@ -215,7 +239,7 @@ function DeleteAccountDialog({
       window.location.href = "/login";
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to delete account";
-      setError(msg);
+      toast.error(msg || "Failed to delete account", { description: "Please try again." });
       setIsDeleting(false);
     }
   };
@@ -224,7 +248,6 @@ function DeleteAccountDialog({
     if (isDeleting) return;
     if (!next) {
       setConfirmText("");
-      setError("");
     }
     onOpenChange(next);
   };
@@ -263,12 +286,6 @@ function DeleteAccountDialog({
           />
         </div>
 
-        {error && (
-          <div className="border-destructive/25 bg-destructive/8 text-destructive rounded-xl border px-3 py-2 text-sm">
-            {error}
-          </div>
-        )}
-
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isDeleting}>
             Cancel
@@ -279,16 +296,11 @@ function DeleteAccountDialog({
             disabled={!isConfirmed || isDeleting}
           >
             {isDeleting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Deleting...
-              </>
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <>
-                <Trash2 className="h-4 w-4" />
-                Delete Account
-              </>
+              <Trash2 className="h-4 w-4" />
             )}
+            Delete Account
           </Button>
         </DialogFooter>
       </DialogContent>

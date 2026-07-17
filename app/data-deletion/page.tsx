@@ -1,7 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Data Deletion — Axiol",
+export const metadata: Metadata = {
+  title: "Data Deletion",
+  description:
+    "How to delete your Axiol account and personal data. Instructions for account deletion and disconnecting Instagram.",
+  alternates: { canonical: "https://www.axiol.store/data-deletion" },
+  robots: { index: false },
 };
 
 export default function DataDeletionPage() {

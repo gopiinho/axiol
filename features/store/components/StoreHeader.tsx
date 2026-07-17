@@ -27,7 +27,7 @@ export function StoreHeader({
 }: StoreHeaderProps) {
   const avatar = (
     <div
-      className="h-24 w-24 overflow-hidden border-4 shrink-0"
+      className="h-24 w-24 shrink-0 overflow-hidden border-4"
       style={{
         borderColor: "var(--store-bg, white)",
         boxShadow: "0 4px 20px -4px oklch(0 0 0 / 0.15)",
@@ -78,7 +78,7 @@ export function StoreHeader({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex w-fit items-center gap-2 transition-colors [color:var(--store-text-muted)] hover:[color:var(--store-accent)]"
+            className="inline-flex w-fit items-center gap-2 [color:var(--store-text-muted)] transition-colors hover:[color:var(--store-accent)]"
             style={{ fontSize: "var(--store-body-size, 0.75rem)" }}
           >
             <Icon className="h-6 w-6 shrink-0" />
@@ -89,9 +89,21 @@ export function StoreHeader({
   );
 
   return (
-    <div className="relative flex w-full items-center justify-center" style={{ padding: "var(--store-header-padding, 2rem) 1rem" }}>
+    <div
+      className="relative flex w-full items-center justify-center"
+      style={{ padding: "var(--store-header-padding, 2rem) 1rem" }}
+    >
       {headerLayout === "left" ? (
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "1rem", maxWidth: "28rem", width: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: "1rem",
+            maxWidth: "28rem",
+            width: "100%",
+          }}
+        >
           {avatar}
           <div className="flex flex-col items-start">
             {nameBlock}
@@ -109,9 +121,7 @@ export function StoreHeader({
             width: "100%",
           }}
         >
-          <div className="-mt-12 flex justify-center">
-            {avatar}
-          </div>
+          <div className="-mt-12 flex justify-center">{avatar}</div>
           <div className="mt-3 flex flex-col items-center text-center">
             {nameBlock}
             {socialsBlock}

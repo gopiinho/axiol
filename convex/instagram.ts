@@ -8,19 +8,18 @@ import {
   internalAction,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { getSession } from "./security";
-import { requireSession } from "./security";
-import { validateReelMappingInput, normalizeKeywordString } from "../lib/validators/instagram-mappings";
+import { getVerifiedSession, requireVerifiedSession } from "./security";
+import {
+  validateReelMappingInput,
+  normalizeKeywordString,
+} from "../lib/validators/instagram-mappings";
 import { decryptToken, encryptToken } from "./lib/instagramCrypto";
 import { Id } from "./_generated/dataModel";
 import { MutationCtx } from "./_generated/server";
 
 const WEBHOOK_SECRET = process.env.INSTAGRAM_INTERNAL_SECRET;
 
-async function syncProductAutomationEnabled(
-  ctx: MutationCtx,
-  productId: Id<"products">,
-) {
+async function syncProductAutomationEnabled(ctx: MutationCtx, productId: Id<"products">) {
   const hasAnyActive = await ctx.db
     .query("reelMappings")
     .withIndex("by_product", (q) => q.eq("productId", productId))
@@ -102,7 +101,7 @@ export const saveConfig = mutation({
     instagramUsername: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const existing = await ctx.db
       .query("instagramConfig")
@@ -163,7 +162,7 @@ export const setWebhookSubscribed = mutation({
     subscribed: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const existing = await ctx.db
       .query("instagramConfig")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -176,7 +175,7 @@ export const setWebhookSubscribed = mutation({
 export const getConfig = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     return await ctx.db
       .query("instagramConfig")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -187,7 +186,7 @@ export const getConfig = query({
 export const getConfigPublic = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const config = await ctx.db
       .query("instagramConfig")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -395,7 +394,7 @@ export const createReelMapping = mutation({
     keyword: v.string(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const validated = validateReelMappingInput({
       reelId: args.reelId,
       reelUrl: args.reelUrl,
@@ -441,7 +440,7 @@ export const publishReelMapping = mutation({
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const mapping = await ctx.db.get(args.id);
     if (!mapping || mapping.userId !== userId) {
       throw new Error("Mapping not found");
@@ -457,7 +456,7 @@ export const publishReelMapping = mutation({
 export const getDraftMappings = query({
   args: {},
   handler: async (ctx) => {
-    const session = await getSession(ctx);
+    const session = await getVerifiedSession(ctx);
     if (!session) return [];
 
     const { userId } = session;
@@ -488,7 +487,7 @@ export const getPublishedMappings = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const session = await getSession(ctx);
+    const session = await getVerifiedSession(ctx);
     if (!session) return [];
 
     const { userId } = session;
@@ -519,7 +518,7 @@ export const getPublishedMappings = query({
 export const listReelMappings = query({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const mappings = await ctx.db
       .query("reelMappings")
@@ -547,7 +546,7 @@ export const generateDMMessage = query({
     triggerType: v.union(v.literal("comment"), v.literal("dm")),
   },
   handler: async (ctx, args) => {
-    const { user } = await requireSession(ctx);
+    const { user } = await requireVerifiedSession(ctx);
 
     const product = await ctx.db.get(args.productId);
     if (!product) throw new Error("Product not found");
@@ -615,7 +614,7 @@ export const deleteReelMapping = mutation({
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const mapping = await ctx.db.get(args.id);
     if (!mapping || mapping.userId !== userId) {
       throw new Error("Mapping not found");
@@ -634,7 +633,7 @@ export const toggleReelMapping = mutation({
     id: v.id("reelMappings"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const mapping = await ctx.db.get(args.id);
     if (!mapping || mapping.userId !== userId) {
@@ -659,7 +658,7 @@ export const updateReelMapping = mutation({
     keyword: v.string(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
     const mapping = await ctx.db.get(args.id);
     if (!mapping || mapping.userId !== userId) {
       throw new Error("Mapping not found");
@@ -796,7 +795,7 @@ export const logDM = mutation({
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
-    const session = await getSession(ctx);
+    const session = await getVerifiedSession(ctx);
     if (!session)
       return {
         totalComments: 0,
@@ -847,7 +846,7 @@ export const getRecentActivity = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     const limit = args.limit ?? 50;
 

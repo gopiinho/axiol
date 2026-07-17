@@ -23,10 +23,7 @@ export async function GET(request: NextRequest) {
     const orderId = request.nextUrl.searchParams.get("orderId");
 
     if (!orderId) {
-      return NextResponse.json(
-        { ok: false, error: "Missing orderId" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing orderId" }, { status: 400 });
     }
 
     const convex = getServerConvexClient();
@@ -36,10 +33,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json(
-        { ok: false, error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
     }
 
     if (order.status === "paid") {

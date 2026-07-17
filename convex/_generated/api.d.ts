@@ -20,13 +20,16 @@ import type * as instagram from "../instagram.js";
 import type * as integrations from "../integrations.js";
 import type * as lib_instagramCrypto from "../lib/instagramCrypto.js";
 import type * as orders from "../orders.js";
+import type * as otpEmail from "../otpEmail.js";
 import type * as productClicks from "../productClicks.js";
 import type * as productConfig from "../productConfig.js";
 import type * as productItems from "../productItems.js";
 import type * as products from "../products.js";
 import type * as security from "../security.js";
+import type * as sitemap from "../sitemap.js";
 import type * as storage from "../storage.js";
 import type * as users from "../users.js";
+import type * as vendors from "../vendors.js";
 import type * as waitlist from "../waitlist.js";
 
 import type {
@@ -48,13 +51,16 @@ declare const fullApi: ApiFromModules<{
   integrations: typeof integrations;
   "lib/instagramCrypto": typeof lib_instagramCrypto;
   orders: typeof orders;
+  otpEmail: typeof otpEmail;
   productClicks: typeof productClicks;
   productConfig: typeof productConfig;
   productItems: typeof productItems;
   products: typeof products;
   security: typeof security;
+  sitemap: typeof sitemap;
   storage: typeof storage;
   users: typeof users;
+  vendors: typeof vendors;
   waitlist: typeof waitlist;
 }>;
 

@@ -12,18 +12,20 @@ export const THUMBNAIL_CARDS: Record<
   callout: CalloutCard,
 };
 
-export function resolveThumbnailStyle(
-  product: { type?: string; config?: Record<string, unknown> }
-): ThumbnailStyle {
-  const configStyle = (
-    product.config?.thumbnail as { style?: string } | undefined
-  )?.style;
+export function resolveThumbnailStyle(product: {
+  type?: string;
+  config?: Record<string, unknown>;
+}): ThumbnailStyle {
+  const configStyle = (product.config?.thumbnail as { style?: string } | undefined)?.style;
   if (configStyle === "button" || configStyle === "callout") {
     return configStyle as ThumbnailStyle;
   }
   if (product.type) {
     const def = PRODUCT_TYPES[product.type as ProductTypeKey];
-    if (def && (def.defaultThumbnailStyle === "button" || def.defaultThumbnailStyle === "callout")) {
+    if (
+      def &&
+      (def.defaultThumbnailStyle === "button" || def.defaultThumbnailStyle === "callout")
+    ) {
       return def.defaultThumbnailStyle as ThumbnailStyle;
     }
   }

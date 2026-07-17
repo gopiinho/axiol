@@ -8,6 +8,7 @@ export default defineSchema({
   users: defineTable({
     betterAuthId: v.string(),
     email: v.string(),
+    emailVerified: v.boolean(),
     username: v.string(),
     name: v.string(),
     bio: v.string(),
@@ -18,24 +19,28 @@ export default defineSchema({
     profileImageId: v.optional(v.id("_storage")),
     theme: v.optional(v.string()),
     accentColor: v.optional(v.string()),
-    palette: v.optional(v.object({
-      bg: v.string(),
-      accent: v.string(),
-      surface: v.optional(v.string()),
-      border: v.optional(v.string()),
-      text: v.optional(v.string()),
-      textMuted: v.optional(v.string()),
-      cardBg: v.optional(v.string()),
-    })),
-    layout: v.optional(v.object({
-      preset: v.optional(v.string()),
-      borderRadius: v.optional(v.string()),
-      cardStyle: v.optional(v.string()),
-      spacing: v.optional(v.string()),
-      headerLayout: v.optional(v.string()),
-      typeScale: v.optional(v.string()),
-      backgroundPattern: v.optional(v.string()),
-    })),
+    palette: v.optional(
+      v.object({
+        bg: v.string(),
+        accent: v.string(),
+        surface: v.optional(v.string()),
+        border: v.optional(v.string()),
+        text: v.optional(v.string()),
+        textMuted: v.optional(v.string()),
+        cardBg: v.optional(v.string()),
+      })
+    ),
+    layout: v.optional(
+      v.object({
+        preset: v.optional(v.string()),
+        borderRadius: v.optional(v.string()),
+        cardStyle: v.optional(v.string()),
+        spacing: v.optional(v.string()),
+        headerLayout: v.optional(v.string()),
+        typeScale: v.optional(v.string()),
+        backgroundPattern: v.optional(v.string()),
+      })
+    ),
     storeName: v.optional(v.string()),
     accountType: accountTypes,
     trialStartedAt: v.optional(v.number()),
@@ -43,6 +48,27 @@ export default defineSchema({
     subscriptionStatus: v.optional(
       v.union(v.literal("trial"), v.literal("active"), v.literal("expired"), v.literal("cancelled"))
     ),
+    vendorId: v.optional(v.string()),
+    vendorStatus: v.optional(v.string()),
+    panNumber: v.optional(v.string()),
+    aadhaarNumber: v.optional(v.string()),
+    addressProofType: v.optional(
+      v.union(
+        v.literal("aadhaar"),
+        v.literal("driving_license"),
+        v.literal("passport"),
+        v.literal("voter_id")
+      )
+    ),
+    addressProofNumber: v.optional(v.string()),
+    vendorDocumentStatus: v.optional(v.record(v.string(), v.string())),
+    payoutMethod: v.optional(v.union(v.literal("bank"), v.literal("upi"))),
+    bankAccount: v.optional(v.string()),
+    bankIfsc: v.optional(v.string()),
+    bankHolder: v.optional(v.string()),
+    upiVpa: v.optional(v.string()),
+    upiHolder: v.optional(v.string()),
+    vendorCreatedAt: v.optional(v.number()),
   })
     .index("by_email", ["email"])
     .index("by_username", ["username"])
@@ -64,10 +90,12 @@ export default defineSchema({
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
     automationEnabled: v.boolean(),
+    order: v.number(),
   })
     .index("by_user", ["createdBy"])
+    .index("by_user_order", ["createdBy", "order"])
     .index("by_productUrl", ["productUrl", "createdBy"])
-    .index("by_status", ["createdBy", "status"]),
+    .index("by_status", ["createdBy", "status", "order"]),
 
   productItems: defineTable({
     productId: v.id("products"),
@@ -126,6 +154,11 @@ export default defineSchema({
     paymentReference: v.optional(v.string()),
     createdAt: v.number(),
     paidAt: v.optional(v.number()),
+    vendorId: v.optional(v.string()),
+    vendorShareCents: v.optional(v.number()),
+    platformFeeCents: v.optional(v.number()),
+    platformFeePct: v.optional(v.number()),
+    tdsCents: v.optional(v.number()),
   })
     .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"])

@@ -1,12 +1,44 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const AUTH_PAGES = ["/login", "/signup"];
+const UNVERIFIED_PAGES = [
+  "/verify-email",
+  "/forgot-password",
+  "/reset-password",
+  "/onboarding/username",
+];
+const ALLOWED_UNAUTHED = [...AUTH_PAGES, ...UNVERIFIED_PAGES];
 const SESSION_COOKIE = "better-auth.session_token";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // (may have __Secure- prefix in production)
+  const hostname = request.headers.get("host") || "";
+  if (hostname.startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = hostname.replace(/^www\./, "");
+    return NextResponse.redirect(url, 301);
+  }
+
+  const storeMatch = pathname.match(/^\/([A-Z][^/]*)$/);
+  if (storeMatch) {
+    return NextResponse.redirect(
+      new URL(`/${storeMatch[1].toLowerCase()}`, request.url),
+      301
+    );
+  }
+
+  const productMatch = pathname.match(/^\/([A-Z][^/]*)\/p\/(.+)$/);
+  if (productMatch) {
+    return NextResponse.redirect(
+      new URL(
+        `/${productMatch[1].toLowerCase()}/p/${productMatch[2]}`,
+        request.url
+      ),
+      301
+    );
+  }
+
   const hasSession =
     request.cookies.get(SESSION_COOKIE)?.value ||
     request.cookies.get(`__Secure-${SESSION_COOKIE}`)?.value;
@@ -25,5 +57,16 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/signup"],
+  matcher: [
+    "/dashboard/:path*",
+    "/login",
+    "/signup",
+    "/verify-email",
+    "/forgot-password",
+    "/reset-password",
+    "/onboarding/username",
+    "/:username",
+    "/:username/p/:productUrl",
+    "/",
+  ],
 };

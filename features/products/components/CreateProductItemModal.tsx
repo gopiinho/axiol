@@ -4,9 +4,10 @@ import { useState } from "react";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -29,14 +30,12 @@ export function CreateProductItemModal({ productId, open, onClose }: CreateProdu
   const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const createItem = useCreateProductItem();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage(null);
 
     try {
       await createItem({
@@ -48,18 +47,15 @@ export function CreateProductItemModal({ productId, open, onClose }: CreateProdu
         imageUrl: imageUrl || undefined,
       });
 
+      toast.success("Item added!");
       setAffiliateLink("");
       setPrice("");
       setPlatform("amazon");
       setTitle("");
       setImageUrl("");
       onClose();
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Couldn't add this item. Check your connection and try again."
-      );
+    } catch {
+      toast.error("Couldn't add item", { description: "Check your connection and try again." });
     } finally {
       setLoading(false);
     }
@@ -87,19 +83,12 @@ export function CreateProductItemModal({ productId, open, onClose }: CreateProdu
               disabled={loading || !affiliateLink.trim()}
               className="px-5"
             >
-              {loading ? "Adding..." : "Add"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
             </Button>
           </div>
         </DialogHeader>
 
         <form id="add-item-form" onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
-          {errorMessage && (
-            <Alert variant="destructive">
-              <AlertTitle>Couldn&apos;t add item</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="item-title">Product name</Label>
             <Input

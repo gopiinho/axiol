@@ -16,14 +16,7 @@ export function ThumbnailImage({
   style?: React.CSSProperties;
 }) {
   if (url) {
-    return (
-      <img
-        src={url}
-        alt={alt}
-        className={cn("object-cover", className)}
-        style={style}
-      />
-    );
+    return <img src={url} alt={alt} className={cn("object-cover", className)} style={style} />;
   }
   return (
     <div

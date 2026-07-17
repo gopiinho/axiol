@@ -11,6 +11,7 @@ export default function Products() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="app-title">Products</h1>
+            <p className="app-subtitle mt-1">What are you sharing today?</p>
           </div>
           <Link href="/dashboard/products/new">
             <Button size="lg" className="gap-2 sm:self-start">

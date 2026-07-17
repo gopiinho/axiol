@@ -31,7 +31,7 @@ const QUICK_ACTIONS = [
     icon: Zap,
     title: "Automations",
     description: "Manage reel-to-product auto-DM mappings",
-    accent: "bg-status-warn-subtle text-status-warn-subtle-fg",
+    accent: "bg-yellow-400/30 text-status-warn-subtle-fg",
   },
 ];
 
@@ -68,7 +68,6 @@ export default function DashboardPage() {
       </section>
 
       <div className="space-y-8 p-5 sm:p-8">
-        <h2 className="mb-3 text-lg font-medium">Activity</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
@@ -76,28 +75,25 @@ export default function DashboardPage() {
               <div key={action.href}>
                 <Link
                   href={action.href}
-                  className="border-border/70 bg-card hover:border-border flex flex-col gap-4 rounded-xs border p-5 transition-all duration-200"
+                  className="border-border/70 bg-card hover:border-border flex h-full flex-col gap-4 rounded-xs border p-5 transition-all duration-200"
                 >
-                  <div
-                    className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${action.accent} transition-transform duration-200`}
-                  >
-                    <Icon className="h-5 w-5" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold">{action.title}</h3>
-                    <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                      {action.description}
-                    </p>
-                  </div>
-                  <div className="mt-auto pt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-primary hover:text-primary px-0 hover:bg-transparent"
-                      tabIndex={-1}
+                  <div className="flex gap-3">
+                    <div
+                      className={`inline-flex h-11 w-11 items-center justify-center rounded-md ${action.accent} transition-transform duration-200`}
                     >
-                      Go &rarr;
-                    </Button>
+                      <Icon className="h-5 w-5" strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">{action.title}</h3>
+                      <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                        {action.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-2 text-end">
+                    <p className="hover:text-primary mr-2 px-0 hover:bg-transparent" tabIndex={-1}>
+                      &rarr;
+                    </p>
                   </div>
                 </Link>
               </div>

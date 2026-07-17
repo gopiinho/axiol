@@ -1,6 +1,8 @@
 import { render } from "react-email";
 import { Resend } from "resend";
 import { DownloadReceipt } from "@/emails/download-receipt";
+import { KycNotification } from "@/emails/kyc-notification";
+import { VerificationCodeEmail } from "@/emails/verification-code";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -48,5 +50,62 @@ export async function sendDownloadEmail(
     const message = err instanceof Error ? err.message : "Failed to send email";
     console.error("Resend sendDownloadEmail error:", message);
     return { ok: false, error: message };
+  }
+}
+
+export async function sendKycNotification(
+  to: string,
+  status: "ACTIVE" | "BLOCKED",
+  userName: string,
+  storeName: string,
+  siteUrl: string
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const html = await render(
+      <KycNotification
+        status={status}
+        userName={userName}
+        storeName={storeName}
+        siteUrl={siteUrl}
+      />
+    );
+
+    const { error } = await resend.emails.send({
+      from: `Axiol <${FROM_EMAIL}>`,
+      to,
+      subject: status === "ACTIVE" ? "Payments Verified" : "Payment Verification Failed",
+      html,
+    });
+
+    if (error) {
+      console.error("Resend KYC notification error:", error);
+      return { ok: false, error: error.message };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to send KYC email";
+    console.error("Resend sendKycNotification error:", message);
+    return { ok: false, error: message };
+  }
+}
+
+export async function sendVerificationOtp(email: string, otp: string) {
+  try {
+    const html = await render(<VerificationCodeEmail otp={otp} />);
+
+    const { error } = await resend.emails.send({
+      from: `Axiol <${FROM_EMAIL}>`,
+      to: email,
+      subject: "Your verification code",
+      html,
+    });
+
+    if (error) {
+      console.error("Resend verification OTP error:", error);
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to send verification email";
+    console.error("Resend sendVerificationOtp error:", message);
   }
 }

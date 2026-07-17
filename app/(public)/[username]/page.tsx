@@ -1,9 +1,89 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { api } from "@/convex/_generated/api";
 import { getServerConvexClient } from "@/server/convex/client";
-import { buildThemeStyle, migrateOldTheme, type PaletteConfig, type LayoutConfig } from "@/lib/themes";
+import {
+  buildThemeStyle,
+  migrateOldTheme,
+  type PaletteConfig,
+  type LayoutConfig,
+} from "@/lib/themes";
 import { resolvePalette } from "@/lib/colorUtils";
 import { StoreContent } from "@/components/StoreContent";
+import {
+  SITE_URL,
+  truncateDescription,
+  generateProfilePageSchema,
+} from "@/lib/seo";
+
+export const revalidate = 3600;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+  const convex = getServerConvexClient();
+
+  const result = await convex.query(api.users.getPublicStore, { username });
+  if (!result) {
+    return { title: "Not Found" };
+  }
+
+  const { user } = result;
+  const displayName = user.storeName || user.name || username;
+  const description = user.bio
+    ? truncateDescription(user.bio)
+    : `${displayName}'s storefront on Axiol. Discover digital products, courses, and more.`;
+  const profileImage = user.profileImageUrl ?? user.avatarUrl ?? undefined;
+  const storeUrl = `${SITE_URL}/${username}`;
+
+  const sameAs = [
+    user.instagramUrl,
+    user.youtubeUrl,
+    user.websiteUrl,
+  ].filter((url): url is string => Boolean(url));
+
+  return {
+    title: displayName,
+    description,
+    openGraph: {
+      title: `${displayName} on Axiol`,
+      description,
+      url: storeUrl,
+      type: "profile",
+      siteName: "Axiol",
+      images: profileImage
+        ? [{ url: profileImage, width: 400, height: 400, alt: displayName }]
+        : [],
+    },
+    twitter: {
+      card: "summary",
+      title: `${displayName} on Axiol`,
+      description,
+      images: profileImage ? [profileImage] : [],
+    },
+    alternates: {
+      canonical: storeUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    other: {
+      "script:ld+json": JSON.stringify(
+        generateProfilePageSchema({
+          name: displayName,
+          bio: user.bio || undefined,
+          image: profileImage,
+          url: storeUrl,
+          sameAs: sameAs.length > 0 ? sameAs : undefined,
+        })
+      ),
+    },
+  };
+}
 
 export default async function UserStorePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -53,9 +133,7 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
   if (palette) {
     palette = resolvePalette(palette);
   }
-  const themeStyle = palette
-    ? buildThemeStyle(palette, layout ?? {})
-    : ({} as React.CSSProperties);
+  const themeStyle = palette ? buildThemeStyle(palette, layout ?? {}) : ({} as React.CSSProperties);
 
   const profileSrc = user.profileImageUrl ?? user.avatarUrl ?? null;
 
@@ -106,13 +184,9 @@ export default async function UserStorePage({ params }: { params: Promise<{ user
   }[];
 
   return (
-    <main
-      className="flex min-h-screen justify-center"
-      style={{ backgroundColor: "var(--store-bg)", ...themeStyle }}
-    >
-      <div className="mx-auto h-full w-full lg:max-w-[90%]">
+    <main className="min-h-screen" style={{ backgroundColor: "var(--store-bg)", ...themeStyle }}>
+      <div className="mx-auto w-full lg:max-w-[90%]">
         <StoreContent
-          className="min-h-screen"
           displayName={displayName}
           bio={user.bio}
           profileImageUrl={profileSrc}

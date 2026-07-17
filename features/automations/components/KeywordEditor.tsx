@@ -34,7 +34,7 @@ export default function KeywordEditor({
           value={keywordInput}
           onChange={(event) => onKeywordInputChange(event.target.value.toLowerCase())}
           placeholder="link, dm, details"
-          className="border-border bg-card w-full rounded-xs border py-2.5 pr-3 pl-9 text-sm outline-none transition focus:border-foreground/40"
+          className="border-border bg-card focus:border-foreground/40 w-full rounded-xs border py-2.5 pr-3 pl-9 text-sm transition outline-none"
         />
       </div>
 
@@ -49,7 +49,7 @@ export default function KeywordEditor({
                   key={preset}
                   type="button"
                   onClick={() => onTogglePreset(preset)}
-                  className={`rounded-xs border px-3 py-1.5 text-sm font-medium cursor-pointer transition-all duration-200 ${
+                  className={`cursor-pointer rounded-xs border px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? "bg-foreground text-background"
                       : "hover:border-border border-border text-muted-foreground hover:text-foreground"

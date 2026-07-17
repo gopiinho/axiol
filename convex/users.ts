@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, MutationCtx } from "./_generated/server";
-import { requireSession, getSession } from "./security";
+import { requireSession, getSession, requireVerifiedSession } from "./security";
 import { Id } from "./_generated/dataModel";
 
 const TRIAL_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days
@@ -84,7 +84,7 @@ export const getPublicStore = query({
     const products = await ctx.db
       .query("products")
       .withIndex("by_status", (q) => q.eq("createdBy", user._id).eq("status", "published"))
-      .order("desc")
+      .order("asc")
       .collect();
 
     const enriched = await Promise.all(
@@ -100,9 +100,7 @@ export const getPublicStore = query({
           : null;
 
         const { thumbnail: thumb } = product.config;
-        const thumbnailImageUrl = thumb?.imageId
-          ? await ctx.storage.getUrl(thumb.imageId)
-          : null;
+        const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
 
         return {
           ...product,
@@ -160,6 +158,7 @@ export const getProfile = query({
     return {
       _id: user._id,
       email: user.email,
+      emailVerified: user.emailVerified,
       username: user.username,
       name: user.name,
       bio: user.bio,
@@ -180,6 +179,17 @@ export const getProfile = query({
   },
 });
 
+export const markEmailVerified = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const { userId, user } = await requireSession(ctx);
+    if (user.emailVerified) {
+      return;
+    }
+    await ctx.db.patch(userId, { emailVerified: true });
+  },
+});
+
 export const updateProfile = mutation({
   args: {
     name: v.optional(v.string()),
@@ -191,27 +201,31 @@ export const updateProfile = mutation({
     theme: v.optional(v.string()),
     accentColor: v.optional(v.string()),
     storeName: v.optional(v.string()),
-    palette: v.optional(v.object({
-      bg: v.string(),
-      accent: v.string(),
-      surface: v.optional(v.string()),
-      border: v.optional(v.string()),
-      text: v.optional(v.string()),
-      textMuted: v.optional(v.string()),
-      cardBg: v.optional(v.string()),
-    })),
-    layout: v.optional(v.object({
-      preset: v.optional(v.string()),
-      borderRadius: v.optional(v.string()),
-      cardStyle: v.optional(v.string()),
-      spacing: v.optional(v.string()),
-      headerLayout: v.optional(v.string()),
-      typeScale: v.optional(v.string()),
-      backgroundPattern: v.optional(v.string()),
-    })),
+    palette: v.optional(
+      v.object({
+        bg: v.string(),
+        accent: v.string(),
+        surface: v.optional(v.string()),
+        border: v.optional(v.string()),
+        text: v.optional(v.string()),
+        textMuted: v.optional(v.string()),
+        cardBg: v.optional(v.string()),
+      })
+    ),
+    layout: v.optional(
+      v.object({
+        preset: v.optional(v.string()),
+        borderRadius: v.optional(v.string()),
+        cardStyle: v.optional(v.string()),
+        spacing: v.optional(v.string()),
+        headerLayout: v.optional(v.string()),
+        typeScale: v.optional(v.string()),
+        backgroundPattern: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Record<string, any> = {};
@@ -258,6 +272,7 @@ export const updateProfile = mutation({
 export const createProfile = mutation({
   args: {
     username: v.string(),
+    emailVerified: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -302,6 +317,7 @@ export const createProfile = mutation({
     return await ctx.db.insert("users", {
       betterAuthId,
       email: identity.email ?? "",
+      emailVerified: args.emailVerified ?? false,
       username,
       name: identity.name ?? "",
       bio: "",
@@ -345,7 +361,7 @@ export const checkUsernameAvailable = query({
 export const deleteAccount = mutation({
   args: {},
   handler: async (ctx) => {
-    const { userId } = await requireSession(ctx);
+    const { userId } = await requireVerifiedSession(ctx);
 
     await deleteAllUserData(ctx, userId);
 

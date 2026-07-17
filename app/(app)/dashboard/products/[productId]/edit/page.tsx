@@ -6,19 +6,33 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Save, ArrowRight, Archive, Upload } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Save, ArrowRight, EyeOff, Upload, Loader2 } from "lucide-react";
 import { ProductTypeIcon } from "@/features/products/components/ProductTypeIcon";
 import { ProductItemsManager } from "@/features/products/components/ProductItemsManager";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import { useUser } from "@/features/auth/client/UserContext";
-import { usePublishProduct, useArchiveProduct } from "@/features/products/hooks/useProduct";
+import { usePublishProduct, useUnpublishProduct } from "@/features/products/hooks/useProduct";
 import { getProductTypeDefinition } from "@/features/products/registry/productTypes";
-import type { ProductTypeKey } from "@/features/products/registry/productTypes";
+import type { ProductTypeKey, ProductStepKey } from "@/features/products/registry/productTypes";
 import { ProductBuilderLayout } from "@/features/products/builder/ProductBuilderLayout";
 import { STEP_COMPONENTS } from "@/features/products/builder/steps/StepRegistry";
 import { ProductStepPreview } from "@/features/products/builder/previews/ProductStepPreview";
-import type { ThumbnailLiveState, CheckoutLiveState } from "@/features/products/components/cards/types";
+import type {
+  ThumbnailLiveState,
+  CheckoutLiveState,
+} from "@/features/products/components/cards/types";
+import { useQueryParam } from "@/lib/hooks/useQueryParam";
 
 export default function EditProduct({
   params,
@@ -33,9 +47,10 @@ export default function EditProduct({
   });
 
   const router = useRouter();
-  const [saving, setSaving] = useState(false);
+  const [busyAction, setBusyAction] = useState<"save" | "next" | null>(null);
   const [publishing, setPublishing] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [unpublishOpen, setUnpublishOpen] = useState(false);
+  const [rawStep, setCurrentStep] = useQueryParam("step", "thumbnail");
   const [thumbnailLiveState, setThumbnailLiveState] = useState<ThumbnailLiveState>({
     style: "button",
     title: "",
@@ -54,12 +69,17 @@ export default function EditProduct({
   const saveFnsRef = useRef<Map<number, () => Promise<void>>>(new Map());
 
   const publishProduct = usePublishProduct();
-  const archiveProduct = useArchiveProduct();
+  const unpublishProduct = useUnpublishProduct();
 
   const isLoading = product === undefined || items === undefined;
   const needsItems = product?.type === "affiliate" && (items?.length ?? 0) === 0;
 
   const definition = product ? getProductTypeDefinition(product.type as ProductTypeKey) : null;
+  const currentStep =
+    definition && definition.steps.includes(rawStep as ProductStepKey)
+      ? rawStep
+      : (definition?.steps?.[0] ?? rawStep);
+  const currentStepIndex = definition ? definition.steps.indexOf(currentStep as ProductStepKey) : 0;
   const isLastStep = definition ? currentStepIndex === definition.steps.length - 1 : false;
 
   useEffect(() => {
@@ -80,10 +100,12 @@ export default function EditProduct({
         imageUrl: product.thumbnailImageUrl ?? null,
         price: product.price,
       });
-      const checkoutConfig = product.config?.checkout as {
-        buttonText?: string;
-        collectFields?: Array<{ key: string; enabled: boolean }>;
-      } | undefined;
+      const checkoutConfig = product.config?.checkout as
+        | {
+            buttonText?: string;
+            collectFields?: Array<{ key: string; enabled: boolean }>;
+          }
+        | undefined;
       const phoneField = checkoutConfig?.collectFields?.find((f) => f.key === "phone");
       setCheckoutLiveState({
         name: product.name,
@@ -103,43 +125,87 @@ export default function EditProduct({
   }, []);
 
   const handleNext = async () => {
-    if (!definition || saving) return;
-    setSaving(true);
+    if (!definition || busyAction) return;
+    setBusyAction("next");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
       if (isLastStep) {
         setPublishing(true);
         try {
           await publishProduct({ id: productId });
+          toast.success("Product published!");
           router.push("/dashboard/products");
         } catch {
+          toast.error("Failed to publish product", { description: "Please try again." });
         } finally {
           setPublishing(false);
         }
       } else {
-        setCurrentStepIndex((prev) => Math.min(prev + 1, definition.steps.length - 1));
+        toast.success("Changes saved!");
+        setCurrentStep(
+          definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]
+        );
       }
     } catch {
+      toast.error("Failed to save. Please try again.");
     } finally {
-      setSaving(false);
+      setBusyAction(null);
     }
   };
 
   const handleSave = async () => {
-    setSaving(true);
+    setBusyAction("save");
     try {
       await saveFnsRef.current.get(currentStepIndex)?.();
+      toast.success("Product saved!");
       router.push("/dashboard/products");
     } catch {
+      toast.error("Failed to save. Please try again.");
     } finally {
-      setSaving(false);
+      setBusyAction(null);
     }
   };
 
-  const handleArchive = async () => {
+  const handleUnpublish = async () => {
     try {
-      await archiveProduct({ id: productId });
-    } catch {}
+      await unpublishProduct({ id: productId });
+      toast.success("Product unpublished!");
+    } catch {
+      toast.error("Failed to unpublish product", { description: "Please try again." });
+    }
+  };
+
+  const handleSaveStay = async () => {
+    setBusyAction("save");
+    try {
+      await saveFnsRef.current.get(currentStepIndex)?.();
+      toast.success("Changes saved!");
+      if (isLastStep) {
+        router.push("/dashboard/products");
+      }
+    } catch {
+      toast.error("Failed to save. Please try again.");
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const handleNextForPublished = async () => {
+    if (!definition || busyAction) return;
+    setBusyAction("next");
+    try {
+      await saveFnsRef.current.get(currentStepIndex)?.();
+      toast.success("Changes saved!");
+      if (!isLastStep) {
+        setCurrentStep(
+          definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]
+        );
+      }
+    } catch {
+      toast.error("Failed to save. Please try again.");
+    } finally {
+      setBusyAction(null);
+    }
   };
 
   return (
@@ -158,41 +224,75 @@ export default function EditProduct({
             <div className="flex gap-2">
               {(product.status === "draft" || product.status === "archived") && (
                 <>
-                  <Button variant="outline" onClick={handleSave} disabled={saving}>
-                    <Save className="mr-1.5 h-4 w-4" />
-                    {saving ? "Saving..." : "Save"}
+                  <Button variant="outline" onClick={handleSave} disabled={!!busyAction}>
+                    {busyAction === "save" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Save
                   </Button>
                   <Button
                     variant="default"
                     onClick={handleNext}
-                    disabled={saving || publishing || needsItems}
+                    disabled={!!busyAction || publishing || needsItems}
                     title={needsItems ? "Add at least one item before publishing" : undefined}
                   >
-                  {isLastStep
-                    ? publishing
-                      ? "Publishing..."
-                      : <>
-                          <Upload className="mr-1.5 h-4 w-4" />
-                          Publish
-                        </>
-                    : saving
-                      ? "Saving..."
-                      : "Next"}
-                  {!isLastStep && !saving && <ArrowRight className="ml-1.5 h-4 w-4" />}
+                    {isLastStep ? (
+                      <>
+                        {publishing ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4" />
+                        )}
+                        Publish
+                      </>
+                    ) : (
+                      <>
+                        Next
+                        {busyAction === "next" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <ArrowRight className="h-4 w-4" />
+                        )}
+                      </>
+                    )}
                   </Button>
                 </>
               )}
 
               {product.status === "published" && (
                 <>
-                  <Button variant="outline" onClick={handleArchive}>
-                    <Archive className="mr-1.5 h-4 w-4" />
-                    Archive
+                  <Button variant="outline" onClick={() => setUnpublishOpen(true)}>
+                    <EyeOff className="h-4 w-4" />
+                    Unpublish
                   </Button>
-                  <Button variant="default" onClick={handleSave} disabled={saving}>
-                    <Save className="mr-1.5 h-4 w-4" />
-                    {saving ? "Saving..." : "Save"}
+                  <Button
+                    variant={isLastStep ? "default" : "outline"}
+                    onClick={handleSaveStay}
+                    disabled={!!busyAction}
+                  >
+                    {busyAction === "save" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Save
                   </Button>
+                  {!isLastStep && (
+                    <Button
+                      variant="default"
+                      onClick={handleNextForPublished}
+                      disabled={!!busyAction}
+                    >
+                      Next
+                      {busyAction === "next" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ArrowRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
                 </>
               )}
             </div>
@@ -229,7 +329,7 @@ export default function EditProduct({
             currentStepKey={definition.steps[currentStepIndex]}
             currentStepIndex={currentStepIndex}
             totalSteps={definition.steps.length}
-            onStepClick={setCurrentStepIndex}
+            onStepClick={(index) => setCurrentStep(definition.steps[index])}
             preview={
               <ProductStepPreview
                 stepKey={definition.steps[currentStepIndex]}
@@ -261,6 +361,7 @@ export default function EditProduct({
                       username: user?.username,
                       type: product.type,
                       status: product.status,
+                      publishedAt: product.publishedAt ?? null,
                       config: product.config as Record<string, unknown>,
                     }}
                     onRegisterSave={(fn) => handleRegisterSave(index, fn)}
@@ -277,6 +378,24 @@ export default function EditProduct({
           </ProductBuilderLayout>
         )}
       </div>
+
+      <AlertDialog open={unpublishOpen} onOpenChange={setUnpublishOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unpublish &ldquo;{product?.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This product will no longer show up in your store. Customers with the link won&rsquo;t
+              be able to access it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button variant="destructive" onClick={handleUnpublish}>
+              Unpublish
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

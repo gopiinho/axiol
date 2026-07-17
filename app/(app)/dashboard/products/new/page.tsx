@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import {
   CreateProductFlow,
@@ -29,7 +30,7 @@ export default function NewProduct() {
               disabled={isCreating}
               onClick={() => formRef.current?.submit()}
             >
-              {isCreating ? "Creating..." : "Create product"}
+              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create product"}
             </Button>
           </div>
         </div>

@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, X, User, Mail, Phone, Check } from "lucide-react";
+import { toast } from "sonner";
+import { Loader2, Plus, X, User, Mail, Phone } from "lucide-react";
 import { RichTextEditor } from "../../components/rich-text";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import {
   useUpdateProduct,
   useUpdateCheckoutConfig,
@@ -16,6 +18,7 @@ import {
 import type { ProductStepComponentProps } from "../../registry/steps";
 import type { CheckoutLiveState } from "@/features/products/components/cards/types";
 import type { Id } from "@/convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 2 * 1024 * 1024;
@@ -48,9 +51,7 @@ export function CheckoutStep({
   const savedPhoneEnabled =
     savedCheckoutConfig?.collectFields?.find((f) => f.key === "phone")?.enabled ?? false;
   const [phoneEnabled, setPhoneEnabled] = useState(savedPhoneEnabled);
-  const [ctaButtonText, setCtaButtonText] = useState(
-    savedCheckoutConfig?.buttonText || "Buy Now"
-  );
+  const [ctaButtonText, setCtaButtonText] = useState(savedCheckoutConfig?.buttonText || "Buy Now");
 
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -88,6 +89,7 @@ export function CheckoutStep({
         storageId: storageId as unknown as Id<"_storage">,
       });
     } catch {
+      toast.error("Failed to upload cover image", { description: "Please try again." });
       setCoverPreview(null);
     } finally {
       setCoverUploading(false);
@@ -101,7 +103,9 @@ export function CheckoutStep({
       await removeProductCoverImage({
         productId: productId as unknown as Id<"products">,
       });
-    } catch {}
+    } catch {
+      toast.error("Failed to remove cover image", { description: "Please try again." });
+    }
   };
 
   const handleSave = useCallback(async () => {
@@ -248,19 +252,15 @@ export function CheckoutStep({
                 </>
               ) : (
                 <>
-                  <span
+                  <Button
                     onClick={() => !coverUploading && inputRef.current?.click()}
-                    className={cn(
-                      "bg-card inline-flex items-center gap-2 rounded-xs px-4 py-2",
-                      "text-foreground border-border/60 border text-sm font-semibold shadow-sm",
-                      "transition-all duration-200",
-                      "hover:bg-accent hover:text-accent-foreground",
-                      "cursor-pointer"
-                    )}
+                    disabled={coverUploading}
+                    variant="outline"
+                    size="sm"
                   >
                     <Plus className="h-4 w-4" strokeWidth={2} />
                     Upload photo
-                  </span>
+                  </Button>
                   <span className="text-muted-foreground text-xs">
                     Images should be horizontal, at least 1280x720px, and 72 DPI (dots per inch).
                   </span>
@@ -394,23 +394,7 @@ export function CheckoutStep({
                 disabled
               />
             </div>
-            <button
-              type="button"
-              onClick={() => setPhoneEnabled(!phoneEnabled)}
-              className={cn(
-                "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors",
-                phoneEnabled
-                  ? "border-primary bg-card/90 text-primary"
-                  : "border-input bg-card/90 text-muted-foreground hover:border-primary/60"
-              )}
-            >
-              <Check
-                className={cn(
-                  "h-4 w-4 transition-opacity",
-                  phoneEnabled ? "opacity-100" : "opacity-0"
-                )}
-              />
-            </button>
+            <Switch checked={phoneEnabled} onCheckedChange={setPhoneEnabled} />
           </div>
         </div>
       </div>

@@ -106,10 +106,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="flex items-center gap-2">
             {visibleGranularities.length > 1 && (
-              <Select
-                value={granularity}
-                onValueChange={(v) => setGranularity(v as Granularity)}
-              >
+              <Select value={granularity} onValueChange={(v) => setGranularity(v as Granularity)}>
                 <SelectTrigger className="w-28">
                   <SelectValue />
                 </SelectTrigger>
@@ -210,8 +207,8 @@ export default function AnalyticsPage() {
                       size="sm"
                       className="gap-1.5"
                     >
-                      <Play className="h-3.5 w-3.5" />
-                      {startingWorker ? "Starting..." : "Start"}
+                      {startingWorker ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+                      Start
                     </Button>
                   )}
                 </div>
