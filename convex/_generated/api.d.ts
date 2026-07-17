@@ -26,6 +26,7 @@ import type * as productConfig from "../productConfig.js";
 import type * as productItems from "../productItems.js";
 import type * as products from "../products.js";
 import type * as security from "../security.js";
+import type * as sitemap from "../sitemap.js";
 import type * as storage from "../storage.js";
 import type * as users from "../users.js";
 import type * as vendors from "../vendors.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   productItems: typeof productItems;
   products: typeof products;
   security: typeof security;
+  sitemap: typeof sitemap;
   storage: typeof storage;
   users: typeof users;
   vendors: typeof vendors;

@@ -1,7 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Privacy Policy — Axiol",
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "Axiol Privacy Policy — learn how we collect, use, and protect your personal data on the Axiol creator platform.",
+  alternates: { canonical: "https://www.axiol.store/privacy" },
+  robots: { index: false },
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

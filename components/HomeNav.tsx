@@ -8,7 +8,7 @@ export default function HomeNav() {
     <div className="bg-foreground fixed top-0 z-100 flex w-full justify-between px-8 py-4 backdrop-blur-md sm:px-16 sm:py-6">
       <div className="flex items-center">
         <Image src={Logo} alt="Logo" width={50} height={50} />
-        <h1 className="text-primary text-3xl font-black">AXIOL</h1>
+        <span className="text-primary text-3xl font-black">AXIOL</span>
       </div>
       {/* <div className="flex gap-2 items-center">
         <Link href={"/login"}>
