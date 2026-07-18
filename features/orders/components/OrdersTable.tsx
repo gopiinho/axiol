@@ -47,7 +47,7 @@ const STATUS_OPTIONS = [
   { value: "refunded", label: "Refunded" },
 ] as const;
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 20;
 
 export default function OrdersTable() {
   const convex = useConvex();
@@ -55,23 +55,25 @@ export default function OrdersTable() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [productId, setProductId] = useState<string>("all");
-  const [offset, setOffset] = useState(0);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursorStack, setCursorStack] = useState<string[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      setOffset(0);
+      setCursor(null);
+      setCursorStack([]);
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { orders, continueCursor, isLoading } = useOrders({
+  const { orders, continueCursor, isDone, isLoading } = useOrders({
     search: debouncedSearch || undefined,
     status: status !== "all" ? (status as "paid" | "pending" | "failed" | "refunded") : undefined,
     productId: productId !== "all" ? (productId as Id<"products">) : undefined,
-    offset,
+    cursor,
     limit: PAGE_SIZE,
   });
 
@@ -158,14 +160,13 @@ export default function OrdersTable() {
   };
 
   const hasActiveFilters = search || status !== "all" || productId !== "all";
-  const hasMore = continueCursor !== null;
-
   const clearFilters = () => {
     setSearch("");
     setDebouncedSearch("");
     setStatus("all");
     setProductId("all");
-    setOffset(0);
+    setCursor(null);
+    setCursorStack([]);
   };
 
   return (
@@ -177,14 +178,14 @@ export default function OrdersTable() {
           <div className="relative">
             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
-              placeholder="Search by name or email..."
+              placeholder="Search by email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
           </div>
           <div className="flex items-center gap-2">
-            <Select value={status} onValueChange={(v) => { setStatus(v); setOffset(0); }}>
+            <Select value={status} onValueChange={(v) => { setStatus(v); setCursor(null); setCursorStack([]); }}>
               <SelectTrigger className="flex-1">
                 <SelectValue />
               </SelectTrigger>
@@ -196,7 +197,7 @@ export default function OrdersTable() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={productId} onValueChange={(v) => { setProductId(v); setOffset(0); }}>
+            <Select value={productId} onValueChange={(v) => { setProductId(v); setCursor(null); setCursorStack([]); }}>
               <SelectTrigger className="flex-1">
                 <SelectValue placeholder="All products" />
               </SelectTrigger>
@@ -237,13 +238,13 @@ export default function OrdersTable() {
             <div className="relative w-64">
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
-                placeholder="Search by name or email..."
+                placeholder="Search by email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
               />
             </div>
-            <Select value={status} onValueChange={(v) => { setStatus(v); setOffset(0); }}>
+            <Select value={status} onValueChange={(v) => { setStatus(v); setCursor(null); setCursorStack([]); }}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -255,7 +256,7 @@ export default function OrdersTable() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={productId} onValueChange={(v) => { setProductId(v); setOffset(0); }}>
+            <Select value={productId} onValueChange={(v) => { setProductId(v); setCursor(null); setCursorStack([]); }}>
               <SelectTrigger className="w-44">
                 <SelectValue placeholder="All products" />
               </SelectTrigger>
@@ -353,7 +354,7 @@ export default function OrdersTable() {
                     <td className="hidden px-4 py-3 sm:table-cell" />
                     <td className="hidden px-4 py-3 md:table-cell">
                       <span className="text-muted-foreground text-sm">
-                        {offset + 1}–{offset + orders.length}
+                        {orders.length} order{orders.length !== 1 ? "s" : ""}
                       </span>
                     </td>
                   </tr>
@@ -370,8 +371,12 @@ export default function OrdersTable() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={offset === 0}
-                  onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+                  disabled={cursorStack.length === 0}
+                  onClick={() => {
+                    const prev = cursorStack.slice(0, -1);
+                    setCursor(cursorStack[cursorStack.length - 1] ?? null);
+                    setCursorStack(prev);
+                  }}
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
@@ -379,8 +384,11 @@ export default function OrdersTable() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={!hasMore}
-                  onClick={() => setOffset(offset + PAGE_SIZE)}
+                  disabled={isDone}
+                  onClick={() => {
+                    setCursorStack((prev) => [...prev, cursor ?? ""]);
+                    setCursor(continueCursor);
+                  }}
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />

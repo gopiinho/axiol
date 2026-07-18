@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { requireVerifiedSession } from "./security";
 
 export const create = mutation({
@@ -81,67 +82,81 @@ export const listBySeller = query({
     ),
     productId: v.optional(v.id("products")),
     search: v.optional(v.string()),
-    offset: v.optional(v.number()),
+    cursor: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireVerifiedSession(ctx);
-    const limit = args.limit ?? 50;
-    const offset = args.offset ?? 0;
+    const limit = args.limit ?? 20;
+    const paginationOpts = { cursor: args.cursor ?? null, numItems: limit };
 
-    let orders = await ctx.db
-      .query("orders")
-      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
-      .order("desc")
-      .collect();
+    async function enrich(orders: Doc<"orders">[]) {
+      return await Promise.all(
+        orders.map(async (order) => {
+          const product = await ctx.db.get(order.productId);
+          const productName = product?.name ?? "Unknown Product";
 
-    if (args.status) {
-      orders = orders.filter((o) => o.status === args.status);
-    }
-    if (args.productId) {
-      orders = orders.filter((o) => o.productId === args.productId);
-    }
-    if (args.search) {
-      const q = args.search.toLowerCase();
-      orders = orders.filter(
-        (o) => o.buyerName.toLowerCase().includes(q) || o.buyerEmail.toLowerCase().includes(q)
+          const deliveryToken = await ctx.db
+            .query("deliveryTokens")
+            .withIndex("by_order", (q) => q.eq("orderId", order._id))
+            .first();
+
+          const deliveries = await ctx.db
+            .query("deliveries")
+            .filter((q) => q.eq(q.field("orderId"), order._id))
+            .order("desc")
+            .take(1);
+
+          return {
+            ...order,
+            productName,
+            deliveryTokenStatus: deliveryToken?.status ?? null,
+            deliveryDownloadCount: deliveryToken?.downloadCount ?? 0,
+            deliveryMaxDownloads: deliveryToken?.maxDownloads ?? 0,
+            deliveryStatus: deliveries[0]?.status ?? null,
+          };
+        })
       );
     }
 
-    const total = orders.length;
-    const page = orders.slice(offset, offset + limit);
+    if (args.search) {
+      const builder = ctx.db
+        .query("orders")
+        .withSearchIndex("search_buyer_email", (q) => {
+          let query = q.search("buyerEmail", args.search!).eq("sellerId", userId);
+          if (args.status) query = query.eq("status", args.status);
+          if (args.productId) query = query.eq("productId", args.productId);
+          return query;
+        });
 
-    const enriched = await Promise.all(
-      page.map(async (order) => {
-        const product = await ctx.db.get(order.productId);
-        const productName = product?.name ?? "Unknown Product";
+      const result = await builder.paginate(paginationOpts);
+      const enriched = await enrich(result.page);
+      return { orders: enriched, continueCursor: result.continueCursor, isDone: result.isDone };
+    }
 
-        const deliveryToken = await ctx.db
-          .query("deliveryTokens")
-          .withIndex("by_order", (q) => q.eq("orderId", order._id))
-          .first();
+    if (args.status && !args.productId) {
+      const result = await ctx.db
+        .query("orders")
+        .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", args.status!))
+        .order("desc")
+        .paginate(paginationOpts);
 
-        const deliveries = await ctx.db
-          .query("deliveries")
-          .filter((q) => q.eq(q.field("orderId"), order._id))
-          .order("desc")
-          .take(1);
+      const enriched = await enrich(result.page);
+      return { orders: enriched, continueCursor: result.continueCursor, isDone: result.isDone };
+    }
 
-        return {
-          ...order,
-          productName,
-          deliveryTokenStatus: deliveryToken?.status ?? null,
-          deliveryDownloadCount: deliveryToken?.downloadCount ?? 0,
-          deliveryMaxDownloads: deliveryToken?.maxDownloads ?? 0,
-          deliveryStatus: deliveries[0]?.status ?? null,
-        };
-      })
-    );
+    const result = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .order("desc")
+      .paginate(paginationOpts);
 
-    return {
-      orders: enriched,
-      continueCursor: offset + limit < total ? String(offset + limit) : null,
-    };
+    let page = result.page;
+    if (args.status) page = page.filter((o) => o.status === args.status);
+    if (args.productId) page = page.filter((o) => o.productId === args.productId);
+
+    const enriched = await enrich(page);
+    return { orders: enriched, continueCursor: result.continueCursor, isDone: result.isDone };
   },
 });
 
@@ -156,23 +171,39 @@ export const listBySellerForExport = query({
   handler: async (ctx, args) => {
     const { userId } = await requireVerifiedSession(ctx);
 
-    let orders = await ctx.db
-      .query("orders")
-      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
-      .order("desc")
-      .collect();
-
-    if (args.status) {
-      orders = orders.filter((o) => o.status === args.status);
-    }
-    if (args.productId) {
-      orders = orders.filter((o) => o.productId === args.productId);
-    }
+    let orders: Doc<"orders">[];
     if (args.search) {
-      const q = args.search.toLowerCase();
-      orders = orders.filter(
-        (o) => o.buyerName.toLowerCase().includes(q) || o.buyerEmail.toLowerCase().includes(q)
-      );
+      const result = await ctx.db
+        .query("orders")
+        .withSearchIndex("search_buyer_email", (q) => {
+          let query = q.search("buyerEmail", args.search!).eq("sellerId", userId);
+          if (args.status) query = query.eq("status", args.status);
+          if (args.productId) query = query.eq("productId", args.productId);
+          return query;
+        })
+        .take(10000);
+      orders = result;
+    } else if (args.status && !args.productId) {
+      orders = await ctx.db
+        .query("orders")
+        .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", args.status!))
+        .order("desc")
+        .take(10000);
+    } else if (args.status || args.productId) {
+      let all = await ctx.db
+        .query("orders")
+        .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+        .order("desc")
+        .take(10000);
+      if (args.status) all = all.filter((o) => o.status === args.status);
+      if (args.productId) all = all.filter((o) => o.productId === args.productId);
+      orders = all;
+    } else {
+      orders = await ctx.db
+        .query("orders")
+        .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+        .order("desc")
+        .take(10000);
     }
 
     const enriched = await Promise.all(

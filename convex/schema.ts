@@ -163,7 +163,11 @@ export default defineSchema({
   })
     .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"])
-    .index("by_seller_status", ["sellerId", "status"]),
+    .index("by_seller_status", ["sellerId", "status"])
+    .searchIndex("search_buyer_email", {
+      searchField: "buyerEmail",
+      filterFields: ["sellerId", "status", "productId"],
+    }),
 
   productClicks: defineTable({
     productId: v.id("products"),

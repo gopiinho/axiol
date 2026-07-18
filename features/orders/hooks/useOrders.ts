@@ -9,15 +9,19 @@ export function useOrders(args: {
   status?: "pending" | "paid" | "failed" | "refunded";
   productId?: Id<"products">;
   search?: string;
-  offset?: number;
+  cursor?: string | null;
   limit?: number;
 }) {
-  const result = useQuery(api.orders.listBySeller, args);
+  const result = useQuery(api.orders.listBySeller, {
+    ...args,
+    cursor: args.cursor ?? undefined,
+  });
   const cached = useCachedQueryResult("orders", result);
 
   return {
     orders: cached?.orders ?? [],
     continueCursor: cached?.continueCursor ?? null,
+    isDone: cached?.isDone ?? true,
     isLoading: result === undefined && cached === undefined,
   };
 }
