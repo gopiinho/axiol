@@ -37,6 +37,20 @@ export async function GET(request: NextRequest) {
     }
 
     if (order.status === "paid") {
+      if (!order.paymentMethod && order.paymentReference) {
+        try {
+          const payments = await cashfree.PGOrderFetchPayments(order.paymentReference);
+          const pg = payments.data?.[0]?.payment_group;
+          if (pg) {
+            await convex.mutation(api.orders.updatePaymentMethod, {
+              orderId: order._id,
+              paymentMethod: pg,
+            });
+          }
+        } catch {
+          // best-effort
+        }
+      }
       try {
         const tokenResult = await convex.mutation(api.deliveries.generateToken, {
           orderId: order._id,
@@ -61,6 +75,19 @@ export async function GET(request: NextRequest) {
     const cfStatus = cashfreeOrder.data.order_status;
 
     if (cfStatus === "PAID") {
+      try {
+        const payments = await cashfree.PGOrderFetchPayments(cfOrderId);
+        const pg = payments.data?.[0]?.payment_group;
+        if (pg) {
+          await convex.mutation(api.orders.updatePaymentMethod, {
+            orderId: order._id,
+            paymentMethod: pg,
+          });
+        }
+      } catch {
+        // best-effort
+      }
+
       await convex.mutation(api.orders.updateStatus, {
         orderId: order._id,
         status: "paid",

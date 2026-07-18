@@ -80,6 +80,17 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   );
 }
 
+function formatPaymentMethod(method: string): string {
+  return method
+    .split("_")
+    .map((w) => {
+      if (w === "upi") return "UPI";
+      if (w === "emi") return "EMI";
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    })
+    .join(" ");
+}
+
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
     <div className="border-border/20 border-b pb-2">
@@ -161,6 +172,13 @@ export function OrderDetailSheet({
                   {formatPrice(order.amount, order.currency)}
                 </span>
               </DetailRow>
+              {order.paymentMethod && (
+                <DetailRow label="Method">
+                  <span className="text-sm font-semibold">
+                    {formatPaymentMethod(order.paymentMethod)}
+                  </span>
+                </DetailRow>
+              )}
               {order.paymentReference && (
                 <DetailRow label="Reference" mono>
                   <span className="flex items-center gap-1.5">

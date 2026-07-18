@@ -150,6 +150,7 @@ export default defineSchema({
       v.literal("failed"),
       v.literal("refunded")
     ),
+    paymentMethod: v.optional(v.string()),
     paymentProvider: v.optional(v.string()),
     paymentReference: v.optional(v.string()),
     createdAt: v.number(),

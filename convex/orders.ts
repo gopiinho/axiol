@@ -64,6 +64,16 @@ export const updateStatus = mutation({
   },
 });
 
+export const updatePaymentMethod = mutation({
+  args: {
+    orderId: v.id("orders"),
+    paymentMethod: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.orderId, { paymentMethod: args.paymentMethod });
+  },
+});
+
 export const listBySeller = query({
   args: {
     status: v.optional(
