@@ -64,6 +64,129 @@ export const updateStatus = mutation({
   },
 });
 
+export const listBySeller = query({
+  args: {
+    status: v.optional(
+      v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"), v.literal("refunded"))
+    ),
+    productId: v.optional(v.id("products")),
+    search: v.optional(v.string()),
+    offset: v.optional(v.number()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireVerifiedSession(ctx);
+    const limit = args.limit ?? 50;
+    const offset = args.offset ?? 0;
+
+    let orders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .order("desc")
+      .collect();
+
+    if (args.status) {
+      orders = orders.filter((o) => o.status === args.status);
+    }
+    if (args.productId) {
+      orders = orders.filter((o) => o.productId === args.productId);
+    }
+    if (args.search) {
+      const q = args.search.toLowerCase();
+      orders = orders.filter(
+        (o) => o.buyerName.toLowerCase().includes(q) || o.buyerEmail.toLowerCase().includes(q)
+      );
+    }
+
+    const total = orders.length;
+    const page = orders.slice(offset, offset + limit);
+
+    const enriched = await Promise.all(
+      page.map(async (order) => {
+        const product = await ctx.db.get(order.productId);
+        const productName = product?.name ?? "Unknown Product";
+
+        const deliveryToken = await ctx.db
+          .query("deliveryTokens")
+          .withIndex("by_order", (q) => q.eq("orderId", order._id))
+          .first();
+
+        const deliveries = await ctx.db
+          .query("deliveries")
+          .filter((q) => q.eq(q.field("orderId"), order._id))
+          .order("desc")
+          .take(1);
+
+        return {
+          ...order,
+          productName,
+          deliveryTokenStatus: deliveryToken?.status ?? null,
+          deliveryDownloadCount: deliveryToken?.downloadCount ?? 0,
+          deliveryMaxDownloads: deliveryToken?.maxDownloads ?? 0,
+          deliveryStatus: deliveries[0]?.status ?? null,
+        };
+      })
+    );
+
+    return {
+      orders: enriched,
+      continueCursor: offset + limit < total ? String(offset + limit) : null,
+    };
+  },
+});
+
+export const listBySellerForExport = query({
+  args: {
+    status: v.optional(
+      v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"), v.literal("refunded"))
+    ),
+    productId: v.optional(v.id("products")),
+    search: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireVerifiedSession(ctx);
+
+    let orders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .order("desc")
+      .collect();
+
+    if (args.status) {
+      orders = orders.filter((o) => o.status === args.status);
+    }
+    if (args.productId) {
+      orders = orders.filter((o) => o.productId === args.productId);
+    }
+    if (args.search) {
+      const q = args.search.toLowerCase();
+      orders = orders.filter(
+        (o) => o.buyerName.toLowerCase().includes(q) || o.buyerEmail.toLowerCase().includes(q)
+      );
+    }
+
+    const enriched = await Promise.all(
+      orders.map(async (order) => {
+        const product = await ctx.db.get(order.productId);
+        const productName = product?.name ?? "Unknown Product";
+
+        const deliveryToken = await ctx.db
+          .query("deliveryTokens")
+          .withIndex("by_order", (q) => q.eq("orderId", order._id))
+          .first();
+
+        return {
+          ...order,
+          productName,
+          deliveryTokenStatus: deliveryToken?.status ?? null,
+        };
+      })
+    );
+
+    return { orders: enriched };
+  },
+});
+
 export const getById = query({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
