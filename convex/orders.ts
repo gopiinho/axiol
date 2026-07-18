@@ -9,15 +9,15 @@ export const create = mutation({
     buyerEmail: v.string(),
     buyerName: v.string(),
     buyerPhone: v.optional(v.string()),
-    amountCents: v.number(),
+    amount: v.number(),
     currency: v.string(),
     paymentProvider: v.string(),
     paymentReference: v.string(),
     vendorId: v.optional(v.string()),
-    vendorShareCents: v.optional(v.number()),
-    platformFeeCents: v.optional(v.number()),
+    vendorShare: v.optional(v.number()),
+    platformFee: v.optional(v.number()),
     platformFeePct: v.optional(v.number()),
-    tdsCents: v.optional(v.number()),
+    tds: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("orders", {
@@ -26,17 +26,17 @@ export const create = mutation({
       buyerEmail: args.buyerEmail,
       buyerName: args.buyerName,
       buyerPhone: args.buyerPhone,
-      amountCents: args.amountCents,
+      amount: args.amount,
       currency: args.currency,
       status: "pending",
       paymentProvider: args.paymentProvider,
       paymentReference: args.paymentReference,
       createdAt: Date.now(),
       vendorId: args.vendorId,
-      vendorShareCents: args.vendorShareCents,
-      platformFeeCents: args.platformFeeCents,
+      vendorShare: args.vendorShare,
+      platformFee: args.platformFee,
       platformFeePct: args.platformFeePct,
-      tdsCents: args.tdsCents,
+      tds: args.tds,
     });
   },
 });
@@ -338,7 +338,7 @@ export const getRevenueTimeline = query({
       const key = bucketKey(order.paidAt, args.granularity);
       revenueByBucket.set(
         key,
-        (revenueByBucket.get(key) ?? 0) + (order.vendorShareCents ?? order.amountCents)
+        (revenueByBucket.get(key) ?? 0) + (order.vendorShare ?? order.amount)
       );
       salesByBucket.set(key, (salesByBucket.get(key) ?? 0) + 1);
     }
@@ -377,13 +377,13 @@ export const getEarningsSummary = query({
     let last28Days = 0;
 
     for (const order of paidOrders) {
-      totalEarnings += order.vendorShareCents ?? order.amountCents;
+      totalEarnings += order.vendorShare ?? order.amount;
       totalSales += 1;
       if (order.paidAt && order.paidAt >= sevenDaysAgo) {
-        last7Days += order.vendorShareCents ?? order.amountCents;
+        last7Days += order.vendorShare ?? order.amount;
       }
       if (order.paidAt && order.paidAt >= twentyEightDaysAgo) {
-        last28Days += order.vendorShareCents ?? order.amountCents;
+        last28Days += order.vendorShare ?? order.amount;
       }
     }
 

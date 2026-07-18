@@ -76,14 +76,14 @@ export const listByUser = query({
       .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
       .collect();
 
-    const salesByProduct = new Map<string, { sales: number; revenueCents: number }>();
+    const salesByProduct = new Map<string, { sales: number; revenue: number }>();
     for (const order of paidOrders) {
       const existing = salesByProduct.get(order.productId);
       if (existing) {
         existing.sales += 1;
-        existing.revenueCents += order.amountCents;
+        existing.revenue += order.amount;
       } else {
-        salesByProduct.set(order.productId, { sales: 1, revenueCents: order.amountCents });
+        salesByProduct.set(order.productId, { sales: 1, revenue: order.amount });
       }
     }
 
@@ -117,7 +117,7 @@ export const listByUser = query({
           thumbnailImageUrl,
           username: user.username,
           sales: stats?.sales ?? 0,
-          revenueCents: stats?.revenueCents ?? 0,
+          revenue: stats?.revenue ?? 0,
           clicks: clicksByProduct.get(product._id) ?? 0,
         };
       })
@@ -160,10 +160,10 @@ export const getStoreTotals = query({
       .collect();
 
     let totalSales = 0;
-    let totalRevenueCents = 0;
+    let totalRevenue = 0;
     for (const order of paidOrders) {
       totalSales += 1;
-      totalRevenueCents += order.amountCents;
+      totalRevenue += order.amount;
     }
 
     const allClicks = await ctx.db
@@ -173,7 +173,7 @@ export const getStoreTotals = query({
 
     return {
       totalSales,
-      totalRevenueCents,
+      totalRevenue,
       totalClicks: allClicks.length,
     };
   },
@@ -269,7 +269,7 @@ export const create = mutation({
       description: validated.description,
       coverImageId: args.coverImageId,
       price: validated.price,
-      priceCents: parsePriceRupees(validated.price),
+      priceValue: parsePriceRupees(validated.price),
       type: validated.type as "affiliate" | "digital",
       status: "draft",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -313,7 +313,7 @@ export const update = mutation({
       productUrl,
       description: validated.description,
       price: validated.price,
-      priceCents: parsePriceRupees(validated.price),
+      priceValue: parsePriceRupees(validated.price),
       type: validated.type as "affiliate" | "digital",
       automationEnabled: validated.automationEnabled,
       updatedAt: Date.now(),
@@ -600,7 +600,7 @@ export const duplicate = mutation({
       description: product.description,
       coverImageId: undefined,
       price: product.price,
-      priceCents: product.priceCents,
+      priceValue: product.priceValue,
       type: product.type,
       status: "draft",
       config: {
