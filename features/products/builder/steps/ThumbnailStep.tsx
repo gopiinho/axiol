@@ -54,6 +54,12 @@ export function ThumbnailStep({
   const [title, setTitle] = useState(savedThumbnail?.title || product.name);
   const [subtitle, setSubtitle] = useState(savedThumbnail?.subtitle ?? "");
   const [buttonText, setButtonText] = useState(savedThumbnail?.buttonText ?? "");
+  const [fieldErrors, setFieldErrors] = useState<{
+    title?: string;
+    subtitle?: string;
+    buttonText?: string;
+  }>({});
+
   const [uploading, setUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -117,7 +123,35 @@ export function ThumbnailStep({
     }
   };
 
+  const validate = useCallback((): boolean => {
+    const errors: typeof fieldErrors = {};
+    const trimmedTitle = title.trim();
+    const trimmedSubtitle = subtitle.trim();
+    const trimmedButtonText = buttonText.trim();
+
+    if (style !== "button" && !trimmedTitle) {
+      errors.title = "Title is required for this style.";
+    } else if (style !== "button" && trimmedTitle.length > 200) {
+      errors.title = "Title must be at most 200 characters.";
+    }
+
+    if (trimmedSubtitle.length > 300) {
+      errors.subtitle = "Subtitle must be at most 300 characters.";
+    }
+
+    if (trimmedButtonText.length > 100) {
+      errors.buttonText = "Button text must be at most 100 characters.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [style, title, subtitle, buttonText]);
+
   const handleSave = useCallback(async () => {
+    if (!validate()) {
+      throw new Error("Please fix the errors above before saving.");
+    }
+
     await updateThumbnailConfig({
       productId: productId as unknown as Id<"products">,
       config: {
@@ -127,7 +161,7 @@ export function ThumbnailStep({
         buttonText: buttonText.trim() || "Download Now",
       },
     });
-  }, [productId, product.name, style, title, subtitle, buttonText, updateThumbnailConfig]);
+  }, [productId, product.name, style, title, subtitle, buttonText, updateThumbnailConfig, validate]);
 
   useEffect(() => {
     onRegisterSave?.(handleSave);
@@ -279,9 +313,16 @@ export function ThumbnailStep({
               <Input
                 id="thumbnail-title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, title: undefined }));
+                }}
                 placeholder={product.name}
+                aria-invalid={!!fieldErrors.title}
               />
+              {fieldErrors.title && (
+                <p className="text-destructive text-sm">{fieldErrors.title}</p>
+              )}
             </div>
           )}
 
@@ -293,9 +334,16 @@ export function ThumbnailStep({
               <Input
                 id="thumbnail-subtitle"
                 value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
+                onChange={(e) => {
+                  setSubtitle(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, subtitle: undefined }));
+                }}
                 placeholder="A short tagline"
+                aria-invalid={!!fieldErrors.subtitle}
               />
+              {fieldErrors.subtitle && (
+                <p className="text-destructive text-sm">{fieldErrors.subtitle}</p>
+              )}
             </div>
           )}
 
@@ -306,9 +354,16 @@ export function ThumbnailStep({
             <Input
               id="thumbnail-button-text"
               value={buttonText}
-              onChange={(e) => setButtonText(e.target.value)}
+              onChange={(e) => {
+                setButtonText(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, buttonText: undefined }));
+              }}
               placeholder="Download Now"
+              aria-invalid={!!fieldErrors.buttonText}
             />
+            {fieldErrors.buttonText && (
+              <p className="text-destructive text-sm">{fieldErrors.buttonText}</p>
+            )}
           </div>
         </div>
       </div>

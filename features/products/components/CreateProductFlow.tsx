@@ -36,6 +36,7 @@ export const CreateProductFlow = forwardRef<
 
     if (!name.trim()) newErrors.name = "Name is required";
     if (showPrice && !price.trim()) newErrors.price = "Price is required";
+    else if (showPrice && price.trim() && parseFloat(price.trim()) < 10) newErrors.price = "Minimum price is ₹10";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0 || loading) return;
@@ -50,10 +51,8 @@ export const CreateProductFlow = forwardRef<
       });
       toast.success("Product created!");
       router.push(`/dashboard/products/${productId}/edit`);
-    } catch {
-      toast.error("Couldn't create product", {
-        description: "Check your connection and try again.",
-      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't create product");
     } finally {
       setLoading(false);
     }

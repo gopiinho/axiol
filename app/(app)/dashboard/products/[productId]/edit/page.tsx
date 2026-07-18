@@ -135,8 +135,8 @@ export default function EditProduct({
           await publishProduct({ id: productId });
           toast.success("Product published!");
           router.push("/dashboard/products");
-        } catch {
-          toast.error("Failed to publish product", { description: "Please try again." });
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Failed to publish product");
         } finally {
           setPublishing(false);
         }
@@ -146,8 +146,8 @@ export default function EditProduct({
           definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]
         );
       }
-    } catch {
-      toast.error("Failed to save. Please try again.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }
@@ -159,8 +159,8 @@ export default function EditProduct({
       await saveFnsRef.current.get(currentStepIndex)?.();
       toast.success("Product saved!");
       router.push("/dashboard/products");
-    } catch {
-      toast.error("Failed to save. Please try again.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }
@@ -170,8 +170,8 @@ export default function EditProduct({
     try {
       await unpublishProduct({ id: productId });
       toast.success("Product unpublished!");
-    } catch {
-      toast.error("Failed to unpublish product", { description: "Please try again." });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to unpublish product");
     }
   };
 
@@ -183,8 +183,8 @@ export default function EditProduct({
       if (isLastStep) {
         router.push("/dashboard/products");
       }
-    } catch {
-      toast.error("Failed to save. Please try again.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }
@@ -201,8 +201,8 @@ export default function EditProduct({
           definition.steps[Math.min(currentStepIndex + 1, definition.steps.length - 1)]
         );
       }
-    } catch {
-      toast.error("Failed to save. Please try again.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save. Please try again.");
     } finally {
       setBusyAction(null);
     }
