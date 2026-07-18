@@ -35,12 +35,12 @@ function exactTime(ts: number): string {
   });
 }
 
-function formatPrice(cents: number, currency = "INR"): string {
+function formatPrice(amount: number, currency = "INR"): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(cents);
+  }).format(amount);
 }
 
 export function OrderMobileCard({
@@ -64,7 +64,7 @@ export function OrderMobileCard({
         <OrderStatusBadge status={order.status} />
       </div>
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-sm font-semibold">{formatPrice(order.amountCents, order.currency)}</span>
+        <span className="text-sm font-semibold">{formatPrice(order.amount, order.currency)}</span>
         <span className="text-muted-foreground/30">·</span>
         <span className="text-muted-foreground text-[11px]">{relativeTime(order.createdAt)}</span>
       </div>

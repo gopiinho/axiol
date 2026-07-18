@@ -31,12 +31,12 @@ type OrderWithDetails = Doc<"orders"> & {
   deliveryStatus: string | null;
 };
 
-function formatPrice(cents: number, currency = "INR"): string {
+function formatPrice(amount: number, currency = "INR"): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(cents);
+  }).format(amount);
 }
 
 const STATUS_OPTIONS = [
@@ -123,16 +123,16 @@ export default function OrdersTable() {
           o.buyerName,
           o.buyerEmail,
           o.buyerPhone ?? "",
-          (o.amountCents / 100).toFixed(2),
+          o.amount.toFixed(2),
           o.currency,
           o.status,
           o.paymentProvider ?? "",
           o.paymentReference ?? "",
           new Date(o.createdAt).toISOString(),
           o.paidAt ? new Date(o.paidAt).toISOString() : "",
-          o.platformFeeCents ? (o.platformFeeCents / 100).toFixed(2) : "",
-          o.tdsCents ? (o.tdsCents / 100).toFixed(2) : "",
-          o.vendorShareCents ? (o.vendorShareCents / 100).toFixed(2) : "",
+           o.platformFee ? o.platformFee.toFixed(2) : "",
+           o.tds ? o.tds.toFixed(2) : "",
+           o.vendorShare ? o.vendorShare.toFixed(2) : "",
           "",
         ]
           .map((v) => `"${String(v).replace(/"/g, '""')}"`)
@@ -344,7 +344,7 @@ export default function OrdersTable() {
                     <td className="hidden px-4 py-3 sm:table-cell" />
                     <td className="hidden px-4 py-3 text-sm font-semibold sm:table-cell">
                       {formatPrice(
-                        orders.reduce((s, o) => s + o.amountCents, 0),
+                        orders.reduce((s, o) => s + o.amount, 0),
                         orders[0]?.currency
                       )}
                     </td>

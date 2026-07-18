@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const amount = new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: order.currency,
-    }).format(order.amountCents);
+    }).format(order.amount);
 
     const orderDate = new Date(order.paidAt ?? order.createdAt).toLocaleDateString("en-IN", {
       year: "numeric",

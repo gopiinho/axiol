@@ -35,12 +35,12 @@ function exactTime(ts: number): string {
   });
 }
 
-function formatPrice(cents: number, currency = "INR"): string {
+function formatPrice(amount: number, currency = "INR"): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(cents);
+  }).format(amount);
 }
 
 export function OrderRow({
@@ -65,7 +65,7 @@ export function OrderRow({
         </div>
       </td>
       <td className="hidden px-4 py-3.5 sm:table-cell">
-        <span className="text-sm font-medium">{formatPrice(order.amountCents, order.currency)}</span>
+        <span className="text-sm font-medium">{formatPrice(order.amount, order.currency)}</span>
       </td>
       <td className="hidden px-4 py-3.5 sm:table-cell">
         <OrderStatusBadge status={order.status} />

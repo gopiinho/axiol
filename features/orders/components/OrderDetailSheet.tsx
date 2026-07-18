@@ -34,12 +34,12 @@ function formatDate(ts: number | undefined): string {
   });
 }
 
-function formatPrice(cents: number, currency = "INR"): string {
+function formatPrice(amount: number, currency = "INR"): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(cents);
+  }).format(amount);
 }
 
 function DetailRow({
@@ -123,9 +123,9 @@ export function OrderDetailSheet({
   };
 
   const hasFees =
-    (order.platformFeeCents && order.platformFeeCents > 0) ||
-    (order.tdsCents && order.tdsCents > 0) ||
-    (order.vendorShareCents && order.vendorShareCents > 0);
+    (order.platformFee && order.platformFee > 0) ||
+    (order.tds && order.tds > 0) ||
+    (order.vendorShare && order.vendorShare > 0);
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
@@ -158,7 +158,7 @@ export function OrderDetailSheet({
             <div className="space-y-2.5">
               <DetailRow label="Amount">
                 <span className="text-base font-bold">
-                  {formatPrice(order.amountCents, order.currency)}
+                  {formatPrice(order.amount, order.currency)}
                 </span>
               </DetailRow>
               {order.paymentReference && (
@@ -176,15 +176,15 @@ export function OrderDetailSheet({
                 <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.06em] uppercase">
                   Fee breakdown
                 </p>
-                {order.platformFeeCents ? (
-                  <DetailRow label="Platform fee">{formatPrice(order.platformFeeCents)}</DetailRow>
+                {order.platformFee ? (
+                  <DetailRow label="Platform fee">{formatPrice(order.platformFee)}</DetailRow>
                 ) : null}
-                {order.tdsCents ? (
-                  <DetailRow label="TDS">{formatPrice(order.tdsCents)}</DetailRow>
+                {order.tds ? (
+                  <DetailRow label="TDS">{formatPrice(order.tds)}</DetailRow>
                 ) : null}
-                {order.vendorShareCents ? (
+                {order.vendorShare ? (
                   <DetailRow label="You get">
-                    <span className="text-emerald-600">{formatPrice(order.vendorShareCents)}</span>
+                    <span className="text-emerald-600">{formatPrice(order.vendorShare)}</span>
                   </DetailRow>
                 ) : null}
               </div>
