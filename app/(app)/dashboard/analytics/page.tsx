@@ -70,7 +70,7 @@ export default function AnalyticsPage() {
   const { products, isLoading: productsLoading } = useProducts();
   const topProducts = (products ?? [])
     .filter((p) => p.sales > 0)
-    .sort((a, b) => b.revenueCents - a.revenueCents)
+    .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10);
 
   /*

@@ -179,6 +179,27 @@ export const useDownload = mutation({
   },
 });
 
+export const markDeliverySentByOrderId = mutation({
+  args: {
+    orderId: v.id("orders"),
+  },
+  handler: async (ctx, args) => {
+    const deliveries = await ctx.db
+      .query("deliveries")
+      .filter((q) => q.eq(q.field("orderId"), args.orderId))
+      .order("desc")
+      .take(1);
+
+    const delivery = deliveries[0];
+    if (delivery && delivery.status !== "sent") {
+      await ctx.db.patch(delivery._id, {
+        status: "sent",
+        sentAt: Date.now(),
+      });
+    }
+  },
+});
+
 export const getProductForDelivery = query({
   args: { productId: v.id("products") },
   handler: async (ctx, args) => {

@@ -8,7 +8,7 @@ export type ProductData = {
   description?: string | null;
   productUrl: string;
   price?: string | null;
-  priceCents?: number | null;
+  priceValue?: number | null;
   coverImageUrl?: string | null;
   coverImageId?: string | null;
   thumbnailImageUrl?: string | null;

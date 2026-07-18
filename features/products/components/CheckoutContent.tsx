@@ -16,7 +16,7 @@ interface CheckoutContentProps {
     type: string;
     productUrl?: string | null;
     price?: string | null;
-    priceCents?: number | null;
+    priceValue?: number | null;
     description?: string | null;
     coverImageUrl?: string | null;
     config?: Record<string, unknown>;
@@ -81,8 +81,8 @@ export function CheckoutContent({
 
   const rawPrice = product.price
     ? product.price
-    : product.priceCents && product.priceCents > 0
-      ? `₹ ${product.priceCents}`
+    : product.priceValue && product.priceValue > 0
+      ? `₹ ${product.priceValue}`
       : null;
 
   const displayPrice = rawPrice ? (/^[₹$€£]/.test(rawPrice) ? rawPrice : `₹ ${rawPrice}`) : "Free";

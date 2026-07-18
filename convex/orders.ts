@@ -9,15 +9,15 @@ export const create = mutation({
     buyerEmail: v.string(),
     buyerName: v.string(),
     buyerPhone: v.optional(v.string()),
-    amountCents: v.number(),
+    amount: v.number(),
     currency: v.string(),
     paymentProvider: v.string(),
     paymentReference: v.string(),
     vendorId: v.optional(v.string()),
-    vendorShareCents: v.optional(v.number()),
-    platformFeeCents: v.optional(v.number()),
+    vendorShare: v.optional(v.number()),
+    platformFee: v.optional(v.number()),
     platformFeePct: v.optional(v.number()),
-    tdsCents: v.optional(v.number()),
+    tds: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("orders", {
@@ -26,17 +26,17 @@ export const create = mutation({
       buyerEmail: args.buyerEmail,
       buyerName: args.buyerName,
       buyerPhone: args.buyerPhone,
-      amountCents: args.amountCents,
+      amount: args.amount,
       currency: args.currency,
       status: "pending",
       paymentProvider: args.paymentProvider,
       paymentReference: args.paymentReference,
       createdAt: Date.now(),
       vendorId: args.vendorId,
-      vendorShareCents: args.vendorShareCents,
-      platformFeeCents: args.platformFeeCents,
+      vendorShare: args.vendorShare,
+      platformFee: args.platformFee,
       platformFeePct: args.platformFeePct,
-      tdsCents: args.tdsCents,
+      tds: args.tds,
     });
   },
 });
@@ -61,6 +61,129 @@ export const updateStatus = mutation({
       patch.paymentReference = args.paymentReference;
     }
     await ctx.db.patch(args.orderId, patch);
+  },
+});
+
+export const listBySeller = query({
+  args: {
+    status: v.optional(
+      v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"), v.literal("refunded"))
+    ),
+    productId: v.optional(v.id("products")),
+    search: v.optional(v.string()),
+    offset: v.optional(v.number()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireVerifiedSession(ctx);
+    const limit = args.limit ?? 50;
+    const offset = args.offset ?? 0;
+
+    let orders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .order("desc")
+      .collect();
+
+    if (args.status) {
+      orders = orders.filter((o) => o.status === args.status);
+    }
+    if (args.productId) {
+      orders = orders.filter((o) => o.productId === args.productId);
+    }
+    if (args.search) {
+      const q = args.search.toLowerCase();
+      orders = orders.filter(
+        (o) => o.buyerName.toLowerCase().includes(q) || o.buyerEmail.toLowerCase().includes(q)
+      );
+    }
+
+    const total = orders.length;
+    const page = orders.slice(offset, offset + limit);
+
+    const enriched = await Promise.all(
+      page.map(async (order) => {
+        const product = await ctx.db.get(order.productId);
+        const productName = product?.name ?? "Unknown Product";
+
+        const deliveryToken = await ctx.db
+          .query("deliveryTokens")
+          .withIndex("by_order", (q) => q.eq("orderId", order._id))
+          .first();
+
+        const deliveries = await ctx.db
+          .query("deliveries")
+          .filter((q) => q.eq(q.field("orderId"), order._id))
+          .order("desc")
+          .take(1);
+
+        return {
+          ...order,
+          productName,
+          deliveryTokenStatus: deliveryToken?.status ?? null,
+          deliveryDownloadCount: deliveryToken?.downloadCount ?? 0,
+          deliveryMaxDownloads: deliveryToken?.maxDownloads ?? 0,
+          deliveryStatus: deliveries[0]?.status ?? null,
+        };
+      })
+    );
+
+    return {
+      orders: enriched,
+      continueCursor: offset + limit < total ? String(offset + limit) : null,
+    };
+  },
+});
+
+export const listBySellerForExport = query({
+  args: {
+    status: v.optional(
+      v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"), v.literal("refunded"))
+    ),
+    productId: v.optional(v.id("products")),
+    search: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireVerifiedSession(ctx);
+
+    let orders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .order("desc")
+      .collect();
+
+    if (args.status) {
+      orders = orders.filter((o) => o.status === args.status);
+    }
+    if (args.productId) {
+      orders = orders.filter((o) => o.productId === args.productId);
+    }
+    if (args.search) {
+      const q = args.search.toLowerCase();
+      orders = orders.filter(
+        (o) => o.buyerName.toLowerCase().includes(q) || o.buyerEmail.toLowerCase().includes(q)
+      );
+    }
+
+    const enriched = await Promise.all(
+      orders.map(async (order) => {
+        const product = await ctx.db.get(order.productId);
+        const productName = product?.name ?? "Unknown Product";
+
+        const deliveryToken = await ctx.db
+          .query("deliveryTokens")
+          .withIndex("by_order", (q) => q.eq("orderId", order._id))
+          .first();
+
+        return {
+          ...order,
+          productName,
+          deliveryTokenStatus: deliveryToken?.status ?? null,
+        };
+      })
+    );
+
+    return { orders: enriched };
   },
 });
 
@@ -215,7 +338,7 @@ export const getRevenueTimeline = query({
       const key = bucketKey(order.paidAt, args.granularity);
       revenueByBucket.set(
         key,
-        (revenueByBucket.get(key) ?? 0) + (order.vendorShareCents ?? order.amountCents)
+        (revenueByBucket.get(key) ?? 0) + (order.vendorShare ?? order.amount)
       );
       salesByBucket.set(key, (salesByBucket.get(key) ?? 0) + 1);
     }
@@ -254,13 +377,13 @@ export const getEarningsSummary = query({
     let last28Days = 0;
 
     for (const order of paidOrders) {
-      totalEarnings += order.vendorShareCents ?? order.amountCents;
+      totalEarnings += order.vendorShare ?? order.amount;
       totalSales += 1;
       if (order.paidAt && order.paidAt >= sevenDaysAgo) {
-        last7Days += order.vendorShareCents ?? order.amountCents;
+        last7Days += order.vendorShare ?? order.amount;
       }
       if (order.paidAt && order.paidAt >= twentyEightDaysAgo) {
-        last28Days += order.vendorShareCents ?? order.amountCents;
+        last28Days += order.vendorShare ?? order.amount;
       }
     }
 

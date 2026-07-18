@@ -10,14 +10,14 @@ interface TopProductsTableProps {
   products: Array<{
     name: string;
     sales: number;
-    revenueCents: number;
+    revenue: number;
     clicks: number;
   }>;
   loading: boolean;
 }
 
 export function TopProductsTable({ products, loading }: TopProductsTableProps) {
-  const sorted = [...products].sort((a, b) => b.revenueCents - a.revenueCents).slice(0, 10);
+  const sorted = [...products].sort((a, b) => b.revenue - a.revenue).slice(0, 10);
 
   return (
     <div className="border-border/70 bg-card rounded-xs border">
@@ -73,7 +73,7 @@ export function TopProductsTable({ products, loading }: TopProductsTableProps) {
                       : "—"}
                   </td>
                   <td className="px-4 py-3.5 text-right text-sm font-medium tabular-nums">
-                    {formatINR(product.revenueCents)}
+                    {formatINR(product.revenue)}
                   </td>
                 </tr>
               ))}

@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
     }
 
     const product = data.product;
-    const amountCents = product.priceCents ?? parsePriceRupees(product.price);
-    if (!amountCents || amountCents <= 0) {
+    const amount = product.priceValue ?? parsePriceRupees(product.price);
+    if (!amount || amount <= 0) {
       return jsonError(400, "Product is not priced");
     }
 
@@ -58,15 +58,15 @@ export async function POST(request: NextRequest) {
 
     const isPro = creator?.subscriptionStatus === "active";
     const platformFeePct = isPro ? 0 : 10;
-    const platformFee = Math.round((amountCents * platformFeePct) / 100);
-    const tds = Math.round(amountCents * 0.01);
-    const vendorNet = amountCents - platformFee - tds;
+    const platformFee = Math.round((amount * platformFeePct) / 100);
+    const tds = Math.round(amount * 0.01);
+    const vendorNet = amount - platformFee - tds;
 
     const hasActiveVendor = creator?.vendorId && creator?.vendorStatus === "ACTIVE";
 
     const cashfreeOrder = await cashfree.PGCreateOrder({
       order_id: orderId,
-      order_amount: amountCents,
+      order_amount: amount,
       order_currency: "INR",
       customer_details: {
         customer_id: `buyer_${Date.now()}`,
@@ -90,15 +90,15 @@ export async function POST(request: NextRequest) {
       buyerEmail: buyerEmail.trim(),
       buyerName: buyerName.trim(),
       buyerPhone: buyerPhone?.trim() || undefined,
-      amountCents,
+      amount,
       currency: "INR",
       paymentProvider: "cashfree",
       paymentReference: cashfreeOrder.data.order_id || "",
       vendorId: creator?.vendorId,
-      vendorShareCents: hasActiveVendor ? vendorNet : undefined,
-      platformFeeCents: hasActiveVendor ? platformFee : undefined,
+      vendorShare: hasActiveVendor ? vendorNet : undefined,
+      platformFee: hasActiveVendor ? platformFee : undefined,
       platformFeePct: hasActiveVendor ? platformFeePct : undefined,
-      tdsCents: hasActiveVendor ? tds : undefined,
+      tds: hasActiveVendor ? tds : undefined,
     });
 
     return NextResponse.json({

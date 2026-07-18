@@ -354,7 +354,7 @@ export default function EditProduct({
                       description: product.description,
                       productUrl: product.productUrl,
                       price: product.price,
-                      priceCents: product.priceCents,
+                      priceValue: product.priceValue,
                       coverImageUrl: product.coverImageUrl,
                       coverImageId: product.coverImageId,
                       thumbnailImageUrl: product.thumbnailImageUrl ?? null,

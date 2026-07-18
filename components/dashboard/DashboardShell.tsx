@@ -13,6 +13,7 @@ import {
   Zap,
   ChevronLeft,
   Loader2,
+  ClipboardList,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/store", label: "My Store", icon: Store },
   { href: "/dashboard/products", label: "Products", icon: Box },
+  { href: "/dashboard/orders", label: "Orders", icon: ClipboardList },
   { href: "/dashboard/automations", label: "Automations", icon: Zap },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
