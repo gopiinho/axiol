@@ -186,7 +186,7 @@ export const markDeliverySentByOrderId = mutation({
   handler: async (ctx, args) => {
     const deliveries = await ctx.db
       .query("deliveries")
-      .filter((q) => q.eq(q.field("orderId"), args.orderId))
+      .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
       .order("desc")
       .take(1);
 

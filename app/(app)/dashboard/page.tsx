@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { PlusCircle, Store, Package, Zap } from "lucide-react";
 import { useQuery } from "convex/react";
@@ -38,7 +39,8 @@ const QUICK_ACTIONS = [
 export default function DashboardPage() {
   const { products, isLoading: productsLoading } = useProducts();
   const { mappings, isLoading: mappingsLoading } = useReelMappings();
-  const rawEarnings = useQuery(api.orders.getEarningsSummary);
+  const nowArg = useMemo(() => Math.floor(Date.now() / 60000) * 60000, []);
+  const rawEarnings = useQuery(api.orders.getEarningsSummary, { now: nowArg });
   const earnings = useCachedQueryResult("home:earnings", rawEarnings);
 
   const isLoading = productsLoading || mappingsLoading;

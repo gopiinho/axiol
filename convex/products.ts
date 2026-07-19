@@ -71,54 +71,27 @@ export const listByUser = query({
       .order("asc")
       .take(100);
 
-    const paidOrders = await ctx.db
-      .query("orders")
-      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
-      .collect();
-
-    const salesByProduct = new Map<string, { sales: number; revenue: number }>();
-    for (const order of paidOrders) {
-      const existing = salesByProduct.get(order.productId);
-      if (existing) {
-        existing.sales += 1;
-        existing.revenue += order.amount;
-      } else {
-        salesByProduct.set(order.productId, { sales: 1, revenue: order.amount });
-      }
-    }
-
-    const allClicks = await ctx.db
-      .query("productClicks")
-      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
-      .collect();
-
-    const clicksByProduct = new Map<string, number>();
-    for (const click of allClicks) {
-      clicksByProduct.set(click.productId, (clicksByProduct.get(click.productId) ?? 0) + 1);
-    }
-
     const withItemCounts = await Promise.all(
       products.map(async (product) => {
-        const items = await ctx.db
-          .query("productItems")
-          .withIndex("by_product", (q) => q.eq("productId", product._id))
-          .take(100);
         const coverImageUrl = product.coverImageId
           ? await ctx.storage.getUrl(product.coverImageId)
           : null;
         const config = product.config;
         const thumb = config.thumbnail;
         const thumbnailImageUrl = thumb?.imageId ? await ctx.storage.getUrl(thumb.imageId) : null;
-        const stats = salesByProduct.get(product._id);
+        const stats = await ctx.db
+          .query("productStats")
+          .withIndex("by_product", (q) => q.eq("productId", product._id))
+          .first();
         return {
           ...product,
-          itemCount: items.length,
+          itemCount: stats?.itemCount ?? 0,
           coverImageUrl,
           thumbnailImageUrl,
           username: user.username,
           sales: stats?.sales ?? 0,
           revenue: stats?.revenue ?? 0,
-          clicks: clicksByProduct.get(product._id) ?? 0,
+          clicks: stats?.clicks ?? 0,
         };
       })
     );
@@ -146,36 +119,6 @@ export const reorder = mutation({
 
       await ctx.db.patch(id, { order });
     }
-  },
-});
-
-export const getStoreTotals = query({
-  args: {},
-  handler: async (ctx) => {
-    const { userId } = await requireVerifiedSession(ctx);
-
-    const paidOrders = await ctx.db
-      .query("orders")
-      .withIndex("by_seller_status", (q) => q.eq("sellerId", userId).eq("status", "paid"))
-      .collect();
-
-    let totalSales = 0;
-    let totalRevenue = 0;
-    for (const order of paidOrders) {
-      totalSales += 1;
-      totalRevenue += order.amount;
-    }
-
-    const allClicks = await ctx.db
-      .query("productClicks")
-      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
-      .collect();
-
-    return {
-      totalSales,
-      totalRevenue,
-      totalClicks: allClicks.length,
-    };
   },
 });
 
@@ -237,7 +180,7 @@ export const create = mutation({
       const existingProducts = await ctx.db
         .query("products")
         .withIndex("by_user", (q) => q.eq("createdBy", userId))
-        .collect();
+        .take(5);
 
       const nonArchived = existingProducts.filter((p) => p.status !== "archived");
 
@@ -565,6 +508,14 @@ export const remove = mutation({
       await ctx.db.delete(mapping._id);
     }
 
+    const stats = await ctx.db
+      .query("productStats")
+      .withIndex("by_product", (q) => q.eq("productId", args.id))
+      .first();
+    if (stats) {
+      await ctx.db.delete(stats._id);
+    }
+
     await ctx.db.delete(args.id);
   },
 });
@@ -703,7 +654,7 @@ export const listForSelect = query({
       .query("products")
       .withIndex("by_user", (q) => q.eq("createdBy", userId))
       .order("desc")
-      .collect();
+      .take(100);
 
     const withImages = await Promise.all(
       products.map(async (p) => {

@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireVerifiedSession } from "./security";
 import { validateProductItemInput } from "../lib/validators/productItems";
+import { ensureProductStats } from "./analytics";
 
 export const listByProduct = query({
   args: { productId: v.id("products") },
@@ -45,6 +46,15 @@ export const create = mutation({
       .first();
 
     const nextOrder = (existing?.order ?? 0) + 1;
+
+    await ensureProductStats(ctx, args.productId);
+    const stats = await ctx.db
+      .query("productStats")
+      .withIndex("by_product", (q) => q.eq("productId", args.productId))
+      .first();
+    if (stats) {
+      await ctx.db.patch(stats._id, { itemCount: (stats.itemCount ?? 0) + 1 });
+    }
 
     return await ctx.db.insert("productItems", {
       productId: args.productId,
@@ -106,6 +116,14 @@ export const remove = mutation({
     const product = await ctx.db.get(item.productId);
     if (!product || product.createdBy !== userId) {
       throw new Error("Unauthorized");
+    }
+
+    const stats = await ctx.db
+      .query("productStats")
+      .withIndex("by_product", (q) => q.eq("productId", item.productId))
+      .first();
+    if (stats) {
+      await ctx.db.patch(stats._id, { itemCount: Math.max(0, (stats.itemCount ?? 0) - 1) });
     }
 
     await ctx.db.delete(args.id);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
 import {
   AlertCircle,
@@ -61,7 +61,8 @@ export default function AnalyticsPage() {
     ? GRANULARITY_OPTIONS
     : GRANULARITY_OPTIONS.filter((g) => g.value === "daily");
 
-  const rawEarnings = useQuery(api.orders.getEarningsSummary);
+  const nowArg = useMemo(() => Math.floor(Date.now() / 60000) * 60000, []);
+  const rawEarnings = useQuery(api.orders.getEarningsSummary, { now: nowArg });
   const earnings = useCachedQueryResult("analytics:earnings", rawEarnings);
 
   const rawTimeline = useQuery(api.orders.getRevenueTimeline, { timePeriod, granularity });
@@ -152,8 +153,8 @@ export default function AnalyticsPage() {
           />
           <EarningsCard
             label="Clicks"
-            value={(products ?? []).reduce((sum, p) => sum + p.clicks, 0)}
-            loading={productsLoading}
+            value={earnings?.totalClicks ?? 0}
+            loading={earnings === undefined}
             isCurrency={false}
             dotColor="color-mix(in srgb, var(--foreground) 30%, transparent)"
           />
