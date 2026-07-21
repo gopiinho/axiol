@@ -463,10 +463,9 @@ export const getDraftMappings = query({
 
     const drafts = await ctx.db
       .query("reelMappings")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("active"), false))
+      .withIndex("by_user_active", (q) => q.eq("userId", userId).eq("active", false))
       .order("desc")
-      .collect();
+      .take(500);
 
     const enriched = await Promise.all(
       drafts.map(async (draft) => {
@@ -496,8 +495,7 @@ export const getPublishedMappings = query({
 
     const published = await ctx.db
       .query("reelMappings")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("active"), true))
+      .withIndex("by_user_active", (q) => q.eq("userId", userId).eq("active", true))
       .order("desc")
       .take(limit ?? 1000);
 
@@ -680,8 +678,7 @@ export const findMappingForComment = query({
 
     const mappings = await ctx.db
       .query("reelMappings")
-      .withIndex("by_reel", (q) => q.eq("reelId", args.reelId))
-      .filter((q) => q.eq(q.field("active"), true))
+      .withIndex("by_reel_active", (q) => q.eq("reelId", args.reelId).eq("active", true))
       .collect();
 
     const mapping = mappings.find((candidate) => {
@@ -716,8 +713,7 @@ export const findMappingForReel = query({
     assertWebhookSourceSecret(args.sourceSecret);
     const mapping = await ctx.db
       .query("reelMappings")
-      .withIndex("by_reel", (q) => q.eq("reelId", args.reelId))
-      .filter((q) => q.eq(q.field("active"), true))
+      .withIndex("by_reel_active", (q) => q.eq("reelId", args.reelId).eq("active", true))
       .first();
 
     if (!mapping) return null;

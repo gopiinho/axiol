@@ -31,7 +31,7 @@ interface ProductRowProps {
     thumbnailImageUrl?: string | null;
     username?: string;
     sales: number;
-    revenueCents: number;
+    revenue: number;
     clicks: number;
   };
   onUnpublish: (id: Id<"products">) => void;
@@ -139,7 +139,7 @@ export function ProductRow({ product, onUnpublish, onDelete, onDuplicate }: Prod
         </td>
         <td className="hidden px-4 py-3.5 md:table-cell">
           <span className="text-sm font-medium">
-            {product.revenueCents > 0 ? `₹${product.revenueCents.toLocaleString("en-IN")}` : "₹0"}
+            {product.revenue > 0 ? `₹${product.revenue.toLocaleString("en-IN")}` : "₹0"}
           </span>
         </td>
         <td className="hidden px-4 py-3.5 lg:table-cell">

@@ -109,6 +109,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
     file?: string;
     url?: string;
     productName?: string;
+    displayName?: string;
   }>({});
   const [isDragging, setIsDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FileEntry | null>(null);
@@ -283,16 +284,22 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
       file?: string;
       url?: string;
       productName?: string;
+      displayName?: string;
     } = {};
 
     if (mode === "upload") {
       if (!uploadedFile && !savedFile) {
         newErrors.file = "Upload a file to continue";
       }
+      if (displayName.trim().length > 200) {
+        newErrors.displayName = "File name must be at most 200 characters.";
+      }
     }
     if (mode === "url") {
       if (!externalUrl.trim()) newErrors.url = "URL is required";
+      else if (externalUrl.trim().length > 2048) newErrors.url = "URL must be at most 2048 characters.";
       if (!productName.trim()) newErrors.productName = "Product name is required";
+      else if (productName.trim().length > 200) newErrors.productName = "Product name must be at most 200 characters.";
     }
 
     setErrors(newErrors);
@@ -301,7 +308,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
     }
 
     await handleSave();
-  }, [handleSave, mode, uploadedFile, savedFile, externalUrl, productName]);
+  }, [handleSave, mode, uploadedFile, savedFile, externalUrl, productName, displayName]);
 
   useEffect(() => {
     onRegisterSave?.(saveAndValidate);
@@ -420,11 +427,17 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                         <Input
                           id="displayName"
                           value={displayName}
-                          onChange={(e) => setDisplayName(e.target.value)}
+                          onChange={(e) => {
+                            setDisplayName(e.target.value);
+                            setErrors((prev) => ({ ...prev, displayName: undefined }));
+                          }}
                           placeholder={displayFile.fileName}
                           className="pl-9"
                         />
                       </div>
+                      {errors.displayName && (
+                        <p className="text-destructive text-sm">{errors.displayName}</p>
+                      )}
                       <p className="text-muted-foreground text-xs">
                         This is the name your customers will see when downloading
                       </p>
@@ -496,6 +509,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                     disabled={isLocked}
                     aria-invalid={!!errors.url}
                   />
+                  {errors.url && <p className="text-destructive text-sm">{errors.url}</p>}
                 </div>
                 <div className="relative">
                   <Pencil className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -513,6 +527,9 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
                     disabled={isLocked}
                     aria-invalid={!!errors.productName}
                   />
+                  {errors.productName && (
+                    <p className="text-destructive text-sm">{errors.productName}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -528,8 +545,7 @@ export function ContentStep({ productId, product, onRegisterSave }: ProductStepC
             {errors.file && !uploadError && (
               <p className="text-destructive text-sm">{errors.file}</p>
             )}
-            {errors.url && <p className="text-destructive text-sm">{errors.url}</p>}
-            {errors.productName && <p className="text-destructive text-sm">{errors.productName}</p>}
+
           </div>
         </div>
       </div>

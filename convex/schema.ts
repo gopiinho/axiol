@@ -83,7 +83,7 @@ export default defineSchema({
     price: v.optional(v.string()),
     type: productTypeValidator,
     status: v.union(v.literal("draft"), v.literal("published"), v.literal("archived")),
-    priceCents: v.optional(v.number()),
+    priceValue: v.optional(v.number()),
     currency: v.optional(v.string()),
     config: productConfigValidator,
     createdAt: v.number(),
@@ -95,7 +95,8 @@ export default defineSchema({
     .index("by_user", ["createdBy"])
     .index("by_user_order", ["createdBy", "order"])
     .index("by_productUrl", ["productUrl", "createdBy"])
-    .index("by_status", ["createdBy", "status", "order"]),
+    .index("by_status", ["createdBy", "status", "order"])
+    .index("by_publish_status", ["status"]),
 
   productItems: defineTable({
     productId: v.id("products"),
@@ -138,11 +139,12 @@ export default defineSchema({
 
   orders: defineTable({
     productId: v.id("products"),
+    productName: v.optional(v.string()),
     sellerId: v.id("users"),
     buyerEmail: v.string(),
     buyerName: v.string(),
     buyerPhone: v.optional(v.string()),
-    amountCents: v.number(),
+    amount: v.number(),
     currency: v.string(),
     status: v.union(
       v.literal("pending"),
@@ -150,27 +152,50 @@ export default defineSchema({
       v.literal("failed"),
       v.literal("refunded")
     ),
+    paymentMethod: v.optional(v.string()),
     paymentProvider: v.optional(v.string()),
     paymentReference: v.optional(v.string()),
     createdAt: v.number(),
     paidAt: v.optional(v.number()),
     vendorId: v.optional(v.string()),
-    vendorShareCents: v.optional(v.number()),
-    platformFeeCents: v.optional(v.number()),
+    vendorShare: v.optional(v.number()),
+    platformFee: v.optional(v.number()),
     platformFeePct: v.optional(v.number()),
-    tdsCents: v.optional(v.number()),
+    tds: v.optional(v.number()),
   })
     .index("by_product", ["productId"])
     .index("by_seller", ["sellerId"])
-    .index("by_seller_status", ["sellerId", "status"]),
+    .index("by_seller_status", ["sellerId", "status"])
+    .index("by_seller_status_paidAt", ["sellerId", "status", "paidAt"])
+    .index("by_seller_product", ["sellerId", "productId"])
+    .searchIndex("search_buyer_email", {
+      searchField: "buyerEmail",
+      filterFields: ["sellerId", "status", "productId"],
+    }),
 
-  productClicks: defineTable({
-    productId: v.id("products"),
+  dailyClickCounts: defineTable({
     sellerId: v.id("users"),
-    timestamp: v.number(),
+    productId: v.id("products"),
+    day: v.string(),
+    clicks: v.number(),
   })
-    .index("by_product", ["productId"])
-    .index("by_seller", ["sellerId"]),
+    .index("by_product_day", ["productId", "day"])
+    .index("by_seller_day", ["sellerId", "day"]),
+
+  sellerStats: defineTable({
+    sellerId: v.id("users"),
+    totalSales: v.number(),
+    totalEarnings: v.number(),
+    totalClicks: v.number(),
+  }).index("by_seller", ["sellerId"]),
+
+  productStats: defineTable({
+    productId: v.id("products"),
+    sales: v.number(),
+    revenue: v.number(),
+    clicks: v.number(),
+    itemCount: v.optional(v.number()),
+  }).index("by_product", ["productId"]),
 
   bookings: defineTable({
     productId: v.id("products"),
@@ -230,7 +255,9 @@ export default defineSchema({
     error: v.optional(v.string()),
     createdAt: v.number(),
     sentAt: v.optional(v.number()),
-  }).index("by_product", ["productId"]),
+  })
+    .index("by_product", ["productId"])
+    .index("by_order", ["orderId"]),
 
   instagramConfig: defineTable({
     userId: v.id("users"),
@@ -281,7 +308,9 @@ export default defineSchema({
     .index("by_reel", ["reelId"])
     .index("by_active", ["active"])
     .index("by_user", ["userId"])
-    .index("by_product", ["productId"]),
+    .index("by_product", ["productId"])
+    .index("by_user_active", ["userId", "active"])
+    .index("by_reel_active", ["reelId", "active"]),
 
   dmJobs: defineTable({
     userId: v.id("users"),

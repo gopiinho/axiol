@@ -78,6 +78,14 @@ export async function POST(request: NextRequest) {
         });
 
         if (existing && existing.status === "pending") {
+          const paymentMethod = data.payment?.payment_group;
+          if (paymentMethod) {
+            await convex.mutation(api.orders.updatePaymentMethod, {
+              orderId: existing._id,
+              paymentMethod,
+            });
+          }
+
           await convex.mutation(api.orders.updateStatus, {
             orderId: existing._id,
             status: "paid",
@@ -99,7 +107,7 @@ export async function POST(request: NextRequest) {
             const amount = new Intl.NumberFormat("en-IN", {
               style: "currency",
               currency: existing.currency,
-            }).format(existing.amountCents);
+            }).format(existing.amount);
 
             const orderDate = new Date(existing.paidAt ?? existing.createdAt).toLocaleDateString(
               "en-IN",
@@ -124,6 +132,24 @@ export async function POST(request: NextRequest) {
           } catch (e) {
             console.error("Delivery generation failed for webhook:", e);
           }
+        }
+      }
+    }
+
+    if (type === "PAYMENT_FAILED_WEBHOOK" || type === "PAYMENT_USER_DROPPED_WEBHOOK") {
+      const cfOrderId = data.order?.order_id;
+
+      if (cfOrderId) {
+        const convex = getServerConvexClient();
+        const existing = await convex.query(api.orders.getByPaymentReference, {
+          paymentReference: cfOrderId,
+        });
+
+        if (existing && existing.status === "pending") {
+          await convex.mutation(api.orders.updateStatus, {
+            orderId: existing._id,
+            status: "failed",
+          });
         }
       }
     }

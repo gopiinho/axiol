@@ -190,8 +190,9 @@ export const markJobSent = internalMutation({
     });
 
     const state = await getRateLimitState(ctx, job.userId);
+    const oneHourAgo = now - 60 * 60 * 1000;
     await ctx.db.patch(state._id, {
-      dmsSentInLastHour: [...state.dmsSentInLastHour, now],
+      dmsSentInLastHour: [...state.dmsSentInLastHour.filter((ts) => ts > oneHourAgo), now],
       lastDmSentAt: now,
     });
   },
@@ -238,7 +239,9 @@ export const markJobFailed = internalMutation({
 export const markWorkerInactive = internalMutation({
   args: {},
   handler: async (ctx) => {
-    const states = await ctx.db.query("dmRateLimitState").collect();
+    const states = await ctx.db
+      .query("dmRateLimitState")
+      .take(100);
     for (const state of states) {
       if (state.workerActive) {
         await ctx.db.patch(state._id, { workerActive: false });
@@ -359,7 +362,7 @@ async function getRateLimitState(
 }
 
 async function ensureWorkerRunning(ctx: MutationCtx): Promise<void> {
-  const states = await ctx.db.query("dmRateLimitState").collect();
+  const states = await ctx.db.query("dmRateLimitState").take(100);
   const anyActive = states.some((s) => s.workerActive);
 
   if (!anyActive) {

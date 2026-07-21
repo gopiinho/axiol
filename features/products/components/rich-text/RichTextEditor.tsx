@@ -13,6 +13,7 @@ interface RichTextEditorProps {
   onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
+  error?: boolean;
 }
 
 interface ToolbarButtonProps {
@@ -45,6 +46,7 @@ export function RichTextEditor({
   value,
   onChange,
   placeholder = "Write something...",
+  error,
   className,
 }: RichTextEditorProps) {
   const [activeInput, setActiveInput] = useState<InputMode>(null);
@@ -129,8 +131,10 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        "border-border/60 bg-card/90 overflow-hidden rounded-xs border transition-[color,box-shadow,transform]",
-        "",
+        "bg-card/90 overflow-hidden rounded-xs border transition-[color,box-shadow,transform]",
+        error
+          ? "border-destructive ring-destructive/20 ring-2"
+          : "border-border/60",
         className
       )}
     >

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { mutation } from "./_generated/server";
+import { addClick } from "./analytics";
 
 export const incrementClick = mutation({
   args: {
@@ -7,21 +8,26 @@ export const incrementClick = mutation({
     sellerId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("productClicks", {
-      productId: args.productId,
-      sellerId: args.sellerId,
-      timestamp: Date.now(),
-    });
-  },
-});
+    const today = new Date().toISOString().slice(0, 10);
 
-export const getClicksByProduct = query({
-  args: { productId: v.id("products") },
-  handler: async (ctx, args) => {
-    const clicks = await ctx.db
-      .query("productClicks")
-      .withIndex("by_product", (q) => q.eq("productId", args.productId))
-      .collect();
-    return clicks.length;
+    const existing = await ctx.db
+      .query("dailyClickCounts")
+      .withIndex("by_product_day", (q) =>
+        q.eq("productId", args.productId).eq("day", today)
+      )
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, { clicks: existing.clicks + 1 });
+    } else {
+      await ctx.db.insert("dailyClickCounts", {
+        sellerId: args.sellerId,
+        productId: args.productId,
+        day: today,
+        clicks: 1,
+      });
+    }
+
+    await addClick(ctx, args.sellerId, args.productId);
   },
 });

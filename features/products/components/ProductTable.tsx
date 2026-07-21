@@ -58,7 +58,7 @@ function ProductMobileCard({
     thumbnailImageUrl?: string | null;
     username?: string;
     sales: number;
-    revenueCents: number;
+    revenue: number;
     clicks: number;
   };
   onUnpublish: (id: Id<"products">) => void;
@@ -147,8 +147,8 @@ function ProductMobileCard({
             </div>
             <div className="text-muted-foreground mt-1.5 flex gap-3 text-[11px]">
               <span>{product.sales} sales</span>
-              {product.revenueCents > 0 && (
-                <span>₹{product.revenueCents.toLocaleString("en-IN")} revenue</span>
+              {product.revenue > 0 && (
+                <span>₹{product.revenue.toLocaleString("en-IN")} revenue</span>
               )}
               <span>{product.clicks} clicks</span>
             </div>
@@ -282,7 +282,7 @@ export function ProductTable() {
   }
 
   const totalSales = products.reduce((sum, p) => sum + p.sales, 0);
-  const totalRevenueCents = products.reduce((sum, p) => sum + p.revenueCents, 0);
+  const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0);
   const totalClicks = products.reduce((sum, p) => sum + p.clicks, 0);
 
   return (
@@ -345,7 +345,7 @@ export function ProductTable() {
               <td className="hidden px-4 py-3 text-sm font-semibold sm:table-cell">{totalSales}</td>
               <td className="hidden px-4 py-3 md:table-cell">
                 <span className="text-sm font-semibold">
-                  {totalRevenueCents > 0 ? `₹${totalRevenueCents.toLocaleString("en-IN")}` : "—"}
+                  {totalRevenue > 0 ? `₹${totalRevenue.toLocaleString("en-IN")}` : "—"}
                 </span>
               </td>
               <td className="hidden px-4 py-3 text-sm font-semibold lg:table-cell">

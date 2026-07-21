@@ -56,6 +56,15 @@ export function validateProductInput(input: ProductInput): {
   if (price && price.length > 32) {
     throw new Error("Price must be at most 32 characters.");
   }
+  if (price && !/\d/.test(price)) {
+    throw new Error("Price must contain a valid number.");
+  }
+  if (price) {
+    const numeric = parseFloat(price.replace(/[^0-9.]/g, ""));
+    if (numeric < 10) {
+      throw new Error("Minimum price is ₹10.");
+    }
+  }
 
   const status = (input.status ?? "draft").trim();
   if (!PRODUCT_STATUSES.includes(status as ProductStatus)) {

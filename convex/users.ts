@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query, MutationCtx } from "./_generated/server";
 import { requireSession, getSession, requireVerifiedSession } from "./security";
 import { Id } from "./_generated/dataModel";
+import { deleteProductData } from "./products";
 
 const TRIAL_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days
 
@@ -374,67 +375,146 @@ async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
   if (user?.profileImageId) {
     await ctx.storage.delete(user.profileImageId);
   }
-  const igConfigs = await ctx.db
-    .query("instagramConfig")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .collect();
-  for (const config of igConfigs) {
-    await ctx.db.delete(config._id);
+
+  while (true) {
+    const docs = await ctx.db
+      .query("instagramConfig")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
   }
 
-  const products = await ctx.db
-    .query("products")
-    .withIndex("by_user", (q) => q.eq("createdBy", userId))
-    .collect();
-  for (const product of products) {
-    const items = await ctx.db
-      .query("productItems")
-      .withIndex("by_product", (q) => q.eq("productId", product._id))
-      .collect();
-    for (const item of items) {
-      await ctx.db.delete(item._id);
+  while (true) {
+    const docs = await ctx.db
+      .query("integrations")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
+  }
+
+  while (true) {
+    const docs = await ctx.db
+      .query("contentUploads")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
+  }
+
+  const productIds: Id<"products">[] = [];
+  while (true) {
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_user", (q) => q.eq("createdBy", userId))
+      .take(100);
+    if (products.length === 0) break;
+    for (const product of products) {
+      productIds.push(product._id);
     }
-
-    await ctx.db.delete(product._id);
   }
 
-  const mappings = await ctx.db
-    .query("reelMappings")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .collect();
-  for (const mapping of mappings) {
-    await ctx.db.delete(mapping._id);
+  for (const productId of productIds) {
+    await deleteProductData(ctx, productId);
   }
 
-  const jobs = await ctx.db
-    .query("dmJobs")
-    .withIndex("by_owner", (q) => q.eq("userId", userId))
-    .collect();
-  for (const job of jobs) {
-    await ctx.db.delete(job._id);
+  for (const productId of productIds) {
+    const stats = await ctx.db
+      .query("productStats")
+      .withIndex("by_product", (q) => q.eq("productId", productId))
+      .first();
+    if (stats) {
+      await ctx.db.delete(stats._id);
+    }
   }
 
-  const rateStates = await ctx.db
-    .query("dmRateLimitState")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .collect();
-  for (const state of rateStates) {
-    await ctx.db.delete(state._id);
+  while (true) {
+    const docs = await ctx.db
+      .query("bookings")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
   }
 
-  const commentLogs = await ctx.db
-    .query("commentLogs")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .collect();
-  for (const log of commentLogs) {
-    await ctx.db.delete(log._id);
+  while (true) {
+    const docs = await ctx.db
+      .query("formSubmissions")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
   }
 
-  const dmLogs = await ctx.db
-    .query("dmLogs")
-    .withIndex("by_owner", (q) => q.eq("userId", userId))
-    .collect();
-  for (const log of dmLogs) {
-    await ctx.db.delete(log._id);
+  while (true) {
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .take(100);
+    if (orders.length === 0) break;
+    for (const order of orders) {
+      while (true) {
+        const tokens = await ctx.db
+          .query("deliveryTokens")
+          .withIndex("by_order", (q) => q.eq("orderId", order._id))
+          .take(500);
+        if (tokens.length === 0) break;
+        for (const t of tokens) await ctx.db.delete(t._id);
+      }
+      while (true) {
+        const deliveries = await ctx.db
+          .query("deliveries")
+          .withIndex("by_order", (q) => q.eq("orderId", order._id))
+          .take(500);
+        if (deliveries.length === 0) break;
+        for (const d of deliveries) await ctx.db.delete(d._id);
+      }
+      await ctx.db.delete(order._id);
+    }
+  }
+
+  const ss = await ctx.db
+    .query("sellerStats")
+    .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+    .first();
+  if (ss) {
+    await ctx.db.delete(ss._id);
+  }
+
+  while (true) {
+    const docs = await ctx.db
+      .query("dmJobs")
+      .withIndex("by_owner", (q) => q.eq("userId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
+  }
+
+  while (true) {
+    const docs = await ctx.db
+      .query("dmRateLimitState")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
+  }
+
+  while (true) {
+    const docs = await ctx.db
+      .query("commentLogs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
+  }
+
+  while (true) {
+    const docs = await ctx.db
+      .query("dmLogs")
+      .withIndex("by_owner", (q) => q.eq("userId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
   }
 }

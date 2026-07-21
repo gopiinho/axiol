@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
 import type * as catCounter from "../catCounter.js";
 import type * as contentLimits from "../contentLimits.js";
@@ -39,6 +40,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  analytics: typeof analytics;
   auth: typeof auth;
   catCounter: typeof catCounter;
   contentLimits: typeof contentLimits;

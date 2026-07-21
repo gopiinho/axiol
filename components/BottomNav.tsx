@@ -4,19 +4,33 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Home, Box, BarChart3, Store, Zap, Settings, Menu, X, LogOut } from "lucide-react";
+import {
+  Home,
+  Box,
+  BarChart3,
+  Store,
+  Zap,
+  Settings,
+  Menu,
+  X,
+  LogOut,
+  ClipboardList,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/store", label: "My Store", icon: Store },
   { href: "/dashboard/products", label: "Products", icon: Box },
+  { href: "/dashboard/orders", label: "Orders", icon: ClipboardList },
   { href: "/dashboard/automations", label: "Automations", icon: Zap },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-const BOTTOM_NAV_ITEMS = NAV_ITEMS.filter((item) => item.href !== "/dashboard/settings");
+const BOTTOM_NAV_ITEMS = NAV_ITEMS.filter(
+  (item) => item.href !== "/dashboard/settings" && item.href !== "/dashboard/automations"
+);
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -115,7 +129,7 @@ export default function BottomNav() {
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-semibold transition-all duration-200",
+                        "flex items-center gap-3 rounded-md px-3.5 py-3 text-sm font-semibold transition-all duration-200",
                         active ? "bg-foreground text-primary" : "text-foreground hover:bg-card"
                       )}
                     >

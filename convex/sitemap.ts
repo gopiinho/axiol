@@ -3,7 +3,7 @@ import { query } from "./_generated/server";
 export const getUsernames = query({
   args: {},
   handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
+    const users = await ctx.db.query("users").take(50000);
     return users
       .filter((u) => u.username)
       .map((u) => ({
@@ -18,8 +18,8 @@ export const getProductUrls = query({
   handler: async (ctx) => {
     const products = await ctx.db
       .query("products")
-      .filter((q) => q.eq(q.field("status"), "published"))
-      .collect();
+      .withIndex("by_publish_status", (q) => q.eq("status", "published"))
+      .take(50000);
 
     const results = await Promise.all(
       products.map(async (p) => {

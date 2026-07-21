@@ -19,6 +19,7 @@ import type { ProductStepComponentProps } from "../../registry/steps";
 import type { CheckoutLiveState } from "@/features/products/components/cards/types";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { buildProductUrl } from "../../lib/slugify";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 2 * 1024 * 1024;
@@ -53,6 +54,13 @@ export function CheckoutStep({
   const [phoneEnabled, setPhoneEnabled] = useState(savedPhoneEnabled);
   const [ctaButtonText, setCtaButtonText] = useState(savedCheckoutConfig?.buttonText || "Buy Now");
 
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    description?: string;
+    productUrl?: string;
+    price?: string;
+  }>({});
+
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,6 +70,35 @@ export function CheckoutStep({
   const generateCoverUploadUrl = useGenerateProductCoverUploadUrl();
   const saveProductCoverImage = useSaveProductCoverImage();
   const removeProductCoverImage = useRemoveProductCoverImage();
+
+  const validate = useCallback((): boolean => {
+    const errors: typeof fieldErrors = {};
+
+    if (!name.trim()) {
+      errors.name = "Product name is required.";
+    } else if (name.trim().length > 140) {
+      errors.name = "Product name must be at most 140 characters.";
+    }
+
+    const slugifiedUrl = buildProductUrl(productUrl.trim() || name);
+    if (slugifiedUrl.length > 80) {
+      errors.productUrl = "Product URL must be at most 80 characters.";
+    }
+
+    if (description.trim().length > 2000) {
+      errors.description = "Description must be at most 2000 characters.";
+    }
+
+    const trimmedPrice = price.trim();
+    if (trimmedPrice.length > 32) {
+      errors.price = "Price must be at most 32 characters.";
+    } else if (trimmedPrice && parseFloat(trimmedPrice) < 10) {
+      errors.price = "Minimum price is ₹10.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [name, productUrl, description, price]);
 
   const persistedCoverUrl = product.coverImageUrl ?? null;
   const displayCoverUrl = coverPreview ?? persistedCoverUrl;
@@ -109,6 +146,10 @@ export function CheckoutStep({
   };
 
   const handleSave = useCallback(async () => {
+    if (!validate()) {
+      throw new Error("Please fix the errors above before saving.");
+    }
+
     await updateProduct({
       id: productId as unknown as Id<"products">,
       name: name.trim(),
@@ -161,6 +202,7 @@ export function CheckoutStep({
     phoneEnabled,
     updateProduct,
     updateCheckoutConfig,
+    validate,
   ]);
 
   useEffect(() => {
@@ -292,9 +334,16 @@ export function CheckoutStep({
             <Input
               id="checkout-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, name: undefined }));
+              }}
               placeholder="Your product name"
+              aria-invalid={!!fieldErrors.name}
             />
+            {fieldErrors.name && (
+              <p className="text-destructive text-sm">{fieldErrors.name}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="checkout-description" className="text-sm font-bold">
@@ -302,9 +351,16 @@ export function CheckoutStep({
             </Label>
             <RichTextEditor
               value={description}
-              onChange={setDescription}
+              onChange={(value) => {
+                setDescription(value);
+                setFieldErrors((prev) => ({ ...prev, description: undefined }));
+              }}
               placeholder="Describe your product..."
+              error={!!fieldErrors.description}
             />
+            {fieldErrors.description && (
+              <p className="text-destructive text-sm">{fieldErrors.description}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="checkout-cta" className="text-sm font-bold">
@@ -336,11 +392,16 @@ export function CheckoutStep({
                 onChange={(e) => {
                   const filtered = e.target.value.replace(/[^a-zA-Z0-9-]/g, "");
                   setProductUrl(filtered);
+                  setFieldErrors((prev) => ({ ...prev, productUrl: undefined }));
                 }}
                 placeholder="my-product-url"
                 className="placeholder:text-muted-foreground min-w-0 flex-1 border-none bg-transparent p-0 text-base font-medium outline-none md:text-sm"
+                aria-invalid={!!fieldErrors.productUrl}
               />
             </div>
+            {fieldErrors.productUrl && (
+              <p className="text-destructive text-sm">{fieldErrors.productUrl}</p>
+            )}
           </div>
         </div>
       </div>
@@ -351,14 +412,30 @@ export function CheckoutStep({
           Set Price
         </Label>
         <div className="space-y-2 pl-8">
-          <Label htmlFor="checkout-name" className="text-sm font-bold">
-            Price(₹) *
+          <Label htmlFor="checkout-price" className="text-sm font-bold">
+            Price *
           </Label>
-          <Input
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="e.g., $29, ₹999"
-          />
+          <div className="relative">
+            <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-base font-medium md:text-sm">
+              ₹
+            </span>
+            <Input
+              id="checkout-price"
+              value={price}
+              inputMode="decimal"
+              onChange={(e) => {
+                const filtered = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+                setPrice(filtered);
+                setFieldErrors((prev) => ({ ...prev, price: undefined }));
+              }}
+              placeholder="0"
+              className="pl-7"
+              aria-invalid={!!fieldErrors.price}
+            />
+          </div>
+          {fieldErrors.price && (
+            <p className="text-destructive text-sm">{fieldErrors.price}</p>
+          )}
         </div>
       </div>
 
