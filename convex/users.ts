@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query, MutationCtx } from "./_generated/server";
 import { requireSession, getSession, requireVerifiedSession } from "./security";
 import { Id } from "./_generated/dataModel";
+import { deleteProductData } from "./products";
 
 const TRIAL_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days
 
@@ -402,21 +403,48 @@ async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
     for (const doc of docs) await ctx.db.delete(doc._id);
   }
 
+  const productIds: Id<"products">[] = [];
+  while (true) {
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_user", (q) => q.eq("createdBy", userId))
+      .take(100);
+    if (products.length === 0) break;
+    for (const product of products) {
+      productIds.push(product._id);
+    }
+  }
+
+  for (const productId of productIds) {
+    await deleteProductData(ctx, productId);
+  }
+
+  for (const productId of productIds) {
+    const stats = await ctx.db
+      .query("productStats")
+      .withIndex("by_product", (q) => q.eq("productId", productId))
+      .first();
+    if (stats) {
+      await ctx.db.delete(stats._id);
+    }
+  }
+
   while (true) {
     const docs = await ctx.db
-      .query("dailyClickCounts")
-      .withIndex("by_seller_day", (q) => q.eq("sellerId", userId))
+      .query("bookings")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
       .take(500);
     if (docs.length === 0) break;
     for (const doc of docs) await ctx.db.delete(doc._id);
   }
 
-  const ss = await ctx.db
-    .query("sellerStats")
-    .withIndex("by_seller", (q) => q.eq("sellerId", userId))
-    .first();
-  if (ss) {
-    await ctx.db.delete(ss._id);
+  while (true) {
+    const docs = await ctx.db
+      .query("formSubmissions")
+      .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+      .take(500);
+    if (docs.length === 0) break;
+    for (const doc of docs) await ctx.db.delete(doc._id);
   }
 
   while (true) {
@@ -446,47 +474,12 @@ async function deleteAllUserData(ctx: MutationCtx, userId: Id<"users">) {
     }
   }
 
-  while (true) {
-    const products = await ctx.db
-      .query("products")
-      .withIndex("by_user", (q) => q.eq("createdBy", userId))
-      .take(100);
-    if (products.length === 0) break;
-    for (const product of products) {
-      while (true) {
-        const items = await ctx.db
-          .query("productItems")
-          .withIndex("by_product", (q) => q.eq("productId", product._id))
-          .take(500);
-        if (items.length === 0) break;
-        for (const item of items) await ctx.db.delete(item._id);
-      }
-      while (true) {
-        const uploads = await ctx.db
-          .query("contentUploads")
-          .withIndex("by_product", (q) => q.eq("productId", product._id))
-          .take(500);
-        if (uploads.length === 0) break;
-        for (const u of uploads) await ctx.db.delete(u._id);
-      }
-
-      const content = product.config.content;
-      if (content && content.mode === "upload" && typeof content.r2Key === "string") {
-        const { r2 } = await import("./contentStorage");
-        await r2.deleteObject(ctx, content.r2Key);
-      }
-
-      await ctx.db.delete(product._id);
-    }
-  }
-
-  while (true) {
-    const docs = await ctx.db
-      .query("reelMappings")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .take(500);
-    if (docs.length === 0) break;
-    for (const doc of docs) await ctx.db.delete(doc._id);
+  const ss = await ctx.db
+    .query("sellerStats")
+    .withIndex("by_seller", (q) => q.eq("sellerId", userId))
+    .first();
+  if (ss) {
+    await ctx.db.delete(ss._id);
   }
 
   while (true) {

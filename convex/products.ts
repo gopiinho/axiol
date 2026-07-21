@@ -455,6 +455,81 @@ export const publish = mutation({
   },
 });
 
+export async function deleteProductData(
+  ctx: MutationCtx,
+  productId: Id<"products">,
+) {
+  const product = await ctx.db.get(productId);
+  if (!product) return;
+
+  if (product.coverImageId) {
+    await ctx.storage.delete(product.coverImageId);
+  }
+
+  const content = product.config.content;
+  if (content && content.mode === "upload" && typeof content.r2Key === "string") {
+    await r2.deleteObject(ctx, content.r2Key);
+
+    const uploadRecord = await ctx.db
+      .query("contentUploads")
+      .withIndex("by_key", (q) => q.eq("r2Key", content.r2Key!))
+      .first();
+    if (uploadRecord) {
+      await ctx.db.delete(uploadRecord._id);
+    }
+  }
+
+  const uploadRecords = await ctx.db
+    .query("contentUploads")
+    .withIndex("by_product", (q) => q.eq("productId", productId))
+    .collect();
+  for (const record of uploadRecords) {
+    await ctx.db.delete(record._id);
+  }
+
+  const items = await ctx.db
+    .query("productItems")
+    .withIndex("by_product", (q) => q.eq("productId", productId))
+    .collect();
+  for (const item of items) {
+    await ctx.db.delete(item._id);
+  }
+
+  const mappings = await ctx.db
+    .query("reelMappings")
+    .withIndex("by_product", (q) => q.eq("productId", productId))
+    .collect();
+  for (const mapping of mappings) {
+    await ctx.db.delete(mapping._id);
+  }
+
+  const clickRecords = await ctx.db
+    .query("dailyClickCounts")
+    .withIndex("by_product_day", (q) => q.eq("productId", productId))
+    .collect();
+  for (const record of clickRecords) {
+    await ctx.db.delete(record._id);
+  }
+
+  const bookings = await ctx.db
+    .query("bookings")
+    .withIndex("by_product", (q) => q.eq("productId", productId))
+    .collect();
+  for (const booking of bookings) {
+    await ctx.db.delete(booking._id);
+  }
+
+  const submissions = await ctx.db
+    .query("formSubmissions")
+    .withIndex("by_product", (q) => q.eq("productId", productId))
+    .collect();
+  for (const submission of submissions) {
+    await ctx.db.delete(submission._id);
+  }
+
+  await ctx.db.delete(productId);
+}
+
 export const remove = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
@@ -465,58 +540,9 @@ export const remove = mutation({
       throw new Error("Product not found.");
     }
 
-    if (product.coverImageId) {
-      await ctx.storage.delete(product.coverImageId);
-    }
-
-    const content = product.config.content;
-    if (content && content.mode === "upload" && typeof content.r2Key === "string") {
-      await r2.deleteObject(ctx, content.r2Key);
-
-      const uploadRecord = await ctx.db
-        .query("contentUploads")
-        .withIndex("by_key", (q) => q.eq("r2Key", content.r2Key!))
-        .first();
-      if (uploadRecord) {
-        await ctx.db.delete(uploadRecord._id);
-      }
-    }
-
-    const uploadRecords = await ctx.db
-      .query("contentUploads")
-      .withIndex("by_product", (q) => q.eq("productId", args.id))
-      .collect();
-    for (const record of uploadRecords) {
-      await ctx.db.delete(record._id);
-    }
-
-    const items = await ctx.db
-      .query("productItems")
-      .withIndex("by_product", (q) => q.eq("productId", args.id))
-      .collect();
-
-    for (const item of items) {
-      await ctx.db.delete(item._id);
-    }
-
-    const mappings = await ctx.db
-      .query("reelMappings")
-      .withIndex("by_product", (q) => q.eq("productId", args.id))
-      .collect();
-
-    for (const mapping of mappings) {
-      await ctx.db.delete(mapping._id);
-    }
-
-    const stats = await ctx.db
-      .query("productStats")
-      .withIndex("by_product", (q) => q.eq("productId", args.id))
-      .first();
-    if (stats) {
-      await ctx.db.delete(stats._id);
-    }
-
-    await ctx.db.delete(args.id);
+    // productStats is intentionally preserved for historical analytics.
+    // Orders and deliveryTokens are kept so buyers retain order history and download access.
+    await deleteProductData(ctx, args.id);
   },
 });
 
