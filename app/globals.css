@@ -361,3 +361,9 @@
     display: none;
   }
 }
+
+@media (max-width: 600px) {
+  [data-sonner-toaster][data-x-position="center"] {
+    width: calc(100% - var(--mobile-offset-left) - var(--mobile-offset-right)) !important;
+  }
+}
